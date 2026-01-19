@@ -1,0 +1,176 @@
+{
+	"farm": {
+		"name": "Farm",
+		"symbol": "▦",
+		"color": "#90EE90",
+		"yields": {"food": 1, "production": 0, "commerce": 0},
+		"required_tech": "agriculture",
+		"valid_terrains": ["grassland", "plains", "flood_plains", "desert"],
+		"requires_fresh_water_on": ["desert"],
+		"build_turns": 5,
+		"pillage_turns": 1
+	},
+	"mine": {
+		"name": "Mine",
+		"symbol": "⛏",
+		"color": "#8B4513",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"required_tech": "mining",
+		"valid_terrains": ["hills"],
+		"build_turns": 6,
+		"pillage_turns": 1
+	},
+	"pasture": {
+		"name": "Pasture",
+		"symbol": "◎",
+		"color": "#DEB887",
+		"yields": {"food": 0, "production": 1, "commerce": 0},
+		"required_tech": "animal_husbandry",
+		"valid_terrains": ["grassland", "plains"],
+		"requires_resource": ["cattle", "sheep", "horses"],
+		"build_turns": 5,
+		"pillage_turns": 1
+	},
+	"plantation": {
+		"name": "Plantation",
+		"symbol": "⚘",
+		"color": "#228B22",
+		"yields": {"food": 0, "production": 0, "commerce": 2},
+		"required_tech": "calendar",
+		"valid_terrains": ["grassland", "plains", "jungle", "forest"],
+		"requires_resource": ["dye", "silk", "spices", "incense"],
+		"build_turns": 5,
+		"pillage_turns": 1
+	},
+	"camp": {
+		"name": "Camp",
+		"symbol": "⌂",
+		"color": "#A0522D",
+		"yields": {"food": 0, "production": 0, "commerce": 1},
+		"required_tech": "hunting",
+		"valid_terrains": ["grassland", "plains", "tundra", "forest"],
+		"requires_resource": ["ivory", "fur", "deer"],
+		"build_turns": 4,
+		"pillage_turns": 1
+	},
+	"quarry": {
+		"name": "Quarry",
+		"symbol": "▤",
+		"color": "#808080",
+		"yields": {"food": 0, "production": 1, "commerce": 0},
+		"required_tech": "masonry",
+		"valid_terrains": ["hills", "grassland", "plains"],
+		"requires_resource": ["marble", "stone"],
+		"build_turns": 7,
+		"pillage_turns": 1
+	},
+	"fishing_boats": {
+		"name": "Fishing Boats",
+		"symbol": "⛵",
+		"color": "#4682B4",
+		"yields": {"food": 2, "production": 0, "commerce": 0},
+		"required_tech": "fishing",
+		"valid_terrains": ["coast", "ocean"],
+		"requires_resource": ["fish", "clam", "crab"],
+		"build_turns": 4,
+		"pillage_turns": 1
+	},
+	"lumbermill": {
+		"name": "Lumbermill",
+		"symbol": "⌘",
+		"color": "#8B4513",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"required_tech": "replaceable_parts",
+		"valid_terrains": ["forest"],
+		"build_turns": 6,
+		"pillage_turns": 1
+	},
+	"cottage": {
+		"name": "Cottage",
+		"symbol": "⌂",
+		"color": "#DAA520",
+		"yields": {"food": 0, "production": 0, "commerce": 1},
+		"required_tech": "pottery",
+		"valid_terrains": ["grassland", "plains", "desert", "tundra"],
+		"build_turns": 4,
+		"pillage_turns": 1,
+		"grows_to": "hamlet",
+		"growth_turns": 10
+	},
+	"hamlet": {
+		"name": "Hamlet",
+		"symbol": "⌂",
+		"color": "#CD853F",
+		"yields": {"food": 0, "production": 0, "commerce": 2},
+		"grows_to": "village",
+		"growth_turns": 20
+	},
+	"village": {
+		"name": "Village",
+		"symbol": "⌂",
+		"color": "#B8860B",
+		"yields": {"food": 0, "production": 0, "commerce": 3},
+		"grows_to": "town",
+		"growth_turns": 40
+	},
+	"town": {
+		"name": "Town",
+		"symbol": "⌂",
+		"color": "#8B6914",
+		"yields": {"food": 0, "production": 0, "commerce": 4}
+	},
+	"road": {
+		"name": "Road",
+		"symbol": "═",
+		"color": "#A9A9A9",
+		"movement_bonus": 0.5,
+		"required_tech": "the_wheel",
+		"valid_terrains": ["grassland", "plains", "desert", "tundra", "snow", "hills"],
+		"build_turns": 2,
+		"pillage_turns": 1
+	},
+	"railroad": {
+		"name": "Railroad",
+		"symbol": "╬",
+		"color": "#4B4B4B",
+		"movement_bonus": 0.1,
+		"yields": {"food": 0, "production": 1, "commerce": 0},
+		"required_tech": "railroad",
+		"valid_terrains": ["grassland", "plains", "desert", "tundra", "snow", "hills"],
+		"requires_improvement": "road",
+		"build_turns": 3,
+		"pillage_turns": 1
+	},
+	"fort": {
+		"name": "Fort",
+		"symbol": "⌘",
+		"color": "#696969",
+		"defense_bonus": 0.5,
+		"required_tech": "masonry",
+		"valid_terrains": ["grassland", "plains", "desert", "tundra", "snow", "hills"],
+		"build_turns": 8,
+		"pillage_turns": 2
+	},
+	"well": {
+		"name": "Oil Well",
+		"symbol": "⛽",
+		"color": "#2F4F4F",
+		"yields": {"food": 0, "production": 3, "commerce": 0},
+		"required_tech": "combustion",
+		"valid_terrains": ["desert", "tundra", "coast", "ocean"],
+		"requires_resource": ["oil"],
+		"build_turns": 8,
+		"pillage_turns": 2
+	},
+	"winery": {
+		"name": "Winery",
+		"symbol": "🍇",
+		"color": "#722F37",
+		"yields": {"food": 0, "production": 0, "commerce": 2},
+		"required_tech": "monarchy",
+		"valid_terrains": ["grassland", "plains", "hills"],
+		"requires_resource": ["wine"],
+		"build_turns": 5,
+		"pillage_turns": 1
+	}
+}

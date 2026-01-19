@@ -1,0 +1,69 @@
+{
+	"domination": {
+		"name": "Domination Victory",
+		"description": "Control 75% of the world's land and 66% of its population",
+		"requirements": {
+			"land_percentage": 0.75,
+			"population_percentage": 0.66
+		},
+		"enabled_by_default": true
+	},
+	"conquest": {
+		"name": "Conquest Victory",
+		"description": "Eliminate all other civilizations",
+		"requirements": {
+			"last_civ_standing": true
+		},
+		"enabled_by_default": true
+	},
+	"cultural": {
+		"name": "Cultural Victory",
+		"description": "Have 3 legendary cities (50,000 culture each)",
+		"requirements": {
+			"legendary_cities": 3,
+			"culture_threshold": 50000
+		},
+		"enabled_by_default": true
+	},
+	"space_race": {
+		"name": "Space Race Victory",
+		"description": "Build and launch a spaceship to Alpha Centauri",
+		"requirements": {
+			"spaceship_parts": {
+				"ss_cockpit": 1,
+				"ss_engine": 1,
+				"ss_thrusters": 3,
+				"ss_life_support": 1,
+				"ss_casing": 1,
+				"ss_stasis_chamber": 1
+			}
+		},
+		"enabled_by_default": true
+	},
+	"diplomatic": {
+		"name": "Diplomatic Victory",
+		"description": "Be elected Secretary General of the United Nations",
+		"requirements": {
+			"united_nations_built": true,
+			"un_votes_required": 0.6
+		},
+		"enabled_by_default": true,
+		"requires_building": "united_nations"
+	},
+	"time": {
+		"name": "Time Victory",
+		"description": "Have the highest score when time runs out (2050 AD)",
+		"requirements": {
+			"end_year": 2050
+		},
+		"enabled_by_default": true
+	},
+	"religious": {
+		"name": "Religious Victory",
+		"description": "Spread your religion to 75% of all cities",
+		"requirements": {
+			"religion_spread_percentage": 0.75
+		},
+		"enabled_by_default": false
+	}
+}

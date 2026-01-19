@@ -1,0 +1,236 @@
+{
+	"wheat": {
+		"name": "Wheat",
+		"symbol": "W",
+		"type": "bonus",
+		"yields": {"food": 2, "production": 0, "commerce": 0},
+		"valid_terrains": ["plains", "grassland", "flood_plains"],
+		"improvement": "farm",
+		"revealed_by": ""
+	},
+	"corn": {
+		"name": "Corn",
+		"symbol": "C",
+		"type": "bonus",
+		"yields": {"food": 2, "production": 0, "commerce": 0},
+		"valid_terrains": ["plains", "grassland"],
+		"improvement": "farm",
+		"revealed_by": ""
+	},
+	"rice": {
+		"name": "Rice",
+		"symbol": "R",
+		"type": "bonus",
+		"yields": {"food": 1, "production": 0, "commerce": 0},
+		"valid_terrains": ["grassland"],
+		"improvement": "farm",
+		"revealed_by": ""
+	},
+	"cattle": {
+		"name": "Cattle",
+		"symbol": "🐄",
+		"type": "bonus",
+		"yields": {"food": 1, "production": 1, "commerce": 0},
+		"valid_terrains": ["grassland", "plains"],
+		"improvement": "pasture",
+		"revealed_by": "animal_husbandry"
+	},
+	"sheep": {
+		"name": "Sheep",
+		"symbol": "🐑",
+		"type": "bonus",
+		"yields": {"food": 1, "production": 1, "commerce": 0},
+		"valid_terrains": ["grassland", "plains", "hills"],
+		"improvement": "pasture",
+		"revealed_by": "animal_husbandry"
+	},
+	"fish": {
+		"name": "Fish",
+		"symbol": "🐟",
+		"type": "bonus",
+		"yields": {"food": 3, "production": 0, "commerce": 0},
+		"valid_terrains": ["coast", "ocean"],
+		"improvement": "fishing_boats",
+		"revealed_by": ""
+	},
+	"copper": {
+		"name": "Copper",
+		"symbol": "Cu",
+		"type": "strategic",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"valid_terrains": ["hills", "grassland", "plains", "desert", "tundra"],
+		"improvement": "mine",
+		"revealed_by": "bronze_working",
+		"enables_units": ["axeman", "spearman"]
+	},
+	"iron": {
+		"name": "Iron",
+		"symbol": "Fe",
+		"type": "strategic",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"valid_terrains": ["hills", "grassland", "plains", "desert", "tundra", "snow"],
+		"improvement": "mine",
+		"revealed_by": "iron_working",
+		"enables_units": ["swordsman", "maceman"]
+	},
+	"horses": {
+		"name": "Horses",
+		"symbol": "🐴",
+		"type": "strategic",
+		"yields": {"food": 1, "production": 1, "commerce": 0},
+		"valid_terrains": ["grassland", "plains"],
+		"improvement": "pasture",
+		"revealed_by": "animal_husbandry",
+		"enables_units": ["chariot", "horseman", "knight"]
+	},
+	"coal": {
+		"name": "Coal",
+		"symbol": "�ite",
+		"type": "strategic",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"valid_terrains": ["hills", "grassland", "plains"],
+		"improvement": "mine",
+		"revealed_by": "steam_power",
+		"enables_units": ["ironclad"]
+	},
+	"oil": {
+		"name": "Oil",
+		"symbol": "⚫",
+		"type": "strategic",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"valid_terrains": ["desert", "tundra", "coast", "ocean"],
+		"improvement": "well",
+		"revealed_by": "combustion",
+		"enables_units": ["tank", "fighter", "bomber"]
+	},
+	"uranium": {
+		"name": "Uranium",
+		"symbol": "☢",
+		"type": "strategic",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"valid_terrains": ["hills", "desert", "tundra"],
+		"improvement": "mine",
+		"revealed_by": "fission",
+		"enables_units": ["nuclear_missile"]
+	},
+	"gold_resource": {
+		"name": "Gold",
+		"symbol": "Au",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 4},
+		"valid_terrains": ["hills", "grassland", "plains", "desert"],
+		"improvement": "mine",
+		"revealed_by": "",
+		"happiness": 1
+	},
+	"silver": {
+		"name": "Silver",
+		"symbol": "Ag",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 3},
+		"valid_terrains": ["hills", "tundra"],
+		"improvement": "mine",
+		"revealed_by": "",
+		"happiness": 1
+	},
+	"gems": {
+		"name": "Gems",
+		"symbol": "💎",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 4},
+		"valid_terrains": ["hills", "grassland", "jungle"],
+		"improvement": "mine",
+		"revealed_by": "",
+		"happiness": 1
+	},
+	"ivory": {
+		"name": "Ivory",
+		"symbol": "🦣",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 1, "commerce": 1},
+		"valid_terrains": ["plains", "grassland"],
+		"improvement": "camp",
+		"revealed_by": "",
+		"happiness": 1
+	},
+	"fur": {
+		"name": "Fur",
+		"symbol": "🦊",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 2},
+		"valid_terrains": ["tundra", "forest"],
+		"improvement": "camp",
+		"revealed_by": "",
+		"happiness": 1
+	},
+	"dye": {
+		"name": "Dye",
+		"symbol": "🎨",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 3},
+		"valid_terrains": ["jungle", "grassland"],
+		"improvement": "plantation",
+		"revealed_by": "calendar",
+		"happiness": 1
+	},
+	"silk": {
+		"name": "Silk",
+		"symbol": "🕸",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 3},
+		"valid_terrains": ["forest"],
+		"improvement": "plantation",
+		"revealed_by": "calendar",
+		"happiness": 1
+	},
+	"spices": {
+		"name": "Spices",
+		"symbol": "🌶",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 2},
+		"valid_terrains": ["jungle", "forest"],
+		"improvement": "plantation",
+		"revealed_by": "calendar",
+		"happiness": 1
+	},
+	"wine": {
+		"name": "Wine",
+		"symbol": "🍷",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 2},
+		"valid_terrains": ["grassland", "plains", "hills"],
+		"improvement": "winery",
+		"revealed_by": "monarchy",
+		"happiness": 1
+	},
+	"incense": {
+		"name": "Incense",
+		"symbol": "💨",
+		"type": "luxury",
+		"yields": {"food": 0, "production": 0, "commerce": 3},
+		"valid_terrains": ["desert", "plains"],
+		"improvement": "plantation",
+		"revealed_by": "calendar",
+		"happiness": 1
+	},
+	"marble": {
+		"name": "Marble",
+		"symbol": "▢",
+		"type": "bonus",
+		"yields": {"food": 0, "production": 1, "commerce": 1},
+		"valid_terrains": ["hills", "grassland", "plains", "desert", "tundra"],
+		"improvement": "quarry",
+		"revealed_by": "masonry",
+		"wonder_bonus": 0.5
+	},
+	"stone": {
+		"name": "Stone",
+		"symbol": "▣",
+		"type": "bonus",
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"valid_terrains": ["hills", "grassland", "plains", "desert", "tundra"],
+		"improvement": "quarry",
+		"revealed_by": "masonry",
+		"wonder_bonus": 0.5
+	}
+}

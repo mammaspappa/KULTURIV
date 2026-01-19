@@ -1,0 +1,76 @@
+{
+	"grassland": {
+		"name": "Grassland",
+		"color": "#4a7c23",
+		"movement_cost": 1,
+		"passable": true,
+		"yields": {"food": 2, "production": 0, "commerce": 0},
+		"defense_bonus": 0.0
+	},
+	"plains": {
+		"name": "Plains",
+		"color": "#c4a000",
+		"movement_cost": 1,
+		"passable": true,
+		"yields": {"food": 1, "production": 1, "commerce": 0},
+		"defense_bonus": 0.0
+	},
+	"desert": {
+		"name": "Desert",
+		"color": "#e6d088",
+		"movement_cost": 1,
+		"passable": true,
+		"yields": {"food": 0, "production": 0, "commerce": 0},
+		"defense_bonus": 0.0
+	},
+	"tundra": {
+		"name": "Tundra",
+		"color": "#a0b8a0",
+		"movement_cost": 1,
+		"passable": true,
+		"yields": {"food": 1, "production": 0, "commerce": 0},
+		"defense_bonus": 0.0
+	},
+	"snow": {
+		"name": "Snow",
+		"color": "#e8e8e8",
+		"movement_cost": 2,
+		"passable": true,
+		"yields": {"food": 0, "production": 0, "commerce": 0},
+		"defense_bonus": 0.0
+	},
+	"coast": {
+		"name": "Coast",
+		"color": "#4a90a4",
+		"movement_cost": 1,
+		"passable": false,
+		"passable_naval": true,
+		"yields": {"food": 1, "production": 0, "commerce": 2},
+		"defense_bonus": 0.0
+	},
+	"ocean": {
+		"name": "Ocean",
+		"color": "#1a5276",
+		"movement_cost": 1,
+		"passable": false,
+		"passable_naval": true,
+		"yields": {"food": 1, "production": 0, "commerce": 1},
+		"defense_bonus": 0.0
+	},
+	"hills": {
+		"name": "Hills",
+		"color": "#8b7355",
+		"movement_cost": 2,
+		"passable": true,
+		"yields": {"food": 0, "production": 2, "commerce": 0},
+		"defense_bonus": 0.25
+	},
+	"mountains": {
+		"name": "Mountains",
+		"color": "#696969",
+		"movement_cost": 99,
+		"passable": false,
+		"yields": {"food": 0, "production": 0, "commerce": 0},
+		"defense_bonus": 0.0
+	}
+}

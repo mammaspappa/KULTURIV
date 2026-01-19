@@ -1,0 +1,562 @@
+{
+	"julius_caesar": {
+		"name": "Julius Caesar",
+		"civilization": "rome",
+		"traits": ["imperialistic", "organized"],
+		"favorite_civic": "representation",
+		"flavor": {
+			"military": 8,
+			"gold": 5,
+			"science": 4,
+			"culture": 3,
+			"religion": 2,
+			"expansion": 9,
+			"growth": 4,
+			"production": 6
+		}
+	},
+	"augustus": {
+		"name": "Augustus Caesar",
+		"civilization": "rome",
+		"traits": ["industrious", "imperialistic"],
+		"favorite_civic": "hereditary_rule",
+		"flavor": {
+			"military": 6,
+			"gold": 6,
+			"science": 5,
+			"culture": 5,
+			"religion": 3,
+			"expansion": 7,
+			"growth": 5,
+			"production": 8
+		}
+	},
+	"alexander": {
+		"name": "Alexander",
+		"civilization": "greece",
+		"traits": ["aggressive", "philosophical"],
+		"favorite_civic": "hereditary_rule",
+		"flavor": {
+			"military": 10,
+			"gold": 3,
+			"science": 6,
+			"culture": 5,
+			"religion": 2,
+			"expansion": 8,
+			"growth": 4,
+			"production": 5
+		}
+	},
+	"pericles": {
+		"name": "Pericles",
+		"civilization": "greece",
+		"traits": ["creative", "philosophical"],
+		"favorite_civic": "representation",
+		"flavor": {
+			"military": 4,
+			"gold": 5,
+			"science": 8,
+			"culture": 9,
+			"religion": 3,
+			"expansion": 5,
+			"growth": 6,
+			"production": 5
+		}
+	},
+	"ramesses": {
+		"name": "Ramesses II",
+		"civilization": "egypt",
+		"traits": ["industrious", "spiritual"],
+		"favorite_civic": "theocracy",
+		"flavor": {
+			"military": 5,
+			"gold": 4,
+			"science": 4,
+			"culture": 7,
+			"religion": 8,
+			"expansion": 6,
+			"growth": 5,
+			"production": 9
+		}
+	},
+	"cleopatra": {
+		"name": "Cleopatra",
+		"civilization": "egypt",
+		"traits": ["creative", "financial"],
+		"favorite_civic": "representation",
+		"flavor": {
+			"military": 4,
+			"gold": 8,
+			"science": 6,
+			"culture": 8,
+			"religion": 4,
+			"expansion": 5,
+			"growth": 6,
+			"production": 5
+		}
+	},
+	"qin_shi_huang": {
+		"name": "Qin Shi Huang",
+		"civilization": "china",
+		"traits": ["industrious", "protective"],
+		"favorite_civic": "police_state",
+		"flavor": {
+			"military": 7,
+			"gold": 5,
+			"science": 5,
+			"culture": 4,
+			"religion": 2,
+			"expansion": 6,
+			"growth": 5,
+			"production": 9
+		}
+	},
+	"mao_zedong": {
+		"name": "Mao Zedong",
+		"civilization": "china",
+		"traits": ["philosophical", "organized"],
+		"favorite_civic": "state_property",
+		"flavor": {
+			"military": 6,
+			"gold": 4,
+			"science": 6,
+			"culture": 4,
+			"religion": 1,
+			"expansion": 7,
+			"growth": 7,
+			"production": 8
+		}
+	},
+	"cyrus": {
+		"name": "Cyrus",
+		"civilization": "persia",
+		"traits": ["charismatic", "imperialistic"],
+		"favorite_civic": "representation",
+		"flavor": {
+			"military": 7,
+			"gold": 6,
+			"science": 5,
+			"culture": 5,
+			"religion": 4,
+			"expansion": 8,
+			"growth": 5,
+			"production": 6
+		}
+	},
+	"darius": {
+		"name": "Darius I",
+		"civilization": "persia",
+		"traits": ["financial", "organized"],
+		"favorite_civic": "bureaucracy",
+		"flavor": {
+			"military": 5,
+			"gold": 9,
+			"science": 6,
+			"culture": 4,
+			"religion": 3,
+			"expansion": 6,
+			"growth": 6,
+			"production": 7
+		}
+	},
+	"victoria": {
+		"name": "Victoria",
+		"civilization": "england",
+		"traits": ["financial", "imperialistic"],
+		"favorite_civic": "representation",
+		"flavor": {
+			"military": 6,
+			"gold": 9,
+			"science": 6,
+			"culture": 5,
+			"religion": 4,
+			"expansion": 8,
+			"growth": 5,
+			"production": 6
+		}
+	},
+	"elizabeth": {
+		"name": "Elizabeth I",
+		"civilization": "england",
+		"traits": ["financial", "philosophical"],
+		"favorite_civic": "free_religion",
+		"flavor": {
+			"military": 4,
+			"gold": 8,
+			"science": 8,
+			"culture": 6,
+			"religion": 5,
+			"expansion": 5,
+			"growth": 5,
+			"production": 5
+		}
+	},
+	"churchill": {
+		"name": "Winston Churchill",
+		"civilization": "england",
+		"traits": ["charismatic", "protective"],
+		"favorite_civic": "nationhood",
+		"flavor": {
+			"military": 8,
+			"gold": 5,
+			"science": 5,
+			"culture": 6,
+			"religion": 3,
+			"expansion": 5,
+			"growth": 4,
+			"production": 6
+		}
+	},
+	"louis_xiv": {
+		"name": "Louis XIV",
+		"civilization": "france",
+		"traits": ["creative", "industrious"],
+		"favorite_civic": "hereditary_rule",
+		"flavor": {
+			"military": 5,
+			"gold": 6,
+			"science": 5,
+			"culture": 9,
+			"religion": 5,
+			"expansion": 5,
+			"growth": 5,
+			"production": 8
+		}
+	},
+	"napoleon": {
+		"name": "Napoleon",
+		"civilization": "france",
+		"traits": ["aggressive", "organized"],
+		"favorite_civic": "nationhood",
+		"flavor": {
+			"military": 10,
+			"gold": 5,
+			"science": 5,
+			"culture": 4,
+			"religion": 2,
+			"expansion": 8,
+			"growth": 4,
+			"production": 7
+		}
+	},
+	"de_gaulle": {
+		"name": "Charles de Gaulle",
+		"civilization": "france",
+		"traits": ["charismatic", "industrious"],
+		"favorite_civic": "nationhood",
+		"flavor": {
+			"military": 7,
+			"gold": 5,
+			"science": 6,
+			"culture": 6,
+			"religion": 3,
+			"expansion": 5,
+			"growth": 5,
+			"production": 8
+		}
+	},
+	"frederick": {
+		"name": "Frederick the Great",
+		"civilization": "germany",
+		"traits": ["philosophical", "organized"],
+		"favorite_civic": "representation",
+		"flavor": {
+			"military": 7,
+			"gold": 5,
+			"science": 8,
+			"culture": 5,
+			"religion": 3,
+			"expansion": 5,
+			"growth": 5,
+			"production": 7
+		}
+	},
+	"bismarck": {
+		"name": "Otto von Bismarck",
+		"civilization": "germany",
+		"traits": ["imperialistic", "industrious"],
+		"favorite_civic": "nationhood",
+		"flavor": {
+			"military": 8,
+			"gold": 6,
+			"science": 5,
+			"culture": 3,
+			"religion": 2,
+			"expansion": 7,
+			"growth": 5,
+			"production": 9
+		}
+	},
+	"peter": {
+		"name": "Peter the Great",
+		"civilization": "russia",
+		"traits": ["philosophical", "expansive"],
+		"favorite_civic": "police_state",
+		"flavor": {
+			"military": 6,
+			"gold": 5,
+			"science": 8,
+			"culture": 4,
+			"religion": 3,
+			"expansion": 7,
+			"growth": 7,
+			"production": 6
+		}
+	},
+	"catherine": {
+		"name": "Catherine the Great",
+		"civilization": "russia",
+		"traits": ["creative", "imperialistic"],
+		"favorite_civic": "hereditary_rule",
+		"flavor": {
+			"military": 5,
+			"gold": 6,
+			"science": 6,
+			"culture": 8,
+			"religion": 4,
+			"expansion": 8,
+			"growth": 5,
+			"production": 5
+		}
+	},
+	"stalin": {
+		"name": "Joseph Stalin",
+		"civilization": "russia",
+		"traits": ["aggressive", "industrious"],
+		"favorite_civic": "police_state",
+		"flavor": {
+			"military": 9,
+			"gold": 4,
+			"science": 5,
+			"culture": 2,
+			"religion": 1,
+			"expansion": 7,
+			"growth": 5,
+			"production": 10
+		}
+	},
+	"washington": {
+		"name": "George Washington",
+		"civilization": "america",
+		"traits": ["charismatic", "expansive"],
+		"favorite_civic": "representation",
+		"flavor": {
+			"military": 6,
+			"gold": 5,
+			"science": 5,
+			"culture": 5,
+			"religion": 5,
+			"expansion": 7,
+			"growth": 7,
+			"production": 5
+		}
+	},
+	"lincoln": {
+		"name": "Abraham Lincoln",
+		"civilization": "america",
+		"traits": ["charismatic", "philosophical"],
+		"favorite_civic": "emancipation",
+		"flavor": {
+			"military": 5,
+			"gold": 5,
+			"science": 7,
+			"culture": 6,
+			"religion": 5,
+			"expansion": 5,
+			"growth": 6,
+			"production": 5
+		}
+	},
+	"roosevelt": {
+		"name": "Franklin Roosevelt",
+		"civilization": "america",
+		"traits": ["industrious", "organized"],
+		"favorite_civic": "universal_suffrage",
+		"flavor": {
+			"military": 6,
+			"gold": 6,
+			"science": 6,
+			"culture": 5,
+			"religion": 4,
+			"expansion": 5,
+			"growth": 6,
+			"production": 8
+		}
+	},
+	"tokugawa": {
+		"name": "Tokugawa Ieyasu",
+		"civilization": "japan",
+		"traits": ["aggressive", "organized"],
+		"favorite_civic": "mercantilism",
+		"flavor": {
+			"military": 8,
+			"gold": 6,
+			"science": 5,
+			"culture": 5,
+			"religion": 4,
+			"expansion": 4,
+			"growth": 5,
+			"production": 7
+		}
+	},
+	"meiji": {
+		"name": "Emperor Meiji",
+		"civilization": "japan",
+		"traits": ["industrious", "philosophical"],
+		"favorite_civic": "nationhood",
+		"flavor": {
+			"military": 6,
+			"gold": 5,
+			"science": 8,
+			"culture": 5,
+			"religion": 3,
+			"expansion": 5,
+			"growth": 5,
+			"production": 9
+		}
+	},
+	"gandhi": {
+		"name": "Mahatma Gandhi",
+		"civilization": "india",
+		"traits": ["philosophical", "spiritual"],
+		"favorite_civic": "pacifism",
+		"flavor": {
+			"military": 1,
+			"gold": 4,
+			"science": 7,
+			"culture": 7,
+			"religion": 10,
+			"expansion": 4,
+			"growth": 7,
+			"production": 4
+		}
+	},
+	"asoka": {
+		"name": "Asoka",
+		"civilization": "india",
+		"traits": ["organized", "spiritual"],
+		"favorite_civic": "organized_religion",
+		"flavor": {
+			"military": 3,
+			"gold": 6,
+			"science": 5,
+			"culture": 6,
+			"religion": 9,
+			"expansion": 5,
+			"growth": 6,
+			"production": 6
+		}
+	},
+	"genghis_khan": {
+		"name": "Genghis Khan",
+		"civilization": "mongolia",
+		"traits": ["aggressive", "imperialistic"],
+		"favorite_civic": "vassalage",
+		"flavor": {
+			"military": 10,
+			"gold": 4,
+			"science": 3,
+			"culture": 2,
+			"religion": 2,
+			"expansion": 10,
+			"growth": 3,
+			"production": 5
+		}
+	},
+	"kublai_khan": {
+		"name": "Kublai Khan",
+		"civilization": "mongolia",
+		"traits": ["creative", "aggressive"],
+		"favorite_civic": "hereditary_rule",
+		"flavor": {
+			"military": 8,
+			"gold": 6,
+			"science": 5,
+			"culture": 6,
+			"religion": 4,
+			"expansion": 7,
+			"growth": 4,
+			"production": 6
+		}
+	},
+	"montezuma": {
+		"name": "Montezuma",
+		"civilization": "aztec",
+		"traits": ["aggressive", "spiritual"],
+		"favorite_civic": "police_state",
+		"flavor": {
+			"military": 9,
+			"gold": 4,
+			"science": 3,
+			"culture": 5,
+			"religion": 8,
+			"expansion": 7,
+			"growth": 4,
+			"production": 5
+		}
+	},
+	"saladin": {
+		"name": "Saladin",
+		"civilization": "arabia",
+		"traits": ["philosophical", "spiritual"],
+		"favorite_civic": "theocracy",
+		"flavor": {
+			"military": 6,
+			"gold": 5,
+			"science": 7,
+			"culture": 5,
+			"religion": 9,
+			"expansion": 5,
+			"growth": 5,
+			"production": 5
+		}
+	},
+	"harun_al_rashid": {
+		"name": "Harun al-Rashid",
+		"civilization": "arabia",
+		"traits": ["financial", "spiritual"],
+		"favorite_civic": "free_market",
+		"flavor": {
+			"military": 4,
+			"gold": 9,
+			"science": 6,
+			"culture": 7,
+			"religion": 8,
+			"expansion": 5,
+			"growth": 6,
+			"production": 5
+		}
+	},
+	"isabella": {
+		"name": "Isabella",
+		"civilization": "spain",
+		"traits": ["expansive", "spiritual"],
+		"favorite_civic": "theocracy",
+		"flavor": {
+			"military": 6,
+			"gold": 5,
+			"science": 4,
+			"culture": 5,
+			"religion": 10,
+			"expansion": 8,
+			"growth": 7,
+			"production": 5
+		}
+	},
+	"philip_ii": {
+		"name": "Philip II",
+		"civilization": "spain",
+		"traits": ["imperialistic", "protective"],
+		"favorite_civic": "theocracy",
+		"flavor": {
+			"military": 8,
+			"gold": 6,
+			"science": 4,
+			"culture": 5,
+			"religion": 8,
+			"expansion": 7,
+			"growth": 4,
+			"production": 6
+		}
+	}
+}

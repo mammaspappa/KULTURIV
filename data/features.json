@@ -1,0 +1,53 @@
+{
+	"forest": {
+		"name": "Forest",
+		"symbol": "♣",
+		"color": "#228b22",
+		"movement_cost": 1,
+		"yields": {"food": 0, "production": 1, "commerce": 0},
+		"defense_bonus": 0.5,
+		"valid_terrains": ["grassland", "plains", "tundra", "hills"],
+		"choppable": true,
+		"chop_production": 20
+	},
+	"jungle": {
+		"name": "Jungle",
+		"symbol": "♠",
+		"color": "#006400",
+		"movement_cost": 2,
+		"yields": {"food": -1, "production": 0, "commerce": 0},
+		"defense_bonus": 0.5,
+		"valid_terrains": ["grassland", "plains"],
+		"choppable": true,
+		"chop_production": 10
+	},
+	"flood_plains": {
+		"name": "Flood Plains",
+		"symbol": "~",
+		"color": "#90ee90",
+		"movement_cost": 0,
+		"yields": {"food": 3, "production": 0, "commerce": 0},
+		"defense_bonus": -0.25,
+		"valid_terrains": ["desert"],
+		"disease_chance": 0.1
+	},
+	"oasis": {
+		"name": "Oasis",
+		"symbol": "○",
+		"color": "#00ced1",
+		"movement_cost": 0,
+		"yields": {"food": 3, "production": 0, "commerce": 2},
+		"defense_bonus": 0.0,
+		"valid_terrains": ["desert"]
+	},
+	"ice": {
+		"name": "Ice",
+		"symbol": "❄",
+		"color": "#add8e6",
+		"movement_cost": 99,
+		"yields": {"food": 0, "production": 0, "commerce": 0},
+		"defense_bonus": 0.0,
+		"valid_terrains": ["coast", "ocean"],
+		"impassable": true
+	}
+}

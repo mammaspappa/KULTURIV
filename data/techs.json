@@ -1,0 +1,825 @@
+{
+	"agriculture": {
+		"name": "Agriculture",
+		"era": "ancient",
+		"cost": 20,
+		"prerequisites": [],
+		"unlocks": {
+			"improvements": ["farm"],
+			"units": [],
+			"buildings": []
+		},
+		"quote": "Where tillage begins, other arts follow.",
+		"description": "Enables Farms"
+	},
+	"hunting": {
+		"name": "Hunting",
+		"era": "ancient",
+		"cost": 20,
+		"prerequisites": [],
+		"unlocks": {
+			"improvements": ["camp"],
+			"units": ["scout"],
+			"buildings": []
+		},
+		"description": "Enables Camps, Scout"
+	},
+	"fishing": {
+		"name": "Fishing",
+		"era": "ancient",
+		"cost": 20,
+		"prerequisites": [],
+		"unlocks": {
+			"improvements": ["fishing_boats"],
+			"units": [],
+			"buildings": []
+		},
+		"description": "Enables Fishing Boats"
+	},
+	"mining": {
+		"name": "Mining",
+		"era": "ancient",
+		"cost": 20,
+		"prerequisites": [],
+		"unlocks": {
+			"improvements": ["mine"],
+			"units": [],
+			"buildings": []
+		},
+		"description": "Enables Mines"
+	},
+	"mysticism": {
+		"name": "Mysticism",
+		"era": "ancient",
+		"cost": 25,
+		"prerequisites": [],
+		"unlocks": {
+			"buildings": ["obelisk"],
+			"enables_religion_founding": true
+		},
+		"description": "Enables Obelisk, can found first religion"
+	},
+	"the_wheel": {
+		"name": "The Wheel",
+		"era": "ancient",
+		"cost": 30,
+		"prerequisites": [],
+		"unlocks": {
+			"improvements": ["road"],
+			"units": ["chariot"]
+		},
+		"description": "Enables Roads, Chariot"
+	},
+	"pottery": {
+		"name": "Pottery",
+		"era": "ancient",
+		"cost": 30,
+		"prerequisites": ["agriculture"],
+		"unlocks": {
+			"improvements": ["cottage"],
+			"buildings": ["granary"]
+		},
+		"description": "Enables Cottages, Granary"
+	},
+	"animal_husbandry": {
+		"name": "Animal Husbandry",
+		"era": "ancient",
+		"cost": 30,
+		"prerequisites": ["hunting"],
+		"unlocks": {
+			"improvements": ["pasture"],
+			"reveals_resources": ["horses", "cattle", "sheep"]
+		},
+		"description": "Enables Pastures, reveals Horses"
+	},
+	"archery": {
+		"name": "Archery",
+		"era": "ancient",
+		"cost": 25,
+		"prerequisites": ["hunting"],
+		"unlocks": {
+			"units": ["archer"]
+		},
+		"description": "Enables Archer"
+	},
+	"meditation": {
+		"name": "Meditation",
+		"era": "ancient",
+		"cost": 35,
+		"prerequisites": ["mysticism"],
+		"unlocks": {
+			"enables_religion_founding": true
+		},
+		"description": "Can found Buddhism"
+	},
+	"polytheism": {
+		"name": "Polytheism",
+		"era": "ancient",
+		"cost": 35,
+		"prerequisites": ["mysticism"],
+		"unlocks": {
+			"enables_religion_founding": true
+		},
+		"description": "Can found Hinduism"
+	},
+	"sailing": {
+		"name": "Sailing",
+		"era": "ancient",
+		"cost": 40,
+		"prerequisites": ["fishing"],
+		"unlocks": {
+			"units": ["galley"],
+			"buildings": ["lighthouse"]
+		},
+		"description": "Enables Galley, Lighthouse"
+	},
+	"masonry": {
+		"name": "Masonry",
+		"era": "ancient",
+		"cost": 45,
+		"prerequisites": ["mining"],
+		"unlocks": {
+			"improvements": ["quarry"],
+			"buildings": ["walls"],
+			"reveals_resources": ["marble", "stone"]
+		},
+		"description": "Enables Quarry, Walls"
+	},
+	"bronze_working": {
+		"name": "Bronze Working",
+		"era": "ancient",
+		"cost": 50,
+		"prerequisites": ["mining"],
+		"unlocks": {
+			"units": ["axeman", "spearman"],
+			"reveals_resources": ["copper"]
+		},
+		"description": "Enables Axeman, Spearman, reveals Copper"
+	},
+	"writing": {
+		"name": "Writing",
+		"era": "ancient",
+		"cost": 50,
+		"prerequisites": ["pottery"],
+		"unlocks": {
+			"buildings": ["library"]
+		},
+		"description": "Enables Library, Open Borders"
+	},
+	"priesthood": {
+		"name": "Priesthood",
+		"era": "ancient",
+		"cost": 40,
+		"prerequisites": ["mysticism"],
+		"unlocks": {
+			"buildings": ["temple"]
+		},
+		"description": "Enables Temple"
+	},
+	"monotheism": {
+		"name": "Monotheism",
+		"era": "ancient",
+		"cost": 80,
+		"prerequisites": ["polytheism"],
+		"unlocks": {
+			"enables_religion_founding": true
+		},
+		"description": "Can found Judaism"
+	},
+	"horseback_riding": {
+		"name": "Horseback Riding",
+		"era": "classical",
+		"cost": 60,
+		"prerequisites": ["animal_husbandry"],
+		"unlocks": {
+			"units": ["horseman"],
+			"buildings": ["stable"]
+		},
+		"description": "Enables Horseman, Stable"
+	},
+	"iron_working": {
+		"name": "Iron Working",
+		"era": "classical",
+		"cost": 75,
+		"prerequisites": ["bronze_working"],
+		"unlocks": {
+			"units": ["swordsman"],
+			"reveals_resources": ["iron"]
+		},
+		"description": "Enables Swordsman, reveals Iron"
+	},
+	"metal_casting": {
+		"name": "Metal Casting",
+		"era": "classical",
+		"cost": 80,
+		"prerequisites": ["bronze_working"],
+		"unlocks": {
+			"units": ["trireme"],
+			"buildings": ["forge"]
+		},
+		"description": "Enables Trireme, Forge"
+	},
+	"mathematics": {
+		"name": "Mathematics",
+		"era": "classical",
+		"cost": 80,
+		"prerequisites": ["writing"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"description": "Enables Catapult"
+	},
+	"alphabet": {
+		"name": "Alphabet",
+		"era": "classical",
+		"cost": 70,
+		"prerequisites": ["writing"],
+		"unlocks": {},
+		"description": "Enables Tech Trading"
+	},
+	"code_of_laws": {
+		"name": "Code of Laws",
+		"era": "classical",
+		"cost": 90,
+		"prerequisites": ["writing"],
+		"unlocks": {
+			"buildings": ["courthouse"],
+			"enables_religion_founding": true
+		},
+		"description": "Enables Courthouse, can found Confucianism"
+	},
+	"currency": {
+		"name": "Currency",
+		"era": "classical",
+		"cost": 100,
+		"prerequisites": ["mathematics"],
+		"unlocks": {
+			"buildings": ["market"]
+		},
+		"description": "Enables Market"
+	},
+	"construction": {
+		"name": "Construction",
+		"era": "classical",
+		"cost": 100,
+		"prerequisites": ["mathematics", "masonry"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["catapult"],
+			"buildings": ["colosseum", "aqueduct"]
+		},
+		"description": "Enables Catapult, Colosseum, Aqueduct"
+	},
+	"monarchy": {
+		"name": "Monarchy",
+		"era": "classical",
+		"cost": 100,
+		"prerequisites": ["priesthood"],
+		"unlocks": {
+			"improvements": ["winery"]
+		},
+		"description": "Enables Hereditary Rule civic"
+	},
+	"theology": {
+		"name": "Theology",
+		"era": "medieval",
+		"cost": 150,
+		"prerequisites": ["monotheism", "writing"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"enables_religion_founding": true
+		},
+		"description": "Can found Christianity"
+	},
+	"calendar": {
+		"name": "Calendar",
+		"era": "medieval",
+		"cost": 120,
+		"prerequisites": ["mathematics"],
+		"unlocks": {
+			"improvements": ["plantation"]
+		},
+		"description": "Enables Plantation"
+	},
+	"feudalism": {
+		"name": "Feudalism",
+		"era": "medieval",
+		"cost": 200,
+		"prerequisites": ["monarchy"],
+		"unlocks": {
+			"units": ["longbowman"]
+		},
+		"description": "Enables Longbowman, Vassalage civic"
+	},
+	"engineering": {
+		"name": "Engineering",
+		"era": "medieval",
+		"cost": 180,
+		"prerequisites": ["construction", "mathematics"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"buildings": ["castle"],
+			"improvements": ["road"]
+		},
+		"bonus": "roads_double_movement",
+		"description": "Enables Castle, faster roads"
+	},
+	"machinery": {
+		"name": "Machinery",
+		"era": "medieval",
+		"cost": 220,
+		"prerequisites": ["engineering"],
+		"unlocks": {
+			"units": ["crossbowman", "trebuchet"]
+		},
+		"description": "Enables Crossbowman, Trebuchet"
+	},
+	"civil_service": {
+		"name": "Civil Service",
+		"era": "medieval",
+		"cost": 250,
+		"prerequisites": ["code_of_laws", "writing"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["pikeman", "maceman"]
+		},
+		"description": "Enables Pikeman, Maceman, Bureaucracy civic"
+	},
+	"guilds": {
+		"name": "Guilds",
+		"era": "medieval",
+		"cost": 280,
+		"prerequisites": ["feudalism", "currency"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["knight"],
+			"buildings": ["grocer"]
+		},
+		"description": "Enables Knight, Grocer"
+	},
+	"philosophy": {
+		"name": "Philosophy",
+		"era": "medieval",
+		"cost": 200,
+		"prerequisites": ["meditation", "priesthood"],
+		"prereq_type": "OR",
+		"unlocks": {
+			"enables_religion_founding": true
+		},
+		"description": "Can found Taoism"
+	},
+	"monasticism": {
+		"name": "Monasticism",
+		"era": "medieval",
+		"cost": 160,
+		"prerequisites": ["philosophy"],
+		"unlocks": {
+			"buildings": ["monastery"]
+		},
+		"description": "Enables Monastery"
+	},
+	"drama": {
+		"name": "Drama",
+		"era": "medieval",
+		"cost": 180,
+		"prerequisites": ["writing"],
+		"unlocks": {
+			"buildings": ["theatre"]
+		},
+		"description": "Enables Theatre, Globe Theatre"
+	},
+	"music": {
+		"name": "Music",
+		"era": "medieval",
+		"cost": 240,
+		"prerequisites": ["drama"],
+		"unlocks": {},
+		"first_to_discover_bonus": "free_great_artist",
+		"description": "First to discover gets a free Great Artist"
+	},
+	"banking": {
+		"name": "Banking",
+		"era": "medieval",
+		"cost": 280,
+		"prerequisites": ["guilds", "currency"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"buildings": ["bank"]
+		},
+		"description": "Enables Bank"
+	},
+	"education": {
+		"name": "Education",
+		"era": "medieval",
+		"cost": 300,
+		"prerequisites": ["philosophy", "writing"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"buildings": ["university"]
+		},
+		"description": "Enables University"
+	},
+	"optics": {
+		"name": "Optics",
+		"era": "renaissance",
+		"cost": 280,
+		"prerequisites": ["sailing"],
+		"unlocks": {
+			"units": ["caravel", "explorer"]
+		},
+		"description": "Enables Caravel, Explorer, ocean travel"
+	},
+	"compass": {
+		"name": "Compass",
+		"era": "renaissance",
+		"cost": 300,
+		"prerequisites": ["optics"],
+		"unlocks": {
+			"buildings": ["harbor"]
+		},
+		"description": "Enables Harbor"
+	},
+	"astronomy": {
+		"name": "Astronomy",
+		"era": "renaissance",
+		"cost": 400,
+		"prerequisites": ["optics", "mathematics"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["frigate"],
+			"buildings": ["observatory"]
+		},
+		"description": "Enables Frigate, Observatory"
+	},
+	"gunpowder": {
+		"name": "Gunpowder",
+		"era": "renaissance",
+		"cost": 400,
+		"prerequisites": ["iron_working", "machinery"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["musketman"]
+		},
+		"description": "Enables Musketman"
+	},
+	"chemistry": {
+		"name": "Chemistry",
+		"era": "renaissance",
+		"cost": 450,
+		"prerequisites": ["gunpowder"],
+		"unlocks": {
+			"units": ["grenadier", "cannon"]
+		},
+		"description": "Enables Grenadier, Cannon"
+	},
+	"printing_press": {
+		"name": "Printing Press",
+		"era": "renaissance",
+		"cost": 350,
+		"prerequisites": ["education", "machinery"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"bonus": "cottage_growth_bonus",
+		"description": "Cottages grow faster"
+	},
+	"nationalism": {
+		"name": "Nationalism",
+		"era": "renaissance",
+		"cost": 500,
+		"prerequisites": ["civil_service", "printing_press"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["spy"]
+		},
+		"description": "Enables Spy, Nationhood civic"
+	},
+	"constitution": {
+		"name": "Constitution",
+		"era": "renaissance",
+		"cost": 500,
+		"prerequisites": ["nationalism"],
+		"unlocks": {},
+		"description": "Enables Representation civic"
+	},
+	"economics": {
+		"name": "Economics",
+		"era": "renaissance",
+		"cost": 450,
+		"prerequisites": ["banking", "printing_press"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"first_to_discover_bonus": "free_great_merchant",
+		"description": "First to discover gets a free Great Merchant"
+	},
+	"military_tradition": {
+		"name": "Military Tradition",
+		"era": "industrial",
+		"cost": 550,
+		"prerequisites": ["nationalism", "gunpowder"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["cavalry"]
+		},
+		"description": "Enables Cavalry"
+	},
+	"rifling": {
+		"name": "Rifling",
+		"era": "industrial",
+		"cost": 600,
+		"prerequisites": ["gunpowder", "printing_press"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["rifleman"]
+		},
+		"description": "Enables Rifleman"
+	},
+	"steel": {
+		"name": "Steel",
+		"era": "industrial",
+		"cost": 650,
+		"prerequisites": ["iron_working", "chemistry"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["artillery"]
+		},
+		"description": "Enables Artillery"
+	},
+	"steam_power": {
+		"name": "Steam Power",
+		"era": "industrial",
+		"cost": 700,
+		"prerequisites": ["chemistry", "engineering"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["transport"],
+			"buildings": ["coal_plant"],
+			"reveals_resources": ["coal"]
+		},
+		"description": "Enables Transport, Coal Plant, reveals Coal"
+	},
+	"railroad": {
+		"name": "Railroad",
+		"era": "industrial",
+		"cost": 750,
+		"prerequisites": ["steam_power"],
+		"unlocks": {
+			"improvements": ["railroad"]
+		},
+		"description": "Enables Railroads"
+	},
+	"corporation": {
+		"name": "Corporation",
+		"era": "industrial",
+		"cost": 700,
+		"prerequisites": ["economics", "steam_power"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"buildings": ["stock_exchange"]
+		},
+		"description": "Enables Stock Exchange, corporations"
+	},
+	"medicine": {
+		"name": "Medicine",
+		"era": "industrial",
+		"cost": 600,
+		"prerequisites": ["chemistry"],
+		"unlocks": {
+			"buildings": ["hospital"]
+		},
+		"description": "Enables Hospital"
+	},
+	"scientific_method": {
+		"name": "Scientific Method",
+		"era": "industrial",
+		"cost": 700,
+		"prerequisites": ["philosophy", "printing_press"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"description": "Doubles research from scientists"
+	},
+	"electricity": {
+		"name": "Electricity",
+		"era": "industrial",
+		"cost": 800,
+		"prerequisites": ["steel", "steam_power"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"description": "Prerequisite for modern techs"
+	},
+	"combustion": {
+		"name": "Combustion",
+		"era": "modern",
+		"cost": 900,
+		"prerequisites": ["electricity", "steel"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["destroyer", "submarine"],
+			"buildings": ["public_transport"],
+			"reveals_resources": ["oil"]
+		},
+		"description": "Enables Destroyer, Submarine, reveals Oil"
+	},
+	"assembly_line": {
+		"name": "Assembly Line",
+		"era": "modern",
+		"cost": 950,
+		"prerequisites": ["corporation", "steam_power"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["infantry"],
+			"buildings": ["factory"]
+		},
+		"description": "Enables Infantry, Factory"
+	},
+	"industrialism": {
+		"name": "Industrialism",
+		"era": "modern",
+		"cost": 1000,
+		"prerequisites": ["assembly_line", "combustion"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["tank", "battleship", "carrier"]
+		},
+		"description": "Enables Tank, Battleship, Carrier"
+	},
+	"flight": {
+		"name": "Flight",
+		"era": "modern",
+		"cost": 900,
+		"prerequisites": ["combustion"],
+		"unlocks": {
+			"units": ["fighter", "bomber"],
+			"buildings": ["airport"]
+		},
+		"first_to_discover_bonus": "free_great_merchant",
+		"description": "Enables Fighter, Bomber, Airport"
+	},
+	"radio": {
+		"name": "Radio",
+		"era": "modern",
+		"cost": 850,
+		"prerequisites": ["electricity"],
+		"unlocks": {},
+		"description": "Enables propaganda"
+	},
+	"mass_media": {
+		"name": "Mass Media",
+		"era": "modern",
+		"cost": 950,
+		"prerequisites": ["radio"],
+		"unlocks": {
+			"buildings": ["broadcast_tower"]
+		},
+		"description": "Enables Broadcast Tower"
+	},
+	"refrigeration": {
+		"name": "Refrigeration",
+		"era": "modern",
+		"cost": 900,
+		"prerequisites": ["electricity", "medicine"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"buildings": ["supermarket"]
+		},
+		"description": "Enables Supermarket"
+	},
+	"plastics": {
+		"name": "Plastics",
+		"era": "modern",
+		"cost": 1000,
+		"prerequisites": ["combustion"],
+		"unlocks": {
+			"buildings": ["hydro_plant"]
+		},
+		"description": "Enables Hydro Plant"
+	},
+	"rocketry": {
+		"name": "Rocketry",
+		"era": "modern",
+		"cost": 1100,
+		"prerequisites": ["flight", "plastics"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["jet_fighter"]
+		},
+		"description": "Enables Jet Fighter, rockets"
+	},
+	"fission": {
+		"name": "Fission",
+		"era": "modern",
+		"cost": 1200,
+		"prerequisites": ["rocketry"],
+		"unlocks": {
+			"units": ["nuclear_missile"],
+			"buildings": ["nuclear_plant"],
+			"reveals_resources": ["uranium"]
+		},
+		"description": "Enables Nuclear Missile, Nuclear Plant, reveals Uranium"
+	},
+	"computers": {
+		"name": "Computers",
+		"era": "modern",
+		"cost": 1100,
+		"prerequisites": ["mass_media", "plastics"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"buildings": ["research_lab"]
+		},
+		"description": "Enables Research Lab"
+	},
+	"ecology": {
+		"name": "Ecology",
+		"era": "modern",
+		"cost": 1000,
+		"prerequisites": ["medicine", "plastics"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"buildings": ["recycling_center"]
+		},
+		"description": "Enables Recycling Center"
+	},
+	"robotics": {
+		"name": "Robotics",
+		"era": "modern",
+		"cost": 1300,
+		"prerequisites": ["computers", "assembly_line"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["mechanized_infantry"],
+			"buildings": ["spaceship_parts_factory"]
+		},
+		"description": "Enables Mechanized Infantry, Spaceship Parts Factory"
+	},
+	"satellites": {
+		"name": "Satellites",
+		"era": "modern",
+		"cost": 1200,
+		"prerequisites": ["rocketry", "computers"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"bonus": "reveal_entire_map",
+		"description": "Reveals the entire map"
+	},
+	"composites": {
+		"name": "Composites",
+		"era": "future",
+		"cost": 1400,
+		"prerequisites": ["plastics", "industrialism"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["modern_armor"]
+		},
+		"description": "Enables Modern Armor"
+	},
+	"stealth": {
+		"name": "Stealth",
+		"era": "future",
+		"cost": 1500,
+		"prerequisites": ["composites", "computers"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["stealth_bomber"]
+		},
+		"description": "Enables Stealth Bomber"
+	},
+	"advanced_flight": {
+		"name": "Advanced Flight",
+		"era": "future",
+		"cost": 1600,
+		"prerequisites": ["rocketry", "fission"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["icbm"]
+		},
+		"description": "Enables ICBM"
+	},
+	"fusion": {
+		"name": "Fusion",
+		"era": "future",
+		"cost": 2000,
+		"prerequisites": ["fission", "computers"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"description": "Enables spaceship engines"
+	},
+	"genetics": {
+		"name": "Genetics",
+		"era": "future",
+		"cost": 1600,
+		"prerequisites": ["medicine", "computers"],
+		"prereq_type": "AND",
+		"unlocks": {},
+		"description": "Enables spaceship life support"
+	},
+	"future_tech": {
+		"name": "Future Tech",
+		"era": "future",
+		"cost": 2500,
+		"prerequisites": ["fusion", "genetics"],
+		"prereq_type": "AND",
+		"repeatable": true,
+		"unlocks": {
+			"bonus_per_completion": {"happiness": 1, "health": 1}
+		},
+		"description": "Can be researched repeatedly for bonuses"
+	}
+}

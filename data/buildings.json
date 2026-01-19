@@ -1,0 +1,461 @@
+{
+	"palace": {
+		"name": "Palace",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "",
+		"is_capital": true,
+		"effects": {
+			"commerce": 8,
+			"culture": 1,
+			"espionage": 4,
+			"great_person_points": 2
+		},
+		"description": "Marks your capital city"
+	},
+	"granary": {
+		"name": "Granary",
+		"era": "ancient",
+		"cost": 60,
+		"maintenance": 1,
+		"required_tech": "pottery",
+		"effects": {
+			"food_stored_on_growth": 0.5,
+			"health": 1
+		},
+		"description": "Stores 50% food after growth"
+	},
+	"barracks": {
+		"name": "Barracks",
+		"era": "ancient",
+		"cost": 60,
+		"maintenance": 1,
+		"required_tech": "",
+		"effects": {
+			"free_experience": 4
+		},
+		"description": "New units start with 4 XP"
+	},
+	"monument": {
+		"name": "Monument",
+		"era": "ancient",
+		"cost": 30,
+		"maintenance": 1,
+		"required_tech": "",
+		"effects": {
+			"culture": 1
+		},
+		"obsolete_tech": "calendar",
+		"replaced_by": "obelisk",
+		"description": "+1 Culture per turn"
+	},
+	"obelisk": {
+		"name": "Obelisk",
+		"era": "ancient",
+		"cost": 40,
+		"maintenance": 1,
+		"required_tech": "mysticism",
+		"effects": {
+			"culture": 2
+		},
+		"description": "+2 Culture per turn"
+	},
+	"walls": {
+		"name": "Walls",
+		"era": "ancient",
+		"cost": 50,
+		"maintenance": 1,
+		"required_tech": "masonry",
+		"effects": {
+			"defense": 0.5
+		},
+		"obsolete_tech": "dynamite",
+		"description": "+50% city defense"
+	},
+	"lighthouse": {
+		"name": "Lighthouse",
+		"era": "ancient",
+		"cost": 60,
+		"maintenance": 1,
+		"required_tech": "sailing",
+		"requires_coast": true,
+		"effects": {
+			"water_food": 1
+		},
+		"description": "+1 Food from water tiles"
+	},
+	"library": {
+		"name": "Library",
+		"era": "ancient",
+		"cost": 90,
+		"maintenance": 2,
+		"required_tech": "writing",
+		"effects": {
+			"science_percent": 0.25,
+			"great_scientist_points": 1
+		},
+		"description": "+25% Science"
+	},
+	"temple": {
+		"name": "Temple",
+		"era": "ancient",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "priesthood",
+		"requires_state_religion": true,
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness with state religion"
+	},
+	"forge": {
+		"name": "Forge",
+		"era": "ancient",
+		"cost": 90,
+		"maintenance": 2,
+		"required_tech": "metal_casting",
+		"effects": {
+			"production_percent": 0.25
+		},
+		"description": "+25% Production"
+	},
+	"courthouse": {
+		"name": "Courthouse",
+		"era": "classical",
+		"cost": 120,
+		"maintenance": 2,
+		"required_tech": "code_of_laws",
+		"effects": {
+			"maintenance_reduction": 0.5,
+			"espionage": 2
+		},
+		"description": "-50% city maintenance"
+	},
+	"market": {
+		"name": "Market",
+		"era": "classical",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "currency",
+		"effects": {
+			"gold_percent": 0.25,
+			"great_merchant_points": 1,
+			"happiness_from_resource": 1
+		},
+		"happiness_resources": ["fur", "ivory", "silk"],
+		"description": "+25% Gold, +1 Happiness from luxury resources"
+	},
+	"colosseum": {
+		"name": "Colosseum",
+		"era": "classical",
+		"cost": 80,
+		"maintenance": 2,
+		"required_tech": "construction",
+		"effects": {
+			"happiness": 1
+		},
+		"description": "+1 Happiness"
+	},
+	"aqueduct": {
+		"name": "Aqueduct",
+		"era": "classical",
+		"cost": 100,
+		"maintenance": 2,
+		"required_tech": "construction",
+		"effects": {
+			"health": 2,
+			"food_storage_bonus": 0.5
+		},
+		"description": "+2 Health, +50% food stored"
+	},
+	"stable": {
+		"name": "Stable",
+		"era": "classical",
+		"cost": 70,
+		"maintenance": 1,
+		"required_tech": "horseback_riding",
+		"requires_resource": "horses",
+		"effects": {
+			"mounted_experience": 4,
+			"mounted_production": 0.25
+		},
+		"description": "Mounted units get +4 XP, +25% production"
+	},
+	"monastery": {
+		"name": "Monastery",
+		"era": "medieval",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "monasticism",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"great_prophet_points": 2
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, +2 Culture"
+	},
+	"castle": {
+		"name": "Castle",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 2,
+		"required_tech": "engineering",
+		"requires_building": "walls",
+		"effects": {
+			"defense": 0.5,
+			"siege_defense": 0.25
+		},
+		"obsolete_tech": "economics",
+		"description": "+50% defense, +25% vs siege"
+	},
+	"university": {
+		"name": "University",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 3,
+		"required_tech": "education",
+		"requires_building": "library",
+		"effects": {
+			"science_percent": 0.25,
+			"great_scientist_points": 2
+		},
+		"description": "+25% Science"
+	},
+	"bank": {
+		"name": "Bank",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 3,
+		"required_tech": "banking",
+		"requires_building": "market",
+		"effects": {
+			"gold_percent": 0.5,
+			"great_merchant_points": 2
+		},
+		"description": "+50% Gold"
+	},
+	"observatory": {
+		"name": "Observatory",
+		"era": "renaissance",
+		"cost": 180,
+		"maintenance": 2,
+		"required_tech": "astronomy",
+		"requires_building": "university",
+		"effects": {
+			"science_percent": 0.25,
+			"great_scientist_points": 1
+		},
+		"description": "+25% Science"
+	},
+	"theatre": {
+		"name": "Theatre",
+		"era": "renaissance",
+		"cost": 100,
+		"maintenance": 2,
+		"required_tech": "drama",
+		"effects": {
+			"culture": 3,
+			"happiness": 1,
+			"great_artist_points": 2
+		},
+		"description": "+3 Culture, +1 Happiness"
+	},
+	"grocer": {
+		"name": "Grocer",
+		"era": "renaissance",
+		"cost": 120,
+		"maintenance": 2,
+		"required_tech": "guilds",
+		"requires_building": "granary",
+		"effects": {
+			"health": 2,
+			"happiness_from_resource": 1
+		},
+		"happiness_resources": ["spices", "wine", "dye"],
+		"description": "+2 Health, +1 Happiness from resources"
+	},
+	"harbor": {
+		"name": "Harbor",
+		"era": "renaissance",
+		"cost": 120,
+		"maintenance": 2,
+		"required_tech": "compass",
+		"requires_coast": true,
+		"effects": {
+			"trade_route_yield": 1,
+			"water_commerce": 1
+		},
+		"description": "+1 Trade route yield, +1 Commerce from water"
+	},
+	"factory": {
+		"name": "Factory",
+		"era": "industrial",
+		"cost": 250,
+		"maintenance": 3,
+		"required_tech": "assembly_line",
+		"effects": {
+			"production_percent": 0.5,
+			"great_engineer_points": 2,
+			"unhealthiness": 2
+		},
+		"description": "+50% Production, +2 Unhealthiness"
+	},
+	"coal_plant": {
+		"name": "Coal Plant",
+		"era": "industrial",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "steam_power",
+		"requires_building": "factory",
+		"effects": {
+			"production_percent": 0.25,
+			"unhealthiness": 2
+		},
+		"exclusive_with": ["hydro_plant", "nuclear_plant"],
+		"description": "+25% Production, +2 Unhealthiness"
+	},
+	"hydro_plant": {
+		"name": "Hydro Plant",
+		"era": "modern",
+		"cost": 240,
+		"maintenance": 3,
+		"required_tech": "plastics",
+		"requires_building": "factory",
+		"requires_river": true,
+		"effects": {
+			"production_percent": 0.25
+		},
+		"exclusive_with": ["coal_plant", "nuclear_plant"],
+		"description": "+25% Production (clean)"
+	},
+	"nuclear_plant": {
+		"name": "Nuclear Plant",
+		"era": "modern",
+		"cost": 350,
+		"maintenance": 4,
+		"required_tech": "fission",
+		"requires_building": "factory",
+		"effects": {
+			"production_percent": 0.5,
+			"meltdown_chance": 0.01
+		},
+		"exclusive_with": ["coal_plant", "hydro_plant"],
+		"description": "+50% Production, risk of meltdown"
+	},
+	"hospital": {
+		"name": "Hospital",
+		"era": "industrial",
+		"cost": 200,
+		"maintenance": 3,
+		"required_tech": "medicine",
+		"effects": {
+			"health": 3,
+			"food_consumed_on_unhealthiness": -1
+		},
+		"description": "+3 Health"
+	},
+	"supermarket": {
+		"name": "Supermarket",
+		"era": "modern",
+		"cost": 180,
+		"maintenance": 2,
+		"required_tech": "refrigeration",
+		"requires_building": "grocer",
+		"effects": {
+			"health": 2,
+			"farm_food": 1
+		},
+		"description": "+2 Health, +1 Food from farms"
+	},
+	"broadcast_tower": {
+		"name": "Broadcast Tower",
+		"era": "modern",
+		"cost": 200,
+		"maintenance": 3,
+		"required_tech": "mass_media",
+		"requires_building": "theatre",
+		"effects": {
+			"culture_percent": 0.5,
+			"happiness": 1
+		},
+		"description": "+50% Culture, +1 Happiness"
+	},
+	"airport": {
+		"name": "Airport",
+		"era": "modern",
+		"cost": 250,
+		"maintenance": 3,
+		"required_tech": "flight",
+		"effects": {
+			"airlift": 1,
+			"trade_route_yield": 1
+		},
+		"description": "Enables airlift, +1 Trade route yield"
+	},
+	"research_lab": {
+		"name": "Research Lab",
+		"era": "modern",
+		"cost": 300,
+		"maintenance": 4,
+		"required_tech": "computers",
+		"requires_building": "university",
+		"effects": {
+			"science_percent": 0.25,
+			"great_scientist_points": 3
+		},
+		"description": "+25% Science"
+	},
+	"stock_exchange": {
+		"name": "Stock Exchange",
+		"era": "modern",
+		"cost": 280,
+		"maintenance": 4,
+		"required_tech": "corporation",
+		"requires_building": "bank",
+		"effects": {
+			"gold_percent": 0.5,
+			"great_merchant_points": 3
+		},
+		"description": "+50% Gold"
+	},
+	"spaceship_parts_factory": {
+		"name": "Spaceship Parts Factory",
+		"era": "future",
+		"cost": 400,
+		"maintenance": 5,
+		"required_tech": "robotics",
+		"requires_building": "factory",
+		"effects": {
+			"spaceship_production": 0.5
+		},
+		"description": "+50% Spaceship production"
+	},
+	"recycling_center": {
+		"name": "Recycling Center",
+		"era": "modern",
+		"cost": 180,
+		"maintenance": 2,
+		"required_tech": "ecology",
+		"effects": {
+			"health": 2,
+			"remove_unhealthiness": 2
+		},
+		"description": "+2 Health, removes 2 unhealthiness"
+	},
+	"public_transport": {
+		"name": "Public Transportation",
+		"era": "modern",
+		"cost": 150,
+		"maintenance": 2,
+		"required_tech": "combustion",
+		"effects": {
+			"happiness": 1,
+			"remove_unhealthiness": 1
+		},
+		"description": "+1 Happiness, removes 1 unhealthiness"
+	}
+}

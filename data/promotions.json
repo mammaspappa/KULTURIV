@@ -1,0 +1,450 @@
+{
+	"combat1": {
+		"name": "Combat I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"strength_bonus": 0.1
+		},
+		"valid_unit_classes": ["melee", "archery", "mounted", "gunpowder", "armor"],
+		"description": "+10% Strength"
+	},
+	"combat2": {
+		"name": "Combat II",
+		"prerequisites": ["combat1"],
+		"required_experience": 5,
+		"effects": {
+			"strength_bonus": 0.1
+		},
+		"valid_unit_classes": ["melee", "archery", "mounted", "gunpowder", "armor"],
+		"description": "+10% Strength"
+	},
+	"combat3": {
+		"name": "Combat III",
+		"prerequisites": ["combat2"],
+		"required_experience": 10,
+		"effects": {
+			"strength_bonus": 0.1
+		},
+		"valid_unit_classes": ["melee", "archery", "mounted", "gunpowder", "armor"],
+		"description": "+10% Strength"
+	},
+	"combat4": {
+		"name": "Combat IV",
+		"prerequisites": ["combat3"],
+		"required_experience": 17,
+		"effects": {
+			"strength_bonus": 0.1
+		},
+		"valid_unit_classes": ["melee", "archery", "mounted", "gunpowder", "armor"],
+		"description": "+10% Strength"
+	},
+	"combat5": {
+		"name": "Combat V",
+		"prerequisites": ["combat4"],
+		"required_experience": 26,
+		"effects": {
+			"strength_bonus": 0.1
+		},
+		"valid_unit_classes": ["melee", "archery", "mounted", "gunpowder", "armor"],
+		"description": "+10% Strength"
+	},
+	"shock": {
+		"name": "Shock",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"bonus_vs_melee": 0.25
+		},
+		"valid_unit_classes": ["melee", "mounted", "gunpowder", "armor"],
+		"description": "+25% vs Melee Units"
+	},
+	"cover": {
+		"name": "Cover",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"bonus_vs_archery": 0.25
+		},
+		"valid_unit_classes": ["melee", "mounted", "gunpowder", "armor"],
+		"description": "+25% vs Archery Units"
+	},
+	"formation": {
+		"name": "Formation",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"bonus_vs_mounted": 0.25
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "+25% vs Mounted Units"
+	},
+	"charge": {
+		"name": "Charge",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"bonus_vs_siege": 0.5,
+			"withdraw_increase": 0.1
+		},
+		"valid_unit_classes": ["mounted"],
+		"description": "+50% vs Siege, +10% Withdrawal"
+	},
+	"flanking1": {
+		"name": "Flanking I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"withdraw_increase": 0.1
+		},
+		"valid_unit_classes": ["mounted"],
+		"description": "+10% Withdrawal Chance"
+	},
+	"flanking2": {
+		"name": "Flanking II",
+		"prerequisites": ["flanking1"],
+		"required_experience": 5,
+		"effects": {
+			"withdraw_increase": 0.1
+		},
+		"valid_unit_classes": ["mounted"],
+		"description": "+10% Withdrawal Chance"
+	},
+	"city_raider1": {
+		"name": "City Raider I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"city_attack_bonus": 0.2
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "+20% City Attack"
+	},
+	"city_raider2": {
+		"name": "City Raider II",
+		"prerequisites": ["city_raider1"],
+		"required_experience": 5,
+		"effects": {
+			"city_attack_bonus": 0.2
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "+20% City Attack"
+	},
+	"city_raider3": {
+		"name": "City Raider III",
+		"prerequisites": ["city_raider2"],
+		"required_experience": 10,
+		"effects": {
+			"city_attack_bonus": 0.2
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "+20% City Attack"
+	},
+	"city_garrison1": {
+		"name": "City Garrison I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"city_defense_bonus": 0.2
+		},
+		"valid_unit_classes": ["archery", "gunpowder"],
+		"description": "+20% City Defense"
+	},
+	"city_garrison2": {
+		"name": "City Garrison II",
+		"prerequisites": ["city_garrison1"],
+		"required_experience": 5,
+		"effects": {
+			"city_defense_bonus": 0.2
+		},
+		"valid_unit_classes": ["archery", "gunpowder"],
+		"description": "+20% City Defense"
+	},
+	"city_garrison3": {
+		"name": "City Garrison III",
+		"prerequisites": ["city_garrison2"],
+		"required_experience": 10,
+		"effects": {
+			"city_defense_bonus": 0.2
+		},
+		"valid_unit_classes": ["archery", "gunpowder"],
+		"description": "+20% City Defense"
+	},
+	"drill1": {
+		"name": "Drill I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"first_strikes": 1
+		},
+		"valid_unit_classes": ["archery", "gunpowder", "mounted"],
+		"description": "+1 First Strike"
+	},
+	"drill2": {
+		"name": "Drill II",
+		"prerequisites": ["drill1"],
+		"required_experience": 5,
+		"effects": {
+			"first_strikes": 1
+		},
+		"valid_unit_classes": ["archery", "gunpowder", "mounted"],
+		"description": "+1 First Strike"
+	},
+	"drill3": {
+		"name": "Drill III",
+		"prerequisites": ["drill2"],
+		"required_experience": 10,
+		"effects": {
+			"first_strikes": 1
+		},
+		"valid_unit_classes": ["archery", "gunpowder", "mounted"],
+		"description": "+1 First Strike"
+	},
+	"drill4": {
+		"name": "Drill IV",
+		"prerequisites": ["drill3"],
+		"required_experience": 17,
+		"effects": {
+			"first_strikes": 1
+		},
+		"valid_unit_classes": ["archery", "gunpowder", "mounted"],
+		"description": "+1 First Strike"
+	},
+	"woodsman1": {
+		"name": "Woodsman I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"forest_defense": 0.2,
+			"forest_attack": 0.2
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "+20% in Forest/Jungle"
+	},
+	"woodsman2": {
+		"name": "Woodsman II",
+		"prerequisites": ["woodsman1"],
+		"required_experience": 5,
+		"effects": {
+			"forest_defense": 0.3,
+			"forest_attack": 0.3,
+			"forest_double_movement": true
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "+30% in Forest/Jungle, Double movement"
+	},
+	"woodsman3": {
+		"name": "Woodsman III",
+		"prerequisites": ["woodsman2"],
+		"required_experience": 10,
+		"effects": {
+			"forest_heal": 10
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "Heal +10 extra HP in Forest/Jungle"
+	},
+	"guerrilla1": {
+		"name": "Guerrilla I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"hills_defense": 0.2,
+			"hills_attack": 0.2
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "+20% on Hills"
+	},
+	"guerrilla2": {
+		"name": "Guerrilla II",
+		"prerequisites": ["guerrilla1"],
+		"required_experience": 5,
+		"effects": {
+			"hills_defense": 0.3,
+			"hills_attack": 0.3,
+			"hills_double_movement": true
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "+30% on Hills, Double movement"
+	},
+	"guerrilla3": {
+		"name": "Guerrilla III",
+		"prerequisites": ["guerrilla2"],
+		"required_experience": 10,
+		"effects": {
+			"hills_heal": 10
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "Heal +10 extra HP on Hills"
+	},
+	"medic1": {
+		"name": "Medic I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"adjacent_heal": 10
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "Heal +10 HP to adjacent units"
+	},
+	"medic2": {
+		"name": "Medic II",
+		"prerequisites": ["medic1"],
+		"required_experience": 5,
+		"effects": {
+			"adjacent_heal": 10
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "Heal +10 HP to adjacent units"
+	},
+	"medic3": {
+		"name": "Medic III",
+		"prerequisites": ["medic2"],
+		"required_experience": 10,
+		"effects": {
+			"same_tile_heal": 10
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "Heal +10 HP to units on same tile"
+	},
+	"march": {
+		"name": "March",
+		"prerequisites": ["combat3"],
+		"required_experience": 15,
+		"effects": {
+			"heal_while_moving": true
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder", "mounted", "armor"],
+		"description": "Can heal while moving"
+	},
+	"blitz": {
+		"name": "Blitz",
+		"prerequisites": ["combat4"],
+		"required_experience": 20,
+		"effects": {
+			"can_attack_multiple": true
+		},
+		"valid_unit_classes": ["armor"],
+		"description": "Can attack multiple times per turn"
+	},
+	"amphibious": {
+		"name": "Amphibious",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"no_amphibious_penalty": true,
+			"no_river_penalty": true
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "No penalty attacking across water/river"
+	},
+	"commando": {
+		"name": "Commando",
+		"prerequisites": ["guerrilla2", "woodsman2"],
+		"required_experience": 15,
+		"effects": {
+			"can_use_enemy_roads": true
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "Can use enemy roads"
+	},
+	"morale": {
+		"name": "Morale",
+		"prerequisites": [],
+		"required_experience": 4,
+		"effects": {
+			"movement_increase": 1
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "+1 Movement"
+	},
+	"navigation1": {
+		"name": "Navigation I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"movement_increase": 1
+		},
+		"valid_unit_classes": ["naval"],
+		"description": "+1 Movement"
+	},
+	"navigation2": {
+		"name": "Navigation II",
+		"prerequisites": ["navigation1"],
+		"required_experience": 5,
+		"effects": {
+			"movement_increase": 1
+		},
+		"valid_unit_classes": ["naval"],
+		"description": "+1 Movement"
+	},
+	"accuracy": {
+		"name": "Accuracy",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"collateral_damage_increase": 0.1
+		},
+		"valid_unit_classes": ["siege"],
+		"description": "+10% Collateral Damage"
+	},
+	"barrage1": {
+		"name": "Barrage I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"collateral_damage_increase": 0.25
+		},
+		"valid_unit_classes": ["siege"],
+		"description": "+25% Collateral Damage"
+	},
+	"barrage2": {
+		"name": "Barrage II",
+		"prerequisites": ["barrage1"],
+		"required_experience": 5,
+		"effects": {
+			"collateral_damage_increase": 0.25
+		},
+		"valid_unit_classes": ["siege"],
+		"description": "+25% Collateral Damage"
+	},
+	"barrage3": {
+		"name": "Barrage III",
+		"prerequisites": ["barrage2"],
+		"required_experience": 10,
+		"effects": {
+			"collateral_damage_increase": 0.25
+		},
+		"valid_unit_classes": ["siege"],
+		"description": "+25% Collateral Damage"
+	},
+	"sentry": {
+		"name": "Sentry",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"visibility_range_increase": 1
+		},
+		"valid_unit_classes": ["recon", "mounted", "naval"],
+		"description": "+1 Visibility Range"
+	},
+	"mobility": {
+		"name": "Mobility",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"ignore_terrain_movement": true
+		},
+		"valid_unit_classes": ["recon"],
+		"description": "Ignore terrain movement costs"
+	},
+	"leadership": {
+		"name": "Leadership",
+		"prerequisites": [],
+		"required_experience": 4,
+		"effects": {
+			"experience_bonus": 1.0
+		},
+		"valid_unit_classes": ["melee", "mounted", "gunpowder", "armor"],
+		"description": "+100% Experience from combat"
+	}
+}

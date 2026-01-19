@@ -1,0 +1,79 @@
+{
+	"buddhism": {
+		"name": "Buddhism",
+		"symbol": "☸",
+		"founding_tech": "meditation",
+		"color": "#FFA500",
+		"shrine": "buddhist_shrine",
+		"temple": "buddhist_temple",
+		"monastery": "buddhist_monastery",
+		"missionary": "buddhist_missionary",
+		"founding_order": 1
+	},
+	"hinduism": {
+		"name": "Hinduism",
+		"symbol": "ॐ",
+		"founding_tech": "polytheism",
+		"color": "#FF6600",
+		"shrine": "hindu_shrine",
+		"temple": "hindu_temple",
+		"monastery": "hindu_monastery",
+		"missionary": "hindu_missionary",
+		"founding_order": 2
+	},
+	"judaism": {
+		"name": "Judaism",
+		"symbol": "✡",
+		"founding_tech": "monotheism",
+		"color": "#0000CD",
+		"shrine": "jewish_shrine",
+		"temple": "jewish_temple",
+		"monastery": "jewish_monastery",
+		"missionary": "jewish_missionary",
+		"founding_order": 3
+	},
+	"confucianism": {
+		"name": "Confucianism",
+		"symbol": "☯",
+		"founding_tech": "code_of_laws",
+		"color": "#006400",
+		"shrine": "confucian_shrine",
+		"temple": "confucian_temple",
+		"monastery": "confucian_monastery",
+		"missionary": "confucian_missionary",
+		"founding_order": 4
+	},
+	"christianity": {
+		"name": "Christianity",
+		"symbol": "✝",
+		"founding_tech": "theology",
+		"color": "#FFFFFF",
+		"shrine": "christian_shrine",
+		"temple": "christian_temple",
+		"monastery": "christian_monastery",
+		"missionary": "christian_missionary",
+		"founding_order": 5
+	},
+	"taoism": {
+		"name": "Taoism",
+		"symbol": "☯",
+		"founding_tech": "philosophy",
+		"color": "#800080",
+		"shrine": "taoist_shrine",
+		"temple": "taoist_temple",
+		"monastery": "taoist_monastery",
+		"missionary": "taoist_missionary",
+		"founding_order": 6
+	},
+	"islam": {
+		"name": "Islam",
+		"symbol": "☪",
+		"founding_tech": "divine_right",
+		"color": "#008000",
+		"shrine": "islamic_shrine",
+		"temple": "islamic_temple",
+		"monastery": "islamic_monastery",
+		"missionary": "islamic_missionary",
+		"founding_order": 7
+	}
+}

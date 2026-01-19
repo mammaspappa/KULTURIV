@@ -1,0 +1,157 @@
+[gd_scene load_steps=8 format=3 uid="uid://cxm5k6qgvwqhf"]
+
+[ext_resource type="Script" path="res://scenes/main/game.gd" id="1_game"]
+[ext_resource type="Script" path="res://scripts/core/game_world.gd" id="2_game_world"]
+[ext_resource type="Script" path="res://scripts/ui/game_ui.gd" id="3_game_ui"]
+[ext_resource type="PackedScene" uid="uid://cqh8myx52ydw4" path="res://scenes/ui/city_screen.tscn" id="4_city_screen"]
+[ext_resource type="PackedScene" uid="uid://b7pqxm8ydw4k5" path="res://scenes/ui/tech_tree.tscn" id="5_tech_tree"]
+[ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="6_minimap"]
+[ext_resource type="PackedScene" uid="uid://djr7kp2xv8m4n" path="res://scenes/ui/victory_screen.tscn" id="7_victory"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_game")
+
+[node name="GameWorld" type="Node2D" parent="."]
+script = ExtResource("2_game_world")
+
+[node name="GridLayer" type="Node2D" parent="GameWorld"]
+
+[node name="EntityLayer" type="Node2D" parent="GameWorld"]
+
+[node name="UILayer" type="CanvasLayer" parent="GameWorld"]
+
+[node name="GameUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_game_ui")
+
+[node name="TopBar" type="Panel" parent="GameUI"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GameUI/TopBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="TurnLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Turn 1 - 4000 BC"
+
+[node name="GoldLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Gold: 0 (+0)"
+
+[node name="ScienceLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Science: 0"
+
+[node name="TechButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Tech (T)"
+
+[node name="Spacer" type="Control" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CivLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Roman Empire"
+
+[node name="UnitPanel" type="Panel" parent="GameUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -200.0
+offset_right = 260.0
+offset_bottom = -10.0
+grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/UnitPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UnitName" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
+layout_mode = 2
+text = "Warrior"
+theme_override_font_sizes/font_size = 18
+
+[node name="UnitStrength" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
+layout_mode = 2
+text = "Strength: 2.0"
+
+[node name="UnitMovement" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
+layout_mode = 2
+text = "Movement: 1/1"
+
+[node name="UnitHealth" type="ProgressBar" parent="GameUI/UnitPanel/VBoxContainer"]
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+
+[node name="ActionButtons" type="HBoxContainer" parent="GameUI/UnitPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="FortifyButton" type="Button" parent="GameUI/UnitPanel/VBoxContainer/ActionButtons"]
+layout_mode = 2
+text = "Fortify (F)"
+
+[node name="SkipButton" type="Button" parent="GameUI/UnitPanel/VBoxContainer/ActionButtons"]
+layout_mode = 2
+text = "Skip (Space)"
+
+[node name="EndTurnButton" type="Button" parent="GameUI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -60.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "End Turn (Enter)"
+
+[node name="MiniMap" type="Panel" parent="GameUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -210.0
+offset_top = 50.0
+offset_right = -10.0
+offset_bottom = 210.0
+grow_horizontal = 0
+script = ExtResource("6_minimap")
+
+[node name="CityScreen" parent="." instance=ExtResource("4_city_screen")]
+
+[node name="TechTree" parent="." instance=ExtResource("5_tech_tree")]
+
+[node name="VictoryScreen" parent="." instance=ExtResource("7_victory")]
