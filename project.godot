@@ -31,6 +31,7 @@ TurnManager="*res://scripts/autoload/turn_manager.gd"
 ReligionSystem="*res://scripts/systems/religion_system.gd"
 GreatPeopleSystem="*res://scripts/systems/great_people_system.gd"
 TradeSystem="*res://scripts/systems/trade_system.gd"
+CivicsSystem="*res://scripts/systems/civics_system.gd"
 
 [display]
 

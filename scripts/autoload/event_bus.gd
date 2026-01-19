@@ -58,6 +58,11 @@ signal religion_founded(player, religion, holy_city)
 signal religion_spread(religion, city)
 signal state_religion_adopted(player, religion)
 
+# Civic events
+signal civic_changed(player, category, civic_id)
+signal anarchy_started(player, turns)
+signal anarchy_ended(player)
+
 # Culture events
 signal culture_expanded(city, new_radius)
 signal great_person_born(city, great_person_type)

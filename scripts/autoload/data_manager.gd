@@ -14,6 +14,7 @@ var leaders: Dictionary = {}
 var promotions: Dictionary = {}
 var religions: Dictionary = {}
 var victories: Dictionary = {}
+var civics: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -34,6 +35,7 @@ func _load_all_data() -> void:
 	promotions = _load_json("promotions.json")
 	religions = _load_json("religions.json")
 	victories = _load_json("victories.json")
+	civics = _load_json("civics.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -247,6 +249,30 @@ func get_victory(victory_id: String) -> Dictionary:
 
 func get_all_victory_types() -> Array:
 	return victories.keys()
+
+# Civic accessors
+func get_civic(civic_id: String) -> Dictionary:
+	return civics.get(civic_id, {})
+
+func get_civic_name(civic_id: String) -> String:
+	var civic = get_civic(civic_id)
+	return civic.get("name", civic_id)
+
+func get_civic_category(civic_id: String) -> String:
+	var civic = get_civic(civic_id)
+	return civic.get("category", "")
+
+func get_civics_by_category(category: String) -> Array:
+	var result = []
+	for civic_id in civics:
+		if civic_id.begins_with("_"):
+			continue  # Skip metadata
+		if civics[civic_id].get("category", "") == category:
+			result.append(civic_id)
+	return result
+
+func get_all_civics() -> Dictionary:
+	return civics
 
 # Utility functions
 func get_all_units() -> Dictionary:

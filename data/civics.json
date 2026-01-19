@@ -1,0 +1,318 @@
+{
+	"_categories": {
+		"government": {
+			"name": "Government",
+			"description": "Determines how your civilization is ruled"
+		},
+		"legal": {
+			"name": "Legal",
+			"description": "Defines the legal system of your civilization"
+		},
+		"labor": {
+			"name": "Labor",
+			"description": "Determines how labor is organized"
+		},
+		"economy": {
+			"name": "Economy",
+			"description": "Sets economic policies"
+		},
+		"religion": {
+			"name": "Religion",
+			"description": "Defines religious policies"
+		}
+	},
+	"despotism": {
+		"name": "Despotism",
+		"category": "government",
+		"required_tech": "",
+		"upkeep": "low",
+		"effects": {
+			"anarchy_length": 1
+		},
+		"description": "No special effects. Starting government civic."
+	},
+	"hereditary_rule": {
+		"name": "Hereditary Rule",
+		"category": "government",
+		"required_tech": "monarchy",
+		"upkeep": "low",
+		"effects": {
+			"anarchy_length": 1,
+			"happy_per_military_unit": 1
+		},
+		"description": "+1 happiness per military unit stationed in a city"
+	},
+	"representation": {
+		"name": "Representation",
+		"category": "government",
+		"required_tech": "constitution",
+		"upkeep": "medium",
+		"effects": {
+			"anarchy_length": 1,
+			"largest_city_happiness": 3,
+			"specialist_commerce_bonus": 3
+		},
+		"description": "+3 happiness in 5 largest cities. +3 research per specialist."
+	},
+	"police_state": {
+		"name": "Police State",
+		"category": "government",
+		"required_tech": "fascism",
+		"upkeep": "high",
+		"effects": {
+			"anarchy_length": 1,
+			"military_production_modifier": 25,
+			"war_weariness_modifier": -50
+		},
+		"description": "+25% military unit production. -50% war weariness."
+	},
+	"universal_suffrage": {
+		"name": "Universal Suffrage",
+		"category": "government",
+		"required_tech": "democracy",
+		"upkeep": "medium",
+		"effects": {
+			"anarchy_length": 1,
+			"town_commerce_bonus": 1,
+			"can_hurry_with_gold": true
+		},
+		"description": "+1 commerce from towns. Can hurry production with gold."
+	},
+	"barbarism": {
+		"name": "Barbarism",
+		"category": "legal",
+		"required_tech": "",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1
+		},
+		"description": "No special effects. Starting legal civic."
+	},
+	"vassalage": {
+		"name": "Vassalage",
+		"category": "legal",
+		"required_tech": "feudalism",
+		"upkeep": "high",
+		"effects": {
+			"anarchy_length": 1,
+			"free_unit_experience": 2,
+			"free_units_from_vassals": true
+		},
+		"description": "+2 experience for new military units. Free units from vassals."
+	},
+	"bureaucracy": {
+		"name": "Bureaucracy",
+		"category": "legal",
+		"required_tech": "civil_service",
+		"upkeep": "medium",
+		"effects": {
+			"anarchy_length": 1,
+			"capital_production_modifier": 50,
+			"capital_commerce_modifier": 50
+		},
+		"description": "+50% production and commerce in capital."
+	},
+	"nationhood": {
+		"name": "Nationhood",
+		"category": "legal",
+		"required_tech": "nationalism",
+		"upkeep": "low",
+		"effects": {
+			"anarchy_length": 1,
+			"max_conscript": 3,
+			"barracks_free_experience": 2
+		},
+		"description": "Can draft 3 units per turn. +2 experience from barracks."
+	},
+	"free_speech": {
+		"name": "Free Speech",
+		"category": "legal",
+		"required_tech": "liberalism",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1,
+			"town_commerce_bonus": 2,
+			"culture_modifier": 100
+		},
+		"description": "+2 commerce from towns. +100% culture in all cities."
+	},
+	"tribalism": {
+		"name": "Tribalism",
+		"category": "labor",
+		"required_tech": "",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1
+		},
+		"description": "No special effects. Starting labor civic."
+	},
+	"slavery": {
+		"name": "Slavery",
+		"category": "labor",
+		"required_tech": "bronze_working",
+		"upkeep": "low",
+		"effects": {
+			"anarchy_length": 1,
+			"can_hurry_with_population": true
+		},
+		"description": "Can sacrifice population to hurry production."
+	},
+	"serfdom": {
+		"name": "Serfdom",
+		"category": "labor",
+		"required_tech": "feudalism",
+		"upkeep": "low",
+		"effects": {
+			"anarchy_length": 1,
+			"worker_speed_modifier": 50
+		},
+		"description": "+50% worker build speed."
+	},
+	"caste_system": {
+		"name": "Caste System",
+		"category": "labor",
+		"required_tech": "code_of_laws",
+		"upkeep": "medium",
+		"effects": {
+			"anarchy_length": 1,
+			"unlimited_artist_slots": true,
+			"unlimited_scientist_slots": true,
+			"unlimited_merchant_slots": true
+		},
+		"description": "Unlimited artist, scientist, and merchant specialists."
+	},
+	"emancipation": {
+		"name": "Emancipation",
+		"category": "labor",
+		"required_tech": "democracy",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1,
+			"cottage_growth_modifier": 100,
+			"emancipation_anger_to_others": true
+		},
+		"description": "+100% cottage growth. Other civs without Emancipation get unhappiness."
+	},
+	"decentralization": {
+		"name": "Decentralization",
+		"category": "economy",
+		"required_tech": "",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1
+		},
+		"description": "No special effects. Starting economy civic."
+	},
+	"mercantilism": {
+		"name": "Mercantilism",
+		"category": "economy",
+		"required_tech": "banking",
+		"upkeep": "low",
+		"effects": {
+			"anarchy_length": 1,
+			"no_foreign_trade": true,
+			"free_specialist_per_city": 1
+		},
+		"description": "No foreign trade routes. +1 free specialist in each city."
+	},
+	"free_market": {
+		"name": "Free Market",
+		"category": "economy",
+		"required_tech": "economics",
+		"upkeep": "low",
+		"effects": {
+			"anarchy_length": 1,
+			"trade_route_modifier": 100
+		},
+		"description": "+1 trade route per city. Trade routes yield +100%."
+	},
+	"state_property": {
+		"name": "State Property",
+		"category": "economy",
+		"required_tech": "communism",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1,
+			"no_distance_maintenance": true,
+			"no_corporations": true,
+			"workshop_food_bonus": 1,
+			"watermill_food_bonus": 1
+		},
+		"description": "No distance maintenance. No corporations. +1 food from workshops/watermills."
+	},
+	"environmentalism": {
+		"name": "Environmentalism",
+		"category": "economy",
+		"required_tech": "medicine",
+		"upkeep": "high",
+		"effects": {
+			"anarchy_length": 1,
+			"health_per_city": 6,
+			"corporation_maintenance_modifier": 25,
+			"forest_preserve_commerce": 2
+		},
+		"description": "+6 health per city. +25% corporation maintenance. +2 commerce from forest preserves."
+	},
+	"paganism": {
+		"name": "Paganism",
+		"category": "religion",
+		"required_tech": "",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1
+		},
+		"description": "No special effects. Starting religion civic."
+	},
+	"organized_religion": {
+		"name": "Organized Religion",
+		"category": "religion",
+		"required_tech": "monotheism",
+		"upkeep": "high",
+		"effects": {
+			"anarchy_length": 1,
+			"state_religion_building_production": 25,
+			"missionary_build_speed": 100,
+			"requires_state_religion": true
+		},
+		"description": "+25% production of buildings that require state religion. Can build missionaries without monastery."
+	},
+	"theocracy": {
+		"name": "Theocracy",
+		"category": "religion",
+		"required_tech": "theology",
+		"upkeep": "medium",
+		"effects": {
+			"anarchy_length": 1,
+			"state_religion_free_experience": 2,
+			"no_non_state_religion_spread": true,
+			"requires_state_religion": true
+		},
+		"description": "+2 experience for units built in cities with state religion. Non-state religions cannot spread."
+	},
+	"pacifism": {
+		"name": "Pacifism",
+		"category": "religion",
+		"required_tech": "philosophy",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1,
+			"great_people_modifier": 100,
+			"military_unit_maintenance": 100,
+			"requires_state_religion": true
+		},
+		"description": "+100% great people birth rate in cities with state religion. +100% military unit maintenance."
+	},
+	"free_religion": {
+		"name": "Free Religion",
+		"category": "religion",
+		"required_tech": "liberalism",
+		"upkeep": "none",
+		"effects": {
+			"anarchy_length": 1,
+			"happiness_per_religion": 1,
+			"free_specialist_per_city": 1,
+			"no_state_religion": true
+		},
+		"description": "+1 happiness per religion in city. +1 free specialist per city. Cannot have state religion."
+	}
+}

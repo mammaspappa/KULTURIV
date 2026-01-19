@@ -16,7 +16,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Diplomacy | Basic | 60% |
 | Religion | Basic | 70% |
 | Victory Conditions | Complete | 100% |
-| Civics | Not Started | 0% |
+| Civics | In Progress | 80% |
 | Corporations | Not Started | 0% |
 | Espionage | Not Started | 0% |
 | Events | Not Started | 0% |
@@ -358,21 +358,40 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 13: Civics System (NOT STARTED)
+## Phase 13: Civics System (80% COMPLETE)
 
-### To Implement
-- [ ] Civic categories (Government, Legal, Labor, Economy, Religion)
-- [ ] Civic effects on empire
-- [ ] Anarchy during civic changes
-- [ ] Civic upkeep costs
-- [ ] Favorite civics per leader
-- [ ] Civic prerequisites (technologies)
+### Implemented
+- [x] Civic categories (Government, Legal, Labor, Economy, Religion)
+- [x] All 25 civics defined with effects
+- [x] Civic effects aggregation system
+- [x] Anarchy during civic changes
+- [x] Spiritual trait eliminates anarchy
+- [x] Civic upkeep costs (none/low/medium/high)
+- [x] Civic prerequisites (technologies)
+- [x] Single and bulk civic changes
+- [x] City yield modifiers from civics
+- [x] Happiness modifiers (Hereditary Rule, Representation, Free Religion)
+- [x] Health modifiers (Environmentalism)
+- [x] Worker speed modifier (Serfdom)
+- [x] Military production modifier (Police State)
+- [x] Hurry production support (Slavery, Universal Suffrage)
+- [x] Free specialists (Mercantilism, Free Religion)
+- [x] Free unit experience (Vassalage, Theocracy)
+
+### Not Implemented
 - [ ] Civics screen UI
+- [ ] Favorite civics per leader
+- [ ] Emancipation anger to other civs
+- [ ] Corporation interactions (State Property)
+
+### Files
+- `scripts/systems/civics_system.gd`
+- `data/civics.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/GameInfo/CIV4CivicInfos.xml` - 25 civics across 5 categories
 
-### Civic Categories from Civ4:
+### Civic Categories (All Implemented):
 1. **Government**: Despotism, Hereditary Rule, Representation, Police State, Universal Suffrage
 2. **Legal**: Barbarism, Vassalage, Bureaucracy, Nationhood, Free Speech
 3. **Labor**: Tribalism, Slavery, Serfdom, Caste System, Emancipation
@@ -560,10 +579,14 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | units.json | ~70 | Partial |
 | victories.json | 7 | Complete |
 
+### Recently Added
+| File | Entries | Status |
+|------|---------|--------|
+| civics.json | 25 | Complete |
+
 ### To Add
 | File | Reference | Purpose |
 |------|-----------|---------|
-| civics.json | CIV4CivicInfos.xml | Civic system |
 | corporations.json | CIV4CorporationInfo.xml | Corporation system |
 | espionage.json | CIV4EspionageMissionInfo.xml | Espionage missions |
 | events.json | CIV4EventInfos.xml | Random events |
@@ -579,7 +602,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 ## Development Priorities
 
 ### High Priority (Next Phase)
-1. **Civics System** - Core gameplay mechanic
+1. **Civics Screen UI** - Display and change civics
 2. **Specialists** - City management depth
 3. **Full Diplomacy** - Trade negotiations
 4. **AI Improvements** - More competitive AI

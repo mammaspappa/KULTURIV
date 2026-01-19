@@ -30,6 +30,13 @@ var met_players: Array[int] = []
 var state_religion: String = ""
 var founded_religion: String = ""
 
+# Civics
+var civics: Dictionary = {}
+var anarchy_turns: int = 0
+
+# Leader traits (cached from DataManager)
+var traits: Array[String] = []
+
 # Entities (untyped to avoid circular dependency with Unit/City classes)
 var units: Array = []
 var cities: Array = []
@@ -59,6 +66,12 @@ func remove_city(city) -> void:
 
 func has_tech(tech_id: String) -> bool:
 	return tech_id in researched_techs
+
+func has_trait(trait_id: String) -> bool:
+	return trait_id in traits
+
+func is_in_anarchy() -> bool:
+	return anarchy_turns > 0
 
 func can_research(tech_id: String) -> bool:
 	if has_tech(tech_id):
@@ -184,6 +197,9 @@ func to_dict() -> Dictionary:
 		"met_players": met_players,
 		"state_religion": state_religion,
 		"founded_religion": founded_religion,
+		"civics": civics,
+		"anarchy_turns": anarchy_turns,
+		"traits": traits,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -204,3 +220,6 @@ func from_dict(data: Dictionary) -> void:
 	met_players.assign(data.get("met_players", []))
 	state_religion = data.get("state_religion", "")
 	founded_religion = data.get("founded_religion", "")
+	civics = data.get("civics", {})
+	anarchy_turns = data.get("anarchy_turns", 0)
+	traits.assign(data.get("traits", []))
