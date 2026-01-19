@@ -85,6 +85,8 @@ signal show_tech_tree()
 signal hide_tech_tree()
 signal show_diplomacy_screen(player)
 signal hide_diplomacy_screen()
+signal show_civics_screen()
+signal hide_civics_screen()
 signal notification_added(message, type_name)
 
 # Game state events

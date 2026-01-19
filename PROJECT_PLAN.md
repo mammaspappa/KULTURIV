@@ -16,7 +16,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Diplomacy | Basic | 60% |
 | Religion | Basic | 70% |
 | Victory Conditions | Complete | 100% |
-| Civics | In Progress | 80% |
+| Civics | Complete | 100% |
 | Corporations | Not Started | 0% |
 | Espionage | Not Started | 0% |
 | Events | Not Started | 0% |
@@ -358,7 +358,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 13: Civics System (80% COMPLETE)
+## Phase 13: Civics System (COMPLETE)
 
 ### Implemented
 - [x] Civic categories (Government, Legal, Labor, Economy, Religion)
@@ -377,15 +377,20 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 - [x] Hurry production support (Slavery, Universal Suffrage)
 - [x] Free specialists (Mercantilism, Free Religion)
 - [x] Free unit experience (Vassalage, Theocracy)
+- [x] Civics screen UI with category display
+- [x] Keyboard shortcut (C key)
+- [x] Effect descriptions and tooltips
+- [x] Pending changes preview with anarchy warning
 
-### Not Implemented
-- [ ] Civics screen UI
-- [ ] Favorite civics per leader
+### Not Implemented (Minor)
+- [ ] Favorite civics per leader (AI preference)
 - [ ] Emancipation anger to other civs
 - [ ] Corporation interactions (State Property)
 
 ### Files
 - `scripts/systems/civics_system.gd`
+- `scripts/ui/civics_screen.gd`
+- `scenes/ui/civics_screen.tscn`
 - `data/civics.json`
 
 ### Reference (beyond/)
@@ -602,10 +607,10 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 ## Development Priorities
 
 ### High Priority (Next Phase)
-1. **Civics Screen UI** - Display and change civics
-2. **Specialists** - City management depth
-3. **Full Diplomacy** - Trade negotiations
-4. **AI Improvements** - More competitive AI
+1. **Specialists** - City management depth
+2. **Full Diplomacy** - Trade negotiations
+3. **AI Improvements** - More competitive AI
+4. **Espionage** - BTS signature feature
 
 ### Medium Priority
 5. **Espionage** - BTS signature feature

@@ -19,6 +19,7 @@ extends Control
 # Other elements
 @onready var end_turn_button: Button = $EndTurnButton
 @onready var tech_button: Button = $TopBar/HBoxContainer/TechButton
+@onready var civics_button: Button = $TopBar/HBoxContainer/CivicsButton
 @onready var diplomacy_button: Button = $TopBar/HBoxContainer/DiplomacyButton
 
 # State
@@ -47,6 +48,8 @@ func _ready() -> void:
 		skip_button.pressed.connect(_on_skip_pressed)
 	if tech_button:
 		tech_button.pressed.connect(_on_tech_pressed)
+	if civics_button:
+		civics_button.pressed.connect(_on_civics_pressed)
 	if diplomacy_button:
 		diplomacy_button.pressed.connect(_on_diplomacy_pressed)
 
@@ -66,6 +69,11 @@ func _process(delta: float) -> void:
 
 	# Update notifications
 	_update_notifications(delta)
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("open_civics"):
+		EventBus.show_civics_screen.emit()
+		get_viewport().set_input_as_handled()
 
 func _on_turn_started(turn: int, player) -> void:
 	if player == GameManager.human_player:
@@ -103,6 +111,9 @@ func _on_skip_pressed() -> void:
 
 func _on_tech_pressed() -> void:
 	EventBus.show_tech_tree.emit()
+
+func _on_civics_pressed() -> void:
+	EventBus.show_civics_screen.emit()
 
 func _on_diplomacy_pressed() -> void:
 	EventBus.show_diplomacy_screen.emit()
@@ -199,6 +210,9 @@ func _connect_notification_signals() -> void:
 	EventBus.religion_founded.connect(_on_religion_founded)
 	EventBus.war_declared.connect(_on_war_declared)
 	EventBus.peace_declared.connect(_on_peace_declared)
+	EventBus.civic_changed.connect(_on_civic_changed)
+	EventBus.anarchy_started.connect(_on_anarchy_started)
+	EventBus.anarchy_ended.connect(_on_anarchy_ended)
 
 func _on_research_completed(player, tech: String) -> void:
 	if player == GameManager.human_player:
@@ -279,6 +293,19 @@ func _on_peace_declared(player1, player2) -> void:
 		var civ_data = DataManager.get_civ(other.civilization_id)
 		_add_notification("Peace with %s" % civ_data.get("name", "Unknown"), "diplomacy")
 
+func _on_civic_changed(player, category: String, civic_id: String) -> void:
+	if player == GameManager.human_player:
+		var civic_name = DataManager.get_civic_name(civic_id)
+		_add_notification("Adopted %s (%s)" % [civic_name, category.capitalize()], "civics")
+
+func _on_anarchy_started(player, turns: int) -> void:
+	if player == GameManager.human_player:
+		_add_notification("Anarchy! %d turn(s) of disorder" % turns, "civics")
+
+func _on_anarchy_ended(player) -> void:
+	if player == GameManager.human_player:
+		_add_notification("Anarchy has ended", "civics")
+
 func _add_notification(message: String, type: String) -> void:
 	var notif = {
 		"message": message,
@@ -345,6 +372,8 @@ func _rebuild_notification_display() -> void:
 				color = Color.GOLD
 			"religion":
 				color = Color.MEDIUM_AQUAMARINE
+			"civics":
+				color = Color.SANDY_BROWN
 
 		label.add_theme_color_override("font_color", color)
 

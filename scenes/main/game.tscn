@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cxm5k6qgvwqhf"]
+[gd_scene load_steps=9 format=3 uid="uid://cxm5k6qgvwqhf"]
 
 [ext_resource type="Script" path="res://scenes/main/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://scripts/core/game_world.gd" id="2_game_world"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://b7pqxm8ydw4k5" path="res://scenes/ui/tech_tree.tscn" id="5_tech_tree"]
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="6_minimap"]
 [ext_resource type="PackedScene" uid="uid://djr7kp2xv8m4n" path="res://scenes/ui/victory_screen.tscn" id="7_victory"]
+[ext_resource type="PackedScene" uid="uid://cx8m7plw9nqk2" path="res://scenes/ui/civics_screen.tscn" id="8_civics"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
@@ -61,6 +62,14 @@ text = "Science: 0"
 [node name="TechButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Tech (T)"
+
+[node name="CivicsButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Civics (C)"
+
+[node name="DiplomacyButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Diplomacy (D)"
 
 [node name="Spacer" type="Control" parent="GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
@@ -155,3 +164,5 @@ script = ExtResource("6_minimap")
 [node name="TechTree" parent="." instance=ExtResource("5_tech_tree")]
 
 [node name="VictoryScreen" parent="." instance=ExtResource("7_victory")]
+
+[node name="CivicsScreen" parent="." instance=ExtResource("8_civics")]

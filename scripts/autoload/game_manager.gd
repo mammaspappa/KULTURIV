@@ -68,6 +68,8 @@ func _create_players(settings: Dictionary) -> void:
 	human_player.team = 0
 	human_player.color = _get_player_color(0)
 	_initialize_player_techs(human_player)
+	_initialize_player_civics(human_player)
+	_initialize_player_traits(human_player)
 	players.append(human_player)
 
 	# Create AI players
@@ -82,12 +84,22 @@ func _create_players(settings: Dictionary) -> void:
 		ai_player.team = i
 		ai_player.color = _get_player_color(i)
 		_initialize_player_techs(ai_player)
+		_initialize_player_civics(ai_player)
+		_initialize_player_traits(ai_player)
 		players.append(ai_player)
 
 func _initialize_player_techs(player) -> void:
 	var starting_techs = DataManager.get_civ_starting_techs(player.civilization_id)
 	for tech in starting_techs:
 		player.researched_techs.append(tech)
+
+func _initialize_player_civics(player) -> void:
+	player.civics = CivicsSystem.get_default_civics()
+
+func _initialize_player_traits(player) -> void:
+	var leader_traits = DataManager.get_leader_traits(player.leader_id)
+	for trait_id in leader_traits:
+		player.traits.append(trait_id)
 
 func _get_available_civs(exclude: Array) -> Array:
 	var all_civs = DataManager.get_all_civs().keys()
