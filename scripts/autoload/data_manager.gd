@@ -15,6 +15,7 @@ var promotions: Dictionary = {}
 var religions: Dictionary = {}
 var victories: Dictionary = {}
 var civics: Dictionary = {}
+var specialists: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -36,6 +37,7 @@ func _load_all_data() -> void:
 	religions = _load_json("religions.json")
 	victories = _load_json("victories.json")
 	civics = _load_json("civics.json")
+	specialists = _load_json("specialists.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -273,6 +275,43 @@ func get_civics_by_category(category: String) -> Array:
 
 func get_all_civics() -> Dictionary:
 	return civics
+
+# Specialist accessors
+func get_specialist(specialist_id: String) -> Dictionary:
+	return specialists.get(specialist_id, {})
+
+func get_specialist_name(specialist_id: String) -> String:
+	var specialist = get_specialist(specialist_id)
+	return specialist.get("name", specialist_id.capitalize())
+
+func get_specialist_yields(specialist_id: String) -> Dictionary:
+	var specialist = get_specialist(specialist_id)
+	return specialist.get("yields", {})
+
+func get_specialist_commerces(specialist_id: String) -> Dictionary:
+	var specialist = get_specialist(specialist_id)
+	return specialist.get("commerces", {})
+
+func get_specialist_gp_points(specialist_id: String) -> int:
+	var specialist = get_specialist(specialist_id)
+	return specialist.get("great_people_points", 0)
+
+func get_specialist_gp_type(specialist_id: String) -> String:
+	var specialist = get_specialist(specialist_id)
+	return specialist.get("great_people_type", "")
+
+func get_all_specialists() -> Dictionary:
+	return specialists
+
+func get_visible_specialists() -> Array:
+	var result = []
+	for specialist_id in specialists:
+		if specialist_id.begins_with("_"):
+			continue
+		var spec = specialists[specialist_id]
+		if spec.get("visible", false):
+			result.append(specialist_id)
+	return result
 
 # Utility functions
 func get_all_units() -> Dictionary:

@@ -1,0 +1,196 @@
+{
+	"_metadata": {
+		"description": "Specialist types that citizens can work as in cities",
+		"yields": "food, production, commerce",
+		"commerces": "gold, research, culture, espionage"
+	},
+	"citizen": {
+		"name": "Citizen",
+		"description": "Regular citizen working tiles. Does not generate Great People points.",
+		"visible": true,
+		"yields": {
+			"food": 0,
+			"production": 1,
+			"commerce": 0
+		},
+		"commerces": {},
+		"great_people_type": "",
+		"great_people_points": 0
+	},
+	"priest": {
+		"name": "Priest",
+		"description": "Generates gold and Great Prophet points.",
+		"visible": true,
+		"yields": {
+			"food": 0,
+			"production": 1,
+			"commerce": 0
+		},
+		"commerces": {
+			"gold": 1
+		},
+		"great_people_type": "prophet",
+		"great_people_points": 3
+	},
+	"artist": {
+		"name": "Artist",
+		"description": "Generates culture and Great Artist points.",
+		"visible": true,
+		"yields": {},
+		"commerces": {
+			"gold": 0,
+			"research": 1,
+			"culture": 4
+		},
+		"great_people_type": "artist",
+		"great_people_points": 3
+	},
+	"scientist": {
+		"name": "Scientist",
+		"description": "Generates research and Great Scientist points.",
+		"visible": true,
+		"yields": {},
+		"commerces": {
+			"gold": 0,
+			"research": 3,
+			"culture": 0
+		},
+		"great_people_type": "scientist",
+		"great_people_points": 3
+	},
+	"merchant": {
+		"name": "Merchant",
+		"description": "Generates gold and Great Merchant points.",
+		"visible": true,
+		"yields": {},
+		"commerces": {
+			"gold": 3,
+			"research": 0,
+			"culture": 0
+		},
+		"great_people_type": "merchant",
+		"great_people_points": 3
+	},
+	"engineer": {
+		"name": "Engineer",
+		"description": "Generates production and Great Engineer points.",
+		"visible": true,
+		"yields": {
+			"food": 0,
+			"production": 2,
+			"commerce": 0
+		},
+		"commerces": {},
+		"great_people_type": "engineer",
+		"great_people_points": 3
+	},
+	"spy": {
+		"name": "Spy",
+		"description": "Generates espionage and Great Spy points.",
+		"visible": true,
+		"yields": {},
+		"commerces": {
+			"gold": 0,
+			"research": 1,
+			"culture": 0,
+			"espionage": 4
+		},
+		"great_people_type": "spy",
+		"great_people_points": 3
+	},
+	"great_priest": {
+		"name": "Great Priest",
+		"description": "Settled Great Prophet provides bonus yields.",
+		"visible": false,
+		"settled": true,
+		"yields": {
+			"food": 0,
+			"production": 2,
+			"commerce": 0
+		},
+		"commerces": {
+			"gold": 5
+		},
+		"great_people_type": "",
+		"great_people_points": 0
+	},
+	"great_artist": {
+		"name": "Great Artist",
+		"description": "Settled Great Artist provides culture.",
+		"visible": false,
+		"settled": true,
+		"yields": {},
+		"commerces": {
+			"gold": 3,
+			"culture": 12
+		},
+		"great_people_type": "",
+		"great_people_points": 0
+	},
+	"great_scientist": {
+		"name": "Great Scientist",
+		"description": "Settled Great Scientist provides research.",
+		"visible": false,
+		"settled": true,
+		"yields": {
+			"production": 1
+		},
+		"commerces": {
+			"research": 6
+		},
+		"great_people_type": "",
+		"great_people_points": 0
+	},
+	"great_merchant": {
+		"name": "Great Merchant",
+		"description": "Settled Great Merchant provides gold and food.",
+		"visible": false,
+		"settled": true,
+		"yields": {
+			"food": 1
+		},
+		"commerces": {
+			"gold": 6
+		},
+		"great_people_type": "",
+		"great_people_points": 0
+	},
+	"great_engineer": {
+		"name": "Great Engineer",
+		"description": "Settled Great Engineer provides production.",
+		"visible": false,
+		"settled": true,
+		"yields": {
+			"production": 3
+		},
+		"commerces": {
+			"research": 3
+		},
+		"great_people_type": "",
+		"great_people_points": 0
+	},
+	"great_general": {
+		"name": "Great General",
+		"description": "Settled Great General provides experience to units built.",
+		"visible": false,
+		"settled": true,
+		"yields": {},
+		"commerces": {},
+		"great_people_type": "",
+		"great_people_points": 0,
+		"experience_bonus": 2
+	},
+	"great_spy": {
+		"name": "Great Spy",
+		"description": "Settled Great Spy provides espionage.",
+		"visible": false,
+		"settled": true,
+		"yields": {},
+		"commerces": {
+			"research": 3,
+			"espionage": 12
+		},
+		"great_people_type": "",
+		"great_people_points": 0
+	}
+}

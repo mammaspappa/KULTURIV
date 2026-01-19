@@ -9,7 +9,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Core Engine | Complete | 100% |
 | Map System | Complete | 100% |
 | Units | Partial | 70% |
-| Cities | Partial | 75% |
+| Cities | Partial | 85% |
 | Combat | Complete | 100% |
 | AI | Basic | 40% |
 | UI | Partial | 50% |
@@ -117,13 +117,15 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 - [x] Tile working radius
 - [x] City health and happiness
 - [x] Maintenance costs
+- [x] Specialists (citizens, scientists, merchants, engineers, artists, priests, spies)
+- [x] Specialist slots from buildings
+- [x] Great People points per specialist
+- [x] Specialist yields and commerces
+- [x] Civic-based specialist bonuses (Representation, Caste System, Mercantilism)
+- [x] Settled Great People specialists
 
 ### Not Implemented
-- [ ] Specialists (scientists, merchants, engineers, artists, priests)
-- [ ] Specialist slots from buildings
-- [ ] Great People points per specialist
 - [ ] City governor automation
-- [ ] Hurry production (gold/population)
 - [ ] Conscription
 - [ ] City trading (culture flip risk)
 - [ ] Wonder movies/effects
@@ -132,6 +134,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 ### Files
 - `scripts/entities/city.gd`
 - `data/buildings.json`
+- `data/specialists.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/Buildings/CIV4BuildingInfos.xml` - 200+ buildings
@@ -588,6 +591,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | File | Entries | Status |
 |------|---------|--------|
 | civics.json | 25 | Complete |
+| specialists.json | 15 | Complete |
 
 ### To Add
 | File | Reference | Purpose |
@@ -596,7 +600,6 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | espionage.json | CIV4EspionageMissionInfo.xml | Espionage missions |
 | events.json | CIV4EventInfos.xml | Random events |
 | projects.json | CIV4ProjectInfo.xml | National/world projects |
-| specialists.json | CIV4SpecialistInfos.xml | City specialists |
 | votes.json | CIV4VoteInfo.xml | UN resolutions |
 | handicaps.json | CIV4HandicapInfo.xml | Difficulty levels |
 | game_speeds.json | CIV4GameSpeedInfo.xml | Game speed modifiers |
@@ -607,14 +610,13 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 ## Development Priorities
 
 ### High Priority (Next Phase)
-1. **Specialists** - City management depth
-2. **Full Diplomacy** - Trade negotiations
-3. **AI Improvements** - More competitive AI
-4. **Espionage** - BTS signature feature
+1. **Full Diplomacy** - Trade negotiations
+2. **AI Improvements** - More competitive AI
+3. **Espionage** - BTS signature feature
+4. **Corporations** - BTS signature feature
 
 ### Medium Priority
-5. **Espionage** - BTS signature feature
-6. **Corporations** - BTS signature feature
+5. **Projects** - Space race completion
 7. **Projects** - Space race completion
 8. **Random Events** - Adds variety
 

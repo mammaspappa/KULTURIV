@@ -64,46 +64,52 @@ func _process_city_gp(city) -> void:
 func _calculate_gp_points(city) -> int:
 	var points = 0
 
-	# Specialists generate GP points (simplified)
-	# In full implementation, this would track specialist counts
-
-	# Buildings that generate GP points
-	for building_id in city.buildings:
-		var effects = DataManager.get_building_effects(building_id)
-		points += effects.get("great_person_points", 0)
+	# Get GP points from city's specialists and buildings
+	var gp_breakdown = city.get_great_people_points()
+	for gp_type in gp_breakdown:
+		points += gp_breakdown[gp_type]
 
 	# Settled great people bonus
 	if city.has_meta("settled_great_people"):
 		var settled = city.get_meta("settled_great_people")
 		points += settled.size() * 2
 
+	# Civic modifier (Pacifism: +100% GP rate in cities with state religion)
+	if city.player_owner:
+		var civic_effects = CivicsSystem.get_civic_effects(city.player_owner)
+		var gp_modifier = civic_effects.get("great_people_modifier", 0)
+		if gp_modifier > 0 and civic_effects.get("requires_state_religion", false):
+			# Only applies if city has state religion
+			if city.player_owner.state_religion in city.religions:
+				points = int(points * (1.0 + gp_modifier / 100.0))
+
 	return points
 
-func _add_gp_weights(city, weights: Dictionary, points: int) -> void:
-	# Different buildings/specialists contribute to different GP types
+func _add_gp_weights(city, weights: Dictionary, _points: int) -> void:
+	# Get GP type weights from city specialists
+	var gp_breakdown = city.get_great_people_points()
+
+	for gp_type in gp_breakdown:
+		weights[gp_type] = weights.get(gp_type, 0) + gp_breakdown[gp_type]
+
+	# Also add building-based weights for buildings without specific GP types
 	for building_id in city.buildings:
-		var building = DataManager.get_building(building_id)
 		var effects = DataManager.get_building_effects(building_id)
+		var building_gp = effects.get("great_person_points", 0)
+		var building_gp_type = effects.get("great_person_type", "")
 
-		# Library, university -> Great Scientist
-		if building_id in ["library", "university", "academy"]:
-			weights["scientist"] = weights.get("scientist", 0) + points
-
-		# Market, bank -> Great Merchant
-		if building_id in ["market", "bank", "grocer"]:
-			weights["merchant"] = weights.get("merchant", 0) + points
-
-		# Forge, factory -> Great Engineer
-		if building_id in ["forge", "factory", "ironworks"]:
-			weights["engineer"] = weights.get("engineer", 0) + points
-
-		# Monument, theater -> Great Artist
-		if building_id in ["monument", "theater", "colosseum"]:
-			weights["artist"] = weights.get("artist", 0) + points
-
-		# Temple, monastery -> Great Prophet
-		if building_id in ["temple", "monastery", "cathedral"]:
-			weights["prophet"] = weights.get("prophet", 0) + points
+		# If building doesn't specify a type, infer from building category
+		if building_gp > 0 and building_gp_type == "":
+			if building_id in ["library", "university", "academy", "oxford_university"]:
+				weights["scientist"] = weights.get("scientist", 0) + building_gp
+			elif building_id in ["market", "bank", "grocer", "wall_street"]:
+				weights["merchant"] = weights.get("merchant", 0) + building_gp
+			elif building_id in ["forge", "factory", "ironworks"]:
+				weights["engineer"] = weights.get("engineer", 0) + building_gp
+			elif building_id in ["monument", "theater", "colosseum"]:
+				weights["artist"] = weights.get("artist", 0) + building_gp
+			elif building_id in ["temple", "monastery", "cathedral"]:
+				weights["prophet"] = weights.get("prophet", 0) + building_gp
 
 func _get_threshold(player) -> int:
 	var player_id = player.player_id

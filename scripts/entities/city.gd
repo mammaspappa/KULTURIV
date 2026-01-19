@@ -27,6 +27,10 @@ var buildings: Array[String] = []
 var territory: Array[Vector2i] = []  # Tiles owned by this city
 var worked_tiles: Array[Vector2i] = []  # Tiles being worked
 
+# Specialists
+var specialists: Dictionary = {}  # specialist_id -> count
+var free_specialists: int = 0  # Free specialists from civics
+
 # Yields (calculated)
 var food_yield: int = 0
 var production_yield: int = 0
@@ -159,6 +163,12 @@ func calculate_yields() -> void:
 			production_yield += yields.get("production", 0)
 			commerce_yield += yields.get("commerce", 0)
 
+	# Specialist yields
+	var spec_yields = get_specialist_yields()
+	food_yield += spec_yields.get("food", 0)
+	production_yield += spec_yields.get("production", 0)
+	commerce_yield += spec_yields.get("commerce", 0)
+
 	# Building modifiers
 	var food_percent = 0.0
 	var prod_percent = 0.0
@@ -191,6 +201,10 @@ func _calculate_science() -> void:
 	var science_rate = 0.5  # 50% of commerce goes to science by default
 	science_yield = int(commerce_yield * science_rate)
 
+	# Specialist science bonus
+	var spec_commerces = get_specialist_commerces()
+	science_yield += spec_commerces.get("research", 0)
+
 	# Building bonuses
 	var science_percent = 0.0
 	for building_id in buildings:
@@ -206,6 +220,10 @@ func _calculate_culture() -> void:
 	for building_id in buildings:
 		var effects = DataManager.get_building_effects(building_id)
 		culture_yield += effects.get("culture", 0)
+
+	# Specialist culture bonus
+	var spec_commerces = get_specialist_commerces()
+	culture_yield += spec_commerces.get("culture", 0)
 
 	# Religion bonuses
 	if player_owner and player_owner.state_religion in religions:
@@ -319,6 +337,125 @@ func _auto_assign_citizen() -> void:
 
 	if best_tile.x >= 0:
 		worked_tiles.append(best_tile)
+
+# Specialist management
+func get_specialist_count(specialist_id: String) -> int:
+	return specialists.get(specialist_id, 0)
+
+func get_total_specialists() -> int:
+	var total = 0
+	for spec_id in specialists:
+		total += specialists[spec_id]
+	return total
+
+func get_available_population() -> int:
+	# Population minus worked tiles minus specialists
+	return population - worked_tiles.size() - get_total_specialists() + 1  # +1 for city center
+
+func get_specialist_slots(specialist_id: String) -> int:
+	var slots = 0
+
+	# Slots from buildings
+	for building_id in buildings:
+		var effects = DataManager.get_building_effects(building_id)
+		var building_slots = effects.get("specialist_slots", {})
+		slots += building_slots.get(specialist_id, 0)
+
+	# Unlimited slots from civics (Caste System)
+	if player_owner:
+		var civic_effects = CivicsSystem.get_civic_effects(player_owner)
+		if civic_effects.get("unlimited_" + specialist_id + "_slots", false):
+			return 99
+
+	# Free specialists from civics (Mercantilism, Free Religion)
+	if player_owner:
+		var free_spec = CivicsSystem.get_free_specialists_per_city(player_owner)
+		if free_spec > 0:
+			# Free specialists can be any type
+			slots += free_spec
+
+	return slots
+
+func can_add_specialist(specialist_id: String) -> bool:
+	if get_available_population() <= 0:
+		return false
+
+	var current = get_specialist_count(specialist_id)
+	var max_slots = get_specialist_slots(specialist_id)
+
+	return current < max_slots
+
+func add_specialist(specialist_id: String) -> bool:
+	if not can_add_specialist(specialist_id):
+		return false
+
+	specialists[specialist_id] = specialists.get(specialist_id, 0) + 1
+	calculate_yields()
+	return true
+
+func remove_specialist(specialist_id: String) -> bool:
+	if specialists.get(specialist_id, 0) <= 0:
+		return false
+
+	specialists[specialist_id] -= 1
+	if specialists[specialist_id] <= 0:
+		specialists.erase(specialist_id)
+
+	calculate_yields()
+	return true
+
+func get_specialist_yields() -> Dictionary:
+	var total_yields = {"food": 0, "production": 0, "commerce": 0}
+
+	for specialist_id in specialists:
+		var count = specialists[specialist_id]
+		var spec_yields = DataManager.get_specialist_yields(specialist_id)
+
+		for yield_key in spec_yields:
+			total_yields[yield_key] = total_yields.get(yield_key, 0) + spec_yields[yield_key] * count
+
+	return total_yields
+
+func get_specialist_commerces() -> Dictionary:
+	var total_commerces = {"gold": 0, "research": 0, "culture": 0, "espionage": 0}
+
+	for specialist_id in specialists:
+		var count = specialists[specialist_id]
+		var spec_commerces = DataManager.get_specialist_commerces(specialist_id)
+
+		for commerce_key in spec_commerces:
+			total_commerces[commerce_key] = total_commerces.get(commerce_key, 0) + spec_commerces[commerce_key] * count
+
+	# Apply civic bonuses (Representation: +3 research per specialist)
+	if player_owner:
+		var civic_effects = CivicsSystem.get_civic_effects(player_owner)
+		var specialist_research_bonus = civic_effects.get("specialist_commerce_bonus", 0)
+		if specialist_research_bonus > 0:
+			total_commerces["research"] += get_total_specialists() * specialist_research_bonus
+
+	return total_commerces
+
+func get_great_people_points() -> Dictionary:
+	var gp_points = {}
+
+	for specialist_id in specialists:
+		var count = specialists[specialist_id]
+		var gp_type = DataManager.get_specialist_gp_type(specialist_id)
+		var gp_amount = DataManager.get_specialist_gp_points(specialist_id)
+
+		if gp_type != "" and gp_amount > 0:
+			gp_points[gp_type] = gp_points.get(gp_type, 0) + gp_amount * count
+
+	# Buildings that generate GP points
+	for building_id in buildings:
+		var effects = DataManager.get_building_effects(building_id)
+		var building_gp = effects.get("great_person_points", 0)
+		var building_gp_type = effects.get("great_person_type", "")
+
+		if building_gp > 0 and building_gp_type != "":
+			gp_points[building_gp_type] = gp_points.get(building_gp_type, 0) + building_gp
+
+	return gp_points
 
 # Production
 func set_production(item: String) -> void:
@@ -508,6 +645,7 @@ func to_dict() -> Dictionary:
 		"culture_level": culture_level,
 		"religions": religions,
 		"holy_city_of": holy_city_of,
+		"specialists": specialists,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -532,6 +670,7 @@ func from_dict(data: Dictionary) -> void:
 	culture_level = data.get("culture_level", 1)
 	religions.assign(data.get("religions", []))
 	holy_city_of = data.get("holy_city_of", "")
+	specialists = data.get("specialists", {})
 
 	position = GridUtils.grid_to_pixel(grid_position)
 	calculate_yields()
