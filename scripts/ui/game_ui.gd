@@ -21,6 +21,9 @@ extends Control
 @onready var tech_button: Button = $TopBar/HBoxContainer/TechButton
 @onready var civics_button: Button = $TopBar/HBoxContainer/CivicsButton
 @onready var diplomacy_button: Button = $TopBar/HBoxContainer/DiplomacyButton
+@onready var espionage_button: Button = $TopBar/HBoxContainer/EspionageButton
+@onready var voting_button: Button = $TopBar/HBoxContainer/VotingButton
+@onready var spaceship_button: Button = $TopBar/HBoxContainer/SpaceshipButton
 
 # State
 var selected_unit = null  # Unit (untyped to avoid load-order issues)
@@ -52,6 +55,12 @@ func _ready() -> void:
 		civics_button.pressed.connect(_on_civics_pressed)
 	if diplomacy_button:
 		diplomacy_button.pressed.connect(_on_diplomacy_pressed)
+	if espionage_button:
+		espionage_button.pressed.connect(_on_espionage_pressed)
+	if voting_button:
+		voting_button.pressed.connect(_on_voting_pressed)
+	if spaceship_button:
+		spaceship_button.pressed.connect(_on_spaceship_pressed)
 
 	# Initial state
 	unit_panel.visible = false
@@ -120,6 +129,15 @@ func _on_civics_pressed() -> void:
 
 func _on_diplomacy_pressed() -> void:
 	EventBus.show_diplomacy_screen.emit()
+
+func _on_espionage_pressed() -> void:
+	EventBus.show_espionage_screen.emit()
+
+func _on_voting_pressed() -> void:
+	EventBus.show_voting_screen.emit()
+
+func _on_spaceship_pressed() -> void:
+	EventBus.show_spaceship_screen.emit()
 
 func _update_top_bar() -> void:
 	if not is_inside_tree():
@@ -218,6 +236,10 @@ func _connect_notification_signals() -> void:
 	EventBus.anarchy_ended.connect(_on_anarchy_ended)
 	EventBus.trade_accepted.connect(_on_trade_accepted)
 	EventBus.trade_rejected.connect(_on_trade_rejected)
+	EventBus.notification_added.connect(_on_notification_added)
+
+func _on_notification_added(message: String, type: String) -> void:
+	_add_notification(message, type)
 
 func _on_research_completed(player, tech: String) -> void:
 	if player == GameManager.human_player:
@@ -392,6 +414,18 @@ func _rebuild_notification_display() -> void:
 				color = Color.MEDIUM_AQUAMARINE
 			"civics":
 				color = Color.SANDY_BROWN
+			"espionage":
+				color = Color.SLATE_GRAY
+			"event":
+				color = Color.ORANGE
+			"vote":
+				color = Color.LIGHT_BLUE
+			"victory":
+				color = Color.GOLD
+			"warning":
+				color = Color.RED
+			"project":
+				color = Color.MEDIUM_SPRING_GREEN
 
 		label.add_theme_color_override("font_color", color)
 

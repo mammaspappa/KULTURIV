@@ -578,6 +578,34 @@ func get_resolution_effect(effect_type: String) -> int:
 func get_secretary(source_id: String) -> int:
 	return secretaries.get(source_id, -1)
 
+# Alias for UI compatibility
+func get_vote_leader(source_id: String) -> int:
+	return secretaries.get(source_id, -1)
+
+# Get player votes for a source
+func get_player_votes(source_id: String, player_id: int) -> int:
+	return get_vote_power(player_id, source_id)
+
+# Check if a vote source is active
+func is_vote_source_active(source_id: String) -> bool:
+	return active_vote_sources.has(source_id)
+
+# Get active resolutions for a source
+func get_active_resolutions(source_id: String) -> Array:
+	var result = []
+	for res in active_resolutions:
+		if res.get("source_id", "") == source_id:
+			result.append(res.resolution_id)
+	return result
+
+# Call an election (for secretary)
+func call_election(source_id: String, _caller_id: int) -> void:
+	_initiate_secretary_election(source_id)
+
+# Propose a resolution
+func propose_resolution(source_id: String, resolution_id: String, proposer_id: int, target = null) -> void:
+	start_vote(source_id, resolution_id, proposer_id, target)
+
 # Check if nukes are banned
 func are_nukes_banned() -> bool:
 	return is_resolution_active("nuclear_non_proliferation")

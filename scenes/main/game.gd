@@ -4,6 +4,12 @@ extends Node2D
 @onready var game_world: GameWorld = $GameWorld
 @onready var game_ui: Control = $GameUI
 
+# UI Screen instances
+var event_popup: Control
+var espionage_screen: Control
+var spaceship_screen: Control
+var voting_screen: Control
+
 func _ready() -> void:
 	# Initialize the game with current settings
 	var settings = {
@@ -16,11 +22,47 @@ func _ready() -> void:
 	# Connect UI signals
 	_setup_ui()
 
+	# Setup additional UI screens
+	_setup_ui_screens()
+
 func _setup_ui() -> void:
 	# Connect UI events
 	EventBus.turn_started.connect(_on_turn_started)
 	EventBus.unit_selected.connect(_on_unit_selected)
 	EventBus.city_selected.connect(_on_city_selected)
+
+func _setup_ui_screens() -> void:
+	# Load and add Event Popup
+	var EventPopupScript = load("res://scripts/ui/event_popup.gd")
+	if EventPopupScript:
+		event_popup = Control.new()
+		event_popup.set_script(EventPopupScript)
+		event_popup.name = "EventPopup"
+		add_child(event_popup)
+
+	# Load and add Espionage Screen
+	var EspionageScreenScript = load("res://scripts/ui/espionage_screen.gd")
+	if EspionageScreenScript:
+		espionage_screen = Control.new()
+		espionage_screen.set_script(EspionageScreenScript)
+		espionage_screen.name = "EspionageScreen"
+		add_child(espionage_screen)
+
+	# Load and add Spaceship Screen
+	var SpaceshipScreenScript = load("res://scripts/ui/spaceship_screen.gd")
+	if SpaceshipScreenScript:
+		spaceship_screen = Control.new()
+		spaceship_screen.set_script(SpaceshipScreenScript)
+		spaceship_screen.name = "SpaceshipScreen"
+		add_child(spaceship_screen)
+
+	# Load and add Voting Screen
+	var VotingScreenScript = load("res://scripts/ui/voting_screen.gd")
+	if VotingScreenScript:
+		voting_screen = Control.new()
+		voting_screen.set_script(VotingScreenScript)
+		voting_screen.name = "VotingScreen"
+		add_child(voting_screen)
 
 func _on_turn_started(turn: int, player: Player) -> void:
 	if player == GameManager.human_player:

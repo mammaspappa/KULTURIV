@@ -73,6 +73,18 @@ text = "Civics (C)"
 layout_mode = 2
 text = "Diplomacy (D)"
 
+[node name="EspionageButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Espionage"
+
+[node name="VotingButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "UN"
+
+[node name="SpaceshipButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Spaceship"
+
 [node name="Spacer" type="Control" parent="GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3

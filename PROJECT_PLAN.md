@@ -12,16 +12,16 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Cities | Partial | 85% |
 | Combat | Complete | 100% |
 | AI | Enhanced | 75% |
-| UI | Partial | 50% |
+| UI | Partial | 65% |
 | Diplomacy | Complete | 90% |
 | Religion | Basic | 70% |
 | Victory Conditions | Complete | 100% |
 | Civics | Complete | 100% |
 | Corporations | Basic | 70% |
-| Espionage | Basic | 75% |
-| Projects | Basic | 80% |
-| Events | Basic | 75% |
-| UN/Voting | Basic | 80% |
+| Espionage | Basic | 80% |
+| Projects | Basic | 85% |
+| Events | Basic | 80% |
+| UN/Voting | Basic | 85% |
 | Multiplayer | Not Started | 0% |
 
 ---
@@ -334,7 +334,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 12: UI System (50% COMPLETE)
+## Phase 12: UI System (65% COMPLETE)
 
 ### Implemented
 - [x] Main menu
@@ -344,9 +344,16 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 - [x] Tech tree screen
 - [x] Minimap with click-to-center
 - [x] Diplomacy screen
+- [x] Trade screen
+- [x] Civics screen
+- [x] Victory screen
 - [x] Notification system (toasts)
 - [x] Top bar (gold, science, turn)
 - [x] Unit panel
+- [x] Event popup (random events with choices)
+- [x] Espionage screen (missions, targets)
+- [x] Spaceship screen (space race progress)
+- [x] UN/Voting screen (resolutions, elections)
 
 ### Not Implemented
 - [ ] Full city screen with specialist management
@@ -356,7 +363,6 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 - [ ] Foreign advisor
 - [ ] Domestic advisor
 - [ ] Religion advisor
-- [ ] Espionage advisor
 - [ ] Victory progress screen
 - [ ] Hall of Fame
 - [ ] Replay system
@@ -371,6 +377,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 - `scripts/ui/minimap.gd`
 - `scripts/ui/diplomacy_screen.gd`
 - `scripts/ui/victory_screen.gd`
+- `scripts/ui/civics_screen.gd`
+- `scripts/ui/trade_screen.gd`
+- `scripts/ui/event_popup.gd`
+- `scripts/ui/espionage_screen.gd`
+- `scripts/ui/spaceship_screen.gd`
+- `scripts/ui/voting_screen.gd`
 
 ---
 
@@ -458,7 +470,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 15: Espionage (75% COMPLETE)
+## Phase 15: Espionage (80% COMPLETE)
 
 ### Implemented
 - [x] Espionage points generation per turn
@@ -491,7 +503,6 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 - [x] Full serialization support
 
 ### Not Implemented
-- [ ] Espionage screen UI
 - [ ] Espionage point slider for distribution
 - [ ] Great Spy unit and abilities
 - [ ] AI espionage operations
@@ -525,7 +536,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 16: Random Events (75% COMPLETE)
+## Phase 16: Random Events (80% COMPLETE)
 
 ### Implemented
 - [x] Event trigger system with multiple conditions
@@ -568,7 +579,6 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 ### Not Implemented
 - [ ] Quest events (multi-turn chains)
 - [ ] Global events (affect all players)
-- [ ] Event popup UI
 - [ ] AI event handling
 
 ### Files
@@ -581,7 +591,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 17: Projects (80% COMPLETE)
+## Phase 17: Projects (85% COMPLETE)
 
 ### Implemented
 - [x] World project system (unique global wonders)
@@ -611,8 +621,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | SS Thrusters | Spaceship | 1200 | Superconductors | 1-5 (faster travel) |
 
 ### Not Implemented
-- [ ] Project screen UI
-- [ ] Spaceship viewer/animation
+- [ ] Spaceship viewer/animation (basic screen exists)
 - [ ] AI project prioritization
 - [ ] Team projects (multiplayer)
 
@@ -625,7 +634,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 18: United Nations & Voting (80% COMPLETE)
+## Phase 18: United Nations & Voting (85% COMPLETE)
 
 ### Implemented
 - [x] Two vote sources: United Nations and Apostolic Palace
@@ -677,7 +686,6 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Assign Holy City | 62% | Transfer city |
 
 ### Not Implemented
-- [ ] Voting UI screen
 - [ ] Defying resolutions (penalties)
 - [ ] Vassal voting
 - [ ] Team voting
