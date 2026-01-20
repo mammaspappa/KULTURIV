@@ -357,6 +357,7 @@ func _create_tile_indicator(grid_pos: Vector2i, color: Color) -> Node2D:
 	var rect = ColorRect.new()
 	rect.color = color
 	rect.size = Vector2(GridUtils.TILE_SIZE, GridUtils.TILE_SIZE)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE  # Allow clicks to pass through
 	indicator.add_child(rect)
 
 	return indicator
@@ -400,6 +401,7 @@ func _create_path_indicator(grid_pos: Vector2i, index: int) -> Node2D:
 	rect.color = Color(1, 1, 0, 0.5)
 	rect.size = Vector2(16, 16)
 	rect.position = Vector2(-8, -8)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE  # Allow clicks to pass through
 	indicator.add_child(rect)
 
 	return indicator
