@@ -231,14 +231,30 @@ func _handle_right_click(screen_pos: Vector2) -> void:
 
 		# Move to position
 		if selected_unit.can_move():
-			# Try pre-calculated path for non-adjacent tiles
+			# Don't move to current position
+			if grid_pos == selected_unit.grid_position:
+				return
+
+			# Try pre-calculated path for tiles in reachable list
 			if grid_pos in reachable_tiles:
 				_move_selected_unit(grid_pos)
+				_update_reachable_tiles()
 				return
-			# Fallback: try direct movement to adjacent tiles
-			elif GridUtils.are_adjacent(selected_unit.grid_position, grid_pos):
+
+			# Try direct movement to adjacent tiles
+			if GridUtils.are_adjacent(selected_unit.grid_position, grid_pos):
 				if selected_unit.can_move_to(grid_pos):
 					selected_unit.move_to(grid_pos)
+					_update_reachable_tiles()
+				return
+
+			# Fallback: try to find and follow a path even if not in reachable_tiles
+			# This handles cases where reachable_tiles wasn't calculated properly
+			if game_grid != null:
+				var pathfinder = PathfindingClass.new(game_grid, selected_unit)
+				var path = pathfinder.find_path_with_movement(selected_unit.grid_position, grid_pos, selected_unit.movement_remaining)
+				if not path.is_empty():
+					selected_unit.move_along_path(path)
 					_update_reachable_tiles()
 				return
 
@@ -275,8 +291,12 @@ func _move_selected_unit(target: Vector2i) -> void:
 	if not selected_unit:
 		return
 
-	# Find path
-	var pathfinder = PathfindingClass.new(game_grid, selected_unit)
+	# Find path using valid grid reference
+	var grid = game_grid if game_grid != null else GameManager.hex_grid
+	if grid == null:
+		return
+
+	var pathfinder = PathfindingClass.new(grid, selected_unit)
 	var path = pathfinder.find_path_with_movement(selected_unit.grid_position, target, selected_unit.movement_remaining)
 
 	if not path.is_empty():
@@ -322,7 +342,12 @@ func _update_reachable_tiles() -> void:
 	if not selected_unit or not selected_unit.can_move():
 		return
 
-	var pathfinder = PathfindingClass.new(game_grid, selected_unit)
+	# Make sure we have a valid grid
+	var grid = game_grid if game_grid != null else GameManager.hex_grid
+	if grid == null:
+		return
+
+	var pathfinder = PathfindingClass.new(grid, selected_unit)
 	reachable_tiles = pathfinder.get_reachable_tiles(selected_unit.grid_position, selected_unit.movement_remaining)
 
 	_draw_movement_overlay()
