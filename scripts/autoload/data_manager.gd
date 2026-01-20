@@ -16,6 +16,7 @@ var religions: Dictionary = {}
 var victories: Dictionary = {}
 var civics: Dictionary = {}
 var specialists: Dictionary = {}
+var handicaps: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -38,6 +39,7 @@ func _load_all_data() -> void:
 	victories = _load_json("victories.json")
 	civics = _load_json("civics.json")
 	specialists = _load_json("specialists.json")
+	handicaps = _load_json("handicaps.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -339,3 +341,36 @@ func get_buildings_by_era(era: String) -> Array:
 		if buildings[building_id].get("era", "") == era:
 			result.append(building_id)
 	return result
+
+# Handicap accessors
+func get_handicap(handicap_id: String) -> Dictionary:
+	return handicaps.get(handicap_id, {})
+
+func get_handicap_by_level(level: int) -> Dictionary:
+	for handicap_id in handicaps:
+		var h = handicaps[handicap_id]
+		if h.get("level", -1) == level:
+			return h
+	return {}
+
+func get_handicap_name(handicap_id: String) -> String:
+	var h = get_handicap(handicap_id)
+	return h.get("name", handicap_id.capitalize())
+
+func get_ai_bonuses(handicap_id: String) -> Dictionary:
+	var h = get_handicap(handicap_id)
+	return h.get("ai_bonuses", {})
+
+func get_human_bonuses(handicap_id: String) -> Dictionary:
+	var h = get_handicap(handicap_id)
+	return h.get("human_bonuses", {})
+
+func get_all_handicaps() -> Dictionary:
+	return handicaps
+
+func get_handicap_id_by_level(level: int) -> String:
+	for handicap_id in handicaps:
+		var h = handicaps[handicap_id]
+		if h.get("level", -1) == level:
+			return handicap_id
+	return "prince"  # Default

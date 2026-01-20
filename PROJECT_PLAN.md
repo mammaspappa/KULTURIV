@@ -11,7 +11,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Units | Partial | 70% |
 | Cities | Partial | 85% |
 | Combat | Complete | 100% |
-| AI | Basic | 40% |
+| AI | Enhanced | 75% |
 | UI | Partial | 50% |
 | Diplomacy | Complete | 90% |
 | Religion | Basic | 70% |
@@ -185,29 +185,31 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 7: AI System (40% COMPLETE)
+## Phase 7: AI System (75% COMPLETE)
 
 ### Implemented
 - [x] Basic AI controller framework
-- [x] AI research selection
-- [x] AI production selection
-- [x] AI unit movement (exploration, attack)
-- [x] AI city site evaluation
-- [x] AI war/peace decisions (basic)
+- [x] AI research selection (personality-weighted tech evaluation)
+- [x] AI production selection (flavor-based building/unit choices)
+- [x] AI unit movement (exploration, attack, garrison)
+- [x] AI city site evaluation (weighted by leader flavor)
+- [x] AI war/peace decisions (based on power ratio and personality)
+- [x] Personality-based AI using leader flavor values (military, gold, science, culture, religion, expansion, growth, production)
+- [x] AI trade evaluation and tech trading
+- [x] AI diplomacy negotiations (treaties, open borders, defensive pacts)
+- [x] AI worker management with improvement selection based on flavor
+- [x] Difficulty-based AI bonuses (handicaps.json with 9 difficulty levels)
+- [x] AI target selection in combat (weighted by win chance and aggressiveness)
 
 ### Not Implemented
-- [ ] Personality-based AI (aggressive, builder, diplomat, etc.)
-- [ ] AI trade evaluation
-- [ ] AI diplomacy negotiations
-- [ ] AI worker management
-- [ ] AI city specialization
+- [ ] AI city specialization (production vs science cities)
 - [ ] AI naval operations
 - [ ] AI espionage
-- [ ] Difficulty-based AI bonuses
-- [ ] AI cheating (visibility, production bonuses at higher difficulties)
+- [ ] AI cheating (visibility at higher difficulties)
 
 ### Files
 - `scripts/ai/ai_controller.gd`
+- `data/handicaps.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/BasicInfos/CIV4UnitAIInfos.xml` - AI unit roles
@@ -620,7 +622,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ### High Priority (Next Phase)
 1. ~~**Full Diplomacy** - Trade negotiations~~ (COMPLETE)
-2. **AI Improvements** - More competitive AI
+2. ~~**AI Improvements** - More competitive AI~~ (75% COMPLETE)
 3. **Espionage** - BTS signature feature
 4. **Corporations** - BTS signature feature
 

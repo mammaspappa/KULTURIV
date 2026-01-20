@@ -1,0 +1,227 @@
+{
+	"settler": {
+		"name": "Settler",
+		"level": 0,
+		"ai_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"unit_cost_percent": 100,
+			"building_cost_percent": 100,
+			"free_units": 0,
+			"free_techs": 0,
+			"starting_gold": 0,
+			"starting_defense_units": 0,
+			"growth_bonus": 0,
+			"maintenance_percent": 100
+		},
+		"human_bonuses": {
+			"production_percent": 20,
+			"research_percent": 20,
+			"gold_percent": 20,
+			"starting_gold": 100,
+			"free_units": 2,
+			"maintenance_percent": 80
+		}
+	},
+	"chieftain": {
+		"name": "Chieftain",
+		"level": 1,
+		"ai_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"unit_cost_percent": 100,
+			"building_cost_percent": 100,
+			"free_units": 0,
+			"free_techs": 0,
+			"starting_gold": 0,
+			"starting_defense_units": 0,
+			"growth_bonus": 0,
+			"maintenance_percent": 100
+		},
+		"human_bonuses": {
+			"production_percent": 10,
+			"research_percent": 10,
+			"gold_percent": 10,
+			"starting_gold": 50,
+			"free_units": 1,
+			"maintenance_percent": 90
+		}
+	},
+	"warlord": {
+		"name": "Warlord",
+		"level": 2,
+		"ai_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"unit_cost_percent": 100,
+			"building_cost_percent": 100,
+			"free_units": 0,
+			"free_techs": 0,
+			"starting_gold": 0,
+			"starting_defense_units": 0,
+			"growth_bonus": 0,
+			"maintenance_percent": 100
+		},
+		"human_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"starting_gold": 25,
+			"free_units": 0,
+			"maintenance_percent": 100
+		}
+	},
+	"noble": {
+		"name": "Noble",
+		"level": 3,
+		"ai_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"unit_cost_percent": 100,
+			"building_cost_percent": 100,
+			"free_units": 0,
+			"free_techs": 0,
+			"starting_gold": 0,
+			"starting_defense_units": 0,
+			"growth_bonus": 0,
+			"maintenance_percent": 100
+		},
+		"human_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"starting_gold": 0,
+			"free_units": 0,
+			"maintenance_percent": 100
+		}
+	},
+	"prince": {
+		"name": "Prince",
+		"level": 4,
+		"ai_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"unit_cost_percent": 100,
+			"building_cost_percent": 100,
+			"free_units": 0,
+			"free_techs": 0,
+			"starting_gold": 0,
+			"starting_defense_units": 0,
+			"growth_bonus": 0,
+			"maintenance_percent": 100
+		},
+		"human_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"starting_gold": 0,
+			"free_units": 0,
+			"maintenance_percent": 100
+		}
+	},
+	"monarch": {
+		"name": "Monarch",
+		"level": 5,
+		"ai_bonuses": {
+			"production_percent": 10,
+			"research_percent": 10,
+			"gold_percent": 10,
+			"unit_cost_percent": 90,
+			"building_cost_percent": 95,
+			"free_units": 1,
+			"free_techs": 0,
+			"starting_gold": 50,
+			"starting_defense_units": 1,
+			"growth_bonus": 5,
+			"maintenance_percent": 90
+		},
+		"human_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"starting_gold": 0,
+			"free_units": 0,
+			"maintenance_percent": 100
+		}
+	},
+	"emperor": {
+		"name": "Emperor",
+		"level": 6,
+		"ai_bonuses": {
+			"production_percent": 20,
+			"research_percent": 20,
+			"gold_percent": 20,
+			"unit_cost_percent": 80,
+			"building_cost_percent": 85,
+			"free_units": 2,
+			"free_techs": 1,
+			"starting_gold": 100,
+			"starting_defense_units": 2,
+			"growth_bonus": 10,
+			"maintenance_percent": 80
+		},
+		"human_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"starting_gold": 0,
+			"free_units": 0,
+			"maintenance_percent": 100
+		}
+	},
+	"immortal": {
+		"name": "Immortal",
+		"level": 7,
+		"ai_bonuses": {
+			"production_percent": 30,
+			"research_percent": 30,
+			"gold_percent": 30,
+			"unit_cost_percent": 70,
+			"building_cost_percent": 75,
+			"free_units": 3,
+			"free_techs": 2,
+			"starting_gold": 150,
+			"starting_defense_units": 3,
+			"growth_bonus": 15,
+			"maintenance_percent": 70
+		},
+		"human_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"starting_gold": 0,
+			"free_units": 0,
+			"maintenance_percent": 100
+		}
+	},
+	"deity": {
+		"name": "Deity",
+		"level": 8,
+		"ai_bonuses": {
+			"production_percent": 50,
+			"research_percent": 50,
+			"gold_percent": 50,
+			"unit_cost_percent": 60,
+			"building_cost_percent": 65,
+			"free_units": 4,
+			"free_techs": 2,
+			"starting_gold": 200,
+			"starting_defense_units": 4,
+			"growth_bonus": 25,
+			"maintenance_percent": 60
+		},
+		"human_bonuses": {
+			"production_percent": 0,
+			"research_percent": 0,
+			"gold_percent": 0,
+			"starting_gold": 0,
+			"free_units": 0,
+			"maintenance_percent": 100
+		}
+	}
+}
