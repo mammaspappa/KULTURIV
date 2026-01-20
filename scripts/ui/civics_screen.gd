@@ -388,3 +388,9 @@ func _update_layout() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED and is_visible():
 		_update_layout()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and event is InputEventKey and event.pressed:
+		if event.keycode == KEY_ESCAPE:
+			_on_close_pressed()
+			get_viewport().set_input_as_handled()

@@ -6,6 +6,7 @@ extends Control
 var player_list: VBoxContainer
 var detail_panel: Panel
 var selected_player = null
+var close_button: Button
 
 # Detail panel elements
 var civ_name_label: Label
@@ -65,13 +66,13 @@ func _setup_ui() -> void:
 	title.add_theme_font_size_override("font_size", 24)
 	add_child(title)
 
-	# Close button
-	var close_btn = Button.new()
-	close_btn.text = "X"
-	close_btn.position = Vector2(size.x - 50, 10)
-	close_btn.custom_minimum_size = Vector2(30, 30)
-	close_btn.pressed.connect(_on_close_pressed)
-	add_child(close_btn)
+	# Close button (positioned in top-right, will be updated on resize)
+	close_button = Button.new()
+	close_button.name = "CloseButton"
+	close_button.text = "X"
+	close_button.custom_minimum_size = Vector2(30, 30)
+	close_button.pressed.connect(_on_close_pressed)
+	add_child(close_button)
 
 	# Split container - player list on left, details on right
 	var split = HSplitContainer.new()
@@ -437,3 +438,17 @@ func _on_first_contact(player1, player2) -> void:
 
 	if visible:
 		_refresh_player_list()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED:
+		_update_close_button_position()
+
+func _update_close_button_position() -> void:
+	if close_button:
+		close_button.position = Vector2(size.x - 50, 10)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and event is InputEventKey and event.pressed:
+		if event.keycode == KEY_ESCAPE:
+			_on_close_pressed()
+			get_viewport().set_input_as_handled()
