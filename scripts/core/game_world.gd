@@ -100,6 +100,27 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_ESCAPE:
 				# Deselect
 				_deselect_all()
+			# Numpad movement (8-directional)
+			KEY_KP_8:
+				_move_unit_in_direction(GridUtils.Direction.N)
+			KEY_KP_9:
+				_move_unit_in_direction(GridUtils.Direction.NE)
+			KEY_KP_6:
+				_move_unit_in_direction(GridUtils.Direction.E)
+			KEY_KP_3:
+				_move_unit_in_direction(GridUtils.Direction.SE)
+			KEY_KP_2:
+				_move_unit_in_direction(GridUtils.Direction.S)
+			KEY_KP_1:
+				_move_unit_in_direction(GridUtils.Direction.SW)
+			KEY_KP_4:
+				_move_unit_in_direction(GridUtils.Direction.W)
+			KEY_KP_7:
+				_move_unit_in_direction(GridUtils.Direction.NW)
+			KEY_KP_5:
+				# Skip turn / center on unit
+				if selected_unit:
+					selected_unit.skip_turn()
 
 func _process(_delta: float) -> void:
 	# Update path preview on mouse move
@@ -209,9 +230,17 @@ func _handle_right_click(screen_pos: Vector2) -> void:
 				return
 
 		# Move to position
-		if selected_unit.can_move() and grid_pos in reachable_tiles:
-			_move_selected_unit(grid_pos)
-			return
+		if selected_unit.can_move():
+			# Try pre-calculated path for non-adjacent tiles
+			if grid_pos in reachable_tiles:
+				_move_selected_unit(grid_pos)
+				return
+			# Fallback: try direct movement to adjacent tiles
+			elif GridUtils.are_adjacent(selected_unit.grid_position, grid_pos):
+				if selected_unit.can_move_to(grid_pos):
+					selected_unit.move_to(grid_pos)
+					_update_reachable_tiles()
+				return
 
 func _get_unit_at_screen_pos(grid_pos: Vector2i) -> Unit:
 	# Check for friendly unit first
@@ -262,6 +291,29 @@ func _attack_unit(attacker: Unit, defender: Unit) -> void:
 
 	# Update movement overlay after combat
 	_update_reachable_tiles()
+
+## Move selected unit in a direction (for numpad/keyboard movement)
+func _move_unit_in_direction(direction: int) -> void:
+	if selected_unit == null or not selected_unit.can_move():
+		return
+
+	var target_pos = GridUtils.get_neighbor(selected_unit.grid_position, direction)
+
+	# Wrap position if map wraps
+	if game_grid:
+		target_pos = GridUtils.wrap_position(target_pos, game_grid.width, game_grid.height)
+
+	# Check for enemy unit to attack
+	var target_unit = GameManager.get_unit_at(target_pos)
+	if target_unit and target_unit.player_owner != selected_unit.player_owner:
+		if selected_unit.can_attack(target_unit):
+			_attack_unit(selected_unit, target_unit)
+		return
+
+	# Try to move directly to adjacent tile
+	if selected_unit.can_move_to(target_pos):
+		selected_unit.move_to(target_pos)
+		_update_reachable_tiles()
 
 func _update_reachable_tiles() -> void:
 	_clear_movement_overlay()
@@ -427,6 +479,9 @@ func found_city(settler: Unit) -> City:
 			tile.tile_owner = owner
 			tile.city_owner = city
 			tile.update_visuals()
+
+	# Reveal visibility around the new city
+	VisibilitySystem.reveal_for_city(city)
 
 	# Remove settler
 	settler.die()

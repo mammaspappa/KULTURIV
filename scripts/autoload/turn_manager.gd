@@ -54,8 +54,6 @@ func _start_turn_for_player(player) -> void:
 	if player == null:
 		return
 
-	EventBus.turn_started.emit(current_turn, player)
-
 	# Process worker builds first (before refreshing movement)
 	for unit in player.units:
 		if unit.current_order == UnitClass.UnitOrder.BUILD:
@@ -72,6 +70,13 @@ func _start_turn_for_player(player) -> void:
 
 	# Process research
 	_process_research(player)
+
+	# Refresh visibility for the player (fog of war)
+	VisibilitySystem.refresh_visibility(player)
+	VisibilitySystem.update_all_tile_visuals()
+
+	# Emit turn_started AFTER movement is refreshed so UI updates correctly
+	EventBus.turn_started.emit(current_turn, player)
 
 	# If AI, execute AI turn
 	if not player.is_human:

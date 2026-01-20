@@ -2,6 +2,8 @@ class_name Minimap
 extends Panel
 ## Minimap showing the game world overview.
 
+const GameTileClass = preload("res://scripts/map/game_tile.gd")
+
 var minimap_image: Image
 var minimap_texture: ImageTexture
 var texture_rect: TextureRect
@@ -64,10 +66,6 @@ func _update_minimap() -> void:
 	var player = GameManager.human_player
 	var player_id = player.player_id if player else -1
 
-	# Visibility state constants
-	const UNEXPLORED = 0
-	const FOGGED = 1
-
 	for x in range(GameManager.map_width):
 		for y in range(GameManager.map_height):
 			var tile = GameManager.hex_grid.get_tile(Vector2i(x, y))
@@ -75,10 +73,10 @@ func _update_minimap() -> void:
 				minimap_image.set_pixel(x, y, Color.BLACK)
 				continue
 
-			# Check visibility
-			var visibility = tile.get_visibility_for_player(player_id) if player_id >= 0 else 2  # VISIBLE
+			# Check visibility using proper enum
+			var vis_state = tile.get_visibility_for_player(player_id) if player_id >= 0 else GameTileClass.VisibilityState.VISIBLE
 
-			if visibility == UNEXPLORED:
+			if vis_state == GameTileClass.VisibilityState.UNEXPLORED:
 				minimap_image.set_pixel(x, y, Color.BLACK)
 				continue
 
@@ -86,18 +84,23 @@ func _update_minimap() -> void:
 			var color = DataManager.get_terrain_color(tile.terrain_id)
 
 			# Darken if fogged
-			if visibility == FOGGED:
+			if vis_state == GameTileClass.VisibilityState.FOGGED:
 				color = color.darkened(0.5)
 			else:
+				# Only show cities and units if tile is VISIBLE
 				# Show city
 				var city = GameManager.get_city_at(Vector2i(x, y))
 				if city != null:
 					color = city.player_owner.color if city.player_owner else Color.WHITE
 
-				# Show unit
+				# Show unit (only if visible to player)
 				var unit = GameManager.get_unit_at(Vector2i(x, y))
 				if unit != null:
-					color = unit.player_owner.color.lightened(0.3) if unit.player_owner else Color.WHITE
+					# Only show own units or units on visible tiles
+					if unit.player_owner == player:
+						color = unit.player_owner.color.lightened(0.3)
+					elif vis_state == GameTileClass.VisibilityState.VISIBLE:
+						color = unit.player_owner.color.lightened(0.3) if unit.player_owner else Color.WHITE
 
 			minimap_image.set_pixel(x, y, color)
 

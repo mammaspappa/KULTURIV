@@ -1,10 +1,10 @@
 {
 	"domination": {
 		"name": "Domination Victory",
-		"description": "Control 75% of the world's land and 66% of its population",
+		"description": "Control 64% of the world's total land mass and 64% of its population",
 		"requirements": {
-			"land_percentage": 0.75,
-			"population_percentage": 0.66
+			"land_percentage": 0.64,
+			"population_percentage": 0.64
 		},
 		"enabled_by_default": true
 	},

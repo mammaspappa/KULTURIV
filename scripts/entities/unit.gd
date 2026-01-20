@@ -101,6 +101,20 @@ func _draw() -> void:
 		draw_string(font, Vector2(15, 20), move_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
 
 func update_visual() -> void:
+	# Check if this unit should be visible to the human player
+	var human_player = GameManager.human_player
+	if human_player != null and player_owner != human_player:
+		# Enemy unit - only show if on a tile visible to human player
+		var tile = GameManager.hex_grid.get_tile(grid_position) if GameManager.hex_grid else null
+		if tile != null:
+			var vis_state = tile.get_visibility_for_player(human_player.player_id)
+			visible = (vis_state == GameTileClass.VisibilityState.VISIBLE)
+		else:
+			visible = false
+	else:
+		# Own unit or no human player - always visible
+		visible = true
+
 	queue_redraw()
 
 # Stats from data
@@ -230,32 +244,37 @@ func teleport_to(target: Vector2i) -> void:
 
 # Visibility
 func get_visibility_range() -> int:
-	var base_range = 2
+	# Get base sight range from unit data (default 1)
+	var unit_data = DataManager.get_unit(unit_id)
+	var base_range = unit_data.get("sight_range", 1)
+
 	# Promotions can increase this
 	for promo in promotions:
 		var effects = DataManager.get_promotion_effects(promo)
 		base_range += effects.get("visibility_range_increase", 0)
+
+	# Hills provide +1 visibility
+	if player_owner != null and GameManager.hex_grid != null:
+		var tile = GameManager.hex_grid.get_tile(grid_position)
+		if tile != null and tile.is_hills():
+			base_range += 1
+
 	return base_range
 
 func _update_visibility() -> void:
 	if player_owner == null:
 		return
 
-	var grid = GameManager.hex_grid
-	if grid == null:
-		return
+	# Use VisibilitySystem to reveal tiles
+	VisibilitySystem.reveal_for_unit(self)
 
+	# Check for first contact with other players
 	var vis_range = get_visibility_range()
 	var visible_tiles = GridUtils.get_tiles_in_range(grid_position, vis_range)
-	visible_tiles.append(grid_position)  # Include current tile
+	visible_tiles.append(grid_position)
 
 	for tile_pos in visible_tiles:
-		var tile = grid.get_tile(tile_pos)
-		if tile != null:
-			tile.set_visibility_for_player(player_owner.player_id, GameTileClass.VisibilityState.VISIBLE)
-
-			# Check for first contact
-			_check_first_contact_at(tile_pos)
+		_check_first_contact_at(tile_pos)
 
 func _check_first_contact_at(tile_pos: Vector2i) -> void:
 	if player_owner == null:

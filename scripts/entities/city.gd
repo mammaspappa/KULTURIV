@@ -3,6 +3,7 @@ extends Node2D
 ## Represents a city on the map.
 
 const UnitClass = preload("res://scripts/entities/unit.gd")
+const GameTileClass = preload("res://scripts/map/game_tile.gd")
 
 # Identity
 var city_name: String = "City"
@@ -119,6 +120,21 @@ func _draw() -> void:
 		religion_x += 12
 
 func update_visual() -> void:
+	# Check if this city should be visible to the human player
+	var human_player = GameManager.human_player
+	if human_player != null and player_owner != human_player:
+		# Enemy city - only show if on a tile explored by human player
+		var tile = GameManager.hex_grid.get_tile(grid_position) if GameManager.hex_grid else null
+		if tile != null:
+			var vis_state = tile.get_visibility_for_player(human_player.player_id)
+			# Cities remain visible once explored (they don't disappear in fog)
+			visible = (vis_state != GameTileClass.VisibilityState.UNEXPLORED)
+		else:
+			visible = false
+	else:
+		# Own city or no human player - always visible
+		visible = true
+
 	queue_redraw()
 
 func _initialize_territory() -> void:

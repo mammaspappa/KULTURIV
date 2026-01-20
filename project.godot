@@ -38,6 +38,7 @@ EspionageSystem="*res://scripts/systems/espionage_system.gd"
 ProjectsSystem="*res://scripts/systems/projects_system.gd"
 EventsSystem="*res://scripts/systems/events_system.gd"
 VotingSystem="*res://scripts/systems/voting_system.gd"
+VisibilitySystem="*res://scripts/systems/visibility_system.gd"
 
 [display]
 

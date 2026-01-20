@@ -32,12 +32,34 @@ func _init(pos: Vector2i = Vector2i.ZERO) -> void:
 	position = GridUtils.grid_to_pixel_corner(grid_position)
 
 func _draw() -> void:
+	# Check visibility for human player
+	var human_player = GameManager.human_player
+	var vis_state = VisibilityState.VISIBLE  # Default to visible if no human player
+	if human_player != null:
+		vis_state = get_visibility_for_player(human_player.player_id)
+
+	# Don't render unexplored tiles
+	if vis_state == VisibilityState.UNEXPLORED:
+		draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), Color.BLACK)
+		return
+
 	_draw_terrain()
 	_draw_feature()
-	_draw_resource()
-	_draw_improvement()
-	_draw_road()
-	_draw_owner_border()
+
+	# Only show resources, improvements, roads if explored
+	if vis_state == VisibilityState.VISIBLE:
+		_draw_resource()
+		_draw_improvement()
+		_draw_road()
+		_draw_owner_border()
+	else:
+		# Fogged - show known improvements but not resources
+		_draw_improvement()
+		_draw_road()
+
+	# Apply fog overlay for fogged tiles
+	if vis_state == VisibilityState.FOGGED:
+		draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), Color(0, 0, 0, 0.5))
 
 func _draw_terrain() -> void:
 	var color = DataManager.get_terrain_color(terrain_id)

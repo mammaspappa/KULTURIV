@@ -43,6 +43,9 @@ var traits: Array[String] = []
 var units: Array = []
 var cities: Array = []
 
+# Elimination tracking
+var has_ever_had_city: bool = false
+
 # Score tracking
 var score: int = 0
 
@@ -62,6 +65,7 @@ func remove_unit(unit) -> void:
 func add_city(city) -> void:
 	city.player_owner = self
 	cities.append(city)
+	has_ever_had_city = true
 
 func remove_city(city) -> void:
 	cities.erase(city)
@@ -117,6 +121,20 @@ func get_num_cities() -> int:
 
 func get_num_units() -> int:
 	return units.size()
+
+func has_settlers() -> bool:
+	for unit in units:
+		if unit.can_found_city():
+			return true
+	return false
+
+func is_eliminated() -> bool:
+	## A player is eliminated if they have no cities AND either:
+	## - They had a city before (it was destroyed), OR
+	## - They have no settlers (can't found a new city)
+	if not cities.is_empty():
+		return false
+	return has_ever_had_city or not has_settlers()
 
 func can_build_unit(unit_id: String) -> bool:
 	var unit_data = DataManager.get_unit(unit_id)
@@ -294,6 +312,7 @@ func to_dict() -> Dictionary:
 		"civics": civics,
 		"anarchy_turns": anarchy_turns,
 		"traits": traits,
+		"has_ever_had_city": has_ever_had_city,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -318,3 +337,4 @@ func from_dict(data: Dictionary) -> void:
 	civics = data.get("civics", {})
 	anarchy_turns = data.get("anarchy_turns", 0)
 	traits.assign(data.get("traits", []))
+	has_ever_had_city = data.get("has_ever_had_city", false)
