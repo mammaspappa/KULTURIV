@@ -19,6 +19,7 @@ var specialists: Dictionary = {}
 var handicaps: Dictionary = {}
 var corporations: Dictionary = {}
 var espionage_missions: Dictionary = {}
+var projects: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -44,6 +45,7 @@ func _load_all_data() -> void:
 	handicaps = _load_json("handicaps.json")
 	corporations = _load_json("corporations.json")
 	espionage_missions = _load_json("espionage_missions.json")
+	projects = _load_json("projects.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -429,4 +431,39 @@ func get_espionage_missions_requiring_spy() -> Array:
 		var mission = espionage_missions[mission_id]
 		if mission.get("requires_spy_in_city", false):
 			result.append(mission_id)
+	return result
+
+# Project accessors
+func get_project(project_id: String) -> Dictionary:
+	return projects.get(project_id, {})
+
+func get_project_name(project_id: String) -> String:
+	var project = get_project(project_id)
+	return project.get("name", project_id.capitalize())
+
+func get_project_cost(project_id: String) -> int:
+	var project = get_project(project_id)
+	return project.get("cost", 0)
+
+func get_all_projects() -> Dictionary:
+	return projects
+
+func get_projects_by_type(project_type: String) -> Array:
+	var result = []
+	for project_id in projects:
+		if project_id.begins_with("_"):
+			continue
+		var project = projects[project_id]
+		if project.get("type", "") == project_type:
+			result.append(project_id)
+	return result
+
+func get_spaceship_parts() -> Array:
+	var result = []
+	for project_id in projects:
+		if project_id.begins_with("_"):
+			continue
+		var project = projects[project_id]
+		if project.get("spaceship_part", false):
+			result.append(project_id)
 	return result

@@ -77,6 +77,11 @@ signal spy_placed(spy_unit, city)
 signal spy_captured(spy_unit, city)
 signal spy_escaped(spy_unit)
 
+# Project events
+signal project_completed(player_id, project_id, city)
+signal spaceship_ready(player_id)
+signal spaceship_launched(player_id, success)
+
 # Culture events
 signal culture_expanded(city, new_radius)
 signal great_person_born(city, great_person_type)

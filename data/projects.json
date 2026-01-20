@@ -1,0 +1,207 @@
+{
+	"_metadata": {
+		"description": "Projects for KulturIV including world wonders, national projects, and spaceship parts",
+		"note": "max_global_instances = -1 means unlimited globally, max_team_instances limits per player"
+	},
+	"manhattan_project": {
+		"name": "Manhattan Project",
+		"description": "Unlocks the ability for all players to build nuclear weapons.",
+		"type": "world",
+		"cost": 1500,
+		"tech_required": "fission",
+		"max_global_instances": 1,
+		"max_team_instances": -1,
+		"effects": {
+			"allows_nukes": true,
+			"everyone_special_building": "bomb_shelter"
+		},
+		"bonus_production": {
+			"uranium": 100
+		},
+		"spaceship_part": false
+	},
+	"the_internet": {
+		"name": "The Internet",
+		"description": "Grants knowledge of all technologies researched by at least two other civilizations.",
+		"type": "world",
+		"cost": 2000,
+		"tech_required": "computers",
+		"max_global_instances": 1,
+		"max_team_instances": -1,
+		"effects": {
+			"tech_share": 2
+		},
+		"bonus_production": {
+			"copper": 100
+		},
+		"spaceship_part": false
+	},
+	"sdi": {
+		"name": "Strategic Defense Initiative",
+		"description": "Provides 75% chance to intercept incoming nuclear missiles.",
+		"type": "national",
+		"cost": 1000,
+		"tech_required": "laser",
+		"anyone_prereq_project": "manhattan_project",
+		"max_global_instances": -1,
+		"max_team_instances": 1,
+		"effects": {
+			"nuke_interception": 75
+		},
+		"bonus_production": {
+			"aluminum": 100
+		},
+		"spaceship_part": false
+	},
+	"apollo_program": {
+		"name": "Apollo Program",
+		"description": "Enables the construction of spaceship parts for the Space Race Victory.",
+		"type": "national",
+		"cost": 1600,
+		"tech_required": "rocketry",
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 1,
+		"effects": {
+			"enables_spaceship": true
+		},
+		"bonus_production": {
+			"aluminum": 100
+		},
+		"spaceship_part": false
+	},
+	"ss_cockpit": {
+		"name": "SS Cockpit",
+		"description": "The command center of the spaceship, housing the crew's controls and navigation systems.",
+		"type": "spaceship",
+		"cost": 1000,
+		"tech_required": "fiber_optics",
+		"prereq_projects": ["apollo_program"],
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 1,
+		"victory_threshold": {
+			"space_race": 1
+		},
+		"bonus_production": {
+			"copper": 100
+		},
+		"spaceship_part": true
+	},
+	"ss_life_support": {
+		"name": "SS Life Support",
+		"description": "Environmental systems to sustain the crew during the long journey.",
+		"type": "spaceship",
+		"cost": 1000,
+		"tech_required": "ecology",
+		"prereq_projects": ["apollo_program"],
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 1,
+		"victory_threshold": {
+			"space_race": 1
+		},
+		"bonus_production": {
+			"copper": 100
+		},
+		"spaceship_part": true
+	},
+	"ss_stasis_chamber": {
+		"name": "SS Stasis Chamber",
+		"description": "Cryogenic pods to preserve colonists during the interstellar voyage.",
+		"type": "spaceship",
+		"cost": 1200,
+		"tech_required": "genetics",
+		"prereq_projects": ["apollo_program"],
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 1,
+		"victory_threshold": {
+			"space_race": 1
+		},
+		"bonus_production": {},
+		"spaceship_part": true
+	},
+	"ss_docking_bay": {
+		"name": "SS Docking Bay",
+		"description": "Landing and docking facilities for the colonization effort.",
+		"type": "spaceship",
+		"cost": 2000,
+		"tech_required": "satellites",
+		"prereq_projects": ["apollo_program"],
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 1,
+		"victory_threshold": {
+			"space_race": 1
+		},
+		"bonus_production": {
+			"aluminum": 100
+		},
+		"spaceship_part": true
+	},
+	"ss_engine": {
+		"name": "SS Engine",
+		"description": "Fusion-powered propulsion system. Two engines provide faster travel time.",
+		"type": "spaceship",
+		"cost": 1600,
+		"tech_required": "fusion",
+		"prereq_projects": ["apollo_program"],
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 2,
+		"victory_threshold": {
+			"space_race": 2
+		},
+		"victory_min_threshold": {
+			"space_race": 1
+		},
+		"victory_delay_percent": 50,
+		"bonus_production": {},
+		"spaceship_part": true
+	},
+	"ss_casing": {
+		"name": "SS Casing",
+		"description": "Protective hull sections. Five casings required for full protection.",
+		"type": "spaceship",
+		"cost": 1200,
+		"tech_required": "composites",
+		"prereq_projects": ["apollo_program"],
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 5,
+		"victory_threshold": {
+			"space_race": 5
+		},
+		"victory_min_threshold": {
+			"space_race": 1
+		},
+		"success_rate": 20,
+		"bonus_production": {
+			"aluminum": 100
+		},
+		"spaceship_part": true
+	},
+	"ss_thrusters": {
+		"name": "SS Thrusters",
+		"description": "Maneuvering thrusters for orbital corrections. Five sets for optimal control.",
+		"type": "spaceship",
+		"cost": 1200,
+		"tech_required": "superconductors",
+		"prereq_projects": ["apollo_program"],
+		"victory_prereq": "space_race",
+		"max_global_instances": -1,
+		"max_team_instances": 5,
+		"victory_threshold": {
+			"space_race": 5
+		},
+		"victory_min_threshold": {
+			"space_race": 1
+		},
+		"victory_delay_percent": 100,
+		"bonus_production": {
+			"aluminum": 100
+		},
+		"spaceship_part": true
+	}
+}

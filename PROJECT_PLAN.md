@@ -19,6 +19,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Civics | Complete | 100% |
 | Corporations | Basic | 70% |
 | Espionage | Basic | 75% |
+| Projects | Basic | 80% |
 | Events | Not Started | 0% |
 | Multiplayer | Not Started | 0% |
 
@@ -549,24 +550,47 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 17: Projects (NOT STARTED)
+## Phase 17: Projects (80% COMPLETE)
 
-### To Implement
-- [ ] National project system
-- [ ] World project system (only one can exist)
-- [ ] Space race projects (spaceship parts)
-- [ ] Project prerequisites
-- [ ] Project effects
+### Implemented
+- [x] World project system (unique global wonders)
+- [x] National project system (per-player limits)
+- [x] Space race projects with all spaceship parts
+- [x] Project prerequisites (tech, other projects)
+- [x] Production bonuses from resources
+- [x] Project effects (nukes, tech share, nuke interception)
+- [x] Spaceship assembly tracking
+- [x] Spaceship launch with success/failure based on components
+- [x] Travel time calculation based on engines/thrusters
+- [x] Full serialization support
+
+### Projects Implemented:
+| Project | Type | Cost | Tech Required | Effect |
+|---------|------|------|---------------|--------|
+| Manhattan Project | World | 1500 | Fission | Enables nukes globally |
+| The Internet | World | 2000 | Computers | Grants techs known by 2+ civs |
+| SDI | National | 1000 | Laser | 75% nuke interception |
+| Apollo Program | National | 1600 | Rocketry | Enables spaceship parts |
+| SS Cockpit | Spaceship | 1000 | Fiber Optics | Required x1 |
+| SS Life Support | Spaceship | 1000 | Ecology | Required x1 |
+| SS Stasis Chamber | Spaceship | 1200 | Genetics | Required x1 |
+| SS Docking Bay | Spaceship | 2000 | Satellites | Required x1 |
+| SS Engine | Spaceship | 1600 | Fusion | 1-2 (faster travel) |
+| SS Casing | Spaceship | 1200 | Composites | 1-5 (launch success) |
+| SS Thrusters | Spaceship | 1200 | Superconductors | 1-5 (faster travel) |
+
+### Not Implemented
+- [ ] Project screen UI
+- [ ] Spaceship viewer/animation
+- [ ] AI project prioritization
+- [ ] Team projects (multiplayer)
+
+### Files
+- `scripts/systems/projects_system.gd`
+- `data/projects.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/GameInfo/CIV4ProjectInfo.xml` - 15+ projects
-
-### Key Projects:
-- Manhattan Project (enables nukes)
-- The Internet (tech sharing)
-- SDI (nuke interception)
-- Apollo Program (enables space race)
-- Spaceship parts (SS Cockpit, Thrusters, Engine, Casing, Life Support, Stasis Chamber)
 
 ---
 
@@ -655,12 +679,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | handicaps.json | 9 | Complete |
 | corporations.json | 7 | Complete |
 | espionage_missions.json | 15 | Complete |
+| projects.json | 11 | Complete |
 
 ### To Add
 | File | Reference | Purpose |
 |------|-----------|---------|
 | events.json | CIV4EventInfos.xml | Random events |
-| projects.json | CIV4ProjectInfo.xml | National/world projects |
 | votes.json | CIV4VoteInfo.xml | UN resolutions |
 | game_speeds.json | CIV4GameSpeedInfo.xml | Game speed modifiers |
 | eras.json | CIV4EraInfos.xml | Era definitions |
@@ -676,9 +700,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 4. ~~**Corporations** - BTS signature feature~~ (70% COMPLETE)
 
 ### Medium Priority
-5. **Projects** - Space race completion
-7. **Projects** - Space race completion
-8. **Random Events** - Adds variety
+5. ~~**Projects** - Space race completion~~ (80% COMPLETE)
+6. **Random Events** - Adds variety
 
 ### Low Priority
 9. **UN/Voting** - Diplomatic victory polish
