@@ -3,6 +3,7 @@ beyond/
 
 # Godot 4+ specific ignores
 .godot/
+*.uid
 
 # Godot-specific ignores
 *.translation

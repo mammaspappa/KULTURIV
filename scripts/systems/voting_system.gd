@@ -439,8 +439,7 @@ func _force_all_civics(civic_id: String, source_id: String) -> void:
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id):
 			if CivicsSystem:
-				var category = CivicsSystem.get_civic_category(civic_id)
-				CivicsSystem.change_civic(player.player_id, category, civic_id)
+				CivicsSystem.change_civic(player, civic_id)
 
 func _force_open_borders(source_id: String) -> void:
 	var players = GameManager.get_all_players() if GameManager else []

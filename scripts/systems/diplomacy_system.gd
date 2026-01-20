@@ -235,6 +235,10 @@ func add_memory(player_id: int, target_id: int, memory_type: MemoryType, strengt
 		"turns": 0
 	})
 
+## Get total attitude modifier from memory (public wrapper)
+func get_memory_attitude(player_id: int, target_id: int) -> int:
+	return _get_memory_attitude(player_id, target_id)
+
 ## Get total attitude modifier from memory
 func _get_memory_attitude(player_id: int, target_id: int) -> int:
 	if not diplomacy_memory.has(player_id):

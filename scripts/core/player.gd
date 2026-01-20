@@ -24,7 +24,9 @@ var research_progress: int = 0
 var at_war_with: Array[int] = []
 var open_borders_with: Array[int] = []
 var defensive_pact_with: Array[int] = []
+var trade_embargo_with: Array[int] = []
 var met_players: Array[int] = []
+var diplomacy_memory: Dictionary = {}  # player_id -> Array of memory entries
 
 # Religion
 var state_religion: String = ""
@@ -160,6 +162,97 @@ func get_available_resources() -> Array:
 				resources.append(resource)
 	return resources
 
+# Diplomacy methods
+func is_at_war_with(other_id: int) -> bool:
+	return other_id in at_war_with
+
+func declare_war_on(other_id: int) -> void:
+	if other_id not in at_war_with:
+		at_war_with.append(other_id)
+	# End treaties
+	open_borders_with.erase(other_id)
+	defensive_pact_with.erase(other_id)
+
+func make_peace_with(other_id: int) -> void:
+	at_war_with.erase(other_id)
+
+func has_open_borders_with(other_id: int) -> bool:
+	return other_id in open_borders_with
+
+func set_open_borders(other_id: int, value: bool) -> void:
+	if value and other_id not in open_borders_with:
+		open_borders_with.append(other_id)
+	elif not value:
+		open_borders_with.erase(other_id)
+
+func has_defensive_pact_with(other_id: int) -> bool:
+	return other_id in defensive_pact_with
+
+func set_defensive_pact(other_id: int, value: bool) -> void:
+	if value and other_id not in defensive_pact_with:
+		defensive_pact_with.append(other_id)
+	elif not value:
+		defensive_pact_with.erase(other_id)
+
+func has_trade_embargo_with(other_id: int) -> bool:
+	return other_id in trade_embargo_with
+
+func set_trade_embargo(other_id: int, value: bool) -> void:
+	if value and other_id not in trade_embargo_with:
+		trade_embargo_with.append(other_id)
+	elif not value:
+		trade_embargo_with.erase(other_id)
+
+func get_relationship(other_id: int) -> String:
+	## Returns relationship status: "friendly", "pleased", "cautious", "annoyed", "furious"
+	if is_at_war_with(other_id):
+		return "furious"
+
+	# Calculate attitude based on various factors
+	var attitude = _calculate_attitude(other_id)
+
+	if attitude >= 8:
+		return "friendly"
+	elif attitude >= 4:
+		return "pleased"
+	elif attitude >= -3:
+		return "cautious"
+	elif attitude >= -7:
+		return "annoyed"
+	else:
+		return "furious"
+
+func _calculate_attitude(other_id: int) -> int:
+	var attitude = 0
+
+	# Base attitude from leader personality (if AI)
+	if not is_human:
+		var leader_data = DataManager.get_leader(leader_id) if DataManager else {}
+		attitude += leader_data.get("base_attitude", 0)
+
+	# Shared religion bonus
+	var other = GameManager.get_player(other_id) if GameManager else null
+	if other and state_religion != "" and state_religion == other.state_religion:
+		attitude += 2
+
+	# Treaty bonuses
+	if has_open_borders_with(other_id):
+		attitude += 1
+	if has_defensive_pact_with(other_id):
+		attitude += 2
+
+	# Shared enemies
+	if other:
+		for enemy_id in at_war_with:
+			if enemy_id in other.at_war_with:
+				attitude += 1
+
+	# Memory effects (from DiplomacySystem)
+	if DiplomacySystem:
+		attitude += DiplomacySystem.get_memory_attitude(player_id, other_id)
+
+	return attitude
+
 func calculate_score() -> int:
 	var s = 0
 	# Population
@@ -194,6 +287,7 @@ func to_dict() -> Dictionary:
 		"at_war_with": at_war_with,
 		"open_borders_with": open_borders_with,
 		"defensive_pact_with": defensive_pact_with,
+		"trade_embargo_with": trade_embargo_with,
 		"met_players": met_players,
 		"state_religion": state_religion,
 		"founded_religion": founded_religion,
@@ -217,6 +311,7 @@ func from_dict(data: Dictionary) -> void:
 	at_war_with.assign(data.get("at_war_with", []))
 	open_borders_with.assign(data.get("open_borders_with", []))
 	defensive_pact_with.assign(data.get("defensive_pact_with", []))
+	trade_embargo_with.assign(data.get("trade_embargo_with", []))
 	met_players.assign(data.get("met_players", []))
 	state_religion = data.get("state_religion", "")
 	founded_religion = data.get("founded_religion", "")
