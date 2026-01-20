@@ -1,6 +1,6 @@
 # KulturIV Project Plan
 
-A Civilization IV: Beyond the Sword clone built in Godot 4.2.
+A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ## Project Status Overview
 

@@ -13,7 +13,7 @@ config_version=5
 config/name="KulturIV"
 config/description="A Civilization IV-inspired 4X strategy game"
 run/main_scene="res://scenes/main/main_menu.tscn"
-config/features=PackedStringArray("4.2", "Forward Plus")
+config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
