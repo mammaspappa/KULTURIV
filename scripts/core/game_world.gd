@@ -235,75 +235,17 @@ func _handle_right_click(screen_pos: Vector2) -> void:
 			if grid_pos == selected_unit.grid_position:
 				return
 
-			# Get grid reference for coordinate wrapping
 			var grid = game_grid if game_grid != null else GameManager.hex_grid
+			if grid == null:
+				return
 
-			# Check reachable_tiles first (handles pathfinding and all movement ranges)
-			# Need to check both wrapped and unwrapped versions due to coordinate storage
-			var found_reachable_pos = _find_position_in_reachable(grid_pos, grid)
-			if found_reachable_pos != Vector2i(-9999, -9999):
-				_move_selected_unit(found_reachable_pos)
+			# Always use pathfinding for movement - simpler and more reliable
+			var pathfinder = PathfindingClass.new(grid, selected_unit)
+			var path = pathfinder.find_path_with_movement(selected_unit.grid_position, grid_pos, selected_unit.movement_remaining)
+			if not path.is_empty():
+				selected_unit.move_along_path(path)
 				_update_reachable_tiles()
-				return
-
-			# Fallback: try direct move for adjacent tiles not in reachable list
-			if _are_adjacent_with_wrap(selected_unit.grid_position, grid_pos, grid):
-				if selected_unit.can_move_to(grid_pos):
-					selected_unit.move_to(grid_pos)
-					_update_reachable_tiles()
-					return
-
-			# Final fallback: try pathfinding even if not in reachable_tiles
-			if grid != null:
-				var pathfinder = PathfindingClass.new(grid, selected_unit)
-				var path = pathfinder.find_path_with_movement(selected_unit.grid_position, grid_pos, selected_unit.movement_remaining)
-				if not path.is_empty():
-					selected_unit.move_along_path(path)
-					_update_reachable_tiles()
-				return
-
-## Check if two positions are adjacent, accounting for map wrapping
-func _are_adjacent_with_wrap(pos1: Vector2i, pos2: Vector2i, grid) -> bool:
-	# Standard adjacency check first
-	if GridUtils.are_adjacent(pos1, pos2):
-		return true
-
-	# Check for wrap-around adjacency
-	if grid != null and grid.wrap_x:
-		var width = grid.width
-		# Check if adjacent via X wrap (e.g., pos1 at x=0, pos2 at x=79)
-		var dx = abs(pos1.x - pos2.x)
-		var dy = abs(pos1.y - pos2.y)
-		var wrap_dx = width - dx
-		if wrap_dx <= 1 and dy <= 1 and (wrap_dx > 0 or dy > 0):
-			return true
-
-	return false
-
-## Find position in reachable_tiles, checking wrapped/unwrapped coordinate variants
-func _find_position_in_reachable(grid_pos: Vector2i, grid) -> Vector2i:
-	# Direct check first
-	if grid_pos in reachable_tiles:
-		return grid_pos
-
-	# Check wrapped/unwrapped variants for X-wrapping maps
-	if grid != null and grid.wrap_x:
-		var width = grid.width
-		# Check unwrapped version (e.g., click at 79 but stored as -1)
-		var unwrapped_neg = Vector2i(grid_pos.x - width, grid_pos.y)
-		if unwrapped_neg in reachable_tiles:
-			return unwrapped_neg
-		# Check wrapped version (e.g., click at -1 but stored as 79)
-		var wrapped_pos = Vector2i(posmod(grid_pos.x, width), grid_pos.y)
-		if wrapped_pos in reachable_tiles:
-			return wrapped_pos
-		# Check positive unwrapped (e.g., click at 0 but stored as 80)
-		var unwrapped_pos = Vector2i(grid_pos.x + width, grid_pos.y)
-		if unwrapped_pos in reachable_tiles:
-			return unwrapped_pos
-
-	# Not found
-	return Vector2i(-9999, -9999)
+			return
 
 func _get_unit_at_screen_pos(grid_pos: Vector2i) -> Unit:
 	# Check for friendly unit first
