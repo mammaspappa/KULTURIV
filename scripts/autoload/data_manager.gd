@@ -21,6 +21,7 @@ var corporations: Dictionary = {}
 var espionage_missions: Dictionary = {}
 var projects: Dictionary = {}
 var random_events: Dictionary = {}
+var votes: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -48,6 +49,7 @@ func _load_all_data() -> void:
 	espionage_missions = _load_json("espionage_missions.json")
 	projects = _load_json("projects.json")
 	random_events = _load_json("events.json")
+	votes = _load_json("votes.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -489,4 +491,33 @@ func get_random_events_by_category(category: String) -> Array:
 		var event = random_events[event_id]
 		if event.get("category", "") == category:
 			result.append(event_id)
+	return result
+
+# Vote/Resolution accessors
+func get_vote_source(source_id: String) -> Dictionary:
+	var sources = votes.get("vote_sources", {})
+	return sources.get(source_id, {})
+
+func get_all_vote_sources() -> Dictionary:
+	return votes.get("vote_sources", {})
+
+func get_resolution(resolution_id: String) -> Dictionary:
+	var resolutions = votes.get("resolutions", {})
+	return resolutions.get(resolution_id, {})
+
+func get_resolution_name(resolution_id: String) -> String:
+	var resolution = get_resolution(resolution_id)
+	return resolution.get("name", resolution_id.capitalize())
+
+func get_all_resolutions() -> Dictionary:
+	return votes.get("resolutions", {})
+
+func get_resolutions_by_source(source_id: String) -> Array:
+	var result = []
+	var resolutions = votes.get("resolutions", {})
+	for res_id in resolutions:
+		var res = resolutions[res_id]
+		var sources = res.get("vote_source", [])
+		if source_id in sources:
+			result.append(res_id)
 	return result

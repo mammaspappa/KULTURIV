@@ -21,6 +21,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Espionage | Basic | 75% |
 | Projects | Basic | 80% |
 | Events | Basic | 75% |
+| UN/Voting | Basic | 80% |
 | Multiplayer | Not Started | 0% |
 
 ---
@@ -624,27 +625,70 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 18: United Nations & Voting (NOT STARTED)
+## Phase 18: United Nations & Voting (80% COMPLETE)
 
-### To Implement
-- [ ] UN building requirement
-- [ ] Secretary General election
-- [ ] UN resolutions
-- [ ] Diplomatic victory voting
-- [ ] Apostolic Palace (religious equivalent)
+### Implemented
+- [x] Two vote sources: United Nations and Apostolic Palace
+- [x] Secretary General / Resident elections
+- [x] Population-based voting (UN)
+- [x] Religion-based voting (Apostolic Palace)
+- [x] Vote power calculation
+- [x] Diplomatic Victory voting
+- [x] 22 total resolutions implemented
+- [x] AI voting logic based on relationships
+- [x] Resolution effects system
+- [x] Vote history tracking
+- [x] Full serialization support
+
+### Vote Sources:
+| Source | Building | Vote Type | Interval |
+|--------|----------|-----------|----------|
+| United Nations | united_nations | Population | 5 turns |
+| Apostolic Palace | apostolic_palace | Religion | 9 turns |
+
+### UN Resolutions Implemented:
+| Resolution | Threshold | Effect |
+|------------|-----------|--------|
+| Elect Secretary General | 40% | Elects leader |
+| Diplomatic Victory | 62% | Grants victory |
+| Single Currency | 51% | +1 trade route |
+| Free Trade | 51% | Open markets |
+| Nuclear Non-Proliferation | 51% | Bans nukes |
+| Universal Suffrage | 51% | Force civic |
+| Free Speech | 51% | Force civic |
+| Emancipation | 51% | Force civic |
+| Environmentalism | 51% | Force civic |
+| Free Religion | 51% | Force civic |
+| Stop the War | 62% | Force peace |
+| Trade Embargo | 62% | Force no trade |
+| Declare War | 62% | Force war |
+| Assign City | 62% | Transfer city |
+
+### Apostolic Palace Resolutions:
+| Resolution | Threshold | Effect |
+|------------|-----------|--------|
+| Elect Resident | 40% | Elects leader |
+| Religious Victory | 75% | Grants victory |
+| Open Borders | 62% | Force borders |
+| Defensive Pact | 62% | Force alliance |
+| Stop the Holy War | 62% | Force peace |
+| Trade Embargo | 62% | Force no trade |
+| Holy War | 62% | Force war |
+| Assign Holy City | 62% | Transfer city |
+
+### Not Implemented
+- [ ] Voting UI screen
+- [ ] Defying resolutions (penalties)
+- [ ] Vassal voting
+- [ ] Team voting
+
+### Files
+- `scripts/systems/voting_system.gd`
+- `data/votes.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/GameInfo/CIV4VoteInfo.xml` - Resolutions
 - `beyond/Beyond the Sword/Assets/XML/GameInfo/CIV4VoteSourceInfos.xml` - Vote sources
-
-### UN Resolutions:
-- Diplomatic Victory
-- Free Trade
-- Open Borders
-- Defensive Pact
-- Force Peace
-- Assign City
-- Nuclear Non-Proliferation
 
 ---
 
@@ -711,11 +755,11 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | espionage_missions.json | 15 | Complete |
 | projects.json | 11 | Complete |
 | events.json | 20 | Complete |
+| votes.json | 22 | Complete |
 
 ### To Add
 | File | Reference | Purpose |
 |------|-----------|---------|
-| votes.json | CIV4VoteInfo.xml | UN resolutions |
 | game_speeds.json | CIV4GameSpeedInfo.xml | Game speed modifiers |
 | eras.json | CIV4EraInfos.xml | Era definitions |
 
@@ -734,7 +778,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 6. ~~**Random Events** - Adds variety~~ (75% COMPLETE)
 
 ### Low Priority
-9. **UN/Voting** - Diplomatic victory polish
+9. ~~**UN/Voting** - Diplomatic victory polish~~ (80% COMPLETE)
 10. **Sound/Music** - Polish
 11. **Advanced UI** - Advisors, Civilopedia
 12. **Multiplayer** - Major undertaking

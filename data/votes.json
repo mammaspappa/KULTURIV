@@ -1,0 +1,265 @@
+{
+	"_metadata": {
+		"description": "UN and Apostolic Palace resolutions for KulturIV",
+		"note": "population_threshold is % of total population needed to win vote"
+	},
+	"vote_sources": {
+		"united_nations": {
+			"name": "United Nations",
+			"description": "Global diplomatic assembly for resolving international disputes.",
+			"building_required": "united_nations",
+			"vote_interval": 5,
+			"vote_type": "population",
+			"secretary_title": "Secretary General"
+		},
+		"apostolic_palace": {
+			"name": "Apostolic Palace",
+			"description": "Religious council for members of the state religion.",
+			"building_required": "apostolic_palace",
+			"vote_interval": 9,
+			"vote_type": "religion",
+			"secretary_title": "Resident",
+			"religion_yields": {
+				"production": 2
+			}
+		}
+	},
+	"resolutions": {
+		"secretary_general": {
+			"name": "Elect Secretary General",
+			"description": "Elect a leader to head the organization.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 40,
+			"min_voters": 3,
+			"effects": {
+				"elect_secretary": true
+			}
+		},
+		"diplomatic_victory": {
+			"name": "Diplomatic Victory",
+			"description": "Vote to grant victory to a civilization through international consensus.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"effects": {
+				"victory": true
+			}
+		},
+		"single_currency": {
+			"name": "Single Currency",
+			"description": "Establish a unified currency, granting +1 trade route to all members.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"trade_routes": 1
+			}
+		},
+		"free_trade": {
+			"name": "Free Trade",
+			"description": "Open markets between all member civilizations.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"free_trade": true
+			}
+		},
+		"nuclear_non_proliferation": {
+			"name": "Nuclear Non-Proliferation",
+			"description": "Ban the construction and use of nuclear weapons.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"no_nukes": true
+			}
+		},
+		"universal_suffrage": {
+			"name": "Global Universal Suffrage",
+			"description": "Force all civilizations to adopt Universal Suffrage civic.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"force_civic": "universal_suffrage"
+			}
+		},
+		"free_speech": {
+			"name": "Global Free Speech",
+			"description": "Force all civilizations to adopt Free Speech civic.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"force_civic": "free_speech"
+			}
+		},
+		"emancipation": {
+			"name": "Global Emancipation",
+			"description": "Force all civilizations to adopt Emancipation civic.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"force_civic": "emancipation"
+			}
+		},
+		"environmentalism": {
+			"name": "Global Environmentalism",
+			"description": "Force all civilizations to adopt Environmentalism civic.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"force_civic": "environmentalism"
+			}
+		},
+		"free_religion": {
+			"name": "Global Free Religion",
+			"description": "Force all civilizations to adopt Free Religion civic.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 51,
+			"min_voters": 3,
+			"effects": {
+				"force_civic": "free_religion"
+			}
+		},
+		"un_force_peace": {
+			"name": "Stop the War",
+			"description": "Force two warring civilizations to make peace.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"requires_target": true,
+			"effects": {
+				"force_peace": true
+			}
+		},
+		"un_trade_embargo": {
+			"name": "Trade Embargo",
+			"description": "Force all members to cease trading with target civilization.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"requires_target": true,
+			"effects": {
+				"force_no_trade": true
+			}
+		},
+		"un_declare_war": {
+			"name": "Declare War",
+			"description": "Force all members to declare war on target civilization.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"requires_target": true,
+			"effects": {
+				"force_war": true
+			}
+		},
+		"un_assign_city": {
+			"name": "Assign City",
+			"description": "Transfer a city from one civilization to another.",
+			"vote_source": ["united_nations"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"requires_city_target": true,
+			"effects": {
+				"assign_city": true
+			}
+		},
+		"elect_pope": {
+			"name": "Elect Resident",
+			"description": "Elect a leader to head the Apostolic Palace.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 40,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"effects": {
+				"elect_secretary": true
+			}
+		},
+		"religious_victory": {
+			"name": "Religious Unity",
+			"description": "Vote to grant victory through religious consensus.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 75,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"effects": {
+				"victory": true
+			}
+		},
+		"ap_open_borders": {
+			"name": "Open Borders",
+			"description": "Force all members of the faith to have open borders.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"effects": {
+				"open_borders": true
+			}
+		},
+		"ap_defensive_pact": {
+			"name": "Defensive Pact",
+			"description": "Force all members of the faith into a defensive alliance.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"effects": {
+				"defensive_pact": true
+			}
+		},
+		"ap_force_peace": {
+			"name": "Stop the Holy War",
+			"description": "Force warring members of the faith to make peace.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"requires_target": true,
+			"effects": {
+				"force_peace": true
+			}
+		},
+		"ap_trade_embargo": {
+			"name": "Trade Embargo",
+			"description": "Force all members to cease trading with non-believers.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"requires_target": true,
+			"effects": {
+				"force_no_trade": true
+			}
+		},
+		"ap_declare_war": {
+			"name": "Holy War",
+			"description": "Call a crusade against non-believers.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"requires_target": true,
+			"effects": {
+				"force_war": true
+			}
+		},
+		"ap_assign_city": {
+			"name": "Assign Holy City",
+			"description": "Transfer a holy city to its rightful owner.",
+			"vote_source": ["apostolic_palace"],
+			"population_threshold": 62,
+			"min_voters": 3,
+			"religion_vote_percent": 100,
+			"requires_city_target": true,
+			"effects": {
+				"assign_city": true
+			}
+		}
+	}
+}

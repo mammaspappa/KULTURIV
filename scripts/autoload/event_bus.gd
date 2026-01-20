@@ -86,6 +86,14 @@ signal spaceship_launched(player_id, success)
 signal random_event_triggered(event_data)
 signal random_event_resolved(player_id, event_id, choice_index)
 
+# Voting/UN signals
+signal vote_source_activated(source_id, city)
+signal vote_session_started(source_id, secretary_id, available_resolutions)
+signal secretary_election_started(source_id, candidates)
+signal secretary_elected(source_id, player_id)
+signal vote_started(source_id, resolution_id, proposer_id)
+signal vote_completed(source_id, resolution_id, passed, result)
+
 # Culture events
 signal culture_expanded(city, new_radius)
 signal great_person_born(city, great_person_type)
