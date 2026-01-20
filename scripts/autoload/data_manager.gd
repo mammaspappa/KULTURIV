@@ -17,6 +17,7 @@ var victories: Dictionary = {}
 var civics: Dictionary = {}
 var specialists: Dictionary = {}
 var handicaps: Dictionary = {}
+var corporations: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -40,6 +41,7 @@ func _load_all_data() -> void:
 	civics = _load_json("civics.json")
 	specialists = _load_json("specialists.json")
 	handicaps = _load_json("handicaps.json")
+	corporations = _load_json("corporations.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -374,3 +376,24 @@ func get_handicap_id_by_level(level: int) -> String:
 		if h.get("level", -1) == level:
 			return handicap_id
 	return "prince"  # Default
+
+# Corporation accessors
+func get_corporation(corporation_id: String) -> Dictionary:
+	return corporations.get(corporation_id, {})
+
+func get_corporation_name(corporation_id: String) -> String:
+	var corp = get_corporation(corporation_id)
+	return corp.get("name", corporation_id.capitalize())
+
+func get_all_corporations() -> Dictionary:
+	return corporations
+
+func get_corporations_by_founder(gp_type: String) -> Array:
+	var result = []
+	for corp_id in corporations:
+		if corp_id.begins_with("_"):
+			continue
+		var corp = corporations[corp_id]
+		if corp.get("founded_by", "") == gp_type:
+			result.append(corp_id)
+	return result

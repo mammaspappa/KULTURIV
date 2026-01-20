@@ -63,6 +63,12 @@ signal civic_changed(player, category, civic_id)
 signal anarchy_started(player, turns)
 signal anarchy_ended(player)
 
+# Corporation events
+signal corporation_founded(corporation_id, city, founder)
+signal corporation_spread(corporation_id, city)
+signal corporation_destroyed(corporation_id)
+signal corporation_hq_moved(corporation_id, new_city)
+
 # Culture events
 signal culture_expanded(city, new_radius)
 signal great_person_born(city, great_person_type)

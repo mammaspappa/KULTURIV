@@ -33,6 +33,7 @@ GreatPeopleSystem="*res://scripts/systems/great_people_system.gd"
 TradeSystem="*res://scripts/systems/trade_system.gd"
 CivicsSystem="*res://scripts/systems/civics_system.gd"
 DiplomacySystem="*res://scripts/systems/diplomacy_system.gd"
+CorporationSystem="*res://scripts/systems/corporation_system.gd"
 
 [display]
 

@@ -1,0 +1,136 @@
+{
+	"_metadata": {
+		"description": "Corporations data for KulturIV",
+		"note": "Corporations consume resources for city bonuses. Founded by Great People."
+	},
+	"mining_inc": {
+		"name": "Mining Inc.",
+		"description": "Extracts and processes mineral resources for industrial production.",
+		"headquarter_building": "mining_inc_hq",
+		"founded_by": "great_engineer",
+		"tech_required": "corporation",
+		"resources_consumed": ["coal", "iron", "copper", "silver", "gold"],
+		"bonus_per_resource": {
+			"production": 1
+		},
+		"base_bonus": {
+			"production": 1
+		},
+		"maintenance_per_city": 3,
+		"maintenance_per_resource": 1,
+		"spread_cost": 100,
+		"color": "#8B4513"
+	},
+	"sids_sushi": {
+		"name": "Sid's Sushi Co.",
+		"description": "A global restaurant chain specializing in seafood cuisine.",
+		"headquarter_building": "sids_sushi_hq",
+		"founded_by": "great_merchant",
+		"tech_required": "corporation",
+		"resources_consumed": ["fish", "rice", "clam", "crab"],
+		"bonus_per_resource": {
+			"food": 1
+		},
+		"base_bonus": {
+			"food": 1,
+			"culture": 1
+		},
+		"maintenance_per_city": 3,
+		"maintenance_per_resource": 1,
+		"spread_cost": 100,
+		"color": "#FF6347"
+	},
+	"cereal_mills": {
+		"name": "Cereal Mills",
+		"description": "Processes grains into food products for mass consumption.",
+		"headquarter_building": "cereal_mills_hq",
+		"founded_by": "great_merchant",
+		"tech_required": "corporation",
+		"resources_consumed": ["wheat", "corn", "rice"],
+		"bonus_per_resource": {
+			"food": 2
+		},
+		"base_bonus": {
+			"food": 1
+		},
+		"maintenance_per_city": 2,
+		"maintenance_per_resource": 1,
+		"spread_cost": 80,
+		"color": "#DAA520"
+	},
+	"standard_ethanol": {
+		"name": "Standard Ethanol",
+		"description": "Converts agricultural products into biofuel for industrial use.",
+		"headquarter_building": "standard_ethanol_hq",
+		"founded_by": "great_engineer",
+		"tech_required": "corporation",
+		"resources_consumed": ["corn", "sugar", "wheat"],
+		"bonus_per_resource": {
+			"production": 1
+		},
+		"base_bonus": {
+			"production": 1
+		},
+		"maintenance_per_city": 2,
+		"maintenance_per_resource": 1,
+		"spread_cost": 80,
+		"color": "#228B22"
+	},
+	"creative_constructions": {
+		"name": "Creative Constructions",
+		"description": "Architectural firm known for innovative building designs.",
+		"headquarter_building": "creative_constructions_hq",
+		"founded_by": "great_engineer",
+		"tech_required": "corporation",
+		"resources_consumed": ["aluminum", "iron", "copper", "marble", "stone"],
+		"bonus_per_resource": {
+			"production": 1,
+			"culture": 1
+		},
+		"base_bonus": {
+			"culture": 2
+		},
+		"maintenance_per_city": 4,
+		"maintenance_per_resource": 2,
+		"spread_cost": 120,
+		"color": "#4169E1"
+	},
+	"civilized_jewelers": {
+		"name": "Civilized Jewelers",
+		"description": "Luxury jewelry and accessories manufacturer.",
+		"headquarter_building": "civilized_jewelers_hq",
+		"founded_by": "great_merchant",
+		"tech_required": "corporation",
+		"resources_consumed": ["gold", "silver", "gems", "ivory"],
+		"bonus_per_resource": {
+			"culture": 1,
+			"gold": 2
+		},
+		"base_bonus": {
+			"culture": 1,
+			"happiness": 1
+		},
+		"maintenance_per_city": 4,
+		"maintenance_per_resource": 2,
+		"spread_cost": 120,
+		"color": "#FFD700"
+	},
+	"aluminum_co": {
+		"name": "Aluminum Co.",
+		"description": "Aluminum smelting and manufacturing conglomerate.",
+		"headquarter_building": "aluminum_co_hq",
+		"founded_by": "great_engineer",
+		"tech_required": "industrialism",
+		"resources_consumed": ["coal", "aluminum", "iron"],
+		"bonus_per_resource": {
+			"production": 2
+		},
+		"base_bonus": {
+			"production": 1
+		},
+		"maintenance_per_city": 3,
+		"maintenance_per_resource": 2,
+		"spread_cost": 100,
+		"color": "#C0C0C0"
+	}
+}

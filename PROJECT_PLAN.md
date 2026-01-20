@@ -17,7 +17,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Religion | Basic | 70% |
 | Victory Conditions | Complete | 100% |
 | Civics | Complete | 100% |
-| Corporations | Not Started | 0% |
+| Corporations | Basic | 70% |
 | Espionage | Not Started | 0% |
 | Events | Not Started | 0% |
 | Multiplayer | Not Started | 0% |
@@ -419,29 +419,40 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 14: Corporations (NOT STARTED)
+## Phase 14: Corporations (70% COMPLETE)
 
-### To Implement
-- [ ] Corporation founding via Great People
-- [ ] Corporation spread mechanics
-- [ ] Corporation headquarters
-- [ ] Resource consumption for bonuses
-- [ ] Corporation maintenance costs
-- [ ] Executive units for spreading
+### Implemented
+- [x] Corporation data with all 7 BTS corporations
+- [x] Corporation founding via Great People (Great Merchant/Engineer)
+- [x] Corporation spread mechanics via executive units
+- [x] Corporation headquarters tracking
+- [x] Resource consumption for city bonuses (food, production, culture, gold, happiness)
+- [x] Corporation maintenance costs per city and per resource
+- [x] Headquarters income from foreign cities
+- [x] Tech requirements for corporations
+- [x] Corporation serialization
+
+### Not Implemented
+- [ ] Executive units for spreading (unit data needed)
 - [ ] Corporation screen UI
-- [ ] Building requirements for corporations
+- [ ] State Property civic disabling corporations
+- [ ] Corporation buildings in cities
+
+### Files
+- `scripts/systems/corporation_system.gd`
+- `data/corporations.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/GameInfo/CIV4CorporationInfo.xml` - 7 corporations
 
-### Corporations from Civ4 BTS:
-1. **Mining Inc** - Requires coal/iron/copper, produces production
-2. **Sid's Sushi** - Requires rice/fish/clam/crab, produces food
-3. **Cereal Mills** - Requires wheat/corn/rice, produces food
-4. **Standard Ethanol** - Requires corn/sugar/wheat, produces production
-5. **Creative Constructions** - Requires aluminum/iron/copper, produces production/culture
-6. **Civilized Jewelers** - Requires gold/silver/gems, produces culture/gold
-7. **Aluminum Co** - Requires coal/aluminum, produces production
+### Corporations Implemented:
+1. **Mining Inc** - Great Engineer, consumes coal/iron/copper/silver/gold, +production
+2. **Sid's Sushi** - Great Merchant, consumes fish/rice/clam/crab, +food/culture
+3. **Cereal Mills** - Great Merchant, consumes wheat/corn/rice, +food
+4. **Standard Ethanol** - Great Engineer, consumes corn/sugar/wheat, +production
+5. **Creative Constructions** - Great Engineer, consumes aluminum/iron/copper/marble/stone, +production/culture
+6. **Civilized Jewelers** - Great Merchant, consumes gold/silver/gems/ivory, +culture/gold/happiness
+7. **Aluminum Co** - Great Engineer, consumes coal/aluminum/iron, +production
 
 ---
 
@@ -624,7 +635,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 1. ~~**Full Diplomacy** - Trade negotiations~~ (COMPLETE)
 2. ~~**AI Improvements** - More competitive AI~~ (75% COMPLETE)
 3. **Espionage** - BTS signature feature
-4. **Corporations** - BTS signature feature
+4. ~~**Corporations** - BTS signature feature~~ (70% COMPLETE)
 
 ### Medium Priority
 5. **Projects** - Space race completion
