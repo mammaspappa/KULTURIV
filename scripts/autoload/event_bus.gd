@@ -69,6 +69,14 @@ signal corporation_spread(corporation_id, city)
 signal corporation_destroyed(corporation_id)
 signal corporation_hq_moved(corporation_id, new_city)
 
+# Espionage events
+signal espionage_points_changed(player_id, target_id, new_amount)
+signal espionage_mission_executed(player_id, target_id, mission_id, result)
+signal espionage_discovered(victim_id, perpetrator_id, mission_id)
+signal spy_placed(spy_unit, city)
+signal spy_captured(spy_unit, city)
+signal spy_escaped(spy_unit)
+
 # Culture events
 signal culture_expanded(city, new_radius)
 signal great_person_born(city, great_person_type)

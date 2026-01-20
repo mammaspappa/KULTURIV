@@ -18,6 +18,7 @@ var civics: Dictionary = {}
 var specialists: Dictionary = {}
 var handicaps: Dictionary = {}
 var corporations: Dictionary = {}
+var espionage_missions: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -42,6 +43,7 @@ func _load_all_data() -> void:
 	specialists = _load_json("specialists.json")
 	handicaps = _load_json("handicaps.json")
 	corporations = _load_json("corporations.json")
+	espionage_missions = _load_json("espionage_missions.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -396,4 +398,35 @@ func get_corporations_by_founder(gp_type: String) -> Array:
 		var corp = corporations[corp_id]
 		if corp.get("founded_by", "") == gp_type:
 			result.append(corp_id)
+	return result
+
+# Espionage mission accessors
+func get_espionage_mission(mission_id: String) -> Dictionary:
+	return espionage_missions.get(mission_id, {})
+
+func get_espionage_mission_name(mission_id: String) -> String:
+	var mission = get_espionage_mission(mission_id)
+	return mission.get("name", mission_id.capitalize())
+
+func get_all_espionage_missions() -> Dictionary:
+	return espionage_missions
+
+func get_espionage_missions_by_target_type(target_type: String) -> Array:
+	var result = []
+	for mission_id in espionage_missions:
+		if mission_id.begins_with("_"):
+			continue
+		var mission = espionage_missions[mission_id]
+		if mission.get("target_type", "") == target_type:
+			result.append(mission_id)
+	return result
+
+func get_espionage_missions_requiring_spy() -> Array:
+	var result = []
+	for mission_id in espionage_missions:
+		if mission_id.begins_with("_"):
+			continue
+		var mission = espionage_missions[mission_id]
+		if mission.get("requires_spy_in_city", false):
+			result.append(mission_id)
 	return result

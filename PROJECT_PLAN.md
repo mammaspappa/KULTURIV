@@ -18,7 +18,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Victory Conditions | Complete | 100% |
 | Civics | Complete | 100% |
 | Corporations | Basic | 70% |
-| Espionage | Not Started | 0% |
+| Espionage | Basic | 75% |
 | Events | Not Started | 0% |
 | Multiplayer | Not Started | 0% |
 
@@ -456,32 +456,70 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 15: Espionage (NOT STARTED)
+## Phase 15: Espionage (75% COMPLETE)
 
-### To Implement
-- [ ] Espionage points generation
-- [ ] Espionage point distribution per rival
-- [ ] Spy unit creation and movement
-- [ ] Espionage missions:
-  - [ ] See demographics
-  - [ ] Investigate city
-  - [ ] See research
-  - [ ] Steal treasury
-  - [ ] Sabotage production
-  - [ ] Destroy building
-  - [ ] Destroy improvement
-  - [ ] City revolt
-  - [ ] Poison water
-  - [ ] Unhappiness
-  - [ ] Counter-espionage
-  - [ ] Steal technology
-  - [ ] Switch civic
-  - [ ] Switch religion
-- [ ] Great Spy abilities
+### Implemented
+- [x] Espionage points generation per turn
+- [x] Espionage point accumulation per rival
+- [x] Spy placement in enemy cities
+- [x] 15 espionage missions with full mechanics:
+  - [x] See Demographics (100% success, no discovery)
+  - [x] Investigate City (reveals buildings, production)
+  - [x] See Research (reveals current research)
+  - [x] Steal Treasury (up to 25% / 500 gold)
+  - [x] Sabotage Production (destroys production progress)
+  - [x] Destroy Building (50% success, 50% discovery)
+  - [x] Destroy Improvement (80% success, 20% discovery)
+  - [x] Incite City Revolt (3 turns of revolt)
+  - [x] Poison Water (health penalty for 5 turns)
+  - [x] Spread Unhappiness (happiness penalty for 5 turns)
+  - [x] Counter-Espionage (+50% defense for 10 turns)
+  - [x] Steal Technology (35% success, 70% discovery)
+  - [x] Force Civic Change (25% success)
+  - [x] Force Religion Change (30% success)
+  - [x] Expose Enemy Spy (capture spies in own territory)
+- [x] Mission success/failure calculation with modifiers
+- [x] Discovery chance calculation
+- [x] Spy capture on discovery
+- [x] Mission cooldowns
+- [x] Counter-espionage defense system
+- [x] Tech requirements for missions
+- [x] Distance-based cost modifiers
+- [x] Diplomatic penalty on discovery
+- [x] Full serialization support
+
+### Not Implemented
 - [ ] Espionage screen UI
+- [ ] Espionage point slider for distribution
+- [ ] Great Spy unit and abilities
+- [ ] AI espionage operations
+- [ ] Buildings that boost espionage (Intelligence Agency, Security Bureau)
+
+### Files
+- `scripts/systems/espionage_system.gd`
+- `data/espionage_missions.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/GameInfo/CIV4EspionageMissionInfo.xml` - 20+ missions
+
+### Espionage Missions Implemented:
+| Mission | Base Cost | Success % | Discovery % | Requires Spy |
+|---------|-----------|-----------|-------------|--------------|
+| See Demographics | 50 | 100% | 0% | No |
+| Investigate City | 100 | 100% | 10% | Yes |
+| See Research | 75 | 100% | 5% | No |
+| Steal Treasury | 200 | 70% | 30% | Yes |
+| Sabotage Production | 300 | 60% | 40% | Yes |
+| Destroy Building | 400 | 50% | 50% | Yes |
+| Destroy Improvement | 150 | 80% | 20% | No |
+| Incite Revolt | 500 | 40% | 60% | Yes |
+| Poison Water | 350 | 55% | 45% | Yes |
+| Spread Unhappiness | 300 | 60% | 35% | Yes |
+| Counter-Espionage | 100 | 100% | 0% | No |
+| Steal Technology | 600 | 35% | 70% | Yes |
+| Force Civic Change | 800 | 25% | 80% | Yes |
+| Force Religion Change | 700 | 30% | 75% | Yes |
+| Expose Enemy Spy | 150 | 50% | 0% | No |
 
 ---
 
@@ -614,16 +652,16 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 |------|---------|--------|
 | civics.json | 25 | Complete |
 | specialists.json | 15 | Complete |
+| handicaps.json | 9 | Complete |
+| corporations.json | 7 | Complete |
+| espionage_missions.json | 15 | Complete |
 
 ### To Add
 | File | Reference | Purpose |
 |------|-----------|---------|
-| corporations.json | CIV4CorporationInfo.xml | Corporation system |
-| espionage.json | CIV4EspionageMissionInfo.xml | Espionage missions |
 | events.json | CIV4EventInfos.xml | Random events |
 | projects.json | CIV4ProjectInfo.xml | National/world projects |
 | votes.json | CIV4VoteInfo.xml | UN resolutions |
-| handicaps.json | CIV4HandicapInfo.xml | Difficulty levels |
 | game_speeds.json | CIV4GameSpeedInfo.xml | Game speed modifiers |
 | eras.json | CIV4EraInfos.xml | Era definitions |
 
@@ -634,7 +672,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 ### High Priority (Next Phase)
 1. ~~**Full Diplomacy** - Trade negotiations~~ (COMPLETE)
 2. ~~**AI Improvements** - More competitive AI~~ (75% COMPLETE)
-3. **Espionage** - BTS signature feature
+3. ~~**Espionage** - BTS signature feature~~ (75% COMPLETE)
 4. ~~**Corporations** - BTS signature feature~~ (70% COMPLETE)
 
 ### Medium Priority

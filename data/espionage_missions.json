@@ -1,0 +1,220 @@
+{
+	"_metadata": {
+		"description": "Espionage missions for KulturIV",
+		"note": "Missions require espionage points accumulated against target. Some missions require spy in target city."
+	},
+	"see_demographics": {
+		"name": "See Demographics",
+		"description": "View detailed information about target civilization's demographics.",
+		"base_cost": 50,
+		"tech_required": "",
+		"requires_spy_in_city": false,
+		"requires_war": false,
+		"target_type": "player",
+		"effects": {
+			"reveal_demographics": true
+		},
+		"success_chance_base": 100,
+		"discovery_chance": 0
+	},
+	"investigate_city": {
+		"name": "Investigate City",
+		"description": "Reveal all buildings, units, and production in a city.",
+		"base_cost": 100,
+		"tech_required": "",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "city",
+		"effects": {
+			"reveal_city_info": true
+		},
+		"success_chance_base": 100,
+		"discovery_chance": 10
+	},
+	"see_research": {
+		"name": "See Research",
+		"description": "Discover what technology the target is researching.",
+		"base_cost": 75,
+		"tech_required": "",
+		"requires_spy_in_city": false,
+		"requires_war": false,
+		"target_type": "player",
+		"effects": {
+			"reveal_research": true
+		},
+		"success_chance_base": 100,
+		"discovery_chance": 5
+	},
+	"steal_treasury": {
+		"name": "Steal Treasury",
+		"description": "Steal gold from the target civilization's treasury.",
+		"base_cost": 200,
+		"tech_required": "currency",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "city",
+		"effects": {
+			"steal_gold_percent": 25,
+			"max_gold": 500
+		},
+		"success_chance_base": 70,
+		"discovery_chance": 30
+	},
+	"sabotage_production": {
+		"name": "Sabotage Production",
+		"description": "Destroy current production progress in a city.",
+		"base_cost": 300,
+		"tech_required": "",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "city",
+		"effects": {
+			"destroy_production": true
+		},
+		"success_chance_base": 60,
+		"discovery_chance": 40
+	},
+	"destroy_building": {
+		"name": "Destroy Building",
+		"description": "Destroy a building in the target city.",
+		"base_cost": 400,
+		"tech_required": "",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "building",
+		"effects": {
+			"destroy_building": true
+		},
+		"success_chance_base": 50,
+		"discovery_chance": 50
+	},
+	"destroy_improvement": {
+		"name": "Destroy Improvement",
+		"description": "Pillage a tile improvement in enemy territory.",
+		"base_cost": 150,
+		"tech_required": "",
+		"requires_spy_in_city": false,
+		"requires_war": false,
+		"target_type": "tile",
+		"effects": {
+			"destroy_improvement": true
+		},
+		"success_chance_base": 80,
+		"discovery_chance": 20
+	},
+	"incite_revolt": {
+		"name": "Incite City Revolt",
+		"description": "Cause unrest and resistance in a city for several turns.",
+		"base_cost": 500,
+		"tech_required": "nationalism",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "city",
+		"effects": {
+			"revolt_turns": 3
+		},
+		"success_chance_base": 40,
+		"discovery_chance": 60
+	},
+	"poison_water": {
+		"name": "Poison Water Supply",
+		"description": "Reduce city health, causing population loss.",
+		"base_cost": 350,
+		"tech_required": "biology",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "city",
+		"effects": {
+			"health_penalty": -4,
+			"duration_turns": 5
+		},
+		"success_chance_base": 55,
+		"discovery_chance": 45
+	},
+	"spread_unhappiness": {
+		"name": "Spread Unhappiness",
+		"description": "Cause civil unrest reducing happiness in a city.",
+		"base_cost": 300,
+		"tech_required": "",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "city",
+		"effects": {
+			"happiness_penalty": -3,
+			"duration_turns": 5
+		},
+		"success_chance_base": 60,
+		"discovery_chance": 35
+	},
+	"counter_espionage": {
+		"name": "Counter-Espionage",
+		"description": "Increase defense against enemy spies for several turns.",
+		"base_cost": 100,
+		"tech_required": "",
+		"requires_spy_in_city": false,
+		"requires_war": false,
+		"target_type": "self",
+		"effects": {
+			"counter_espionage_bonus": 50,
+			"duration_turns": 10
+		},
+		"success_chance_base": 100,
+		"discovery_chance": 0
+	},
+	"steal_technology": {
+		"name": "Steal Technology",
+		"description": "Steal a random technology that the target has but you don't.",
+		"base_cost": 600,
+		"tech_required": "scientific_method",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "player",
+		"effects": {
+			"steal_tech": true
+		},
+		"success_chance_base": 35,
+		"discovery_chance": 70
+	},
+	"switch_civic": {
+		"name": "Force Civic Change",
+		"description": "Force the target civilization to change a civic.",
+		"base_cost": 800,
+		"tech_required": "mass_media",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "player",
+		"effects": {
+			"force_civic_change": true
+		},
+		"success_chance_base": 25,
+		"discovery_chance": 80
+	},
+	"switch_religion": {
+		"name": "Force State Religion Change",
+		"description": "Force the target civilization to change state religion.",
+		"base_cost": 700,
+		"tech_required": "theology",
+		"requires_spy_in_city": true,
+		"requires_war": false,
+		"target_type": "player",
+		"effects": {
+			"force_religion_change": true
+		},
+		"success_chance_base": 30,
+		"discovery_chance": 75
+	},
+	"expose_spy": {
+		"name": "Expose Enemy Spy",
+		"description": "Attempt to capture and eliminate an enemy spy in your territory.",
+		"base_cost": 150,
+		"tech_required": "",
+		"requires_spy_in_city": false,
+		"requires_war": false,
+		"target_type": "self",
+		"effects": {
+			"expose_spy": true
+		},
+		"success_chance_base": 50,
+		"discovery_chance": 0
+	}
+}
