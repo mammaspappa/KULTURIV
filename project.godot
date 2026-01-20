@@ -36,6 +36,7 @@ DiplomacySystem="*res://scripts/systems/diplomacy_system.gd"
 CorporationSystem="*res://scripts/systems/corporation_system.gd"
 EspionageSystem="*res://scripts/systems/espionage_system.gd"
 ProjectsSystem="*res://scripts/systems/projects_system.gd"
+EventsSystem="*res://scripts/systems/events_system.gd"
 
 [display]
 

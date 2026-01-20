@@ -82,6 +82,10 @@ signal project_completed(player_id, project_id, city)
 signal spaceship_ready(player_id)
 signal spaceship_launched(player_id, success)
 
+# Random event signals
+signal random_event_triggered(event_data)
+signal random_event_resolved(player_id, event_id, choice_index)
+
 # Culture events
 signal culture_expanded(city, new_radius)
 signal great_person_born(city, great_person_type)

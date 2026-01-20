@@ -20,7 +20,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Corporations | Basic | 70% |
 | Espionage | Basic | 75% |
 | Projects | Basic | 80% |
-| Events | Not Started | 0% |
+| Events | Basic | 75% |
 | Multiplayer | Not Started | 0% |
 
 ---
@@ -524,29 +524,59 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 16: Random Events (NOT STARTED)
+## Phase 16: Random Events (75% COMPLETE)
 
-### To Implement
-- [ ] Event trigger system
-- [ ] Random event selection
-- [ ] Event choices with consequences
-- [ ] Quest events (multi-turn)
-- [ ] Global events
-- [ ] Event text and UI popup
+### Implemented
+- [x] Event trigger system with multiple conditions
+- [x] Weight-based random event selection
+- [x] Event choices with various consequences
+- [x] Temporary effects with duration tracking
+- [x] Event cooldowns to prevent spam
+- [x] Non-recurring events tracking
+- [x] 20 diverse events across multiple categories
+- [x] Full serialization support
+
+### Events Implemented:
+| Category | Events |
+|----------|--------|
+| Natural Disaster | Forest Fire, Earthquake, Flood |
+| Disaster | Plague, Mine Collapse |
+| Discovery | Gold Discovery, Ancient Ruins |
+| Economic | Merchant Caravan, Trade Opportunity |
+| Cultural | Religious Festival, Great Artist Born |
+| Science | Scientific Breakthrough |
+| Military | Barbarian Raiders |
+| Diplomatic | Diplomatic Incident, Spy Discovered |
+| Growth | Population Boom, Skilled Immigrants |
+| Unrest | Rebellion Brewing |
+| Religious | Wandering Prophet |
+| Prosperity | Bountiful Harvest |
+
+### Event Effects Supported:
+- Gold changes (immediate or per-turn)
+- Population changes
+- Food/Production/Research bonuses
+- Happiness/Health modifiers (temporary)
+- Culture gains
+- Feature/Improvement changes
+- Diplomatic modifiers
+- Espionage effects
+- Religion spreading
+- City revolt chances
+
+### Not Implemented
+- [ ] Quest events (multi-turn chains)
+- [ ] Global events (affect all players)
+- [ ] Event popup UI
+- [ ] AI event handling
+
+### Files
+- `scripts/systems/events_system.gd`
+- `data/events.json`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/Events/CIV4EventInfos.xml` - 200+ events
 - `beyond/Beyond the Sword/Assets/XML/Events/CIV4EventTriggerInfos.xml` - Event triggers
-
-### Event Categories:
-- Natural disasters (forest fire, earthquake, hurricane)
-- Resource discovery
-- Diplomatic incidents
-- Religious events
-- Cultural events
-- Economic events
-- Military events
-- Quest chains
 
 ---
 
@@ -680,11 +710,11 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | corporations.json | 7 | Complete |
 | espionage_missions.json | 15 | Complete |
 | projects.json | 11 | Complete |
+| events.json | 20 | Complete |
 
 ### To Add
 | File | Reference | Purpose |
 |------|-----------|---------|
-| events.json | CIV4EventInfos.xml | Random events |
 | votes.json | CIV4VoteInfo.xml | UN resolutions |
 | game_speeds.json | CIV4GameSpeedInfo.xml | Game speed modifiers |
 | eras.json | CIV4EraInfos.xml | Era definitions |
@@ -701,7 +731,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ### Medium Priority
 5. ~~**Projects** - Space race completion~~ (80% COMPLETE)
-6. **Random Events** - Adds variety
+6. ~~**Random Events** - Adds variety~~ (75% COMPLETE)
 
 ### Low Priority
 9. **UN/Voting** - Diplomatic victory polish

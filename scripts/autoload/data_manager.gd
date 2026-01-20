@@ -20,6 +20,7 @@ var handicaps: Dictionary = {}
 var corporations: Dictionary = {}
 var espionage_missions: Dictionary = {}
 var projects: Dictionary = {}
+var random_events: Dictionary = {}
 
 # Data paths
 const DATA_PATH = "res://data/"
@@ -46,6 +47,7 @@ func _load_all_data() -> void:
 	corporations = _load_json("corporations.json")
 	espionage_missions = _load_json("espionage_missions.json")
 	projects = _load_json("projects.json")
+	random_events = _load_json("events.json")
 	print("DataManager: All data loaded")
 
 func _load_json(filename: String) -> Dictionary:
@@ -466,4 +468,25 @@ func get_spaceship_parts() -> Array:
 		var project = projects[project_id]
 		if project.get("spaceship_part", false):
 			result.append(project_id)
+	return result
+
+# Random event accessors
+func get_random_event(event_id: String) -> Dictionary:
+	return random_events.get(event_id, {})
+
+func get_random_event_name(event_id: String) -> String:
+	var event = get_random_event(event_id)
+	return event.get("name", event_id.capitalize())
+
+func get_all_random_events() -> Dictionary:
+	return random_events
+
+func get_random_events_by_category(category: String) -> Array:
+	var result = []
+	for event_id in random_events:
+		if event_id.begins_with("_"):
+			continue
+		var event = random_events[event_id]
+		if event.get("category", "") == category:
+			result.append(event_id)
 	return result

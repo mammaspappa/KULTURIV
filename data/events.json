@@ -1,0 +1,633 @@
+{
+	"_metadata": {
+		"description": "Random events for KulturIV",
+		"note": "Events have triggers (conditions to fire) and choices with effects"
+	},
+	"forest_fire": {
+		"name": "Forest Fire",
+		"description": "A fire has broken out in the forests near {city}!",
+		"category": "natural_disaster",
+		"weight": 100,
+		"recurring": true,
+		"triggers": {
+			"requires_feature": "forest",
+			"min_turn": 20
+		},
+		"choices": [
+			{
+				"text": "Send workers to contain the blaze",
+				"effects": {
+					"gold": -10
+				}
+			},
+			{
+				"text": "Let it burn itself out",
+				"effects": {
+					"remove_feature": "forest",
+					"gold": -4
+				}
+			},
+			{
+				"text": "Use the opportunity for a controlled burn",
+				"effects": {
+					"remove_feature": "forest",
+					"production_bonus": 20,
+					"production_bonus_turns": 5
+				}
+			}
+		]
+	},
+	"earthquake": {
+		"name": "Earthquake",
+		"description": "A powerful earthquake has struck {city}!",
+		"category": "natural_disaster",
+		"weight": 50,
+		"recurring": true,
+		"triggers": {
+			"min_population": 4,
+			"min_turn": 30
+		},
+		"choices": [
+			{
+				"text": "Focus on rescue efforts",
+				"effects": {
+					"gold": -50,
+					"population": -1
+				}
+			},
+			{
+				"text": "Rebuild stronger than before",
+				"effects": {
+					"gold": -100,
+					"production_bonus": 10,
+					"production_bonus_turns": 10
+				}
+			}
+		]
+	},
+	"flood": {
+		"name": "Flood",
+		"description": "Heavy rains have caused flooding near {city}.",
+		"category": "natural_disaster",
+		"weight": 80,
+		"recurring": true,
+		"triggers": {
+			"requires_terrain": ["grassland", "plains"],
+			"min_turn": 15
+		},
+		"choices": [
+			{
+				"text": "Divert resources to flood relief",
+				"effects": {
+					"gold": -20,
+					"food_bonus": 10,
+					"food_bonus_turns": 3
+				}
+			},
+			{
+				"text": "Let nature take its course",
+				"effects": {
+					"pillage_improvement": true
+				}
+			}
+		]
+	},
+	"plague": {
+		"name": "Plague Outbreak",
+		"description": "A terrible plague has broken out in {city}!",
+		"category": "disaster",
+		"weight": 40,
+		"recurring": true,
+		"triggers": {
+			"min_population": 6,
+			"negative_health": true,
+			"min_turn": 50
+		},
+		"choices": [
+			{
+				"text": "Quarantine the affected areas",
+				"effects": {
+					"health": -2,
+					"health_turns": 5
+				}
+			},
+			{
+				"text": "Pray for divine intervention",
+				"effects": {
+					"population": -2
+				}
+			},
+			{
+				"text": "Hire doctors from abroad",
+				"effects": {
+					"gold": -100,
+					"health": 1,
+					"health_turns": 10
+				},
+				"requires_tech": "medicine"
+			}
+		]
+	},
+	"gold_discovery": {
+		"name": "Gold Discovery",
+		"description": "Workers near {city} have discovered gold deposits!",
+		"category": "discovery",
+		"weight": 30,
+		"recurring": false,
+		"triggers": {
+			"requires_improvement": "mine",
+			"no_resource": true,
+			"min_turn": 25
+		},
+		"choices": [
+			{
+				"text": "Establish a mining operation",
+				"effects": {
+					"gold": 100
+				}
+			},
+			{
+				"text": "Keep it quiet for now",
+				"effects": {
+					"gold": 25,
+					"gold_per_turn": 2,
+					"gold_per_turn_turns": 20
+				}
+			}
+		]
+	},
+	"ancient_ruins": {
+		"name": "Ancient Ruins Discovered",
+		"description": "Explorers have discovered ancient ruins in your territory!",
+		"category": "discovery",
+		"weight": 60,
+		"recurring": false,
+		"triggers": {
+			"min_turn": 10
+		},
+		"choices": [
+			{
+				"text": "Excavate the ruins",
+				"effects": {
+					"gold": 50,
+					"culture": 20
+				}
+			},
+			{
+				"text": "Study them carefully",
+				"effects": {
+					"research_bonus": 15,
+					"culture": 10
+				}
+			},
+			{
+				"text": "Preserve them as a monument",
+				"effects": {
+					"culture": 50
+				}
+			}
+		]
+	},
+	"merchant_caravan": {
+		"name": "Merchant Caravan",
+		"description": "A wealthy merchant caravan seeks passage through {city}.",
+		"category": "economic",
+		"weight": 100,
+		"recurring": true,
+		"triggers": {
+			"has_road": true,
+			"min_turn": 20
+		},
+		"choices": [
+			{
+				"text": "Welcome them and trade",
+				"effects": {
+					"gold": 30
+				}
+			},
+			{
+				"text": "Tax them heavily",
+				"effects": {
+					"gold": 60,
+					"happiness": -1,
+					"happiness_turns": 3
+				}
+			},
+			{
+				"text": "Offer protection for a fee",
+				"effects": {
+					"gold": 20,
+					"gold_per_turn": 1,
+					"gold_per_turn_turns": 10
+				}
+			}
+		]
+	},
+	"religious_festival": {
+		"name": "Religious Festival",
+		"description": "The people of {city} wish to celebrate a religious festival.",
+		"category": "cultural",
+		"weight": 80,
+		"recurring": true,
+		"triggers": {
+			"has_state_religion": true,
+			"min_turn": 30
+		},
+		"choices": [
+			{
+				"text": "Fund the festival generously",
+				"effects": {
+					"gold": -50,
+					"happiness": 2,
+					"happiness_turns": 10,
+					"culture": 15
+				}
+			},
+			{
+				"text": "Allow a modest celebration",
+				"effects": {
+					"happiness": 1,
+					"happiness_turns": 5
+				}
+			},
+			{
+				"text": "Forbid unnecessary spending",
+				"effects": {
+					"happiness": -1,
+					"happiness_turns": 3
+				}
+			}
+		]
+	},
+	"barbarian_threat": {
+		"name": "Barbarian Raiders",
+		"description": "Barbarian raiders have been spotted near {city}!",
+		"category": "military",
+		"weight": 70,
+		"recurring": true,
+		"triggers": {
+			"near_border": true,
+			"min_turn": 15
+		},
+		"choices": [
+			{
+				"text": "Hire mercenaries to deal with them",
+				"effects": {
+					"gold": -40
+				}
+			},
+			{
+				"text": "Send our troops to intercept",
+				"effects": {
+					"spawn_enemy_unit": "barbarian_warrior"
+				}
+			},
+			{
+				"text": "Fortify the city",
+				"effects": {
+					"gold": -20,
+					"defense_bonus": 10,
+					"defense_bonus_turns": 10
+				}
+			}
+		]
+	},
+	"great_artist_born": {
+		"name": "Prodigious Talent",
+		"description": "A person of great artistic talent has emerged in {city}!",
+		"category": "cultural",
+		"weight": 20,
+		"recurring": true,
+		"triggers": {
+			"min_culture": 100,
+			"min_turn": 50
+		},
+		"choices": [
+			{
+				"text": "Patronize their work",
+				"effects": {
+					"gold": -30,
+					"culture": 40,
+					"great_people_points": 5
+				}
+			},
+			{
+				"text": "Send them abroad for training",
+				"effects": {
+					"gold": -50,
+					"great_people_points": 15
+				}
+			}
+		]
+	},
+	"scientific_breakthrough": {
+		"name": "Scientific Breakthrough",
+		"description": "Scholars in {city} are on the verge of a breakthrough!",
+		"category": "science",
+		"weight": 40,
+		"recurring": true,
+		"triggers": {
+			"has_building": "library",
+			"min_turn": 40
+		},
+		"choices": [
+			{
+				"text": "Fund their research",
+				"effects": {
+					"gold": -75,
+					"research_bonus": 50
+				}
+			},
+			{
+				"text": "Let them work at their own pace",
+				"effects": {
+					"research_bonus": 15
+				}
+			}
+		]
+	},
+	"diplomatic_incident": {
+		"name": "Diplomatic Incident",
+		"description": "A diplomat from a foreign power has been insulted in {city}.",
+		"category": "diplomatic",
+		"weight": 30,
+		"recurring": true,
+		"triggers": {
+			"has_met_players": true,
+			"min_turn": 40
+		},
+		"choices": [
+			{
+				"text": "Offer formal apologies and compensation",
+				"effects": {
+					"gold": -30,
+					"diplomatic_favor": 2
+				}
+			},
+			{
+				"text": "Investigate the matter",
+				"effects": {
+					"diplomatic_penalty": -1
+				}
+			},
+			{
+				"text": "Dismiss the complaint",
+				"effects": {
+					"diplomatic_penalty": -3
+				}
+			}
+		]
+	},
+	"population_boom": {
+		"name": "Baby Boom",
+		"description": "Times of prosperity have led to a population boom in {city}!",
+		"category": "growth",
+		"weight": 50,
+		"recurring": true,
+		"triggers": {
+			"positive_happiness": true,
+			"positive_food": true,
+			"min_turn": 30
+		},
+		"choices": [
+			{
+				"text": "Celebrate the growth",
+				"effects": {
+					"food_bonus": 30,
+					"happiness": 1,
+					"happiness_turns": 5
+				}
+			},
+			{
+				"text": "Prepare for the future",
+				"effects": {
+					"food_bonus": 15,
+					"production_bonus": 10
+				}
+			}
+		]
+	},
+	"skilled_immigrants": {
+		"name": "Skilled Immigrants",
+		"description": "A group of skilled craftsmen seek to settle in {city}.",
+		"category": "immigration",
+		"weight": 40,
+		"recurring": true,
+		"triggers": {
+			"min_population": 5,
+			"min_turn": 35
+		},
+		"choices": [
+			{
+				"text": "Welcome them warmly",
+				"effects": {
+					"population": 1,
+					"production_bonus": 5,
+					"production_bonus_turns": 10
+				}
+			},
+			{
+				"text": "Restrict their settlement",
+				"effects": {
+					"gold": 20
+				}
+			}
+		]
+	},
+	"rebellion_brewing": {
+		"name": "Unrest",
+		"description": "Discontent is growing among the citizens of {city}.",
+		"category": "unrest",
+		"weight": 60,
+		"recurring": true,
+		"triggers": {
+			"negative_happiness": true,
+			"min_population": 4,
+			"min_turn": 30
+		},
+		"choices": [
+			{
+				"text": "Address their grievances",
+				"effects": {
+					"gold": -40,
+					"happiness": 2,
+					"happiness_turns": 10
+				}
+			},
+			{
+				"text": "Crack down on troublemakers",
+				"effects": {
+					"happiness": -1,
+					"happiness_turns": 3,
+					"production_bonus": 10,
+					"production_bonus_turns": 5
+				}
+			},
+			{
+				"text": "Ignore the complaints",
+				"effects": {
+					"revolt_chance": 20
+				}
+			}
+		]
+	},
+	"mine_collapse": {
+		"name": "Mine Collapse",
+		"description": "A mine near {city} has collapsed!",
+		"category": "disaster",
+		"weight": 50,
+		"recurring": true,
+		"triggers": {
+			"requires_improvement": "mine",
+			"min_turn": 25
+		},
+		"choices": [
+			{
+				"text": "Organize a rescue operation",
+				"effects": {
+					"gold": -30,
+					"production_penalty": -5,
+					"production_penalty_turns": 3
+				}
+			},
+			{
+				"text": "Close the mine temporarily",
+				"effects": {
+					"pillage_improvement": true
+				}
+			}
+		]
+	},
+	"bountiful_harvest": {
+		"name": "Bountiful Harvest",
+		"description": "The farms around {city} have produced a bountiful harvest!",
+		"category": "prosperity",
+		"weight": 80,
+		"recurring": true,
+		"triggers": {
+			"requires_improvement": "farm",
+			"min_turn": 15
+		},
+		"choices": [
+			{
+				"text": "Store food for hard times",
+				"effects": {
+					"food_bonus": 40
+				}
+			},
+			{
+				"text": "Sell surplus for profit",
+				"effects": {
+					"gold": 40
+				}
+			},
+			{
+				"text": "Share with the people",
+				"effects": {
+					"food_bonus": 20,
+					"happiness": 1,
+					"happiness_turns": 5
+				}
+			}
+		]
+	},
+	"wandering_prophet": {
+		"name": "Wandering Prophet",
+		"description": "A wandering prophet has arrived in {city} preaching a new faith.",
+		"category": "religious",
+		"weight": 40,
+		"recurring": true,
+		"triggers": {
+			"min_turn": 40,
+			"religions_founded": true
+		},
+		"choices": [
+			{
+				"text": "Listen to their teachings",
+				"effects": {
+					"spread_random_religion": true
+				}
+			},
+			{
+				"text": "Send them away",
+				"effects": {}
+			},
+			{
+				"text": "Persecute the heretic",
+				"effects": {
+					"happiness": -1,
+					"happiness_turns": 3
+				},
+				"requires_civic": "theocracy"
+			}
+		]
+	},
+	"trade_opportunity": {
+		"name": "Trade Opportunity",
+		"description": "A foreign trader offers exotic goods to {city}.",
+		"category": "economic",
+		"weight": 70,
+		"recurring": true,
+		"triggers": {
+			"has_met_players": true,
+			"min_turn": 30
+		},
+		"choices": [
+			{
+				"text": "Purchase their goods",
+				"effects": {
+					"gold": -50,
+					"happiness": 2,
+					"happiness_turns": 10
+				}
+			},
+			{
+				"text": "Negotiate a better deal",
+				"effects": {
+					"gold": -25,
+					"happiness": 1,
+					"happiness_turns": 5
+				}
+			},
+			{
+				"text": "Decline the offer",
+				"effects": {}
+			}
+		]
+	},
+	"spy_discovered": {
+		"name": "Spy Discovered",
+		"description": "A foreign spy has been discovered in {city}!",
+		"category": "espionage",
+		"weight": 30,
+		"recurring": true,
+		"triggers": {
+			"has_met_players": true,
+			"min_turn": 60
+		},
+		"choices": [
+			{
+				"text": "Execute the spy publicly",
+				"effects": {
+					"diplomatic_penalty": -2,
+					"espionage_defense": 10,
+					"espionage_defense_turns": 20
+				}
+			},
+			{
+				"text": "Imprison and interrogate",
+				"effects": {
+					"espionage_points": 50,
+					"diplomatic_penalty": -1
+				}
+			},
+			{
+				"text": "Expel them quietly",
+				"effects": {
+					"espionage_defense": 5,
+					"espionage_defense_turns": 10
+				}
+			}
+		]
+	}
+}
