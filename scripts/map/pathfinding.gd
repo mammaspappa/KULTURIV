@@ -23,11 +23,15 @@ func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 	if grid == null:
 		return path
 
-	if start == goal:
+	# Wrap positions for consistent handling
+	var wrapped_start = _wrap_grid_position(start)
+	var wrapped_goal = _wrap_grid_position(goal)
+
+	if wrapped_start == wrapped_goal:
 		return path
 
 	# Check if goal is reachable
-	var goal_tile = grid.get_tile(goal)
+	var goal_tile = grid.get_tile(wrapped_goal)
 	if goal_tile == null or not _is_tile_passable(goal_tile):
 		return path
 
@@ -37,16 +41,16 @@ func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 	var g_score: Dictionary = {}
 	var f_score: Dictionary = {}
 
-	g_score[start] = 0.0
-	f_score[start] = _heuristic(start, goal)
-	open_set.push(start, f_score[start])
+	g_score[wrapped_start] = 0.0
+	f_score[wrapped_start] = _heuristic(wrapped_start, wrapped_goal)
+	open_set.push(wrapped_start, f_score[wrapped_start])
 
 	var closed_set: Dictionary = {}
 
 	while not open_set.is_empty():
 		var current = open_set.pop()
 
-		if current == goal:
+		if current == wrapped_goal:
 			# Reconstruct path
 			path = _reconstruct_path(came_from, current)
 			total_cost = g_score[current]
@@ -57,33 +61,40 @@ func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 		# Check neighbors
 		var neighbors = GridUtils.get_neighbors(current)
 		for neighbor in neighbors:
-			if neighbor in closed_set:
+			# Wrap neighbor for consistent coordinates
+			var wrapped_neighbor = _wrap_grid_position(neighbor)
+
+			if wrapped_neighbor in closed_set:
 				continue
 
-			if not grid.is_valid_position(neighbor):
+			if not grid.is_valid_position(wrapped_neighbor):
 				continue
 
-			var neighbor_tile = grid.get_tile(neighbor)
+			var neighbor_tile = grid.get_tile(wrapped_neighbor)
 			if neighbor_tile == null or not _is_tile_passable(neighbor_tile):
 				continue
 
 			var move_cost = _get_movement_cost(neighbor_tile)
 			var tentative_g = g_score.get(current, INF) + move_cost
 
-			if tentative_g < g_score.get(neighbor, INF):
-				came_from[neighbor] = current
-				g_score[neighbor] = tentative_g
-				f_score[neighbor] = tentative_g + _heuristic(neighbor, goal)
+			if tentative_g < g_score.get(wrapped_neighbor, INF):
+				came_from[wrapped_neighbor] = current
+				g_score[wrapped_neighbor] = tentative_g
+				f_score[wrapped_neighbor] = tentative_g + _heuristic(wrapped_neighbor, wrapped_goal)
 
-				if not open_set.contains(neighbor):
-					open_set.push(neighbor, f_score[neighbor])
+				if not open_set.contains(wrapped_neighbor):
+					open_set.push(wrapped_neighbor, f_score[wrapped_neighbor])
 
 	# No path found
 	return path
 
 ## Find path considering movement points
 func find_path_with_movement(start: Vector2i, goal: Vector2i, movement_points: float) -> Array[Vector2i]:
-	var full_path = find_path(start, goal)
+	# Wrap positions for consistent handling
+	var wrapped_start = _wrap_grid_position(start)
+	var wrapped_goal = _wrap_grid_position(goal)
+
+	var full_path = find_path(wrapped_start, wrapped_goal)
 
 	if full_path.is_empty():
 		return full_path
@@ -120,8 +131,10 @@ func get_reachable_tiles(start: Vector2i, movement_points: float) -> Array[Vecto
 	var visited: Dictionary = {}
 	var queue = PriorityQueue.new()
 
-	distances[start] = 0.0
-	queue.push(start, 0.0)
+	# Wrap start position for consistent storage
+	var wrapped_start = _wrap_grid_position(start)
+	distances[wrapped_start] = 0.0
+	queue.push(wrapped_start, 0.0)
 
 	while not queue.is_empty():
 		var current = queue.pop()
@@ -131,18 +144,21 @@ func get_reachable_tiles(start: Vector2i, movement_points: float) -> Array[Vecto
 		visited[current] = true
 
 		var current_dist = distances.get(current, INF)
-		if current_dist <= movement_points and current != start:
+		if current_dist <= movement_points and current != wrapped_start:
 			reachable.append(current)
 
 		var neighbors = GridUtils.get_neighbors(current)
 		for neighbor in neighbors:
-			if neighbor in visited:
+			# Wrap neighbor position for consistent coordinate handling
+			var wrapped_neighbor = _wrap_grid_position(neighbor)
+
+			if wrapped_neighbor in visited:
 				continue
 
-			if not grid.is_valid_position(neighbor):
+			if not grid.is_valid_position(wrapped_neighbor):
 				continue
 
-			var neighbor_tile = grid.get_tile(neighbor)
+			var neighbor_tile = grid.get_tile(wrapped_neighbor)
 			if neighbor_tile == null or not _is_tile_passable(neighbor_tile):
 				continue
 
@@ -152,11 +168,22 @@ func get_reachable_tiles(start: Vector2i, movement_points: float) -> Array[Vecto
 			# Allow moving into tiles even if we don't have full movement
 			# (as long as we have any movement left)
 			if new_dist <= movement_points or (current_dist < movement_points and current_dist + 1 <= movement_points + 1):
-				if new_dist < distances.get(neighbor, INF):
-					distances[neighbor] = new_dist
-					queue.push(neighbor, new_dist)
+				if new_dist < distances.get(wrapped_neighbor, INF):
+					distances[wrapped_neighbor] = new_dist
+					queue.push(wrapped_neighbor, new_dist)
 
 	return reachable
+
+## Wrap grid position for consistent coordinate storage
+func _wrap_grid_position(pos: Vector2i) -> Vector2i:
+	if grid == null:
+		return pos
+	var result = pos
+	if grid.wrap_x:
+		result.x = posmod(pos.x, grid.width)
+	if grid.wrap_y:
+		result.y = posmod(pos.y, grid.height)
+	return result
 
 ## Get the cost to reach a specific tile
 func get_path_cost(start: Vector2i, goal: Vector2i) -> float:
@@ -202,9 +229,22 @@ func _get_movement_cost(tile) -> float:
 
 	return base_cost
 
-## Heuristic function (Chebyshev distance for 8-directional movement)
+## Heuristic function (Chebyshev distance for 8-directional movement, accounting for wrap)
 func _heuristic(from: Vector2i, to: Vector2i) -> float:
-	return float(GridUtils.chebyshev_distance(from, to))
+	var dx = abs(to.x - from.x)
+	var dy = abs(to.y - from.y)
+
+	# Account for X wrapping
+	if grid != null and grid.wrap_x:
+		var wrap_dx = grid.width - dx
+		dx = min(dx, wrap_dx)
+
+	# Account for Y wrapping
+	if grid != null and grid.wrap_y:
+		var wrap_dy = grid.height - dy
+		dy = min(dy, wrap_dy)
+
+	return float(max(dx, dy))
 
 ## Reconstruct path from came_from map
 func _reconstruct_path(came_from: Dictionary, current: Vector2i) -> Array[Vector2i]:
