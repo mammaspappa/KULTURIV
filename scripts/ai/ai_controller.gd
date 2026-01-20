@@ -236,7 +236,7 @@ func _worker_ai(unit, player, flavor: Dictionary) -> void:
 	var gold_flavor = flavor.get("gold", 5)
 
 	# If on owned tile without improvement, build one
-	if tile.owner == player and tile.improvement_id == "" and tile.road_level == 0:
+	if tile.tile_owner == player and tile.improvement_id == "" and tile.road_level == 0:
 		var improvements = ImprovementSystem.get_available_improvements(unit, tile)
 
 		if not improvements.is_empty():
@@ -313,7 +313,7 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 		var garrison = GameManager.get_units_at(city.grid_position)
 		var has_military = false
 		for g_unit in garrison:
-			if g_unit.owner == player and g_unit.get_strength() > 0:
+			if g_unit.player_owner == player and g_unit.get_strength() > 0:
 				has_military = true
 				break
 		if not has_military:
@@ -601,8 +601,8 @@ func _find_nearby_enemies(unit, player, range_val: int) -> Array:
 		if tile == null:
 			continue
 		var enemy = GameManager.get_unit_at(tile_pos)
-		if enemy != null and enemy.owner != player:
-			if GameManager.is_at_war(player, enemy.owner):
+		if enemy != null and enemy.player_owner != player:
+			if GameManager.is_at_war(player, enemy.player_owner):
 				enemies.append(enemy)
 
 	return enemies

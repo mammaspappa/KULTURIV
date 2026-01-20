@@ -50,8 +50,8 @@ func can_build(worker, tile, improvement_id: String) -> bool:
 
 	# Check tech requirement
 	var required_tech = improvement.get("required_tech", "")
-	if required_tech != "" and worker.owner != null:
-		if not worker.owner.has_tech(required_tech):
+	if required_tech != "" and worker.player_owner != null:
+		if not worker.player_owner.has_tech(required_tech):
 			return false
 
 	# Check resource requirements (some improvements only work with certain resources)
@@ -106,7 +106,7 @@ func can_build_railroad(worker, tile) -> bool:
 		return false
 
 	# Check tech requirement (usually railroad tech)
-	if worker.owner != null and not worker.owner.has_tech("railroad"):
+	if worker.player_owner != null and not worker.player_owner.has_tech("railroad"):
 		return false
 
 	return true

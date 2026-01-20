@@ -235,7 +235,7 @@ func _restore_save_data(data: Dictionary) -> bool:
 			for tile_pos in city.territory:
 				var tile = GameManager.hex_grid.get_tile(tile_pos) if GameManager.hex_grid else null
 				if tile:
-					tile.owner = owner
+					tile.tile_owner = owner
 					tile.city_owner = city
 					tile.update_visuals()
 

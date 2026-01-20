@@ -53,14 +53,14 @@ func _init() -> void:
 	pass
 
 func add_unit(unit) -> void:
-	unit.owner = self
+	unit.player_owner = self
 	units.append(unit)
 
 func remove_unit(unit) -> void:
 	units.erase(unit)
 
 func add_city(city) -> void:
-	city.owner = self
+	city.player_owner = self
 	cities.append(city)
 
 func remove_city(city) -> void:

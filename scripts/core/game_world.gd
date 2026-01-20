@@ -176,12 +176,12 @@ func _handle_left_click(screen_pos: Vector2) -> void:
 	var clicked_city = GameManager.get_city_at(grid_pos)
 
 	# If clicking on own unit, select it
-	if clicked_unit and clicked_unit.owner == GameManager.human_player:
+	if clicked_unit and clicked_unit.player_owner == GameManager.human_player:
 		_select_unit(clicked_unit)
 		return
 
 	# If clicking on own city, select it
-	if clicked_city and clicked_city.owner == GameManager.human_player:
+	if clicked_city and clicked_city.player_owner == GameManager.human_player:
 		_select_city(clicked_city)
 		return
 
@@ -203,7 +203,7 @@ func _handle_right_click(screen_pos: Vector2) -> void:
 		var target_unit = _get_unit_at_screen_pos(grid_pos)
 
 		# Attack enemy
-		if target_unit and target_unit.owner != selected_unit.owner:
+		if target_unit and target_unit.player_owner != selected_unit.player_owner:
 			if selected_unit.can_attack(target_unit):
 				_attack_unit(selected_unit, target_unit)
 				return
@@ -348,7 +348,7 @@ func _on_tile_clicked(tile: GameTile) -> void:
 	pass
 
 func _on_unit_selected(unit: Unit) -> void:
-	if unit.owner == GameManager.human_player:
+	if unit.player_owner == GameManager.human_player:
 		_update_reachable_tiles()
 
 func _on_unit_deselected(_unit: Unit) -> void:
@@ -407,7 +407,7 @@ func found_city(settler: Unit) -> City:
 		return null
 
 	var pos = settler.grid_position
-	var owner = settler.owner
+	var owner = settler.player_owner
 
 	# Get city name
 	var civ_data = DataManager.get_civ(owner.civilization_id)
@@ -424,7 +424,7 @@ func found_city(settler: Unit) -> City:
 	for tile_pos in city.territory:
 		var tile = game_grid.get_tile(tile_pos)
 		if tile:
-			tile.owner = owner
+			tile.tile_owner = owner
 			tile.city_owner = city
 			tile.update_visuals()
 
