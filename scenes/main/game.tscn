@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cxm5k6qgvwqhf"]
+[gd_scene load_steps=11 format=3 uid="uid://cxm5k6qgvwqhf"]
 
 [ext_resource type="Script" path="res://scenes/main/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://scripts/core/game_world.gd" id="2_game_world"]
@@ -7,7 +7,9 @@
 [ext_resource type="PackedScene" uid="uid://b7pqxm8ydw4k5" path="res://scenes/ui/tech_tree.tscn" id="5_tech_tree"]
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="6_minimap"]
 [ext_resource type="PackedScene" uid="uid://djr7kp2xv8m4n" path="res://scenes/ui/victory_screen.tscn" id="7_victory"]
-[ext_resource type="PackedScene" uid="uid://cx8m7plw9nqk2" path="res://scenes/ui/civics_screen.tscn" id="8_civics"]
+[ext_resource type="PackedScene" uid="uid://cx8m7plxanqk2" path="res://scenes/ui/civics_screen.tscn" id="8_civics"]
+[ext_resource type="PackedScene" uid="uid://dw3kpm8t7qr5n" path="res://scenes/ui/trade_screen.tscn" id="9_trade"]
+[ext_resource type="PackedScene" uid="uid://cx9k4pm7t8r2q" path="res://scenes/ui/diplomacy_screen.tscn" id="10_diplomacy"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
@@ -105,8 +107,8 @@ grow_vertical = 2
 
 [node name="UnitName" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
-text = "Warrior"
 theme_override_font_sizes/font_size = 18
+text = "Warrior"
 
 [node name="UnitStrength" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
@@ -118,7 +120,6 @@ text = "Movement: 1/1"
 
 [node name="UnitHealth" type="ProgressBar" parent="GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
-max_value = 100.0
 value = 100.0
 
 [node name="ActionButtons" type="HBoxContainer" parent="GameUI/UnitPanel/VBoxContainer"]
@@ -166,3 +167,7 @@ script = ExtResource("6_minimap")
 [node name="VictoryScreen" parent="." instance=ExtResource("7_victory")]
 
 [node name="CivicsScreen" parent="." instance=ExtResource("8_civics")]
+
+[node name="TradeScreen" parent="." instance=ExtResource("9_trade")]
+
+[node name="DiplomacyScreen" parent="." instance=ExtResource("10_diplomacy")]

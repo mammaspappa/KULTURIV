@@ -32,6 +32,7 @@ ReligionSystem="*res://scripts/systems/religion_system.gd"
 GreatPeopleSystem="*res://scripts/systems/great_people_system.gd"
 TradeSystem="*res://scripts/systems/trade_system.gd"
 CivicsSystem="*res://scripts/systems/civics_system.gd"
+DiplomacySystem="*res://scripts/systems/diplomacy_system.gd"
 
 [display]
 
@@ -106,7 +107,8 @@ open_civics={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":67,"key_label":0,"unicode":99,"echo":false,"script":null)
 ]
 }
-
-[rendering]
-
-renderer/rendering_method="forward_plus"
+open_diplomacy={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":68,"key_label":0,"unicode":100,"echo":false,"script":null)
+]
+}

@@ -105,6 +105,7 @@ func _setup_ui() -> void:
 
 func _setup_detail_panel() -> void:
 	var vbox = VBoxContainer.new()
+	vbox.name = "VBoxContainer"
 	vbox.position = Vector2(20, 20)
 	vbox.add_theme_constant_override("separation", 10)
 	detail_panel.add_child(vbox)
@@ -135,6 +136,13 @@ func _setup_detail_panel() -> void:
 	attitude_label = Label.new()
 	attitude_label.text = ""
 	vbox.add_child(attitude_label)
+
+	# Attitude breakdown (detailed)
+	var breakdown_label = Label.new()
+	breakdown_label.name = "BreakdownLabel"
+	breakdown_label.add_theme_font_size_override("font_size", 12)
+	breakdown_label.add_theme_color_override("font_color", Color.LIGHT_GRAY)
+	vbox.add_child(breakdown_label)
 
 	# Spacer
 	var spacer2 = Control.new()
@@ -285,52 +293,47 @@ func _update_detail_panel() -> void:
 	relation_label.text = "Status: " + relation_text
 	relation_label.add_theme_color_override("font_color", relation_color)
 
-	# Attitude (simplified)
+	# Attitude
 	var attitude = _calculate_attitude(selected_player)
 	attitude_label.text = "Attitude: " + attitude
+
+	# Color based on attitude
+	var attitude_color = Color.WHITE
+	match attitude:
+		"Friendly":
+			attitude_color = Color.GREEN
+		"Pleased":
+			attitude_color = Color.LIGHT_GREEN
+		"Cautious":
+			attitude_color = Color.YELLOW
+		"Annoyed":
+			attitude_color = Color.ORANGE
+		"Furious":
+			attitude_color = Color.RED
+	attitude_label.add_theme_color_override("font_color", attitude_color)
+
+	# Attitude breakdown
+	var breakdown_label = detail_panel.get_node_or_null("VBoxContainer/BreakdownLabel")
+	if breakdown_label == null:
+		# Find it in the children
+		for child in detail_panel.get_children():
+			if child is VBoxContainer:
+				breakdown_label = child.get_node_or_null("BreakdownLabel")
+				break
+
+	if breakdown_label:
+		var breakdown = DiplomacySystem.get_attitude_breakdown(selected_player, human)
+		var breakdown_text = ""
+		for item in breakdown:
+			var sign = "+" if item["value"] > 0 else ""
+			breakdown_text += "  %s%d: %s\n" % [sign, item["value"], item["reason"]]
+		breakdown_label.text = breakdown_text
 
 	# Show appropriate buttons
 	_update_action_buttons()
 
 func _calculate_attitude(player) -> String:
-	var human = GameManager.human_player
-	if human == null:
-		return "Unknown"
-
-	# Simplified attitude calculation
-	var score = 0
-
-	# War penalty
-	if GameManager.is_at_war(human, player):
-		return "Furious"
-
-	# Alliance bonus
-	if player.player_id in human.defensive_pact_with:
-		score += 5
-
-	# Open borders bonus
-	if player.player_id in human.open_borders_with:
-		score += 2
-
-	# Same religion bonus
-	if human.state_religion != "" and human.state_religion == player.state_religion:
-		score += 3
-
-	# Different religion penalty
-	if human.state_religion != "" and player.state_religion != "" and human.state_religion != player.state_religion:
-		score -= 2
-
-	# Convert to text
-	if score >= 6:
-		return "Friendly"
-	elif score >= 3:
-		return "Pleased"
-	elif score >= 0:
-		return "Cautious"
-	elif score >= -3:
-		return "Annoyed"
-	else:
-		return "Furious"
+	return DiplomacySystem.get_attitude_string(player, GameManager.human_player)
 
 func _update_action_buttons() -> void:
 	if selected_player == null:
@@ -412,10 +415,8 @@ func _on_trade_pressed() -> void:
 	if selected_player == null:
 		return
 
-	# Trade will be handled by trade system
-	# For now, just emit the signal
-	var offer = {}  # Empty offer to start
-	EventBus.trade_proposed.emit(GameManager.human_player, selected_player, offer)
+	# Open trade screen
+	EventBus.show_trade_screen.emit(GameManager.human_player, selected_player)
 
 func _on_war_declared(_aggressor, _target) -> void:
 	if visible:

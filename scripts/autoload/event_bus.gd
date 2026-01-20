@@ -87,6 +87,8 @@ signal show_diplomacy_screen(player)
 signal hide_diplomacy_screen()
 signal show_civics_screen()
 signal hide_civics_screen()
+signal show_trade_screen(from_player, to_player)
+signal hide_trade_screen()
 signal notification_added(message, type_name)
 
 # Game state events

@@ -74,6 +74,9 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("open_civics"):
 		EventBus.show_civics_screen.emit()
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("open_diplomacy"):
+		EventBus.show_diplomacy_screen.emit()
+		get_viewport().set_input_as_handled()
 
 func _on_turn_started(turn: int, player) -> void:
 	if player == GameManager.human_player:
@@ -213,6 +216,8 @@ func _connect_notification_signals() -> void:
 	EventBus.civic_changed.connect(_on_civic_changed)
 	EventBus.anarchy_started.connect(_on_anarchy_started)
 	EventBus.anarchy_ended.connect(_on_anarchy_ended)
+	EventBus.trade_accepted.connect(_on_trade_accepted)
+	EventBus.trade_rejected.connect(_on_trade_rejected)
 
 func _on_research_completed(player, tech: String) -> void:
 	if player == GameManager.human_player:
@@ -305,6 +310,19 @@ func _on_anarchy_started(player, turns: int) -> void:
 func _on_anarchy_ended(player) -> void:
 	if player == GameManager.human_player:
 		_add_notification("Anarchy has ended", "civics")
+
+func _on_trade_accepted(from_player, to_player, _offer: Dictionary) -> void:
+	if from_player == GameManager.human_player:
+		var civ_data = DataManager.get_civ(to_player.civilization_id)
+		_add_notification("Trade accepted by %s" % civ_data.get("name", "Unknown"), "diplomacy")
+	elif to_player == GameManager.human_player:
+		var civ_data = DataManager.get_civ(from_player.civilization_id)
+		_add_notification("Accepted trade from %s" % civ_data.get("name", "Unknown"), "diplomacy")
+
+func _on_trade_rejected(from_player, to_player) -> void:
+	if from_player == GameManager.human_player:
+		var civ_data = DataManager.get_civ(to_player.civilization_id)
+		_add_notification("Trade rejected by %s" % civ_data.get("name", "Unknown"), "diplomacy")
 
 func _add_notification(message: String, type: String) -> void:
 	var notif = {

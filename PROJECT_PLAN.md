@@ -13,7 +13,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 | Combat | Complete | 100% |
 | AI | Basic | 40% |
 | UI | Partial | 50% |
-| Diplomacy | Basic | 60% |
+| Diplomacy | Complete | 90% |
 | Religion | Basic | 70% |
 | Victory Conditions | Complete | 100% |
 | Civics | Complete | 100% |
@@ -215,35 +215,44 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 
 ---
 
-## Phase 8: Diplomacy (60% COMPLETE)
+## Phase 8: Diplomacy (90% COMPLETE)
 
 ### Implemented
-- [x] Diplomacy screen UI
+- [x] Diplomacy screen UI with attitude breakdown
 - [x] War/Peace declarations
 - [x] Open Borders agreements
 - [x] Defensive Pacts
 - [x] First contact detection
-- [x] Basic attitude calculation
+- [x] Full attitude calculation with multiple modifiers
 - [x] Met players tracking
+- [x] Trade negotiations UI (full implementation)
+- [x] Technology trading
+- [x] Resource trading (per-turn)
+- [x] Gold trading (lump sum and per-turn)
+- [x] Attitude modifiers (shared religion, shared enemy, treaties, civics, power ratio)
+- [x] "Worst enemy" tracking
+- [x] Diplomacy memory system (events decay over time)
+- [x] Memory types: declared war, made peace, signed treaties, shared tech, helped in war, etc.
+- [x] AI trade evaluation and acceptance
+- [x] Peace demands calculation based on power ratio
+- [x] Trade screen with gold, gold/turn, resources, technologies
+- [x] Keyboard shortcut (D key)
 
 ### Not Implemented
-- [ ] Trade negotiations UI (full implementation)
 - [ ] Permanent alliances
 - [ ] Vassal states
 - [ ] Tribute demands
-- [ ] Technology trading
 - [ ] Map trading
 - [ ] City trading
-- [ ] Resource trading (per-turn)
-- [ ] Gold trading (lump sum and per-turn)
-- [ ] Attitude modifiers (shared religion, shared enemy, etc.)
-- [ ] "Worst enemy" tracking
-- [ ] Diplomacy memory (broken promises, etc.)
 - [ ] AI personality in negotiations
 
 ### Files
 - `scripts/ui/diplomacy_screen.gd`
+- `scripts/ui/trade_screen.gd`
 - `scripts/systems/trade_system.gd`
+- `scripts/systems/diplomacy_system.gd`
+- `scenes/ui/diplomacy_screen.tscn`
+- `scenes/ui/trade_screen.tscn`
 
 ### Reference (beyond/)
 - `beyond/Beyond the Sword/Assets/XML/GameInfo/CIV4DiplomacyInfos.xml` - Diplomacy options
@@ -610,7 +619,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.2.
 ## Development Priorities
 
 ### High Priority (Next Phase)
-1. **Full Diplomacy** - Trade negotiations
+1. ~~**Full Diplomacy** - Trade negotiations~~ (COMPLETE)
 2. **AI Improvements** - More competitive AI
 3. **Espionage** - BTS signature feature
 4. **Corporations** - BTS signature feature

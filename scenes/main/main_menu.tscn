@@ -42,11 +42,11 @@ text = "KULTUR IV"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="VBoxContainer"]
+modulate = Color(0.7, 0.7, 0.7, 1)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "A Civilization IV Clone"
 horizontal_alignment = 1
-modulate = Color(0.7, 0.7, 0.7, 1)
 
 [node name="Spacer" type="Control" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 30)
