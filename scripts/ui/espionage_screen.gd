@@ -21,24 +21,18 @@ func _ready() -> void:
 
 	# Connect signals
 	EventBus.show_espionage_screen.connect(_on_show)
+	EventBus.hide_espionage_screen.connect(_on_close)
 
 func _build_ui() -> void:
-	# Background overlay
-	var overlay = ColorRect.new()
-	overlay.color = Color(0, 0, 0, 0.6)
-	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(overlay)
-
-	# Center container
-	var center = CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-
-	# Main panel
+	# Main panel positioned just below top menu
 	panel = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(900, 600)
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 10
+	panel.offset_right = -10
+	panel.offset_top = 50  # Just below 40px top menu
+	panel.offset_bottom = -10
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.12, 0.12, 0.15, 0.98)
+	style.bg_color = Color(0.12, 0.12, 0.15, 1.0)
 	style.border_color = Color(0.3, 0.3, 0.4)
 	style.border_width_top = 2
 	style.border_width_bottom = 2
@@ -49,7 +43,7 @@ func _build_ui() -> void:
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
 	panel.add_theme_stylebox_override("panel", style)
-	center.add_child(panel)
+	add_child(panel)
 
 	var main_vbox = VBoxContainer.new()
 	main_vbox.add_theme_constant_override("separation", 10)
@@ -139,6 +133,15 @@ func _build_ui() -> void:
 	info_panel.add_child(info_label)
 
 func _on_show() -> void:
+	# Close other popup screens
+	EventBus.hide_diplomacy_screen.emit()
+	EventBus.hide_civics_screen.emit()
+	EventBus.hide_trade_screen.emit()
+	EventBus.hide_spaceship_screen.emit()
+	EventBus.hide_voting_screen.emit()
+	EventBus.hide_city_screen.emit()
+	EventBus.hide_tech_tree.emit()
+
 	if GameManager and GameManager.human_player:
 		current_player_id = GameManager.human_player.player_id
 	_refresh_targets()

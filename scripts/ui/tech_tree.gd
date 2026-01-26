@@ -19,7 +19,7 @@ var close_button: Button
 var current_research_label: Label
 
 # Colors
-const BG_COLOR = Color(0.08, 0.08, 0.12, 0.95)
+const BG_COLOR = Color(0.08, 0.08, 0.12, 1.0)
 const RESEARCHED_COLOR = Color(0.2, 0.6, 0.2)
 const AVAILABLE_COLOR = Color(0.3, 0.3, 0.5)
 const UNAVAILABLE_COLOR = Color(0.2, 0.2, 0.2)
@@ -46,31 +46,50 @@ func _create_ui() -> void:
 	style.border_width_bottom = 2
 	style.border_color = Color(0.4, 0.4, 0.5)
 	panel.add_theme_stylebox_override("panel", style)
-	panel.anchor_left = 0.02
-	panel.anchor_right = 0.98
-	panel.anchor_top = 0.02
-	panel.anchor_bottom = 0.98
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 10
+	panel.offset_right = -10
+	panel.offset_top = 50  # Below the 40px top menu
+	panel.offset_bottom = -10
 	add_child(panel)
 
 	# Header with current research
 	current_research_label = Label.new()
 	current_research_label.name = "CurrentResearch"
-	current_research_label.position = Vector2(20, 10)
+	current_research_label.anchor_left = 0.0
+	current_research_label.anchor_right = 0.9  # Leave room for close button
+	current_research_label.anchor_top = 0.0
+	current_research_label.anchor_bottom = 0.0
+	current_research_label.offset_left = 20
+	current_research_label.offset_top = 10
+	current_research_label.offset_bottom = 45
 	current_research_label.add_theme_font_size_override("font_size", 18)
 	panel.add_child(current_research_label)
 
-	# Close button
+	# Close button (top right)
 	close_button = Button.new()
 	close_button.name = "CloseButton"
 	close_button.text = "X"
 	close_button.custom_minimum_size = Vector2(30, 30)
+	close_button.anchor_left = 1.0
+	close_button.anchor_right = 1.0
+	close_button.anchor_top = 0.0
+	close_button.anchor_bottom = 0.0
+	close_button.offset_left = -40
+	close_button.offset_right = -10
+	close_button.offset_top = 10
+	close_button.offset_bottom = 40
 	close_button.pressed.connect(_on_close_pressed)
 	panel.add_child(close_button)
 
 	# Scroll container for tech tree
 	scroll_container = ScrollContainer.new()
 	scroll_container.name = "ScrollContainer"
-	scroll_container.position = Vector2(10, 50)
+	scroll_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+	scroll_container.offset_left = 10
+	scroll_container.offset_top = 50
+	scroll_container.offset_right = -10
+	scroll_container.offset_bottom = -120  # Leave room for info panel
 	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	panel.add_child(scroll_container)
@@ -82,7 +101,14 @@ func _create_ui() -> void:
 	# Info panel (bottom)
 	info_panel = Panel.new()
 	info_panel.name = "InfoPanel"
-	info_panel.custom_minimum_size = Vector2(300, 100)
+	info_panel.anchor_left = 0.0
+	info_panel.anchor_right = 1.0
+	info_panel.anchor_top = 1.0
+	info_panel.anchor_bottom = 1.0
+	info_panel.offset_left = 10
+	info_panel.offset_right = -10
+	info_panel.offset_top = -110
+	info_panel.offset_bottom = -10
 	var info_style = StyleBoxFlat.new()
 	info_style.bg_color = Color(0.15, 0.15, 0.2)
 	info_panel.add_theme_stylebox_override("panel", info_style)
@@ -97,16 +123,13 @@ func _create_ui() -> void:
 func _on_show_tech_tree() -> void:
 	current_player = GameManager.human_player
 	_build_tech_tree()
-	_update_layout()
 	show()
+	# Update layout after showing so panel.size is computed
+	call_deferred("_update_layout")
 
 func _update_layout() -> void:
-	# Update positions based on panel size
-	var panel_size = panel.size
-	close_button.position = Vector2(panel_size.x - 50, 10)
-	scroll_container.size = Vector2(panel_size.x - 20, panel_size.y - 170)
-	info_panel.position = Vector2(10, panel_size.y - 110)
-	info_panel.size = Vector2(panel_size.x - 20, 100)
+	# Layout is now handled by anchors, but keep for compatibility
+	pass
 
 func _build_tech_tree() -> void:
 	# Clear existing nodes

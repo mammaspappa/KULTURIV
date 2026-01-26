@@ -10,12 +10,14 @@ var city_name_label: Label
 var population_label: Label
 var yields_label: Label
 var production_list: VBoxContainer
+var production_scroll: ScrollContainer
 var production_progress_label: Label
+var change_production_btn: Button
 var building_list: Label
 var close_button: Button
 
 # Colors
-const BG_COLOR = Color(0.1, 0.1, 0.15, 0.95)
+const BG_COLOR = Color(0.1, 0.1, 0.15, 1.0)
 const HEADER_COLOR = Color(0.2, 0.2, 0.3)
 const BUTTON_COLOR = Color(0.3, 0.3, 0.4)
 
@@ -26,7 +28,7 @@ func _ready() -> void:
 	hide()
 
 func _create_ui() -> void:
-	# Main panel
+	# Main panel - sized and positioned over the city
 	panel = Panel.new()
 	panel.name = "Panel"
 	var style = StyleBoxFlat.new()
@@ -41,10 +43,7 @@ func _create_ui() -> void:
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
 	panel.add_theme_stylebox_override("panel", style)
-	panel.anchor_left = 0.1
-	panel.anchor_right = 0.9
-	panel.anchor_top = 0.1
-	panel.anchor_bottom = 0.9
+	panel.custom_minimum_size = Vector2(700, 550)
 	add_child(panel)
 
 	# Close button (top right)
@@ -96,16 +95,26 @@ func _create_ui() -> void:
 	production_progress_label.add_theme_font_size_override("font_size", 14)
 	panel.add_child(production_progress_label)
 
-	# Production options (scrollable)
-	var scroll = ScrollContainer.new()
-	scroll.name = "ProductionScroll"
-	scroll.position = Vector2(20, 300)
-	scroll.custom_minimum_size = Vector2(350, 300)
-	panel.add_child(scroll)
+	# Change production button
+	change_production_btn = Button.new()
+	change_production_btn.name = "ChangeProductionBtn"
+	change_production_btn.text = "Change Production"
+	change_production_btn.position = Vector2(20, 310)
+	change_production_btn.custom_minimum_size = Vector2(150, 30)
+	change_production_btn.pressed.connect(_toggle_production_list)
+	panel.add_child(change_production_btn)
+
+	# Production options (scrollable, initially hidden)
+	production_scroll = ScrollContainer.new()
+	production_scroll.name = "ProductionScroll"
+	production_scroll.position = Vector2(20, 350)
+	production_scroll.custom_minimum_size = Vector2(350, 180)
+	production_scroll.visible = false
+	panel.add_child(production_scroll)
 
 	production_list = VBoxContainer.new()
 	production_list.name = "ProductionList"
-	scroll.add_child(production_list)
+	production_scroll.add_child(production_list)
 
 	# Buildings section (right side)
 	var buildings_header = Label.new()
@@ -123,7 +132,43 @@ func _create_ui() -> void:
 func _on_show_city_screen(city) -> void:
 	current_city = city
 	_update_display()
+	_position_over_city()
 	show()
+
+func _position_over_city() -> void:
+	if current_city == null:
+		# Center on screen below top menu
+		var viewport_size = get_viewport_rect().size
+		panel.position = Vector2(
+			(viewport_size.x - panel.size.x) / 2,
+			50  # Below top menu
+		)
+		return
+
+	# Get the city's world position and convert to screen position
+	var camera = get_viewport().get_camera_2d()
+	if camera:
+		var city_world_pos = GridUtils.grid_to_pixel(current_city.grid_position)
+		var viewport_size = get_viewport_rect().size
+		var canvas_transform = get_viewport().get_canvas_transform()
+		var screen_pos = canvas_transform * city_world_pos
+
+		# Position the panel centered horizontally on the city, below it vertically
+		var panel_x = screen_pos.x - panel.size.x / 2
+		var panel_y = screen_pos.y - panel.size.y / 2
+
+		# Clamp to keep within screen bounds, respecting top menu (40px)
+		panel_x = clamp(panel_x, 10, viewport_size.x - panel.size.x - 10)
+		panel_y = clamp(panel_y, 50, viewport_size.y - panel.size.y - 10)
+
+		panel.position = Vector2(panel_x, panel_y)
+	else:
+		# Fallback: center on screen
+		var viewport_size = get_viewport_rect().size
+		panel.position = Vector2(
+			(viewport_size.x - panel.size.x) / 2,
+			50
+		)
 
 func _update_display() -> void:
 	if current_city == null:
@@ -141,7 +186,9 @@ func _update_display() -> void:
 
 	# Update production
 	_update_production_progress()
-	_update_production_list()
+	# Only update production list if it's visible
+	if production_scroll.visible:
+		_update_production_list()
 
 	# Update buildings
 	_update_building_list()
@@ -198,12 +245,20 @@ func _update_production_progress() -> void:
 		item_name, progress, cost, turns_left
 	]
 
+func _toggle_production_list() -> void:
+	production_scroll.visible = not production_scroll.visible
+	if production_scroll.visible:
+		change_production_btn.text = "Hide Build Menu"
+		_update_production_list()
+	else:
+		change_production_btn.text = "Change Production"
+
 func _update_production_list() -> void:
 	# Clear existing
 	for child in production_list.get_children():
 		child.queue_free()
 
-	# Section: Units
+	# Section: Units (excluding great people)
 	var units_header = Label.new()
 	units_header.text = "--- Units ---"
 	units_header.add_theme_font_size_override("font_size", 14)
@@ -212,6 +267,9 @@ func _update_production_list() -> void:
 	for unit_id in DataManager.units:
 		if current_city.can_build_unit(unit_id):
 			var unit_data = DataManager.get_unit(unit_id)
+			# Skip great people
+			if unit_data.get("unit_class", "") == "great_person":
+				continue
 			var btn = Button.new()
 			var cost = int(DataManager.get_unit_cost(unit_id) * GameManager.get_speed_multiplier())
 			var turns = ceili(cost / max(current_city.production_yield, 1))
@@ -239,6 +297,9 @@ func _update_production_list() -> void:
 
 func _on_production_selected(item_id: String) -> void:
 	current_city.set_production(item_id)
+	# Close the build menu after selection
+	production_scroll.visible = false
+	change_production_btn.text = "Change Production"
 	_update_display()
 
 func _update_building_list() -> void:

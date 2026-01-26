@@ -13,7 +13,7 @@ var stats_label: Label
 var main_menu_button: Button
 var continue_button: Button
 
-const BG_COLOR = Color(0.05, 0.05, 0.1, 0.98)
+const BG_COLOR = Color(0.05, 0.05, 0.1, 1.0)
 
 func _ready() -> void:
 	_create_ui()
@@ -39,8 +39,10 @@ func _create_ui() -> void:
 	panel.add_theme_stylebox_override("panel", style)
 	panel.anchor_left = 0.2
 	panel.anchor_right = 0.8
-	panel.anchor_top = 0.15
-	panel.anchor_bottom = 0.85
+	panel.anchor_top = 0.0
+	panel.anchor_bottom = 1.0
+	panel.offset_top = 50  # Below the 40px top menu
+	panel.offset_bottom = -50
 	add_child(panel)
 
 	# Title

@@ -86,6 +86,20 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("open_diplomacy"):
 		EventBus.show_diplomacy_screen.emit()
 		get_viewport().set_input_as_handled()
+	elif event is InputEventKey and event.pressed:
+		match event.keycode:
+			KEY_E:
+				EventBus.show_espionage_screen.emit()
+				get_viewport().set_input_as_handled()
+			KEY_U:
+				EventBus.show_voting_screen.emit()
+				get_viewport().set_input_as_handled()
+			KEY_P:
+				EventBus.show_spaceship_screen.emit()
+				get_viewport().set_input_as_handled()
+			KEY_T:
+				EventBus.show_tech_tree.emit()
+				get_viewport().set_input_as_handled()
 
 func _on_turn_started(turn: int, player) -> void:
 	if player == GameManager.human_player:

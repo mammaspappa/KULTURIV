@@ -29,7 +29,7 @@ var cancel_button: Button
 var status_label: Label
 
 # Colors
-const BG_COLOR = Color(0.1, 0.1, 0.15, 0.95)
+const BG_COLOR = Color(0.1, 0.1, 0.15, 1.0)
 const OFFER_BG_COLOR = Color(0.15, 0.15, 0.2)
 
 func _ready() -> void:
@@ -57,10 +57,11 @@ func _create_ui() -> void:
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
 	panel.add_theme_stylebox_override("panel", style)
-	panel.anchor_left = 0.1
-	panel.anchor_right = 0.9
-	panel.anchor_top = 0.1
-	panel.anchor_bottom = 0.9
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 10
+	panel.offset_right = -10
+	panel.offset_top = 50  # Below the 40px top menu
+	panel.offset_bottom = -10
 	add_child(panel)
 
 	# Title

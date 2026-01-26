@@ -25,7 +25,7 @@ var info_label: RichTextLabel
 var anarchy_label: Label
 
 # Colors
-const BG_COLOR = Color(0.08, 0.08, 0.12, 0.95)
+const BG_COLOR = Color(0.08, 0.08, 0.12, 1.0)
 const SELECTED_COLOR = Color(0.3, 0.5, 0.3)
 const AVAILABLE_COLOR = Color(0.25, 0.25, 0.35)
 const UNAVAILABLE_COLOR = Color(0.15, 0.15, 0.15)
@@ -50,10 +50,11 @@ func _create_ui() -> void:
 	style.border_width_bottom = 2
 	style.border_color = Color(0.4, 0.4, 0.5)
 	panel.add_theme_stylebox_override("panel", style)
-	panel.anchor_left = 0.05
-	panel.anchor_right = 0.95
-	panel.anchor_top = 0.05
-	panel.anchor_bottom = 0.95
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 10
+	panel.offset_right = -10
+	panel.offset_top = 50  # Below the 40px top menu
+	panel.offset_bottom = -10
 	add_child(panel)
 
 	# Title

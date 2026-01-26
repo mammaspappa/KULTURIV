@@ -23,7 +23,10 @@ script = ExtResource("2_game_world")
 
 [node name="UILayer" type="CanvasLayer" parent="GameWorld"]
 
-[node name="GameUI" type="Control" parent="."]
+[node name="ScreenUILayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="GameUI" type="Control" parent="ScreenUILayer"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,14 +36,14 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("3_game_ui")
 
-[node name="TopBar" type="Panel" parent="GameUI"]
+[node name="TopBar" type="Panel" parent="ScreenUILayer/GameUI"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 40.0
 grow_horizontal = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="GameUI/TopBar"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ScreenUILayer/GameUI/TopBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -49,51 +52,51 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 20
 
-[node name="TurnLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+[node name="TurnLabel" type="Label" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Turn 1 - 4000 BC"
 
-[node name="GoldLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+[node name="GoldLabel" type="Label" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Gold: 0 (+0)"
 
-[node name="ScienceLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+[node name="ScienceLabel" type="Label" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Science: 0"
 
-[node name="TechButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+[node name="TechButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Tech (T)"
 
-[node name="CivicsButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+[node name="CivicsButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Civics (C)"
 
-[node name="DiplomacyButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+[node name="DiplomacyButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Diplomacy (D)"
 
-[node name="EspionageButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+[node name="EspionageButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
-text = "Espionage"
+text = "Espionage (E)"
 
-[node name="VotingButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+[node name="VotingButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
-text = "UN"
+text = "UN (U)"
 
-[node name="SpaceshipButton" type="Button" parent="GameUI/TopBar/HBoxContainer"]
+[node name="SpaceshipButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
-text = "Spaceship"
+text = "Spaceship (P)"
 
-[node name="Spacer" type="Control" parent="GameUI/TopBar/HBoxContainer"]
+[node name="Spacer" type="Control" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CivLabel" type="Label" parent="GameUI/TopBar/HBoxContainer"]
+[node name="CivLabel" type="Label" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Roman Empire"
 
-[node name="UnitPanel" type="Panel" parent="GameUI"]
+[node name="UnitPanel" type="Panel" parent="ScreenUILayer/GameUI"]
 visible = false
 layout_mode = 1
 anchors_preset = 2
@@ -105,7 +108,7 @@ offset_right = 260.0
 offset_bottom = -10.0
 grow_vertical = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/UnitPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ScreenUILayer/GameUI/UnitPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -117,35 +120,35 @@ offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="UnitName" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
+[node name="UnitName" type="Label" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Warrior"
 
-[node name="UnitStrength" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
+[node name="UnitStrength" type="Label" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
 text = "Strength: 2.0"
 
-[node name="UnitMovement" type="Label" parent="GameUI/UnitPanel/VBoxContainer"]
+[node name="UnitMovement" type="Label" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
 text = "Movement: 1/1"
 
-[node name="UnitHealth" type="ProgressBar" parent="GameUI/UnitPanel/VBoxContainer"]
+[node name="UnitHealth" type="ProgressBar" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
 value = 100.0
 
-[node name="ActionButtons" type="HBoxContainer" parent="GameUI/UnitPanel/VBoxContainer"]
+[node name="ActionButtons" type="HBoxContainer" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer"]
 layout_mode = 2
 
-[node name="FortifyButton" type="Button" parent="GameUI/UnitPanel/VBoxContainer/ActionButtons"]
+[node name="FortifyButton" type="Button" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer/ActionButtons"]
 layout_mode = 2
 text = "Fortify (F)"
 
-[node name="SkipButton" type="Button" parent="GameUI/UnitPanel/VBoxContainer/ActionButtons"]
+[node name="SkipButton" type="Button" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer/ActionButtons"]
 layout_mode = 2
 text = "Skip (Space)"
 
-[node name="EndTurnButton" type="Button" parent="GameUI"]
+[node name="EndTurnButton" type="Button" parent="ScreenUILayer/GameUI"]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -160,26 +163,29 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "End Turn (Enter)"
 
-[node name="MiniMap" type="Panel" parent="GameUI"]
+[node name="MiniMap" type="Panel" parent="ScreenUILayer/GameUI"]
 layout_mode = 1
-anchors_preset = 1
+anchors_preset = 3
 anchor_left = 1.0
+anchor_top = 1.0
 anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = -210.0
-offset_top = 50.0
+offset_top = -230.0
 offset_right = -10.0
-offset_bottom = 210.0
+offset_bottom = -70.0
 grow_horizontal = 0
+grow_vertical = 0
 script = ExtResource("6_minimap")
 
-[node name="CityScreen" parent="." instance=ExtResource("4_city_screen")]
+[node name="CityScreen" parent="ScreenUILayer" instance=ExtResource("4_city_screen")]
 
-[node name="TechTree" parent="." instance=ExtResource("5_tech_tree")]
+[node name="TechTree" parent="ScreenUILayer" instance=ExtResource("5_tech_tree")]
 
-[node name="VictoryScreen" parent="." instance=ExtResource("7_victory")]
+[node name="VictoryScreen" parent="ScreenUILayer" instance=ExtResource("7_victory")]
 
-[node name="CivicsScreen" parent="." instance=ExtResource("8_civics")]
+[node name="CivicsScreen" parent="ScreenUILayer" instance=ExtResource("8_civics")]
 
-[node name="TradeScreen" parent="." instance=ExtResource("9_trade")]
+[node name="TradeScreen" parent="ScreenUILayer" instance=ExtResource("9_trade")]
 
-[node name="DiplomacyScreen" parent="." instance=ExtResource("10_diplomacy")]
+[node name="DiplomacyScreen" parent="ScreenUILayer" instance=ExtResource("10_diplomacy")]

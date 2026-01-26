@@ -84,13 +84,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_T:
 				EventBus.show_tech_tree.emit()
 			KEY_B:
-				# Build improvement menu for workers
-				if selected_unit and selected_unit.can_build_improvements():
-					_show_build_menu()
-			KEY_C:
-				# Found city with settler
-				if selected_unit and selected_unit.can_found_city():
-					found_city(selected_unit)
+				# Build: found city for settlers, build improvements for workers
+				if selected_unit:
+					if selected_unit.can_found_city():
+						found_city(selected_unit)
+					elif selected_unit.can_build_improvements():
+						_show_build_menu()
 			KEY_F5:
 				# Quick save
 				SaveSystem.quicksave()
@@ -487,6 +486,11 @@ func found_city(settler: Unit) -> City:
 	var city = City.new(pos, city_name)
 	owner.add_city(city)
 	entity_layer.add_child(city)
+
+	# First city for non-barbarians gets a free palace (becomes capital)
+	if city_count == 0 and owner.civilization_id != "barbarian":
+		city.buildings.append("palace")
+		city.calculate_yields()
 
 	# Set tile ownership
 	for tile_pos in city.territory:
