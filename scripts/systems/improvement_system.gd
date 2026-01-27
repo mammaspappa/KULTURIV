@@ -86,6 +86,10 @@ func can_build_road(worker, tile) -> bool:
 	if tile.road_level >= 1:
 		return false
 
+	# Check tech requirement (the_wheel)
+	if worker.player_owner != null and not worker.player_owner.has_tech("the_wheel"):
+		return false
+
 	return true
 
 ## Check if a worker can build a railroad

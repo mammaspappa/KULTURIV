@@ -111,6 +111,18 @@ func _input(event: InputEvent) -> void:
 			KEY_T:
 				EventBus.show_tech_tree.emit()
 				get_viewport().set_input_as_handled()
+			KEY_R:
+				_try_worker_action("road")
+				get_viewport().set_input_as_handled()
+			KEY_M:
+				_try_worker_action("mine")
+				get_viewport().set_input_as_handled()
+			KEY_I:
+				_try_worker_action("farm")
+				get_viewport().set_input_as_handled()
+			KEY_O:
+				_try_worker_action("cottage")
+				get_viewport().set_input_as_handled()
 
 func _on_turn_started(turn: int, player) -> void:
 	if player == GameManager.human_player:
@@ -352,6 +364,33 @@ func _on_cancel_build_pressed() -> void:
 
 	ImprovementSystem.cancel_build(selected_unit)
 	_update_unit_panel()
+
+## Try to perform a worker action via keyboard shortcut
+func _try_worker_action(action: String) -> void:
+	if selected_unit == null or not selected_unit.can_build_improvements():
+		return
+
+	if selected_unit.has_acted:
+		return
+
+	var tile = GameManager.hex_grid.get_tile(selected_unit.grid_position) if GameManager.hex_grid else null
+	if tile == null:
+		return
+
+	match action:
+		"road":
+			if ImprovementSystem.can_build_road(selected_unit, tile):
+				ImprovementSystem.start_build_road(selected_unit)
+				_update_unit_panel()
+		"railroad":
+			if ImprovementSystem.can_build_railroad(selected_unit, tile):
+				ImprovementSystem.start_build_railroad(selected_unit)
+				_update_unit_panel()
+		_:
+			# Other improvements (mine, farm, cottage, etc.)
+			if ImprovementSystem.can_build(selected_unit, tile, action):
+				ImprovementSystem.start_build(selected_unit, action)
+				_update_unit_panel()
 
 # Notification system
 func _setup_notifications() -> void:
