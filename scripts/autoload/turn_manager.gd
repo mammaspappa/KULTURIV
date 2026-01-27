@@ -93,6 +93,9 @@ func _end_turn_for_player(player) -> void:
 
 	EventBus.turn_ended.emit(current_turn, player)
 
+	# Process golden age countdown
+	player.process_golden_age()
+
 	# Heal units in friendly territory or fortified
 	for unit in player.units:
 		_process_unit_healing(unit)

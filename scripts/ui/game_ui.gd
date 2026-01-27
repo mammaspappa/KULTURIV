@@ -433,6 +433,8 @@ func _connect_notification_signals() -> void:
 	EventBus.civic_changed.connect(_on_civic_changed)
 	EventBus.anarchy_started.connect(_on_anarchy_started)
 	EventBus.anarchy_ended.connect(_on_anarchy_ended)
+	EventBus.golden_age_started.connect(_on_golden_age_started)
+	EventBus.golden_age_ended.connect(_on_golden_age_ended)
 	EventBus.trade_accepted.connect(_on_trade_accepted)
 	EventBus.trade_rejected.connect(_on_trade_rejected)
 	EventBus.notification_added.connect(_on_notification_added)
@@ -531,6 +533,14 @@ func _on_anarchy_started(player, turns: int) -> void:
 func _on_anarchy_ended(player) -> void:
 	if player == GameManager.human_player:
 		_add_notification("Anarchy has ended", "civics")
+
+func _on_golden_age_started(player) -> void:
+	if player == GameManager.human_player:
+		_add_notification("Golden Age has begun! (%d turns)" % player.golden_age_turns, "great_person")
+
+func _on_golden_age_ended(player) -> void:
+	if player == GameManager.human_player:
+		_add_notification("Golden Age has ended", "great_person")
 
 func _on_trade_accepted(from_player, to_player, _offer: Dictionary) -> void:
 	if from_player == GameManager.human_player:

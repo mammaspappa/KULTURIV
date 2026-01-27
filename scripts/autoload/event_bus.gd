@@ -30,6 +30,7 @@ signal city_starving(city)
 signal city_production_completed(city, item)
 signal city_building_constructed(city, building)
 signal city_borders_expanded(city)
+signal wonder_built(wonder_id, player_id, wonder_type)
 
 # Combat events
 signal combat_started(attacker, defender)
@@ -66,6 +67,8 @@ signal state_religion_adopted(player, religion)
 signal civic_changed(player, category, civic_id)
 signal anarchy_started(player, turns)
 signal anarchy_ended(player)
+signal golden_age_started(player)
+signal golden_age_ended(player)
 
 # Corporation events
 signal corporation_founded(corporation_id, city, founder)

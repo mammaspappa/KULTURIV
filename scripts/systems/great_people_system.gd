@@ -220,12 +220,12 @@ func _settle_great_person(unit, city) -> bool:
 	return true
 
 func _start_golden_age(unit, player) -> bool:
-	# Set golden age turns
-	if not player.has_meta("golden_age_turns"):
-		player.set_meta("golden_age_turns", 0)
+	# Calculate golden age length (8 base, increases with number of golden ages)
+	var base_turns = 8
+	var turns = base_turns - player.golden_ages_count  # Each golden age is shorter
+	turns = max(turns, 4)  # Minimum 4 turns
 
-	var current = player.get_meta("golden_age_turns")
-	player.set_meta("golden_age_turns", current + 8)  # 8 turn golden age
+	player.start_golden_age(turns)
 
 	# Remove unit
 	unit.die()

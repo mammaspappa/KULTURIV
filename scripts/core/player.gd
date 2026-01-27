@@ -20,6 +20,9 @@ var science_rate: float = 1.0  # Percentage of commerce going to science (0.0 to
 var researched_techs: Array[String] = []
 var current_research: String = ""
 var research_progress: int = 0
+var future_tech_count: int = 0  # Number of times Future Tech has been completed
+var future_tech_happiness: int = 0  # Bonus happiness from Future Tech
+var future_tech_health: int = 0  # Bonus health from Future Tech
 
 # Diplomacy
 var at_war_with: Array[int] = []
@@ -36,6 +39,10 @@ var master_id: int = -1  # Player ID of master if this player is a vassal (-1 if
 # Religion
 var state_religion: String = ""
 var founded_religion: String = ""
+
+# Golden Age
+var golden_age_turns: int = 0
+var golden_ages_count: int = 0  # Number of golden ages this player has had
 
 # Civics
 var civics: Dictionary = {}
@@ -85,6 +92,12 @@ func is_in_anarchy() -> bool:
 	return anarchy_turns > 0
 
 func can_research(tech_id: String) -> bool:
+	# Check if tech is repeatable (like Future Tech)
+	var tech_data = DataManager.get_tech(tech_id)
+	if tech_data.get("repeatable", false):
+		# For repeatable techs, just check prerequisites
+		return DataManager.is_tech_available(tech_id, researched_techs)
+
 	if has_tech(tech_id):
 		return false
 	return DataManager.is_tech_available(tech_id, researched_techs)
@@ -99,7 +112,26 @@ func complete_research() -> void:
 	if current_research == "":
 		return
 
-	researched_techs.append(current_research)
+	var tech_data = DataManager.get_tech(current_research)
+	var is_repeatable = tech_data.get("repeatable", false)
+
+	# Handle repeatable techs (like Future Tech)
+	if is_repeatable:
+		# Apply bonuses
+		var unlocks = tech_data.get("unlocks", {})
+		var bonus = unlocks.get("bonus_per_completion", {})
+		if bonus.has("happiness"):
+			future_tech_happiness += bonus.happiness
+		if bonus.has("health"):
+			future_tech_health += bonus.health
+		future_tech_count += 1
+
+		# Only add to researched_techs once
+		if current_research not in researched_techs:
+			researched_techs.append(current_research)
+	else:
+		researched_techs.append(current_research)
+
 	EventBus.research_completed.emit(self, current_research)
 
 	# Check for unlocks
@@ -114,6 +146,28 @@ func get_research_output() -> int:
 	for city in cities:
 		total += city.science_yield
 	return total
+
+# Golden Age functions
+func is_in_golden_age() -> bool:
+	return golden_age_turns > 0
+
+func start_golden_age(turns: int = 8) -> void:
+	if golden_age_turns <= 0:
+		golden_ages_count += 1
+		EventBus.golden_age_started.emit(self)
+	golden_age_turns += turns
+
+func process_golden_age() -> void:
+	if golden_age_turns > 0:
+		golden_age_turns -= 1
+		if golden_age_turns <= 0:
+			EventBus.golden_age_ended.emit(self)
+
+func get_golden_age_production_bonus() -> float:
+	return 1.0 if is_in_golden_age() else 0.0
+
+func get_golden_age_commerce_bonus() -> float:
+	return 1.0 if is_in_golden_age() else 0.0
 
 func get_total_population() -> int:
 	var total = 0

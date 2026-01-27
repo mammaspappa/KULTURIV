@@ -457,5 +457,489 @@
 			"remove_unhealthiness": 1
 		},
 		"description": "+1 Happiness, removes 1 unhealthiness"
+	},
+
+	"_comment_wonders": "=== WORLD WONDERS (Only one per game) ===",
+
+	"stonehenge": {
+		"name": "Stonehenge",
+		"era": "ancient",
+		"cost": 120,
+		"maintenance": 0,
+		"required_tech": "mysticism",
+		"wonder_type": "world",
+		"effects": {
+			"free_monument_all_cities": true,
+			"great_prophet_points": 2
+		},
+		"description": "Free Monument in all cities"
+	},
+	"the_pyramids": {
+		"name": "The Pyramids",
+		"era": "ancient",
+		"cost": 450,
+		"maintenance": 0,
+		"required_tech": "masonry",
+		"wonder_type": "world",
+		"effects": {
+			"all_government_civics": true,
+			"great_engineer_points": 2
+		},
+		"description": "Can use any Government civic"
+	},
+	"the_great_wall": {
+		"name": "The Great Wall",
+		"era": "ancient",
+		"cost": 300,
+		"maintenance": 0,
+		"required_tech": "masonry",
+		"wonder_type": "world",
+		"effects": {
+			"double_production_walls": true,
+			"barbarian_defense": true,
+			"great_general_points": 2
+		},
+		"obsolete_tech": "dynamite",
+		"description": "Doubles production of Walls, enemies cannot enter territory"
+	},
+	"the_oracle": {
+		"name": "The Oracle",
+		"era": "ancient",
+		"cost": 200,
+		"maintenance": 0,
+		"required_tech": "priesthood",
+		"wonder_type": "world",
+		"effects": {
+			"free_tech": true,
+			"great_prophet_points": 2
+		},
+		"description": "Grants a free technology"
+	},
+	"the_great_lighthouse": {
+		"name": "The Great Lighthouse",
+		"era": "ancient",
+		"cost": 200,
+		"maintenance": 0,
+		"required_tech": "sailing",
+		"requires_coast": true,
+		"wonder_type": "world",
+		"effects": {
+			"naval_movement": 1,
+			"great_merchant_points": 2
+		},
+		"obsolete_tech": "corporation",
+		"description": "+1 Movement for naval units"
+	},
+	"the_colossus": {
+		"name": "The Colossus",
+		"era": "ancient",
+		"cost": 250,
+		"maintenance": 0,
+		"required_tech": "metal_casting",
+		"requires_coast": true,
+		"wonder_type": "world",
+		"effects": {
+			"water_tile_commerce": 1,
+			"great_merchant_points": 2
+		},
+		"obsolete_tech": "flight",
+		"description": "+1 Commerce from water tiles"
+	},
+	"the_hanging_gardens": {
+		"name": "The Hanging Gardens",
+		"era": "classical",
+		"cost": 300,
+		"maintenance": 0,
+		"required_tech": "mathematics",
+		"wonder_type": "world",
+		"effects": {
+			"population_all_cities": 1,
+			"health": 1,
+			"great_engineer_points": 2
+		},
+		"description": "+1 Population in all cities, +1 Health"
+	},
+	"the_parthenon": {
+		"name": "The Parthenon",
+		"era": "classical",
+		"cost": 400,
+		"maintenance": 0,
+		"required_tech": "polytheism",
+		"wonder_type": "world",
+		"effects": {
+			"great_people_birth_rate": 0.5,
+			"great_artist_points": 2
+		},
+		"description": "+50% Great People birth rate"
+	},
+	"the_great_library": {
+		"name": "The Great Library",
+		"era": "classical",
+		"cost": 350,
+		"maintenance": 0,
+		"required_tech": "literature",
+		"requires_building": "library",
+		"wonder_type": "world",
+		"effects": {
+			"free_scientist_slots": 2,
+			"great_scientist_points": 4
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+2 Free Scientist specialist slots"
+	},
+	"chichen_itza": {
+		"name": "Chichen Itza",
+		"era": "medieval",
+		"cost": 450,
+		"maintenance": 0,
+		"required_tech": "code_of_laws",
+		"wonder_type": "world",
+		"effects": {
+			"defense_all_cities": 0.25,
+			"great_prophet_points": 2
+		},
+		"description": "+25% Defense in all cities"
+	},
+	"notre_dame": {
+		"name": "Notre Dame",
+		"era": "medieval",
+		"cost": 500,
+		"maintenance": 0,
+		"required_tech": "engineering",
+		"wonder_type": "world",
+		"effects": {
+			"happiness_all_cities": 1,
+			"great_artist_points": 3
+		},
+		"description": "+1 Happiness in all cities"
+	},
+	"sistine_chapel": {
+		"name": "Sistine Chapel",
+		"era": "medieval",
+		"cost": 500,
+		"maintenance": 0,
+		"required_tech": "theology",
+		"wonder_type": "world",
+		"effects": {
+			"culture_state_religion": 5,
+			"great_artist_points": 3
+		},
+		"description": "+5 Culture in cities with state religion"
+	},
+	"angkor_wat": {
+		"name": "Angkor Wat",
+		"era": "medieval",
+		"cost": 450,
+		"maintenance": 0,
+		"required_tech": "philosophy",
+		"wonder_type": "world",
+		"effects": {
+			"free_priest_all_cities": 1,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Free Priest in all cities"
+	},
+	"university_of_sankore": {
+		"name": "University of Sankore",
+		"era": "medieval",
+		"cost": 500,
+		"maintenance": 0,
+		"required_tech": "paper",
+		"wonder_type": "world",
+		"effects": {
+			"research_state_religion": 2,
+			"great_scientist_points": 3
+		},
+		"description": "+2 Research in cities with state religion"
+	},
+	"versailles": {
+		"name": "Versailles",
+		"era": "renaissance",
+		"cost": 600,
+		"maintenance": 0,
+		"required_tech": "divine_right",
+		"wonder_type": "world",
+		"effects": {
+			"second_palace": true,
+			"great_artist_points": 2
+		},
+		"description": "Reduces maintenance like a second palace"
+	},
+	"taj_mahal": {
+		"name": "Taj Mahal",
+		"era": "renaissance",
+		"cost": 700,
+		"maintenance": 0,
+		"required_tech": "nationalism",
+		"wonder_type": "world",
+		"effects": {
+			"golden_age": true,
+			"great_artist_points": 4
+		},
+		"description": "Starts a Golden Age"
+	},
+	"statue_of_liberty": {
+		"name": "Statue of Liberty",
+		"era": "industrial",
+		"cost": 1000,
+		"maintenance": 0,
+		"required_tech": "democracy",
+		"requires_coast": true,
+		"wonder_type": "world",
+		"effects": {
+			"free_specialist_all_cities": 1,
+			"great_merchant_points": 2
+		},
+		"description": "+1 Free Specialist in all cities"
+	},
+	"eiffel_tower": {
+		"name": "Eiffel Tower",
+		"era": "industrial",
+		"cost": 850,
+		"maintenance": 0,
+		"required_tech": "steel",
+		"wonder_type": "world",
+		"effects": {
+			"free_broadcast_tower_all_cities": true,
+			"great_engineer_points": 2
+		},
+		"description": "Free Broadcast Tower in all cities"
+	},
+	"broadway": {
+		"name": "Broadway",
+		"era": "modern",
+		"cost": 900,
+		"maintenance": 0,
+		"required_tech": "mass_media",
+		"wonder_type": "world",
+		"effects": {
+			"free_artist_slots": 3,
+			"great_artist_points": 5
+		},
+		"description": "+3 Free Artist specialist slots"
+	},
+	"hollywood": {
+		"name": "Hollywood",
+		"era": "modern",
+		"cost": 1000,
+		"maintenance": 0,
+		"required_tech": "mass_media",
+		"wonder_type": "world",
+		"effects": {
+			"culture_percent": 1.0,
+			"great_artist_points": 4
+		},
+		"description": "+100% Culture in this city"
+	},
+	"rock_n_roll": {
+		"name": "Rock 'n' Roll",
+		"era": "modern",
+		"cost": 900,
+		"maintenance": 0,
+		"required_tech": "mass_media",
+		"wonder_type": "world",
+		"effects": {
+			"happiness": 3,
+			"great_artist_points": 3
+		},
+		"description": "+3 Happiness"
+	},
+	"united_nations": {
+		"name": "United Nations",
+		"era": "modern",
+		"cost": 1000,
+		"maintenance": 0,
+		"required_tech": "mass_media",
+		"wonder_type": "world",
+		"effects": {
+			"enables_diplomatic_victory": true,
+			"great_merchant_points": 2
+		},
+		"description": "Enables Diplomatic Victory votes"
+	},
+	"the_pentagon": {
+		"name": "The Pentagon",
+		"era": "modern",
+		"cost": 1000,
+		"maintenance": 0,
+		"required_tech": "assembly_line",
+		"wonder_type": "world",
+		"effects": {
+			"free_experience_all_units": 2,
+			"great_general_points": 3
+		},
+		"description": "+2 XP for all new units"
+	},
+	"the_internet": {
+		"name": "The Internet",
+		"era": "future",
+		"cost": 1500,
+		"maintenance": 0,
+		"required_tech": "computers",
+		"requires_building": "research_lab",
+		"wonder_type": "world",
+		"effects": {
+			"free_tech_known_by_two": true,
+			"great_scientist_points": 4
+		},
+		"description": "Grants techs known by 2+ civilizations"
+	},
+	"space_elevator": {
+		"name": "Space Elevator",
+		"era": "future",
+		"cost": 2000,
+		"maintenance": 0,
+		"required_tech": "robotics",
+		"wonder_type": "world",
+		"effects": {
+			"spaceship_production_all_cities": 0.5,
+			"great_engineer_points": 4
+		},
+		"description": "+50% Spaceship production in all cities"
+	},
+
+	"_comment_national": "=== NATIONAL WONDERS (One per civilization) ===",
+
+	"heroic_epic": {
+		"name": "Heroic Epic",
+		"era": "classical",
+		"cost": 200,
+		"maintenance": 0,
+		"required_tech": "literature",
+		"requires_building": "barracks",
+		"requires_great_general": true,
+		"wonder_type": "national",
+		"effects": {
+			"military_production": 1.0,
+			"great_general_points": 2
+		},
+		"description": "+100% Military unit production"
+	},
+	"national_epic": {
+		"name": "National Epic",
+		"era": "classical",
+		"cost": 200,
+		"maintenance": 0,
+		"required_tech": "literature",
+		"requires_building": "library",
+		"wonder_type": "national",
+		"effects": {
+			"great_people_birth_rate": 1.0,
+			"great_artist_points": 3
+		},
+		"description": "+100% Great People birth rate"
+	},
+	"globe_theatre": {
+		"name": "Globe Theatre",
+		"era": "renaissance",
+		"cost": 350,
+		"maintenance": 0,
+		"required_tech": "drama",
+		"requires_building": "theatre",
+		"wonder_type": "national",
+		"effects": {
+			"no_unhappiness": true,
+			"great_artist_points": 4
+		},
+		"description": "No unhappiness in this city"
+	},
+	"hermitage": {
+		"name": "Hermitage",
+		"era": "renaissance",
+		"cost": 400,
+		"maintenance": 0,
+		"required_tech": "nationalism",
+		"requires_building": "theatre",
+		"wonder_type": "national",
+		"effects": {
+			"culture_percent": 1.0,
+			"great_artist_points": 5
+		},
+		"description": "+100% Culture in this city"
+	},
+	"ironworks": {
+		"name": "Ironworks",
+		"era": "industrial",
+		"cost": 500,
+		"maintenance": 0,
+		"required_tech": "steel",
+		"requires_building": "factory",
+		"wonder_type": "national",
+		"effects": {
+			"production_percent": 0.5,
+			"great_engineer_points": 3
+		},
+		"description": "+50% Production"
+	},
+	"oxford_university": {
+		"name": "Oxford University",
+		"era": "medieval",
+		"cost": 400,
+		"maintenance": 0,
+		"required_tech": "education",
+		"requires_building": "university",
+		"wonder_type": "national",
+		"effects": {
+			"free_tech": true,
+			"science_percent": 1.0,
+			"great_scientist_points": 4
+		},
+		"description": "Grants a free tech, +100% Science"
+	},
+	"wall_street": {
+		"name": "Wall Street",
+		"era": "modern",
+		"cost": 600,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"requires_building": "bank",
+		"wonder_type": "national",
+		"effects": {
+			"gold_percent": 1.0,
+			"great_merchant_points": 4
+		},
+		"description": "+100% Gold"
+	},
+	"red_cross": {
+		"name": "Red Cross",
+		"era": "industrial",
+		"cost": 400,
+		"maintenance": 0,
+		"required_tech": "medicine",
+		"requires_building": "hospital",
+		"wonder_type": "national",
+		"effects": {
+			"heal_rate_all_units": 0.1,
+			"great_merchant_points": 2
+		},
+		"description": "+10% heal rate for all units"
+	},
+	"west_point": {
+		"name": "West Point",
+		"era": "industrial",
+		"cost": 450,
+		"maintenance": 0,
+		"required_tech": "military_science",
+		"requires_building": "barracks",
+		"requires_great_general": true,
+		"wonder_type": "national",
+		"effects": {
+			"free_experience": 4,
+			"great_general_points": 3
+		},
+		"description": "+4 XP for units built here"
+	},
+	"mt_rushmore": {
+		"name": "Mt. Rushmore",
+		"era": "industrial",
+		"cost": 500,
+		"maintenance": 0,
+		"required_tech": "fascism",
+		"wonder_type": "national",
+		"effects": {
+			"war_weariness_reduction": 0.25,
+			"great_artist_points": 2
+		},
+		"description": "-25% War weariness"
 	}
 }

@@ -24,6 +24,10 @@ var game_world: Node2D = null
 var difficulty: int = 4  # Prince difficulty (0-8 scale)
 var game_speed: int = 1  # 0=Quick, 1=Normal, 2=Epic, 3=Marathon
 
+# Wonder tracking
+var world_wonders_built: Dictionary = {}  # wonder_id -> player_id who built it
+var national_wonders_built: Dictionary = {}  # player_id -> Array of wonder_ids
+
 # Options/Settings
 var edge_pan_enabled: bool = true
 var auto_end_turn: bool = false
@@ -229,3 +233,31 @@ func get_city_at(hex: Vector2i):
 			if city.grid_position == hex:
 				return city
 	return null
+
+# Wonder management
+func is_world_wonder_available(wonder_id: String) -> bool:
+	return wonder_id not in world_wonders_built
+
+func is_national_wonder_available(wonder_id: String, player_id: int) -> bool:
+	if player_id not in national_wonders_built:
+		return true
+	return wonder_id not in national_wonders_built[player_id]
+
+func register_world_wonder(wonder_id: String, player_id: int) -> void:
+	world_wonders_built[wonder_id] = player_id
+	EventBus.wonder_built.emit(wonder_id, player_id, "world")
+
+func register_national_wonder(wonder_id: String, player_id: int) -> void:
+	if player_id not in national_wonders_built:
+		national_wonders_built[player_id] = []
+	national_wonders_built[player_id].append(wonder_id)
+	EventBus.wonder_built.emit(wonder_id, player_id, "national")
+
+func get_wonder_owner(wonder_id: String) -> int:
+	return world_wonders_built.get(wonder_id, -1)
+
+func get_all_world_wonders() -> Dictionary:
+	return world_wonders_built
+
+func get_player_national_wonders(player_id: int) -> Array:
+	return national_wonders_built.get(player_id, [])

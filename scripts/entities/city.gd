@@ -206,6 +206,17 @@ func calculate_yields() -> void:
 	production_yield = int(production_yield * (1.0 + prod_percent))
 	commerce_yield = int(commerce_yield * (1.0 + commerce_percent))
 
+	# Golden Age bonuses (+1 hammer and +1 commerce per worked tile that already produces it)
+	if player_owner != null and player_owner.is_in_golden_age():
+		for tile_pos in worked_tiles:
+			var tile = _get_tile(tile_pos)
+			if tile != null:
+				var tile_yields = tile.get_yields()
+				if tile_yields.get("production", 0) > 0:
+					production_yield += 1
+				if tile_yields.get("commerce", 0) > 0:
+					commerce_yield += 1
+
 	# Calculate science and culture
 	_calculate_science()
 	_calculate_culture()
@@ -561,6 +572,15 @@ func _produce_unit(unit_type: String) -> void:
 func _produce_building(building_type: String) -> void:
 	if building_type not in buildings:
 		buildings.append(building_type)
+
+		# Register wonders with GameManager
+		var building = DataManager.get_building(building_type)
+		var wonder_type = building.get("wonder_type", "")
+		if wonder_type == "world" and player_owner != null:
+			GameManager.register_world_wonder(building_type, player_owner.player_id)
+		elif wonder_type == "national" and player_owner != null:
+			GameManager.register_national_wonder(building_type, player_owner.player_id)
+
 		EventBus.city_building_constructed.emit(self, building_type)
 		calculate_yields()
 
@@ -582,6 +602,15 @@ func can_build_building(building_id: String) -> bool:
 
 	# Check requirements
 	var building = DataManager.get_building(building_id)
+
+	# Check wonder availability
+	var wonder_type = building.get("wonder_type", "")
+	if wonder_type == "world":
+		if not GameManager.is_world_wonder_available(building_id):
+			return false
+	elif wonder_type == "national":
+		if not GameManager.is_national_wonder_available(building_id, player_owner.player_id):
+			return false
 
 	# Required building
 	var requires = building.get("requires_building", "")
