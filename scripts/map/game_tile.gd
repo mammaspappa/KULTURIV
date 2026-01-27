@@ -142,10 +142,122 @@ func _draw_owner_border() -> void:
 	if tile_owner == null:
 		return
 
-	# Draw colored border to show ownership
+	# Civ4-style cultural borders: gradient fill that's opaque at borders, fading inward
 	var border_color = tile_owner.color
-	border_color.a = 0.5
-	draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), border_color, false, 2.0)
+
+	# Check which edges border unowned or differently-owned tiles
+	var border_edges = _get_border_edges()
+
+	if border_edges.is_empty():
+		# Interior tile - very faint color
+		border_color.a = 0.1
+		draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), border_color)
+	else:
+		# Border tile - draw gradient from edges
+		_draw_border_gradient(border_color, border_edges)
+
+## Get which edges of this tile border unowned or differently-owned tiles
+## Returns array of direction indices (0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW)
+func _get_border_edges() -> Array:
+	var edges = []
+	if tile_owner == null:
+		return edges
+
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return edges
+
+	# Check all 8 directions for square grid
+	var directions = [
+		Vector2i(0, -1),   # N
+		Vector2i(1, -1),   # NE
+		Vector2i(1, 0),    # E
+		Vector2i(1, 1),    # SE
+		Vector2i(0, 1),    # S
+		Vector2i(-1, 1),   # SW
+		Vector2i(-1, 0),   # W
+		Vector2i(-1, -1),  # NW
+	]
+
+	for i in range(directions.size()):
+		var neighbor_pos = grid_position + directions[i]
+		# Handle wrapping
+		neighbor_pos = GridUtils.wrap_position(neighbor_pos, grid.width, grid.height)
+		var neighbor = grid.get_tile(neighbor_pos)
+
+		# Edge is a border if neighbor doesn't exist, is unowned, or owned by different player
+		if neighbor == null or neighbor.tile_owner != tile_owner:
+			edges.append(i)
+
+	return edges
+
+## Draw gradient fill from border edges inward
+func _draw_border_gradient(base_color: Color, border_edges: Array) -> void:
+	var half = TILE_SIZE / 2.0
+	var center = Vector2(half, half)
+
+	# For each border edge, draw a gradient quad from edge to center
+	for edge_idx in border_edges:
+		var edge_color = base_color
+		edge_color.a = 0.7  # Opaque at edge
+
+		var center_color = base_color
+		center_color.a = 0.0  # Transparent at center
+
+		# Get edge start and end points based on direction
+		var edge_points = _get_edge_points(edge_idx)
+		var p1 = edge_points[0]
+		var p2 = edge_points[1]
+
+		# Draw gradient triangle from edge to center
+		var colors = PackedColorArray([edge_color, edge_color, center_color])
+		var points = PackedVector2Array([p1, p2, center])
+		draw_polygon(points, colors)
+
+	# Draw a solid border line at the actual edge for crisp definition
+	for edge_idx in border_edges:
+		var edge_color = base_color
+		edge_color.a = 0.9
+
+		var edge_points = _get_edge_points(edge_idx)
+		draw_line(edge_points[0], edge_points[1], edge_color, 2.0)
+
+## Get the two corner points for an edge based on direction index
+func _get_edge_points(edge_idx: int) -> Array:
+	# Corner positions: TL, TR, BR, BL
+	var corners = [
+		Vector2(0, 0),           # Top-left
+		Vector2(TILE_SIZE, 0),   # Top-right
+		Vector2(TILE_SIZE, TILE_SIZE),  # Bottom-right
+		Vector2(0, TILE_SIZE),   # Bottom-left
+	]
+
+	# Edge midpoints for diagonal directions
+	var mid_top = Vector2(TILE_SIZE / 2.0, 0)
+	var mid_right = Vector2(TILE_SIZE, TILE_SIZE / 2.0)
+	var mid_bottom = Vector2(TILE_SIZE / 2.0, TILE_SIZE)
+	var mid_left = Vector2(0, TILE_SIZE / 2.0)
+
+	# Return edge segment based on direction
+	match edge_idx:
+		0:  # North
+			return [corners[0], corners[1]]
+		1:  # Northeast (corner)
+			return [mid_top, mid_right]
+		2:  # East
+			return [corners[1], corners[2]]
+		3:  # Southeast (corner)
+			return [mid_right, mid_bottom]
+		4:  # South
+			return [corners[2], corners[3]]
+		5:  # Southwest (corner)
+			return [mid_bottom, mid_left]
+		6:  # West
+			return [corners[3], corners[0]]
+		7:  # Northwest (corner)
+			return [mid_left, mid_top]
+
+	return [Vector2.ZERO, Vector2.ZERO]
 
 func update_visuals() -> void:
 	queue_redraw()
