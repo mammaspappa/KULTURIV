@@ -191,3 +191,78 @@ static func has_line_of_sight(from: Vector2i, to: Vector2i, blocked_tiles: Array
 		if line[i] in blocked_tiles:
 			return false
 	return true
+
+## Get tiles within a circular radius (using Euclidean distance)
+## This creates a more rounded shape than the square Chebyshev distance
+static func get_tiles_in_circular_range(center: Vector2i, radius: float) -> Array[Vector2i]:
+	var tiles: Array[Vector2i] = []
+	var int_radius = int(ceil(radius))
+
+	for x in range(-int_radius, int_radius + 1):
+		for y in range(-int_radius, int_radius + 1):
+			if x == 0 and y == 0:
+				continue
+			# Use Euclidean distance for circular shape
+			var dist = sqrt(x * x + y * y)
+			if dist <= radius:
+				tiles.append(center + Vector2i(x, y))
+	return tiles
+
+## Get the "Fat Cross" pattern - the 20 workable tiles around a city
+## This is based on Civ4's Big Fat Cross (BFC) adapted for square grid
+## Includes all tiles within Euclidean distance of ~2.24 (sqrt(5))
+static func get_fat_cross(center: Vector2i) -> Array[Vector2i]:
+	var tiles: Array[Vector2i] = []
+
+	# All tiles within range 1 (8 tiles)
+	for x in range(-1, 2):
+		for y in range(-1, 2):
+			if x == 0 and y == 0:
+				continue
+			tiles.append(center + Vector2i(x, y))
+
+	# Cardinal tiles at range 2 (4 tiles) - N, E, S, W
+	tiles.append(center + Vector2i(0, -2))  # N
+	tiles.append(center + Vector2i(2, 0))   # E
+	tiles.append(center + Vector2i(0, 2))   # S
+	tiles.append(center + Vector2i(-2, 0))  # W
+
+	# Semi-cardinal tiles at range 2 (8 tiles) - NE, SE, SW, NW directions
+	tiles.append(center + Vector2i(1, -2))   # NNE
+	tiles.append(center + Vector2i(2, -1))   # ENE
+	tiles.append(center + Vector2i(2, 1))    # ESE
+	tiles.append(center + Vector2i(1, 2))    # SSE
+	tiles.append(center + Vector2i(-1, 2))   # SSW
+	tiles.append(center + Vector2i(-2, 1))   # WSW
+	tiles.append(center + Vector2i(-2, -1))  # WNW
+	tiles.append(center + Vector2i(-1, -2))  # NNW
+
+	return tiles  # Total: 8 + 4 + 8 = 20 tiles
+
+## Get tiles for a specific culture level expansion pattern
+## Level 0: 3x3 initial (8 neighbors)
+## Level 1: Fat Cross (20 workable tiles)
+## Level 2+: Circular expansion at increasing radii
+static func get_culture_expansion_tiles(center: Vector2i, culture_level: int) -> Array[Vector2i]:
+	match culture_level:
+		0:
+			# Initial 3x3 square (the 8 neighbors)
+			return get_neighbors(center)
+		1:
+			# Fat Cross pattern (20 tiles)
+			return get_fat_cross(center)
+		2:
+			# 3-tile radius circle
+			return get_tiles_in_circular_range(center, 3.0)
+		3:
+			# 4-tile radius circle
+			return get_tiles_in_circular_range(center, 4.0)
+		4:
+			# 5-tile radius circle
+			return get_tiles_in_circular_range(center, 5.0)
+		5:
+			# 6-tile radius circle (Legendary)
+			return get_tiles_in_circular_range(center, 6.0)
+		_:
+			# Beyond legendary - keep expanding
+			return get_tiles_in_circular_range(center, float(culture_level + 1))

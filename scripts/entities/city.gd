@@ -43,7 +43,7 @@ var food_surplus: int = 0
 
 # Culture
 var culture: int = 0
-var culture_level: int = 1
+var culture_level: int = 0  # Starts at Poor (0), expands at Fledgling (10), Developing (100), etc.
 
 # Religion
 var religions: Array[String] = []
@@ -139,15 +139,15 @@ func update_visual() -> void:
 	queue_redraw()
 
 func _initialize_territory() -> void:
-	# Start with just the city tile and immediate neighbors
+	# Start with just the city tile and initial culture level 0 territory (3x3)
 	territory = [grid_position]
 	worked_tiles = [grid_position]
 
-	# Add adjacent tiles
-	var neighbors = GridUtils.get_neighbors(grid_position)
-	for neighbor in neighbors:
-		if _can_claim_tile(neighbor):
-			territory.append(neighbor)
+	# Add tiles for culture level 0 (Poor - 3x3 square around city)
+	var initial_tiles = GridUtils.get_culture_expansion_tiles(grid_position, 0)
+	for tile_pos in initial_tiles:
+		if _can_claim_tile(tile_pos):
+			territory.append(tile_pos)
 
 func _can_claim_tile(pos: Vector2i) -> bool:
 	if GameManager.hex_grid == null:
@@ -618,19 +618,22 @@ func has_resource(resource_id: String) -> bool:
 
 # Culture and borders
 func check_border_expansion() -> void:
-	# Check if we've reached next culture level
-	while culture_level < CULTURE_THRESHOLDS.size() and culture >= CULTURE_THRESHOLDS[culture_level]:
+	# Check if we've reached the next culture level threshold
+	# culture_level 0 = Poor (initial 3x3), expands to level 1 at 10 culture
+	# culture_level 1 = Fledgling (Fat Cross), expands to level 2 at 100 culture
+	# etc.
+	while culture_level + 1 < CULTURE_THRESHOLDS.size() and culture >= CULTURE_THRESHOLDS[culture_level + 1]:
 		culture_level += 1
 		_expand_borders()
 		EventBus.city_borders_expanded.emit(self)
 
 func _expand_borders() -> void:
-	# Add tiles at the next ring
-	var range_val = culture_level + 1
-	var new_tiles = GridUtils.get_tiles_at_range(grid_position, range_val)
+	# Get all tiles that should be in territory for current culture level
+	# This uses circular expansion patterns instead of square rings
+	var expansion_tiles = GridUtils.get_culture_expansion_tiles(grid_position, culture_level)
 
 	var added_new_tiles = false
-	for tile_pos in new_tiles:
+	for tile_pos in expansion_tiles:
 		if tile_pos not in territory and _can_claim_tile(tile_pos):
 			territory.append(tile_pos)
 			var tile = _get_tile(tile_pos)
