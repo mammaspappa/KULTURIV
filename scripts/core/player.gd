@@ -14,6 +14,7 @@ var color: Color = Color.WHITE
 var gold: int = 0
 var gold_per_turn: int = 0
 var science_per_turn: int = 0
+var science_rate: float = 1.0  # Percentage of commerce going to science (0.0 to 1.0)
 
 # Research
 var researched_techs: Array[String] = []
@@ -313,6 +314,7 @@ func to_dict() -> Dictionary:
 		"anarchy_turns": anarchy_turns,
 		"traits": traits,
 		"has_ever_had_city": has_ever_had_city,
+		"science_rate": science_rate,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -338,3 +340,4 @@ func from_dict(data: Dictionary) -> void:
 	anarchy_turns = data.get("anarchy_turns", 0)
 	traits.assign(data.get("traits", []))
 	has_ever_had_city = data.get("has_ever_had_city", false)
+	science_rate = data.get("science_rate", 1.0)

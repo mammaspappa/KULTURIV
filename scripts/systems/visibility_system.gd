@@ -68,9 +68,11 @@ func _reveal_tiles_around(center: Vector2i, sight_range: int, player_id: int) ->
 ## Reveal tiles for a unit (called when unit moves)
 func reveal_for_unit(unit) -> void:
 	if unit == null or unit.player_owner == null:
+		print("[DEBUG] reveal_for_unit: unit or player_owner is null")
 		return
 
 	var player_id = unit.player_owner.player_id
+	print("[DEBUG] reveal_for_unit: player_id=%d, pos=%s, range=%d" % [player_id, unit.grid_position, unit.get_visibility_range()])
 	_reveal_tiles_around(unit.grid_position, unit.get_visibility_range(), player_id)
 
 	# Update tile visuals in the revealed area

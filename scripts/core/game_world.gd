@@ -128,29 +128,35 @@ func _process(_delta: float) -> void:
 
 ## Initialize the game world with generated map
 func initialize_game(settings: Dictionary) -> void:
+	print("[DEBUG] initialize_game() starting")
 	# Create grid
 	game_grid = GameGrid.new()
 	grid_layer.add_child(game_grid)
 	GameManager.game_grid = game_grid
+	print("[DEBUG] GameManager.game_grid set, hex_grid is: ", GameManager.hex_grid)
 
 	# Generate map
 	var map_width = settings.get("map_width", 40)
 	var map_height = settings.get("map_height", 25)
 	game_grid.generate_map(map_width, map_height)
+	print("[DEBUG] Map generated: %dx%d, tiles count: %d" % [map_width, map_height, game_grid.tiles.size()])
 
 	# Create camera
 	game_camera = GameCamera.new()
 	game_camera.set_map_bounds(map_width, map_height)
 	add_child(game_camera)
+	print("[DEBUG] Camera created, position: %s, zoom: %s" % [game_camera.position, game_camera.zoom])
 
 	# Connect grid signals
 	game_grid.tile_clicked.connect(_on_tile_clicked)
 
 	# Place starting units for players
 	_place_starting_units()
+	print("[DEBUG] Starting units placed, human_player units: %d" % GameManager.human_player.units.size())
 
 	# Start the game
 	TurnManager.start_game()
+	print("[DEBUG] Game started, turn: %d" % TurnManager.current_turn)
 
 	# Center camera on human player's starting location
 	if GameManager.human_player and GameManager.human_player.units.size() > 0:

@@ -16,6 +16,8 @@ var continue_button: Button
 const BG_COLOR = Color(0.05, 0.05, 0.1, 1.0)
 
 func _ready() -> void:
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_create_ui()
 	EventBus.victory_achieved.connect(_on_victory_achieved)
 	EventBus.game_over.connect(_on_game_over)
@@ -105,6 +107,8 @@ func _on_game_over(player, type: String) -> void:
 	_show_victory_screen()
 
 func _show_victory_screen() -> void:
+	# Close all other popups first (victory takes priority)
+	EventBus.close_all_popups.emit()
 	_update_display()
 	show()
 

@@ -33,9 +33,12 @@ const CURRENT_COLOR = Color(0.2, 0.4, 0.5)
 const PENDING_COLOR = Color(0.5, 0.5, 0.2)
 
 func _ready() -> void:
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_create_ui()
 	EventBus.show_civics_screen.connect(_on_show_civics_screen)
 	EventBus.hide_civics_screen.connect(_on_close_pressed)
+	EventBus.close_all_popups.connect(_on_close_pressed)
 	hide()
 
 func _create_ui() -> void:
@@ -136,6 +139,8 @@ func _create_category_container(category: String) -> VBoxContainer:
 	return vbox
 
 func _on_show_civics_screen() -> void:
+	# Close all other popups first
+	EventBus.close_all_popups.emit()
 	current_player = GameManager.human_player
 	pending_changes.clear()
 	_build_civics_list()
@@ -363,7 +368,6 @@ func _on_confirm_pressed() -> void:
 func _on_close_pressed() -> void:
 	pending_changes.clear()
 	hide()
-	EventBus.hide_civics_screen.emit()
 
 func _update_layout() -> void:
 	if panel == null:

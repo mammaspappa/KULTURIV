@@ -68,6 +68,9 @@ func _start_turn_for_player(player) -> void:
 	for city in player.cities:
 		_process_city_turn_start(city)
 
+	# Process gold (sum gold_yield from all cities)
+	_process_gold(player)
+
 	# Process research
 	_process_research(player)
 
@@ -153,6 +156,25 @@ func _process_city_turn_start(city) -> void:
 	# Process culture
 	city.culture += city.culture_yield
 	city.check_border_expansion()
+
+func _process_gold(player) -> void:
+	# Calculate gold per turn from all cities
+	var total_gold = 0
+	for city in player.cities:
+		total_gold += city.gold_yield
+
+	# Subtract unit maintenance costs (basic implementation)
+	var unit_maintenance = player.units.size()  # 1 gold per unit
+
+	# Calculate net gold per turn
+	player.gold_per_turn = total_gold - unit_maintenance
+
+	# Add to player's gold treasury
+	player.gold += player.gold_per_turn
+
+	# Ensure gold doesn't go below 0 (could add deficit handling later)
+	if player.gold < 0:
+		player.gold = 0
 
 func _process_research(player) -> void:
 	if player.current_research == "":

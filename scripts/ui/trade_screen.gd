@@ -33,9 +33,12 @@ const BG_COLOR = Color(0.1, 0.1, 0.15, 1.0)
 const OFFER_BG_COLOR = Color(0.15, 0.15, 0.2)
 
 func _ready() -> void:
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_create_ui()
 	EventBus.show_trade_screen.connect(_on_show_trade_screen)
 	EventBus.hide_trade_screen.connect(_on_hide_trade_screen)
+	EventBus.close_all_popups.connect(_on_hide_trade_screen)
 	EventBus.trade_proposed.connect(_on_trade_proposed)
 	EventBus.trade_accepted.connect(_on_trade_accepted)
 	EventBus.trade_rejected.connect(_on_trade_rejected)
@@ -234,6 +237,9 @@ func show_trade(proposer, receiver) -> void:
 
 	if from_player == null or to_player == null:
 		return
+
+	# Close all other popups first
+	EventBus.close_all_popups.emit()
 
 	# Create new proposal
 	current_proposal = TradeSystem.create_proposal(from_player, to_player)

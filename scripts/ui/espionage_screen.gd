@@ -16,12 +16,17 @@ var selected_target_id: int = -1
 var current_player_id: int = -1
 
 func _ready() -> void:
+	# Ensure this Control fills the screen so child anchors work
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_ui()
 	visible = false
 
 	# Connect signals
 	EventBus.show_espionage_screen.connect(_on_show)
 	EventBus.hide_espionage_screen.connect(_on_close)
+	EventBus.close_all_popups.connect(_on_close)
 
 func _build_ui() -> void:
 	# Main panel positioned just below top menu
@@ -133,14 +138,8 @@ func _build_ui() -> void:
 	info_panel.add_child(info_label)
 
 func _on_show() -> void:
-	# Close other popup screens
-	EventBus.hide_diplomacy_screen.emit()
-	EventBus.hide_civics_screen.emit()
-	EventBus.hide_trade_screen.emit()
-	EventBus.hide_spaceship_screen.emit()
-	EventBus.hide_voting_screen.emit()
-	EventBus.hide_city_screen.emit()
-	EventBus.hide_tech_tree.emit()
+	# Close all other popups first
+	EventBus.close_all_popups.emit()
 
 	if GameManager and GameManager.human_player:
 		current_player_id = GameManager.human_player.player_id

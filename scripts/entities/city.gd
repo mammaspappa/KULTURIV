@@ -38,6 +38,7 @@ var production_yield: int = 0
 var commerce_yield: int = 0
 var science_yield: int = 0
 var culture_yield: int = 0
+var gold_yield: int = 0  # Gold from commerce (based on science rate)
 var food_surplus: int = 0
 
 # Culture
@@ -213,9 +214,13 @@ func calculate_yields() -> void:
 	_calculate_health()
 
 func _calculate_science() -> void:
-	# Base science from commerce
-	var science_rate = 0.5  # 50% of commerce goes to science by default
-	science_yield = int(commerce_yield * science_rate)
+	# Get science rate from player (percentage of commerce going to science)
+	var rate = 1.0  # Default 100%
+	if player_owner != null:
+		rate = player_owner.science_rate
+
+	# Base science from commerce (based on player's science slider)
+	science_yield = int(commerce_yield * rate)
 
 	# Specialist science bonus
 	var spec_commerces = get_specialist_commerces()
@@ -228,6 +233,17 @@ func _calculate_science() -> void:
 		science_percent += effects.get("science_percent", 0.0)
 
 	science_yield = int(science_yield * (1.0 + science_percent))
+
+	# Gold from remaining commerce (commerce not going to science)
+	# This follows Civ4 mechanics where commerce is split between science and gold
+	var gold_from_commerce = int(commerce_yield * (1.0 - rate))
+	# Add gold from buildings
+	var gold_bonus = 0
+	for building_id in buildings:
+		var effects = DataManager.get_building_effects(building_id)
+		gold_bonus += effects.get("gold", 0)
+	# Store in a city property for reference (gold_yield)
+	gold_yield = gold_from_commerce + gold_bonus
 
 func _calculate_culture() -> void:
 	culture_yield = 0

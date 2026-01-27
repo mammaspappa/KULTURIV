@@ -110,6 +110,7 @@ signal fog_updated(player)
 
 # UI events
 signal selection_changed(selected)
+signal close_all_popups()  # Close all popup screens (emit before showing a popup)
 signal show_city_screen(city)
 signal hide_city_screen()
 signal show_tech_tree()

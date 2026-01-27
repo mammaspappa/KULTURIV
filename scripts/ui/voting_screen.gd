@@ -15,12 +15,17 @@ var vote_result_label: RichTextLabel
 var current_player_id: int = -1
 
 func _ready() -> void:
+	# Ensure this Control fills the screen so child anchors work
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_ui()
 	visible = false
 
 	# Connect signals
 	EventBus.show_voting_screen.connect(_on_show)
 	EventBus.hide_voting_screen.connect(_on_close)
+	EventBus.close_all_popups.connect(_on_close)
 	EventBus.vote_started.connect(_on_vote_started)
 	EventBus.vote_completed.connect(_on_vote_completed)
 
@@ -107,14 +112,8 @@ func _build_ui() -> void:
 	active_vote_panel.add_child(vote_result_label)
 
 func _on_show() -> void:
-	# Close other popup screens
-	EventBus.hide_diplomacy_screen.emit()
-	EventBus.hide_civics_screen.emit()
-	EventBus.hide_trade_screen.emit()
-	EventBus.hide_espionage_screen.emit()
-	EventBus.hide_spaceship_screen.emit()
-	EventBus.hide_city_screen.emit()
-	EventBus.hide_tech_tree.emit()
+	# Close all other popups first
+	EventBus.close_all_popups.emit()
 
 	if GameManager and GameManager.human_player:
 		current_player_id = GameManager.human_player.player_id

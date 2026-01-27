@@ -30,6 +30,9 @@ enum VisibilityState { UNEXPLORED, FOGGED, VISIBLE }
 func _init(pos: Vector2i = Vector2i.ZERO) -> void:
 	grid_position = pos
 	position = GridUtils.grid_to_pixel_corner(grid_position)
+	# Debug only for first tile
+	if pos == Vector2i(0, 0):
+		print("[DEBUG] Tile(0,0) created at position: %s" % position)
 
 func _draw() -> void:
 	# Check visibility for human player
@@ -37,6 +40,10 @@ func _draw() -> void:
 	var vis_state = VisibilityState.VISIBLE  # Default to visible if no human player
 	if human_player != null:
 		vis_state = get_visibility_for_player(human_player.player_id)
+
+	# Debug output for tile at (0,0) to check visibility system
+	if grid_position == Vector2i(0, 0):
+		print("[DEBUG] Tile(0,0) _draw: human_player=%s, vis_state=%d, visibility dict=%s" % [human_player, vis_state, visibility])
 
 	# Don't render unexplored tiles
 	if vis_state == VisibilityState.UNEXPLORED:
@@ -141,6 +148,17 @@ func _draw_owner_border() -> void:
 	draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), border_color, false, 2.0)
 
 func update_visuals() -> void:
+	queue_redraw()
+
+## Copy visual data from another tile (used for wrap display)
+func copy_from(other: GameTile) -> void:
+	terrain_id = other.terrain_id
+	feature_id = other.feature_id
+	resource_id = other.resource_id
+	improvement_id = other.improvement_id
+	road_level = other.road_level
+	tile_owner = other.tile_owner
+	visibility = other.visibility.duplicate()
 	queue_redraw()
 
 # Terrain and feature queries

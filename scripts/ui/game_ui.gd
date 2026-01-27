@@ -5,6 +5,8 @@ extends Control
 @onready var turn_label: Label = $TopBar/HBoxContainer/TurnLabel
 @onready var gold_label: Label = $TopBar/HBoxContainer/GoldLabel
 @onready var science_label: Label = $TopBar/HBoxContainer/ScienceLabel
+@onready var science_rate_slider: HSlider = $TopBar/HBoxContainer/ScienceRateContainer/ScienceRateSlider
+@onready var science_rate_value: Label = $TopBar/HBoxContainer/ScienceRateContainer/ScienceRateValue
 @onready var civ_label: Label = $TopBar/HBoxContainer/CivLabel
 
 # Unit panel
@@ -61,6 +63,11 @@ func _ready() -> void:
 		voting_button.pressed.connect(_on_voting_pressed)
 	if spaceship_button:
 		spaceship_button.pressed.connect(_on_spaceship_pressed)
+	if science_rate_slider:
+		science_rate_slider.value_changed.connect(_on_science_rate_changed)
+		# Initialize slider to player's current science rate
+		if GameManager and GameManager.human_player:
+			science_rate_slider.value = GameManager.human_player.science_rate * 100
 
 	# Initial state
 	unit_panel.visible = false
@@ -153,6 +160,19 @@ func _on_voting_pressed() -> void:
 func _on_spaceship_pressed() -> void:
 	EventBus.show_spaceship_screen.emit()
 
+func _on_science_rate_changed(value: float) -> void:
+	if GameManager and GameManager.human_player:
+		# Convert 0-100 slider value to 0.0-1.0 rate
+		GameManager.human_player.science_rate = value / 100.0
+		# Update the percentage label
+		if science_rate_value:
+			science_rate_value.text = "%d%%" % int(value)
+		# Recalculate all city yields to reflect the new rate
+		for city in GameManager.human_player.cities:
+			city.calculate_yields()
+		# Update the top bar to show new science/gold values
+		_update_top_bar()
+
 func _update_top_bar() -> void:
 	if not is_inside_tree():
 		return
@@ -174,13 +194,20 @@ func _update_top_bar() -> void:
 	# Science
 	if science_label:
 		var research = player.current_research
+		var science_output = player.get_research_output()
 		if research != "":
 			var tech_data = DataManager.get_tech(research)
 			var progress = player.research_progress
 			var cost = int(DataManager.get_tech_cost(research) * GameManager.get_speed_multiplier())
-			science_label.text = "%s: %d/%d" % [tech_data.get("name", research), progress, cost]
+			var turns_left = ceili((cost - progress) / max(science_output, 1)) if science_output > 0 else 999
+			science_label.text = "%s: %d/%d (+%d, %d turns)" % [tech_data.get("name", research), progress, cost, science_output, turns_left]
 		else:
-			science_label.text = "No Research"
+			science_label.text = "No Research (+%d)" % science_output
+
+	# Update science rate slider and label
+	if science_rate_slider and science_rate_value:
+		science_rate_slider.value = player.science_rate * 100
+		science_rate_value.text = "%d%%" % int(player.science_rate * 100)
 
 	# Civilization
 	if civ_label:

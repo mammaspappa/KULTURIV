@@ -29,9 +29,12 @@ const CURRENT_COLOR = Color(0.6, 0.6, 0.2)
 const ERA_ORDER = ["ancient", "classical", "medieval", "renaissance", "industrial", "modern", "future"]
 
 func _ready() -> void:
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_create_ui()
 	EventBus.show_tech_tree.connect(_on_show_tech_tree)
 	EventBus.hide_tech_tree.connect(_on_close_pressed)
+	EventBus.close_all_popups.connect(_on_close_pressed)
 	hide()
 
 func _create_ui() -> void:
@@ -121,6 +124,8 @@ func _create_ui() -> void:
 	info_panel.add_child(info_label)
 
 func _on_show_tech_tree() -> void:
+	# Close all other popups first
+	EventBus.close_all_popups.emit()
 	current_player = GameManager.human_player
 	_build_tech_tree()
 	show()

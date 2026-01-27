@@ -8,13 +8,14 @@ extends Camera2D
 @export var edge_pan_enabled: bool = true
 
 # Zoom settings
-@export var min_zoom: float = 0.25
+@export var min_zoom: float = 0.25  # Will be calculated based on map size
 @export var max_zoom: float = 2.0
 @export var zoom_speed: float = 0.1
 @export var zoom_smooth: float = 10.0
 
 # Bounds (will be set based on map size)
 var map_bounds: Rect2 = Rect2(0, 0, 10000, 10000)
+var wrap_x: bool = true  # Whether map wraps horizontally
 
 # Internal state
 var target_zoom: float = 1.0
@@ -107,14 +108,53 @@ func _smooth_zoom(delta: float) -> void:
 	zoom = Vector2(new_zoom, new_zoom)
 
 func _clamp_position() -> void:
-	# Allow some margin beyond map edges
 	var margin = 200 / zoom.x
-	position.x = clamp(position.x, map_bounds.position.x - margin, map_bounds.end.x + margin)
+
+	if wrap_x:
+		# For wrapping maps, wrap the camera position instead of clamping X
+		var map_width = map_bounds.size.x
+		if position.x < 0:
+			position.x += map_width
+		elif position.x > map_width:
+			position.x -= map_width
+	else:
+		# No wrap - clamp X position
+		position.x = clamp(position.x, map_bounds.position.x - margin, map_bounds.end.x + margin)
+
+	# Y is always clamped (no vertical wrap)
 	position.y = clamp(position.y, map_bounds.position.y - margin, map_bounds.end.y + margin)
 
-## Set map bounds based on grid size
+## Set map bounds based on grid size and calculate zoom limits
 func set_map_bounds(width: int, height: int, tile_size: int = 64) -> void:
 	map_bounds = Rect2(0, 0, width * tile_size, height * tile_size)
+
+	# Get wrap setting from game grid if available
+	if GameManager.hex_grid:
+		wrap_x = GameManager.hex_grid.wrap_x
+
+	# Calculate min_zoom so that 60% of the map fills the screen width
+	# Deferred to ensure viewport is ready
+	call_deferred("_calculate_min_zoom")
+
+func _calculate_min_zoom() -> void:
+	print("[DEBUG] _calculate_min_zoom called, map_bounds: %s" % map_bounds)
+	if map_bounds.size.x <= 0:
+		print("[DEBUG] map_bounds.size.x <= 0, returning early")
+		return
+
+	var viewport_size = get_viewport_rect().size
+	print("[DEBUG] viewport_size: %s" % viewport_size)
+	if viewport_size.x > 0:
+		# At zoom Z, viewport shows viewport_width / Z pixels
+		# We want: viewport_width / Z = map_width * 0.6
+		# So: Z = viewport_width / (map_width * 0.6)
+		var map_sixty_percent = map_bounds.size.x * 0.6
+		var calculated_min = viewport_size.x / map_sixty_percent
+		# Ensure min_zoom is reasonable (between 0.1 and 1.0)
+		min_zoom = clamp(calculated_min, 0.1, 1.0)
+		# Clamp target zoom if it's now below the new minimum
+		target_zoom = max(target_zoom, min_zoom)
+		print("[DEBUG] min_zoom set to: %f, target_zoom: %f" % [min_zoom, target_zoom])
 
 ## Center camera on a position
 func center_on(world_pos: Vector2) -> void:
@@ -145,3 +185,8 @@ func _on_unit_selected(unit: Unit) -> void:
 func _on_city_selected(city: City) -> void:
 	if city != null:
 		move_to_grid(city.grid_position)
+
+func _notification(what: int) -> void:
+	# Recalculate zoom limits when viewport size changes
+	if what == NOTIFICATION_WM_SIZE_CHANGED:
+		_calculate_min_zoom()

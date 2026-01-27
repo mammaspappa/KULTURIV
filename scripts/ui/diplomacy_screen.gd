@@ -29,31 +29,29 @@ var trade_btn: Button
 var selected_player = null
 
 func _ready() -> void:
+	# Ensure this Control fills the screen so child anchors work
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_ui()
 	visible = false
 
 	# Connect signals
 	EventBus.show_diplomacy_screen.connect(_on_show_diplomacy)
 	EventBus.hide_diplomacy_screen.connect(_on_hide_diplomacy)
+	EventBus.close_all_popups.connect(_on_hide_diplomacy)
 	EventBus.war_declared.connect(_on_war_declared)
 	EventBus.peace_declared.connect(_on_peace_declared)
 	EventBus.first_contact.connect(_on_first_contact)
 
 func _build_ui() -> void:
-	# Container to position below top menu
-	var container = Control.new()
-	container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	container.offset_top = 40  # Below top menu
-	add_child(container)
-
-	# Center container
-	var center = CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	container.add_child(center)
-
-	# Main panel
+	# Main panel - anchored below top menu like other screens
 	panel = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(900, 600)
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 10
+	panel.offset_right = -10
+	panel.offset_top = 50  # Just below 40px top menu
+	panel.offset_bottom = -10
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.12, 0.12, 0.15, 1.0)
 	style.border_color = Color(0.3, 0.3, 0.4)
@@ -66,7 +64,7 @@ func _build_ui() -> void:
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
 	panel.add_theme_stylebox_override("panel", style)
-	center.add_child(panel)
+	add_child(panel)
 
 	var main_vbox = VBoxContainer.new()
 	main_vbox.add_theme_constant_override("separation", 10)
@@ -237,6 +235,8 @@ func _hide_action_buttons() -> void:
 	trade_btn.visible = false
 
 func _on_show_diplomacy(player = null) -> void:
+	# Close all other popups first
+	EventBus.close_all_popups.emit()
 	_refresh_player_list()
 	if player:
 		_select_player(player)

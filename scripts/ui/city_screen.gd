@@ -22,9 +22,12 @@ const HEADER_COLOR = Color(0.2, 0.2, 0.3)
 const BUTTON_COLOR = Color(0.3, 0.3, 0.4)
 
 func _ready() -> void:
+	# Allow clicks to pass through to top menu
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_create_ui()
 	EventBus.show_city_screen.connect(_on_show_city_screen)
 	EventBus.hide_city_screen.connect(_on_close_pressed)
+	EventBus.close_all_popups.connect(_on_close_pressed)
 	hide()
 
 func _create_ui() -> void:
@@ -130,6 +133,8 @@ func _create_ui() -> void:
 	panel.add_child(building_list)
 
 func _on_show_city_screen(city) -> void:
+	# Close all other popups first
+	EventBus.close_all_popups.emit()
 	current_city = city
 	_update_display()
 	_position_over_city()

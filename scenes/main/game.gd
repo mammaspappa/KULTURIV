@@ -2,7 +2,8 @@ extends Node2D
 ## Main game scene that sets up the game world.
 
 @onready var game_world: GameWorld = $GameWorld
-@onready var game_ui: Control = $GameUI
+@onready var game_ui: Control = $ScreenUILayer/GameUI
+@onready var screen_ui_layer: CanvasLayer = $ScreenUILayer
 
 # UI Screen instances
 var event_popup: Control
@@ -32,37 +33,37 @@ func _setup_ui() -> void:
 	EventBus.city_selected.connect(_on_city_selected)
 
 func _setup_ui_screens() -> void:
-	# Load and add Event Popup
+	# Load and add Event Popup to ScreenUILayer (so it doesn't scale with zoom)
 	var EventPopupScript = load("res://scripts/ui/event_popup.gd")
 	if EventPopupScript:
 		event_popup = Control.new()
 		event_popup.set_script(EventPopupScript)
 		event_popup.name = "EventPopup"
-		add_child(event_popup)
+		screen_ui_layer.add_child(event_popup)
 
-	# Load and add Espionage Screen
+	# Load and add Espionage Screen to ScreenUILayer
 	var EspionageScreenScript = load("res://scripts/ui/espionage_screen.gd")
 	if EspionageScreenScript:
 		espionage_screen = Control.new()
 		espionage_screen.set_script(EspionageScreenScript)
 		espionage_screen.name = "EspionageScreen"
-		add_child(espionage_screen)
+		screen_ui_layer.add_child(espionage_screen)
 
-	# Load and add Spaceship Screen
+	# Load and add Spaceship Screen to ScreenUILayer
 	var SpaceshipScreenScript = load("res://scripts/ui/spaceship_screen.gd")
 	if SpaceshipScreenScript:
 		spaceship_screen = Control.new()
 		spaceship_screen.set_script(SpaceshipScreenScript)
 		spaceship_screen.name = "SpaceshipScreen"
-		add_child(spaceship_screen)
+		screen_ui_layer.add_child(spaceship_screen)
 
-	# Load and add Voting Screen
+	# Load and add Voting Screen to ScreenUILayer
 	var VotingScreenScript = load("res://scripts/ui/voting_screen.gd")
 	if VotingScreenScript:
 		voting_screen = Control.new()
 		voting_screen.set_script(VotingScreenScript)
 		voting_screen.name = "VotingScreen"
-		add_child(voting_screen)
+		screen_ui_layer.add_child(voting_screen)
 
 func _on_turn_started(turn: int, player: Player) -> void:
 	if player == GameManager.human_player:

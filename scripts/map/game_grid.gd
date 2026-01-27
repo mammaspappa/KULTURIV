@@ -11,6 +11,12 @@ var wrap_y: bool = false
 # Tile storage
 var tiles: Dictionary = {}  # Vector2i -> GameTile
 
+# Wrap visual copies (for cylindrical display)
+var left_wrap_container: Node2D
+var right_wrap_container: Node2D
+var wrap_tiles_left: Dictionary = {}  # Vector2i -> GameTile (visual copies)
+var wrap_tiles_right: Dictionary = {}  # Vector2i -> GameTile (visual copies)
+
 # Map generation settings
 var sea_level: float = 0.4
 var mountain_threshold: float = 0.85
@@ -76,6 +82,11 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 
 	# Ensure starting locations have good terrain
 	_prepare_starting_locations()
+
+	# Create visual wrap copies for cylindrical display
+	# Note: Temporarily disabled for debugging - uncomment when working
+	#if wrap_x:
+	#	_create_wrap_visuals()
 
 	map_generated.emit()
 
@@ -216,6 +227,56 @@ func _prepare_starting_locations() -> void:
 	# Will be used when placing initial settlers
 	pass
 
+## Create visual copies of tiles at the left and right edges for cylindrical wrapping
+func _create_wrap_visuals() -> void:
+	# Clear existing wrap visuals
+	if left_wrap_container:
+		left_wrap_container.queue_free()
+	if right_wrap_container:
+		right_wrap_container.queue_free()
+	wrap_tiles_left.clear()
+	wrap_tiles_right.clear()
+
+	# Create containers for wrap visuals
+	left_wrap_container = Node2D.new()
+	left_wrap_container.name = "LeftWrapContainer"
+	left_wrap_container.position.x = -width * GridUtils.TILE_SIZE
+	add_child(left_wrap_container)
+
+	right_wrap_container = Node2D.new()
+	right_wrap_container.name = "RightWrapContainer"
+	right_wrap_container.position.x = width * GridUtils.TILE_SIZE
+	add_child(right_wrap_container)
+
+	# Create copies of all tiles for both sides
+	for pos in tiles:
+		var original_tile = tiles[pos]
+
+		# Left wrap copy
+		var left_tile = GameTile.new(pos)
+		left_tile.copy_from(original_tile)
+		wrap_tiles_left[pos] = left_tile
+		left_wrap_container.add_child(left_tile)
+
+		# Right wrap copy
+		var right_tile = GameTile.new(pos)
+		right_tile.copy_from(original_tile)
+		wrap_tiles_right[pos] = right_tile
+		right_wrap_container.add_child(right_tile)
+
+## Update the wrap tile visuals to match the main tiles
+func update_wrap_visuals() -> void:
+	if not wrap_x:
+		return
+
+	for pos in tiles:
+		var original_tile = tiles[pos]
+
+		if pos in wrap_tiles_left:
+			wrap_tiles_left[pos].copy_from(original_tile)
+		if pos in wrap_tiles_right:
+			wrap_tiles_right[pos].copy_from(original_tile)
+
 # Tile access
 func get_tile(pos: Vector2i) -> GameTile:
 	var wrapped_pos = _wrap_position(pos)
@@ -331,6 +392,8 @@ func _input(event: InputEvent) -> void:
 func update_all_tiles() -> void:
 	for tile in tiles.values():
 		tile.update_visuals()
+	# Also update wrap visuals
+	update_wrap_visuals()
 
 # Serialization
 func to_dict() -> Dictionary:
@@ -357,6 +420,16 @@ func from_dict(data: Dictionary) -> void:
 		tile.queue_free()
 	tiles.clear()
 
+	# Clear wrap visuals
+	if left_wrap_container:
+		left_wrap_container.queue_free()
+		left_wrap_container = null
+	if right_wrap_container:
+		right_wrap_container.queue_free()
+		right_wrap_container = null
+	wrap_tiles_left.clear()
+	wrap_tiles_right.clear()
+
 	# Load tiles
 	var tiles_data = data.get("tiles", {})
 	for key in tiles_data:
@@ -366,3 +439,7 @@ func from_dict(data: Dictionary) -> void:
 		tile.from_dict(tiles_data[key])
 		tiles[pos] = tile
 		add_child(tile)
+
+	# Recreate wrap visuals
+	if wrap_x:
+		_create_wrap_visuals()

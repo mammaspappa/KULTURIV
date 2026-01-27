@@ -64,6 +64,27 @@ text = "Gold: 0 (+0)"
 layout_mode = 2
 text = "Science: 0"
 
+[node name="ScienceRateContainer" type="HBoxContainer" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="ScienceRateLabel" type="Label" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer/ScienceRateContainer"]
+layout_mode = 2
+text = "Rate:"
+
+[node name="ScienceRateSlider" type="HSlider" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer/ScienceRateContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+min_value = 0.0
+max_value = 100.0
+step = 10.0
+value = 100.0
+
+[node name="ScienceRateValue" type="Label" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer/ScienceRateContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+text = "100%"
+
 [node name="TechButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Tech (T)"

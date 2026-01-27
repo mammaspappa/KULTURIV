@@ -32,6 +32,8 @@ const CATEGORY_COLORS = {
 }
 
 func _ready() -> void:
+	# Ensure this Control fills the screen so child anchors work
+	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build_ui()
 	visible = false
 
