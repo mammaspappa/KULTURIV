@@ -640,11 +640,15 @@ func _expand_borders() -> void:
 				added_new_tiles = true
 
 	# Redraw ALL territory tiles so old border lines are removed
+	# and update visibility based on new cultural borders
 	if added_new_tiles:
 		for tile_pos in territory:
 			var tile = _get_tile(tile_pos)
 			if tile != null:
 				tile.update_visuals()
+
+		# Update visibility to extend beyond new borders
+		VisibilitySystem.reveal_for_city(self)
 
 # Defense
 func get_defense_strength() -> float:

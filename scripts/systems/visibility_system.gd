@@ -18,22 +18,41 @@ func refresh_visibility(player) -> void:
 	for unit in player.units:
 		_reveal_tiles_around(unit.grid_position, unit.get_visibility_range(), player_id)
 
-	# Recalculate visibility from all cities
+	# Recalculate visibility from all cities (based on cultural borders)
 	for city in player.cities:
-		_reveal_tiles_around(city.grid_position, get_city_visibility_range(city), player_id)
+		_reveal_city_territory(city, player_id)
 
-## Get visibility range for a city
-func get_city_visibility_range(city) -> int:
-	# Base city visibility is 2, can be increased by buildings
-	var base_range = 2
+## Get extra visibility range beyond cultural borders for a city
+func get_city_extra_visibility(city) -> int:
+	# Base visibility is 2 tiles beyond cultural border
+	var extra_range = 2
 
 	# Check for buildings that increase sight
 	if "lighthouse" in city.buildings:
-		base_range += 1
+		extra_range += 1
 	if "observatory" in city.buildings:
-		base_range += 1
+		extra_range += 1
 
-	return base_range
+	return extra_range
+
+## Reveal tiles for a city based on its territory (cultural borders) + extra range
+func _reveal_city_territory(city, player_id: int) -> void:
+	var grid = GameManager.hex_grid
+	if grid == null or city == null:
+		return
+
+	var extra_range = get_city_extra_visibility(city)
+
+	# For each tile in the city's territory, reveal tiles within extra_range
+	for territory_pos in city.territory:
+		var tiles_to_reveal = GridUtils.get_tiles_in_range(territory_pos, extra_range)
+		tiles_to_reveal.append(territory_pos)
+
+		for tile_pos in tiles_to_reveal:
+			var wrapped_pos = GridUtils.wrap_position(tile_pos, grid.width, grid.height)
+			var tile = grid.get_tile(wrapped_pos)
+			if tile != null:
+				tile.visibility[player_id] = GameTileClass.VisibilityState.VISIBLE
 
 ## Fog all currently visible tiles for a player
 func _fog_visible_tiles(player_id: int) -> void:
@@ -78,17 +97,39 @@ func reveal_for_unit(unit) -> void:
 	# Update tile visuals in the revealed area
 	_update_tile_visuals_around(unit.grid_position, unit.get_visibility_range())
 
-## Reveal tiles for a city (called when city is founded)
+## Reveal tiles for a city (called when city is founded or borders expand)
 func reveal_for_city(city) -> void:
 	if city == null or city.player_owner == null:
 		return
 
 	var player_id = city.player_owner.player_id
-	var sight_range = get_city_visibility_range(city)
-	_reveal_tiles_around(city.grid_position, sight_range, player_id)
 
-	# Update tile visuals
-	_update_tile_visuals_around(city.grid_position, sight_range)
+	# Reveal based on territory + extra range
+	_reveal_city_territory(city, player_id)
+
+	# Update tile visuals for the entire visible area
+	_update_city_tile_visuals(city)
+
+## Update tile visuals for a city's visible area (territory + extra range)
+func _update_city_tile_visuals(city) -> void:
+	var grid = GameManager.hex_grid
+	if grid == null or city == null:
+		return
+
+	var extra_range = get_city_extra_visibility(city)
+	var updated_tiles = {}  # Use dict to avoid duplicate updates
+
+	for territory_pos in city.territory:
+		var tiles = GridUtils.get_tiles_in_range(territory_pos, extra_range)
+		tiles.append(territory_pos)
+
+		for tile_pos in tiles:
+			var wrapped_pos = GridUtils.wrap_position(tile_pos, grid.width, grid.height)
+			if not updated_tiles.has(wrapped_pos):
+				updated_tiles[wrapped_pos] = true
+				var tile = grid.get_tile(wrapped_pos)
+				if tile != null:
+					tile.update_visuals()
 
 ## Update tile visuals in an area
 func _update_tile_visuals_around(center: Vector2i, radius: int) -> void:
