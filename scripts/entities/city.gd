@@ -186,13 +186,18 @@ func calculate_yields() -> void:
 	production_yield += spec_yields.get("production", 0)
 	commerce_yield += spec_yields.get("commerce", 0)
 
-	# Building modifiers
+	# Building flat bonuses and percentage modifiers
 	var food_percent = 0.0
 	var prod_percent = 0.0
 	var commerce_percent = 0.0
 
 	for building_id in buildings:
 		var effects = DataManager.get_building_effects(building_id)
+		# Flat bonuses from buildings (e.g., Palace gives +8 commerce)
+		food_yield += effects.get("food", 0)
+		production_yield += effects.get("production", 0)
+		commerce_yield += effects.get("commerce", 0)
+		# Percentage modifiers
 		food_percent += effects.get("food_percent", 0.0)
 		prod_percent += effects.get("production_percent", 0.0)
 		commerce_percent += effects.get("gold_percent", 0.0)
@@ -249,9 +254,11 @@ func _calculate_culture() -> void:
 	culture_yield = 0
 
 	# Buildings that produce culture
+	var culture_percent = 0.0
 	for building_id in buildings:
 		var effects = DataManager.get_building_effects(building_id)
 		culture_yield += effects.get("culture", 0)
+		culture_percent += effects.get("culture_percent", 0.0)
 
 	# Specialist culture bonus
 	var spec_commerces = get_specialist_commerces()
@@ -262,6 +269,9 @@ func _calculate_culture() -> void:
 		for building_id in buildings:
 			var effects = DataManager.get_building_effects(building_id)
 			culture_yield += effects.get("culture_from_religion", 0)
+
+	# Apply percentage modifier (e.g., Broadcast Tower gives +50% culture)
+	culture_yield = int(culture_yield * (1.0 + culture_percent))
 
 func _calculate_happiness() -> void:
 	happiness = 0
