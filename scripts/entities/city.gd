@@ -629,6 +629,7 @@ func _expand_borders() -> void:
 	var range_val = culture_level + 1
 	var new_tiles = GridUtils.get_tiles_at_range(grid_position, range_val)
 
+	var added_new_tiles = false
 	for tile_pos in new_tiles:
 		if tile_pos not in territory and _can_claim_tile(tile_pos):
 			territory.append(tile_pos)
@@ -636,6 +637,13 @@ func _expand_borders() -> void:
 			if tile != null:
 				tile.tile_owner = player_owner
 				tile.city_owner = self
+				added_new_tiles = true
+
+	# Redraw ALL territory tiles so old border lines are removed
+	if added_new_tiles:
+		for tile_pos in territory:
+			var tile = _get_tile(tile_pos)
+			if tile != null:
 				tile.update_visuals()
 
 # Defense
