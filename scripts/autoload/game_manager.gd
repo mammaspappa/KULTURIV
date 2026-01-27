@@ -24,6 +24,10 @@ var game_world: Node2D = null
 var difficulty: int = 4  # Prince difficulty (0-8 scale)
 var game_speed: int = 1  # 0=Quick, 1=Normal, 2=Epic, 3=Marathon
 
+# Options/Settings
+var edge_pan_enabled: bool = true
+var auto_end_turn: bool = false
+
 # Speed multipliers for production/research
 const SPEED_MULTIPLIERS = {
 	0: 0.67,   # Quick
