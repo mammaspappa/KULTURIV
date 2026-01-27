@@ -170,7 +170,23 @@ func can_move_to(target: Vector2i) -> bool:
 		# Can attack instead
 		return false
 
+	# Check border permissions
+	if not can_enter_tile(tile):
+		return false
+
 	return true
+
+## Check if this unit can enter a tile based on border ownership
+func can_enter_tile(tile) -> bool:
+	if player_owner == null:
+		return true
+
+	# No owner = neutral territory, anyone can enter
+	if tile.tile_owner == null:
+		return true
+
+	# Check if we have permission to enter this player's borders
+	return player_owner.can_enter_borders_of(tile.tile_owner.player_id)
 
 func _can_enter_water() -> bool:
 	var unit_class = get_unit_class()

@@ -51,7 +51,11 @@ signal trade_accepted(from_player, to_player, offer)
 signal trade_rejected(from_player, to_player)
 signal first_contact(player1, player2)
 signal open_borders_signed(player1, player2)
+signal open_borders_ended(player1, player2)
 signal defensive_pact_signed(player1, player2)
+signal vassal_created(vassal, master)
+signal vassal_freed(vassal, old_master_id)
+signal units_expelled_from_borders(player, expelled_units)
 
 # Religion events
 signal religion_founded(player, religion, holy_city)

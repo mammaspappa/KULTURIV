@@ -180,6 +180,10 @@ func _is_tile_passable(tile) -> bool:
 		if blocking_unit != null and blocking_unit.player_owner != unit.player_owner:
 			return false
 
+		# Check border permissions
+		if not unit.can_enter_tile(tile):
+			return false
+
 	return true
 
 ## Get movement cost for a tile

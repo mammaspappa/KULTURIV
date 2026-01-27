@@ -29,6 +29,10 @@ var trade_embargo_with: Array[int] = []
 var met_players: Array[int] = []
 var diplomacy_memory: Dictionary = {}  # player_id -> Array of memory entries
 
+# Vassalage
+var vassals: Array[int] = []  # Player IDs of civilizations that are vassals to this player
+var master_id: int = -1  # Player ID of master if this player is a vassal (-1 if independent)
+
 # Religion
 var state_religion: String = ""
 var founded_religion: String = ""
@@ -199,10 +203,17 @@ func has_open_borders_with(other_id: int) -> bool:
 	return other_id in open_borders_with
 
 func set_open_borders(other_id: int, value: bool) -> void:
+	var had_open_borders = other_id in open_borders_with
 	if value and other_id not in open_borders_with:
 		open_borders_with.append(other_id)
 	elif not value:
 		open_borders_with.erase(other_id)
+
+	# Emit signal when open borders end
+	if had_open_borders and not value:
+		var other_player = GameManager.get_player(other_id)
+		if other_player:
+			EventBus.open_borders_ended.emit(self, other_player)
 
 func has_defensive_pact_with(other_id: int) -> bool:
 	return other_id in defensive_pact_with
@@ -221,6 +232,68 @@ func set_trade_embargo(other_id: int, value: bool) -> void:
 		trade_embargo_with.append(other_id)
 	elif not value:
 		trade_embargo_with.erase(other_id)
+
+# Vassal methods
+func is_vassal() -> bool:
+	return master_id >= 0
+
+func is_vassal_of(other_id: int) -> bool:
+	return master_id == other_id
+
+func has_vassal(other_id: int) -> bool:
+	return other_id in vassals
+
+func become_vassal_of(master: int) -> void:
+	if master_id >= 0:
+		# Already a vassal, remove from old master first
+		var old_master = GameManager.get_player(master_id)
+		if old_master:
+			old_master.vassals.erase(player_id)
+
+	master_id = master
+	var new_master = GameManager.get_player(master)
+	if new_master:
+		if player_id not in new_master.vassals:
+			new_master.vassals.append(player_id)
+		# Vassals inherit master's wars and peace
+		at_war_with = new_master.at_war_with.duplicate()
+		# End any wars with master
+		at_war_with.erase(master)
+
+	EventBus.vassal_created.emit(self, new_master)
+
+func gain_independence() -> void:
+	if master_id < 0:
+		return
+
+	var old_master = GameManager.get_player(master_id)
+	if old_master:
+		old_master.vassals.erase(player_id)
+
+	var old_master_id = master_id
+	master_id = -1
+	EventBus.vassal_freed.emit(self, old_master_id)
+
+# Border permission check
+func can_enter_borders_of(other_id: int) -> bool:
+	## Check if this player's units can enter the borders of another player
+	if other_id == player_id:
+		return true  # Own borders
+
+	if is_at_war_with(other_id):
+		return true  # At war - can enter enemy territory
+
+	if has_open_borders_with(other_id):
+		return true  # Open borders agreement
+
+	if has_vassal(other_id):
+		return true  # Vassal's borders are open to master
+
+	# Check if other player is our master (vassals can enter master's territory)
+	if is_vassal_of(other_id):
+		return true
+
+	return false
 
 func get_relationship(other_id: int) -> String:
 	## Returns relationship status: "friendly", "pleased", "cautious", "annoyed", "furious"
@@ -315,6 +388,8 @@ func to_dict() -> Dictionary:
 		"traits": traits,
 		"has_ever_had_city": has_ever_had_city,
 		"science_rate": science_rate,
+		"vassals": vassals,
+		"master_id": master_id,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -341,3 +416,5 @@ func from_dict(data: Dictionary) -> void:
 	traits.assign(data.get("traits", []))
 	has_ever_had_city = data.get("has_ever_had_city", false)
 	science_rate = data.get("science_rate", 1.0)
+	vassals.assign(data.get("vassals", []))
+	master_id = data.get("master_id", -1)
