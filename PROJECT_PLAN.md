@@ -8,12 +8,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 |----------|--------|----------|
 | Core Engine | Complete | 100% |
 | Map System | Complete | 100% |
-| Units | Partial | 70% |
+| Units | Partial | 75% |
 | Cities | Partial | 85% |
 | Combat | Complete | 100% |
 | AI | Enhanced | 75% |
-| UI | Partial | 65% |
-| Diplomacy | Complete | 90% |
+| UI | Partial | 70% |
+| Diplomacy | Complete | 95% |
 | Religion | Basic | 70% |
 | Victory Conditions | Complete | 100% |
 | Civics | Complete | 100% |
@@ -22,6 +22,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | Projects | Basic | 85% |
 | Events | Basic | 80% |
 | UN/Voting | Basic | 85% |
+| Borders | Complete | 100% |
 | Multiplayer | Not Started | 0% |
 
 ---
@@ -58,6 +59,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Fog of war and visibility system
 - [x] Cylindrical map wrapping (X-axis)
 - [x] A* pathfinding
+- [x] Road-to-road movement bonus (1/3 movement cost)
+- [x] Railroad-to-railroad movement bonus (0.1 movement cost)
 
 ### Files
 - `scripts/map/grid_utils.gd`
@@ -86,6 +89,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Special abilities (found_city, build_improvements, transport, bombard, etc.)
 - [x] Unit upgrade paths
 - [x] Experience and leveling
+
+### Recently Added
+- [x] Worker keyboard shortcuts (R=road, M=mine, I=farm, O=cottage)
+- [x] Worker action buttons with availability check per tile
+- [x] Border permission checking for unit movement
+- [x] Road-to-road movement cost calculation
 
 ### Not Implemented
 - [ ] Air units combat system (interception, air superiority, bombing runs)
@@ -156,6 +165,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Experience gain from combat
 - [x] Collateral damage (siege units)
 - [x] City combat modifiers
+- [x] Attacking triggers war declaration automatically
+- [x] Cannot attack across closed borders (must have permission to enter)
 
 ### Files
 - `scripts/systems/combat_system.gd`
@@ -219,7 +230,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 8: Diplomacy (90% COMPLETE)
+## Phase 8: Diplomacy (95% COMPLETE)
 
 ### Implemented
 - [x] Diplomacy screen UI with attitude breakdown
@@ -244,17 +255,24 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ### Not Implemented
 - [ ] Permanent alliances
-- [ ] Vassal states
 - [ ] Tribute demands
 - [ ] Map trading
 - [ ] City trading
 - [ ] AI personality in negotiations
+
+### Recently Added
+- [x] Border crossing restrictions (own borders, at war, open borders, vassal)
+- [x] Forced unit expulsion when borders close or war declared
+- [x] Tech trading requires Alphabet technology
+- [x] Vassal state framework (vassals array, master_id tracking)
+- [x] Border permission checks in pathfinding
 
 ### Files
 - `scripts/ui/diplomacy_screen.gd`
 - `scripts/ui/trade_screen.gd`
 - `scripts/systems/trade_system.gd`
 - `scripts/systems/diplomacy_system.gd`
+- `scripts/systems/border_system.gd`
 - `scenes/ui/diplomacy_screen.tscn`
 - `scenes/ui/trade_screen.tscn`
 
@@ -334,7 +352,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 12: UI System (65% COMPLETE)
+## Phase 12: UI System (70% COMPLETE)
 
 ### Implemented
 - [x] Main menu
@@ -349,7 +367,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Victory screen
 - [x] Notification system (toasts)
 - [x] Top bar (gold, science, turn)
-- [x] Unit panel
+- [x] Unit panel with worker actions
+- [x] Worker action buttons (context-sensitive per tile)
 - [x] Event popup (random events with choices)
 - [x] Espionage screen (missions, targets)
 - [x] Spaceship screen (space race progress)
@@ -700,6 +719,37 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
+## Phase 18.5: Border System (COMPLETE)
+
+### Implemented
+- [x] Border crossing permission system
+- [x] Units can only enter tiles if: own territory, at war, open borders, or vassal relationship
+- [x] Forced unit expulsion when diplomatic status changes
+- [x] Unit expulsion on war declaration (both sides)
+- [x] Unit expulsion when open borders ends
+- [x] Unit expulsion when borders expand into occupied tiles
+- [x] Pathfinding respects border permissions
+- [x] Combat restricted to valid border crossings
+- [x] Vassal state tracking (vassals array, master_id)
+
+### Border Permission Rules:
+| Condition | Can Enter |
+|-----------|-----------|
+| Own territory | Yes |
+| At war with owner | Yes |
+| Open borders agreement | Yes |
+| Vassal of tile owner | Yes |
+| Master of tile owner | Yes |
+| No relationship | No |
+
+### Files
+- `scripts/systems/border_system.gd`
+- `scripts/core/player.gd` (can_enter_borders_of, vassal tracking)
+- `scripts/entities/unit.gd` (can_enter_tile)
+- `scripts/map/pathfinding.gd` (border checks)
+
+---
+
 ## Phase 19: Sound & Music (NOT STARTED)
 
 ### To Implement
@@ -821,6 +871,8 @@ See CLAUDE.md for development guidelines and architecture overview.
 3. `scripts/entities/unit.gd` - Unit implementation
 4. `scripts/entities/city.gd` - City implementation
 5. `scripts/systems/combat_system.gd` - Combat mechanics
+6. `scripts/systems/border_system.gd` - Border permissions and unit expulsion
+7. `scripts/map/pathfinding.gd` - Movement and pathfinding
 
 ### Adding New Features
 1. Define data in appropriate JSON file
@@ -832,4 +884,4 @@ See CLAUDE.md for development guidelines and architecture overview.
 
 ---
 
-*Last updated: January 2026*
+*Last updated: January 27, 2026*
