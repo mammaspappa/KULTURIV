@@ -72,6 +72,18 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# Keyboard shortcuts
 	if event is InputEventKey and event.pressed:
+		# Debug shortcuts (Alt + key)
+		if event.alt_pressed:
+			match event.keycode:
+				KEY_W:
+					_debug_spawn_unit("worker")
+					get_viewport().set_input_as_handled()
+					return
+				KEY_S:
+					_debug_spawn_unit("settler")
+					get_viewport().set_input_as_handled()
+					return
+
 		match event.keycode:
 			KEY_SPACE:
 				if selected_unit:
@@ -514,3 +526,41 @@ func found_city(settler: Unit) -> City:
 
 	EventBus.city_founded.emit(city, settler)
 	return city
+
+## Debug: Spawn a unit at the human player's capital
+func _debug_spawn_unit(unit_type: String) -> void:
+	var player = GameManager.human_player
+	if player == null:
+		print("[DEBUG] No human player")
+		return
+
+	# Find capital (first city or city with palace)
+	var capital = null
+	for city in player.cities:
+		if city.has_building("palace"):
+			capital = city
+			break
+	if capital == null and player.cities.size() > 0:
+		capital = player.cities[0]
+
+	if capital == null:
+		print("[DEBUG] No capital city found")
+		return
+
+	# Find an empty tile near the capital
+	var spawn_pos = capital.grid_position
+	var unit_at_pos = GameManager.get_unit_at(spawn_pos)
+	if unit_at_pos != null:
+		# Find adjacent empty tile
+		var neighbors = GridUtils.get_neighbors(spawn_pos)
+		for neighbor in neighbors:
+			var tile = game_grid.get_tile(neighbor) if game_grid else null
+			if tile and tile.is_passable() and not tile.is_water():
+				if GameManager.get_unit_at(neighbor) == null:
+					spawn_pos = neighbor
+					break
+
+	var unit = spawn_unit(unit_type, spawn_pos, player)
+	if unit:
+		print("[DEBUG] Spawned %s at %s" % [unit_type, spawn_pos])
+		_select_unit(unit)
