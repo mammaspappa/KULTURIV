@@ -56,6 +56,7 @@ func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 
 		# Check neighbors
 		var neighbors = GridUtils.get_neighbors(current)
+		var current_tile = grid.get_tile(current)
 		for neighbor in neighbors:
 			if neighbor in closed_set:
 				continue
@@ -67,7 +68,7 @@ func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 			if neighbor_tile == null or not _is_tile_passable(neighbor_tile):
 				continue
 
-			var move_cost = _get_movement_cost(neighbor_tile)
+			var move_cost = _get_movement_cost(neighbor_tile, current_tile)
 			var tentative_g = g_score.get(current, INF) + move_cost
 
 			if tentative_g < g_score.get(neighbor, INF):
@@ -91,16 +92,19 @@ func find_path_with_movement(start: Vector2i, goal: Vector2i, movement_points: f
 	# Trim path to what we can actually move
 	var reachable_path: Array[Vector2i] = []
 	var remaining_movement = movement_points
+	var prev_pos = start
 
 	for pos in full_path:
 		var tile = grid.get_tile(pos)
 		if tile == null:
 			break
 
-		var cost = _get_movement_cost(tile)
+		var prev_tile = grid.get_tile(prev_pos)
+		var cost = _get_movement_cost(tile, prev_tile)
 		if remaining_movement >= cost or reachable_path.is_empty():
 			reachable_path.append(pos)
 			remaining_movement -= cost
+			prev_pos = pos
 			if remaining_movement <= 0:
 				break
 		else:
@@ -117,6 +121,7 @@ func get_reachable_tiles(start: Vector2i, movement_points: float) -> Array[Vecto
 
 	# Dijkstra's algorithm to find all reachable tiles
 	var distances: Dictionary = {}
+	var came_from: Dictionary = {}  # Track which tile we came from
 	var visited: Dictionary = {}
 	var queue = PriorityQueue.new()
 
@@ -134,6 +139,7 @@ func get_reachable_tiles(start: Vector2i, movement_points: float) -> Array[Vecto
 		if current_dist <= movement_points and current != start:
 			reachable.append(current)
 
+		var current_tile = grid.get_tile(current)
 		var neighbors = GridUtils.get_neighbors(current)
 		for neighbor in neighbors:
 			if neighbor in visited:
@@ -146,7 +152,7 @@ func get_reachable_tiles(start: Vector2i, movement_points: float) -> Array[Vecto
 			if neighbor_tile == null or not _is_tile_passable(neighbor_tile):
 				continue
 
-			var move_cost = _get_movement_cost(neighbor_tile)
+			var move_cost = _get_movement_cost(neighbor_tile, current_tile)
 			var new_dist = current_dist + move_cost
 
 			# Allow moving into tiles even if we don't have full movement
@@ -154,6 +160,7 @@ func get_reachable_tiles(start: Vector2i, movement_points: float) -> Array[Vecto
 			if new_dist <= movement_points or (current_dist < movement_points and current_dist + 1 <= movement_points + 1):
 				if new_dist < distances.get(neighbor, INF):
 					distances[neighbor] = new_dist
+					came_from[neighbor] = current
 					queue.push(neighbor, new_dist)
 
 	return reachable
@@ -186,9 +193,19 @@ func _is_tile_passable(tile) -> bool:
 
 	return true
 
-## Get movement cost for a tile
-func _get_movement_cost(tile) -> float:
+## Get movement cost for a tile (optionally considering source tile for road-to-road movement)
+func _get_movement_cost(tile, source_tile = null) -> float:
 	var base_cost = float(tile.get_total_movement_cost())
+
+	# Road-to-road movement costs 1/3 movement point
+	if source_tile != null and source_tile.road_level >= 1 and tile.road_level >= 1:
+		# Both tiles have roads - reduced movement cost
+		if tile.road_level >= 2 and source_tile.road_level >= 2:
+			# Railroad-to-railroad is essentially free
+			base_cost = 0.1
+		else:
+			# Road-to-road costs 1/3 movement point
+			base_cost = 1.0 / 3.0
 
 	# Unit-specific modifiers
 	if unit != null:

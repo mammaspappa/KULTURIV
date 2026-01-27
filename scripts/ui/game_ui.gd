@@ -33,6 +33,10 @@ extends Control
 
 # State
 var selected_unit = null  # Unit (untyped to avoid load-order issues)
+var worker_actions_dirty: bool = true  # Flag to track when worker actions need updating
+var last_unit_position: Vector2i = Vector2i.ZERO
+var last_unit_acted: bool = false
+var last_unit_order: int = -1
 
 # Notification system
 var notifications: Array = []
@@ -135,6 +139,7 @@ func _on_unit_selected(unit) -> void:
 	if unit.player_owner == GameManager.human_player:
 		selected_unit = unit
 		unit_panel.visible = true
+		worker_actions_dirty = true  # Force refresh of worker buttons
 		_update_unit_panel()
 
 func _on_unit_deselected(_unit) -> void:
@@ -266,8 +271,14 @@ func _update_unit_panel() -> void:
 	if skip_button:
 		skip_button.disabled = selected_unit.has_acted
 
-	# Worker actions
-	_update_worker_actions()
+	# Only update worker actions when state changes
+	var current_order = selected_unit.current_order
+	if worker_actions_dirty or last_unit_position != selected_unit.grid_position or last_unit_acted != selected_unit.has_acted or last_unit_order != current_order:
+		_update_worker_actions()
+		last_unit_position = selected_unit.grid_position
+		last_unit_acted = selected_unit.has_acted
+		last_unit_order = current_order
+		worker_actions_dirty = false
 
 func _update_worker_actions() -> void:
 	if worker_actions == null or worker_buttons_container == null:

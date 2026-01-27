@@ -198,7 +198,8 @@ func move_to(target: Vector2i) -> bool:
 
 	var grid = GameManager.hex_grid
 	var tile = grid.get_tile(target)
-	var move_cost = tile.get_total_movement_cost()
+	var source_tile = grid.get_tile(grid_position)
+	var move_cost = _get_movement_cost_to(source_tile, tile)
 
 	# Check if we have enough movement
 	if movement_remaining < move_cost and movement_remaining < 1:
@@ -251,6 +252,37 @@ func move_along_path(path: Array[Vector2i]) -> void:
 			# Continue moving after animation
 			await movement_completed
 			move_along_path(path)
+
+## Calculate movement cost considering road-to-road movement
+func _get_movement_cost_to(source_tile, dest_tile) -> float:
+	if dest_tile == null:
+		return 1.0
+
+	var base_cost = float(dest_tile.get_total_movement_cost())
+
+	# Road-to-road movement costs 1/3 movement point
+	if source_tile != null and source_tile.road_level >= 1 and dest_tile.road_level >= 1:
+		# Both tiles have roads - reduced movement cost
+		if dest_tile.road_level >= 2 and source_tile.road_level >= 2:
+			# Railroad-to-railroad is essentially free
+			base_cost = 0.1
+		else:
+			# Road-to-road costs 1/3 movement point
+			base_cost = 1.0 / 3.0
+
+	# Unit-specific modifiers
+	if "ignore_terrain_cost" in get_abilities():
+		return 1.0
+
+	# Promotion effects for terrain
+	for promo in promotions:
+		var effects = DataManager.get_promotion_effects(promo)
+		if dest_tile.feature_id == "forest" and effects.get("forest_double_movement", false):
+			base_cost = 1.0
+		if dest_tile.terrain_id == "hills" and effects.get("hills_double_movement", false):
+			base_cost = 1.0
+
+	return base_cost
 
 func teleport_to(target: Vector2i) -> void:
 	grid_position = target
