@@ -111,6 +111,11 @@ func is_proposal_valid(proposal: Dictionary) -> bool:
 		if not to_player.has_tech(tech_id):
 			return false
 
+	# Tech trading requires at least one player to have Alphabet
+	var has_tech_trade = not from_offers["techs"].is_empty() or not to_offers["techs"].is_empty()
+	if has_tech_trade and not can_trade_techs(from_player, to_player):
+		return false
+
 	# Proposal must offer something from both sides or be one-sided gift
 	var from_has_offer = from_offers["gold"] > 0 or from_offers["gold_per_turn"] > 0 or not from_offers["resources"].is_empty() or not from_offers["techs"].is_empty()
 	var to_has_offer = to_offers["gold"] > 0 or to_offers["gold_per_turn"] > 0 or not to_offers["resources"].is_empty() or not to_offers["techs"].is_empty()
@@ -229,9 +234,19 @@ func get_tradeable_resources(player) -> Array:
 
 	return tradeable
 
+## Check if two players can trade techs (requires at least one to have Alphabet)
+func can_trade_techs(player1, player2) -> bool:
+	if player1 == null or player2 == null:
+		return false
+	return player1.has_tech("alphabet") or player2.has_tech("alphabet")
+
 ## Get techs that can be traded to another player
 func get_tradeable_techs(from_player, to_player) -> Array:
 	if from_player == null or to_player == null:
+		return []
+
+	# Tech trading requires at least one player to have Alphabet
+	if not can_trade_techs(from_player, to_player):
 		return []
 
 	var tradeable = []

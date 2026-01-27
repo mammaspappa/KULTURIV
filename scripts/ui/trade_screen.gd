@@ -304,6 +304,24 @@ func _populate_techs() -> void:
 	for child in their_techs_list.get_children():
 		child.queue_free()
 
+	# Check if tech trading is available (requires Alphabet)
+	var can_trade = TradeSystem.can_trade_techs(from_player, to_player)
+
+	if not can_trade:
+		# Show message that Alphabet is required
+		var label1 = Label.new()
+		label1.text = "(Requires Alphabet)"
+		label1.add_theme_font_size_override("font_size", 12)
+		label1.add_theme_color_override("font_color", Color.GRAY)
+		our_techs_list.add_child(label1)
+
+		var label2 = Label.new()
+		label2.text = "(Requires Alphabet)"
+		label2.add_theme_font_size_override("font_size", 12)
+		label2.add_theme_color_override("font_color", Color.GRAY)
+		their_techs_list.add_child(label2)
+		return
+
 	# Our tradeable techs
 	var our_techs = TradeSystem.get_tradeable_techs(from_player, to_player)
 	for tech_id in our_techs:
