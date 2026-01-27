@@ -3,24 +3,23 @@ extends Node
 
 const UnitClass = preload("res://scripts/entities/unit.gd")
 
-# Build times in turns
+# Build times in turns (keys must match improvements.json)
+# Note: hamlet, village, town are cottage growth stages, not directly buildable
 const BUILD_TIMES = {
 	"farm": 5,
 	"mine": 6,
 	"road": 3,
 	"railroad": 3,
 	"cottage": 4,
-	"lumber_mill": 5,
-	"workshop": 5,
-	"windmill": 5,
-	"watermill": 5,
+	"lumbermill": 6,
 	"plantation": 5,
-	"camp": 5,
-	"pasture": 4,
-	"quarry": 6,
+	"camp": 4,
+	"pasture": 5,
+	"quarry": 7,
 	"well": 5,
 	"winery": 5,
-	"fort": 6
+	"fort": 6,
+	"fishing_boats": 4
 }
 
 ## Check if a worker can build a specific improvement on a tile

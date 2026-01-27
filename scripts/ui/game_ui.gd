@@ -18,6 +18,10 @@ extends Control
 @onready var fortify_button: Button = $UnitPanel/VBoxContainer/ActionButtons/FortifyButton
 @onready var skip_button: Button = $UnitPanel/VBoxContainer/ActionButtons/SkipButton
 
+# Worker actions
+@onready var worker_actions: VBoxContainer = $UnitPanel/VBoxContainer/WorkerActions
+@onready var worker_buttons_container: GridContainer = $UnitPanel/VBoxContainer/WorkerActions/WorkerButtonsContainer
+
 # Other elements
 @onready var end_turn_button: Button = $EndTurnButton
 @onready var tech_button: Button = $TopBar/HBoxContainer/TechButton
@@ -220,9 +224,14 @@ func _update_unit_panel() -> void:
 
 	var unit_data = DataManager.get_unit(selected_unit.unit_id)
 
-	# Name
+	# Name (include build status if building)
 	if unit_name_label:
-		unit_name_label.text = unit_data.get("name", selected_unit.unit_id)
+		var name_text = unit_data.get("name", selected_unit.unit_id)
+		if selected_unit.current_order == selected_unit.UnitOrder.BUILD and selected_unit.order_target_improvement != "":
+			var remaining = ImprovementSystem.get_remaining_turns(selected_unit)
+			var imp_name = selected_unit.order_target_improvement.replace("_", " ").capitalize()
+			name_text += " (Building %s: %d turns)" % [imp_name, remaining]
+		unit_name_label.text = name_text
 
 	# Strength
 	if unit_strength_label:
@@ -244,6 +253,105 @@ func _update_unit_panel() -> void:
 		fortify_button.disabled = selected_unit.has_acted or selected_unit.get_strength() <= 0
 	if skip_button:
 		skip_button.disabled = selected_unit.has_acted
+
+	# Worker actions
+	_update_worker_actions()
+
+func _update_worker_actions() -> void:
+	if worker_actions == null or worker_buttons_container == null:
+		return
+
+	# Clear existing buttons
+	for child in worker_buttons_container.get_children():
+		child.queue_free()
+
+	# Only show for workers
+	if selected_unit == null or not selected_unit.can_build_improvements():
+		worker_actions.visible = false
+		return
+
+	worker_actions.visible = true
+
+	# Get tile at unit's position
+	var tile = GameManager.hex_grid.get_tile(selected_unit.grid_position) if GameManager.hex_grid else null
+	if tile == null:
+		return
+
+	# Check if currently building - show cancel button
+	if selected_unit.current_order == selected_unit.UnitOrder.BUILD:
+		var cancel_button = Button.new()
+		cancel_button.text = "Cancel"
+		cancel_button.custom_minimum_size = Vector2(110, 30)
+		cancel_button.pressed.connect(_on_cancel_build_pressed)
+		worker_buttons_container.add_child(cancel_button)
+		return
+
+	# Can't build if unit has already acted
+	if selected_unit.has_acted:
+		var label = Label.new()
+		label.text = "No actions remaining"
+		label.add_theme_font_size_override("font_size", 12)
+		worker_buttons_container.add_child(label)
+		return
+
+	var buttons_added = 0
+
+	# Road button
+	if ImprovementSystem.can_build_road(selected_unit, tile):
+		var road_button = _create_worker_button("Road", "road", ImprovementSystem.get_build_time("road"))
+		worker_buttons_container.add_child(road_button)
+		buttons_added += 1
+
+	# Railroad button
+	if ImprovementSystem.can_build_railroad(selected_unit, tile):
+		var railroad_button = _create_worker_button("Railroad", "railroad", ImprovementSystem.get_build_time("railroad"))
+		worker_buttons_container.add_child(railroad_button)
+		buttons_added += 1
+
+	# Get available improvements for this tile
+	var available_improvements = ImprovementSystem.get_available_improvements(selected_unit, tile)
+	for imp_id in available_improvements:
+		var imp_data = DataManager.get_improvement(imp_id)
+		var imp_name = imp_data.get("name", imp_id.replace("_", " ").capitalize())
+		var build_time = ImprovementSystem.get_build_time(imp_id)
+		var button = _create_worker_button(imp_name, imp_id, build_time)
+		worker_buttons_container.add_child(button)
+		buttons_added += 1
+
+	# Show message if no actions available
+	if buttons_added == 0:
+		var label = Label.new()
+		label.text = "No improvements available"
+		label.add_theme_font_size_override("font_size", 12)
+		worker_buttons_container.add_child(label)
+
+func _create_worker_button(display_name: String, improvement_id: String, turns: int) -> Button:
+	var button = Button.new()
+	button.text = "%s (%dt)" % [display_name, turns]
+	button.custom_minimum_size = Vector2(110, 30)
+	button.tooltip_text = "Build %s - %d turns" % [display_name, turns]
+	button.pressed.connect(_on_worker_build_pressed.bind(improvement_id))
+	return button
+
+func _on_worker_build_pressed(improvement_id: String) -> void:
+	if selected_unit == null or not selected_unit.can_build_improvements():
+		return
+
+	if improvement_id == "road":
+		ImprovementSystem.start_build_road(selected_unit)
+	elif improvement_id == "railroad":
+		ImprovementSystem.start_build_railroad(selected_unit)
+	else:
+		ImprovementSystem.start_build(selected_unit, improvement_id)
+
+	_update_unit_panel()
+
+func _on_cancel_build_pressed() -> void:
+	if selected_unit == null:
+		return
+
+	ImprovementSystem.cancel_build(selected_unit)
+	_update_unit_panel()
 
 # Notification system
 func _setup_notifications() -> void:

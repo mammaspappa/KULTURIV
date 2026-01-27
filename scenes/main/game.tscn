@@ -124,7 +124,7 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 10.0
-offset_top = -200.0
+offset_top = -300.0
 offset_right = 260.0
 offset_bottom = -10.0
 grow_vertical = 0
@@ -168,6 +168,21 @@ text = "Fortify (F)"
 [node name="SkipButton" type="Button" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer/ActionButtons"]
 layout_mode = 2
 text = "Skip (Space)"
+
+[node name="WorkerActions" type="VBoxContainer" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="WorkerLabel" type="Label" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer/WorkerActions"]
+layout_mode = 2
+text = "Build:"
+theme_override_font_sizes/font_size = 14
+
+[node name="WorkerButtonsContainer" type="GridContainer" parent="ScreenUILayer/GameUI/UnitPanel/VBoxContainer/WorkerActions"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
 
 [node name="EndTurnButton" type="Button" parent="ScreenUILayer/GameUI"]
 layout_mode = 1
