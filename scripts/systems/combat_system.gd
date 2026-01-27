@@ -1,10 +1,27 @@
 extends Node
 ## Handles combat resolution between units.
 
+## Ensure war is declared between the two players if not already at war
+func _ensure_war_declared(attacker, defender) -> void:
+	if attacker.player_owner == null or defender.player_owner == null:
+		return
+
+	var att_player = attacker.player_owner
+	var def_player = defender.player_owner
+
+	# If not already at war, declare war
+	if not att_player.is_at_war_with(def_player.player_id):
+		att_player.declare_war_on(def_player.player_id)
+		def_player.declare_war_on(att_player.player_id)
+		EventBus.war_declared.emit(att_player, def_player)
+
 ## Resolve combat between attacker and defender
 func resolve_combat(attacker, defender) -> Dictionary:
 	if attacker == null or defender == null:
 		return {}
+
+	# Attacking triggers war declaration if not already at war
+	_ensure_war_declared(attacker, defender)
 
 	# Get combat strengths with all modifiers
 	var att_strength = _get_effective_strength(attacker, true, defender)

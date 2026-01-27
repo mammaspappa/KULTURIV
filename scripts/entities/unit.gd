@@ -373,6 +373,17 @@ func can_attack(target) -> bool:
 		return false
 	if not GridUtils.are_adjacent(grid_position, target.grid_position):
 		return false
+
+	# Check if we can enter the defender's tile (border permissions)
+	# Must be at war or have permission to cross their borders to attack
+	if player_owner != null and target.player_owner != null:
+		var defender_tile = GameManager.hex_grid.get_tile(target.grid_position) if GameManager.hex_grid else null
+		if defender_tile != null and defender_tile.tile_owner != null:
+			# If target is in their own territory, check if we can enter
+			if defender_tile.tile_owner == target.player_owner:
+				if not player_owner.can_enter_borders_of(target.player_owner.player_id):
+					return false
+
 	return true
 
 func take_damage(amount: float) -> void:
