@@ -6,6 +6,7 @@ func _ready() -> void:
 	EventBus.city_borders_expanded.connect(_on_city_borders_expanded)
 	EventBus.peace_declared.connect(_on_peace_declared)
 	EventBus.open_borders_ended.connect(_on_open_borders_ended)
+	EventBus.war_declared.connect(_on_war_declared)
 
 func _on_city_borders_expanded(city) -> void:
 	on_borders_change(city)
@@ -15,6 +16,9 @@ func _on_peace_declared(player1, player2) -> void:
 
 func _on_open_borders_ended(player1, player2) -> void:
 	on_open_borders_ended(player1.player_id, player2.player_id)
+
+func _on_war_declared(aggressor, target) -> void:
+	on_war_declared(aggressor.player_id, target.player_id)
 
 ## Called when a city's borders change - check for units that need to be expelled
 ## This handles expansion, capture, or any other border modifications
@@ -59,6 +63,40 @@ func on_open_borders_ended(player1_id: int, player2_id: int) -> void:
 	var expelled_from_p1 = _get_units_to_expel(player2, player1)
 	if not expelled_from_p1.is_empty():
 		_expel_units(expelled_from_p1, player1)
+
+## Called when war is declared - all units of both sides must leave enemy territory
+## When A declares war on B: A's units leave B's borders, B's units leave A's borders
+func on_war_declared(aggressor_id: int, target_id: int) -> void:
+	var aggressor = GameManager.get_player(aggressor_id)
+	var target = GameManager.get_player(target_id)
+
+	if aggressor == null or target == null:
+		return
+
+	# Expel aggressor's units from target's territory
+	var aggressor_units_to_expel = _get_units_in_territory(aggressor, target)
+	if not aggressor_units_to_expel.is_empty():
+		_expel_units(aggressor_units_to_expel, target)
+
+	# Expel target's units from aggressor's territory
+	var target_units_to_expel = _get_units_in_territory(target, aggressor)
+	if not target_units_to_expel.is_empty():
+		_expel_units(target_units_to_expel, aggressor)
+
+## Get all units of unit_owner that are inside territory_owner's borders
+func _get_units_in_territory(unit_owner, territory_owner) -> Array:
+	var units_in_territory = []
+
+	for unit in unit_owner.units:
+		var tile = GameManager.hex_grid.get_tile(unit.grid_position) if GameManager.hex_grid else null
+		if tile == null:
+			continue
+
+		# Check if unit is in territory_owner's borders
+		if tile.tile_owner == territory_owner:
+			units_in_territory.append(unit)
+
+	return units_in_territory
 
 ## Called when peace is declared - units inside enemy territory must leave
 func on_peace_declared(player1_id: int, player2_id: int) -> void:
