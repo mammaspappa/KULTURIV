@@ -119,7 +119,7 @@ func place_spy_in_city(spy_unit, city) -> bool:
 		return false
 
 	# Verify unit is a spy type
-	var unit_data = DataManager.get_unit(spy_unit.unit_type)
+	var unit_data = DataManager.get_unit(spy_unit.unit_id)
 	if not unit_data.get("abilities", []).has("spy"):
 		return false
 

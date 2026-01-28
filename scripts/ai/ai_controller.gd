@@ -1134,13 +1134,13 @@ func _process_naval_strategy(player, flavor: Dictionary) -> void:
 	var combat_naval = 0
 
 	for unit in player.units:
-		var unit_data = DataManager.get_unit(unit.unit_type)
+		var unit_data = DataManager.get_unit(unit.unit_id)
 		var domain = unit_data.get("domain", "land")
 		if domain == "sea":
 			naval_units += 1
 			if unit_data.get("cargo", 0) > 0:
 				transport_units += 1
-			if DataManager.get_unit_strength(unit.unit_type) > 0:
+			if DataManager.get_unit_strength(unit.unit_id) > 0:
 				combat_naval += 1
 
 	# Determine naval need based on map and enemies
@@ -1157,7 +1157,7 @@ func _process_naval_strategy(player, flavor: Dictionary) -> void:
 
 	# Process naval unit AI
 	for unit in player.units:
-		var unit_data = DataManager.get_unit(unit.unit_type)
+		var unit_data = DataManager.get_unit(unit.unit_id)
 		if unit_data.get("domain", "land") == "sea":
 			_process_naval_unit_ai(unit, player, flavor)
 
@@ -1238,7 +1238,7 @@ func _process_naval_unit_ai(unit, player, flavor: Dictionary) -> void:
 	if unit.has_acted or unit.movement_remaining <= 0:
 		return
 
-	var unit_data = DataManager.get_unit(unit.unit_type)
+	var unit_data = DataManager.get_unit(unit.unit_id)
 	var cargo_capacity = unit_data.get("cargo", 0)
 
 	# Transport ship logic
@@ -1315,7 +1315,7 @@ func _find_nearest_enemy_ship(unit, player):
 			continue
 
 		for enemy_unit in other.units:
-			var enemy_data = DataManager.get_unit(enemy_unit.unit_type)
+			var enemy_data = DataManager.get_unit(enemy_unit.unit_id)
 			if enemy_data.get("domain", "land") != "sea":
 				continue
 
@@ -1377,7 +1377,7 @@ func _find_landing_spot(unit, player) -> Vector2i:
 ## Find a unit that wants to embark
 func _find_embarkable_unit(unit, player) -> Vector2i:
 	for land_unit in player.units:
-		var land_data = DataManager.get_unit(land_unit.unit_type)
+		var land_data = DataManager.get_unit(land_unit.unit_id)
 		if land_data.get("domain", "land") != "land":
 			continue
 
@@ -1465,7 +1465,7 @@ func _load_unit(unit, pos: Vector2i) -> void:
 	if land_unit == null:
 		return
 
-	var unit_data = DataManager.get_unit(unit.unit_type)
+	var unit_data = DataManager.get_unit(unit.unit_id)
 	var cargo_capacity = unit_data.get("cargo", 0)
 
 	if not unit.get("cargo"):
