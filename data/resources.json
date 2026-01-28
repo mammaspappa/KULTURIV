@@ -232,5 +232,23 @@
 		"improvement": "quarry",
 		"revealed_by": "masonry",
 		"wonder_bonus": 0.5
+	},
+	"deer": {
+		"name": "Deer",
+		"symbol": "🦌",
+		"type": "bonus",
+		"yields": {"food": 1, "production": 0, "commerce": 1},
+		"valid_terrains": ["forest", "tundra"],
+		"improvement": "camp",
+		"revealed_by": ""
+	},
+	"pig": {
+		"name": "Pig",
+		"symbol": "🐷",
+		"type": "bonus",
+		"yields": {"food": 2, "production": 0, "commerce": 0},
+		"valid_terrains": ["grassland", "plains", "forest"],
+		"improvement": "pasture",
+		"revealed_by": "animal_husbandry"
 	}
 }

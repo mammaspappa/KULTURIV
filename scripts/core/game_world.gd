@@ -518,6 +518,12 @@ func found_city(settler: Unit) -> City:
 			tile.city_owner = city
 			tile.update_visuals()
 
+	# City tile gets a road automatically
+	var city_tile = game_grid.get_tile(pos)
+	if city_tile and city_tile.road_level < 1:
+		city_tile.road_level = 1
+		city_tile.update_visuals()
+
 	# Reveal visibility around the new city
 	VisibilitySystem.reveal_for_city(city)
 

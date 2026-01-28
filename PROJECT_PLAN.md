@@ -8,8 +8,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 |----------|--------|----------|
 | Core Engine | Complete | 100% |
 | Map System | Complete | 100% |
-| Units | Enhanced | 95% |
-| Cities | Enhanced | 90% |
+| Units | Enhanced | 98% |
+| Cities | Enhanced | 95% |
 | Combat | Enhanced | 100% |
 | AI | Enhanced | 85% |
 | UI | Partial | 70% |
@@ -108,14 +108,16 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
   - Keshik (Mongolia), Jaguar (Aztec), Camel Archer (Arabia), Conquistador (Spain)
 - [x] Inquisitor unit (removes non-state religions from cities)
 
+### Recently Added
+- [x] Unique unit civilization restrictions (only applicable civ can build their unique unit)
+- [x] Pasture improvement works for cow, sheep, horse, pig (requires Animal Husbandry)
+- [x] Camp improvement works for deer, furs, ivory (requires Hunting)
+- [x] Deer and pig resources added
+
 ### Not Implemented
 - [ ] Unit formations and army groups
-- [ ] Only applicable civilizations can build their unique unit. Example: Only Germany can build Panzer.
-- [ ] Worker cannot build improvements, except road and fort, outside own border
-- [ ] Worker can build pasture after discovery of tech Animal Husbandry on tiles with cow, sheep, horse or pig
-- [ ] Worker can build camp after discovery of tech Hunting on tiles with deer, furs or ivory
-- [ ] After unit completes action, focus shifts to the closest unit that can do action or has not been Skipped this turn. If all units have cannot do action or has been skipped, then next turn if Wait for next turn not active.
-- [ ] Check that unique units are identical to unique buildings in Reference
+- [ ] After unit completes action, focus shifts to the closest unit that can do action or has not been Skipped this turn
+- [ ] Check that unique units are identical to Reference
 
 ### Files
 - `scripts/entities/unit.gd`
@@ -156,13 +158,16 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Draft anger mechanics (unhappiness per conscripted unit)
 - [x] Unique buildings per civilization (9 unique buildings)
 
+### Recently Added
+- [x] City founding automatically places road on city tile
+- [x] Unique building civilization restrictions (only applicable civ can build their unique building)
+- [x] Worker border restrictions (can only build improvements in own territory, except roads and forts)
+
 ### Not Implemented
 - [ ] City governor automation
 - [ ] City trading (culture flip risk)
 - [ ] Wonder movies/effects
-- [ ] Tile that city is build on gets road improvement.
-- [ ] Unique building can only be built by specific Civilization
-- [ ] Check that unique buildings are identical to unique buildings in Reference
+- [ ] Check that unique buildings are identical to Reference
 
 ### Files
 - `scripts/entities/city.gd`
@@ -983,3 +988,7 @@ See CLAUDE.md for development guidelines and architecture overview.
 16. **Unique Buildings** - 9 civilization-specific unique buildings
 17. **Conscription System** - Draft units using population (requires Nationalism + Nationhood)
 18. **AI City Specialization** - AI categorizes cities as production, science, gold, military, etc.
+19. **Unique Unit/Building Restrictions** - Only applicable civilization can build their unique units/buildings
+20. **Worker Border Restrictions** - Workers cannot build improvements outside borders (except roads and forts)
+21. **City Road Placement** - Founding a city automatically places a road on the tile
+22. **Deer and Pig Resources** - New bonus resources for camp and pasture improvements

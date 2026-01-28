@@ -34,6 +34,14 @@ func can_build(worker, tile, improvement_id: String) -> bool:
 	if tile.improvement_id == improvement_id:
 		return false
 
+	# Border check: Workers can only build improvements in own territory,
+	# except for roads and forts which can be built outside borders
+	if worker.player_owner != null:
+		var is_own_territory = tile.tile_owner == worker.player_owner
+		var can_build_outside_borders = improvement_id in ["fort"]
+		if not is_own_territory and not can_build_outside_borders:
+			return false
+
 	# Get improvement data
 	var improvement = DataManager.get_improvement(improvement_id)
 	if improvement.is_empty():

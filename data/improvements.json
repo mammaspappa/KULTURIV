@@ -26,8 +26,8 @@
 		"color": "#DEB887",
 		"yields": {"food": 0, "production": 1, "commerce": 0},
 		"required_tech": "animal_husbandry",
-		"valid_terrains": ["grassland", "plains"],
-		"requires_resource": ["cattle", "sheep", "horses"],
+		"valid_terrains": ["grassland", "plains", "forest"],
+		"requires_resource": ["cattle", "sheep", "horses", "pig"],
 		"build_turns": 5,
 		"pillage_turns": 1
 	},

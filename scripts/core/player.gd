@@ -309,6 +309,16 @@ func can_build_unit(unit_id: String) -> bool:
 	if unit_data.is_empty():
 		return false
 
+	# Check if this is a unique unit restricted to specific civilization
+	var unit_civ = unit_data.get("civilization", "")
+	if unit_civ != "" and unit_civ != civilization_id:
+		return false  # Can only build unique units of your own civilization
+
+	# Check if this unit is replaced by a unique unit for this civilization
+	# (e.g., Rome can't build Swordsman because Praetorian replaces it)
+	if _is_unit_replaced_by_unique(unit_id):
+		return false
+
 	# Check tech requirement
 	var required_tech = unit_data.get("required_tech", "")
 	if required_tech != "" and not has_tech(required_tech):
@@ -321,9 +331,28 @@ func can_build_unit(unit_id: String) -> bool:
 
 	return true
 
+## Check if a base unit is replaced by a unique unit for this civilization
+func _is_unit_replaced_by_unique(unit_id: String) -> bool:
+	# Search all units to find if any unique unit replaces this one for our civ
+	for check_unit_id in DataManager.units:
+		var check_unit = DataManager.units[check_unit_id]
+		if check_unit.get("civilization", "") == civilization_id:
+			if check_unit.get("replaces", "") == unit_id:
+				return true  # Our civ has a unique unit that replaces this one
+	return false
+
 func can_build_building(building_id: String) -> bool:
 	var building_data = DataManager.get_building(building_id)
 	if building_data.is_empty():
+		return false
+
+	# Check if this is a unique building restricted to specific civilization
+	var building_civ = building_data.get("civilization", "")
+	if building_civ != "" and building_civ != civilization_id:
+		return false  # Can only build unique buildings of your own civilization
+
+	# Check if this building is replaced by a unique building for this civilization
+	if _is_building_replaced_by_unique(building_id):
 		return false
 
 	# Check tech requirement
@@ -332,6 +361,16 @@ func can_build_building(building_id: String) -> bool:
 		return false
 
 	return true
+
+## Check if a base building is replaced by a unique building for this civilization
+func _is_building_replaced_by_unique(building_id: String) -> bool:
+	# Search all buildings to find if any unique building replaces this one for our civ
+	for check_building_id in DataManager.buildings:
+		var check_building = DataManager.buildings[check_building_id]
+		if check_building.get("civilization", "") == civilization_id:
+			if check_building.get("replaces", "") == building_id:
+				return true  # Our civ has a unique building that replaces this one
+	return false
 
 func has_resource(resource_id: String) -> bool:
 	# Check if any city has access to this resource

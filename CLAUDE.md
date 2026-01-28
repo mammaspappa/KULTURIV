@@ -6,7 +6,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1.
 
 **Goal**: Recreate the core gameplay of Civilization IV: Beyond the Sword as a standalone game using the Godot engine.
 
-**Status**: ~90% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions. Recent additions include unique units, tech diffusion, AI city specialization, and conscription.
+**Status**: ~92% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions. Recent additions include unique units/buildings with civilization restrictions, worker border restrictions, tech diffusion, AI city specialization, and conscription.
 
 **Reference Files**: The original Civ4 BTS XML data files are located in `beyond/` directory for reference. These files should NOT be modified - they're only for understanding the original game's data structures and mechanics.
 
@@ -177,8 +177,12 @@ KULTURIV/
 - [x] Tech diffusion (cost reduction if others know tech)
 - [x] Conscription (draft units with Nationalism + Nationhood)
 - [x] Emancipation civic anger
-- [x] Unique units per civilization (16 total)
-- [x] Unique buildings per civilization (9 total)
+- [x] Unique units per civilization (16 total, with civ restrictions)
+- [x] Unique buildings per civilization (9 total, with civ restrictions)
+- [x] Worker border restrictions (improvements only in own territory, except roads/forts)
+- [x] City founding places road on tile automatically
+- [x] Pasture improvement (cattle, sheep, horses, pig)
+- [x] Camp improvement (deer, furs, ivory)
 
 ## Game Settings
 
