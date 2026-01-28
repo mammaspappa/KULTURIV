@@ -80,6 +80,9 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 	_add_features()
 	_add_resources()
 
+	# Add tribal villages (goody huts)
+	_add_goody_huts()
+
 	# Ensure starting locations have good terrain
 	_prepare_starting_locations()
 
@@ -226,6 +229,27 @@ func _prepare_starting_locations() -> void:
 	# Find good starting spots for players
 	# Will be used when placing initial settlers
 	pass
+
+func _add_goody_huts() -> void:
+	# Place tribal villages (goody huts) on the map
+	var density = 0.02  # 2% of valid tiles
+	var placed = 0
+
+	for pos in tiles:
+		var tile = tiles[pos]
+
+		# Only on land, non-mountain, unowned tiles
+		if tile.is_water() or tile.terrain_id == "mountains":
+			continue
+
+		# Random chance based on density
+		if randf() < density:
+			# Don't place too close to map edges (starting positions)
+			if pos.y > 5 and pos.y < height - 5:
+				tile.has_goody_hut = true
+				placed += 1
+
+	print("[MapGen] Placed %d goody huts" % placed)
 
 ## Create visual copies of tiles at the left and right edges for cylindrical wrapping
 func _create_wrap_visuals() -> void:

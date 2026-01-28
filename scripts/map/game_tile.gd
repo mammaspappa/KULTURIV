@@ -11,6 +11,7 @@ var feature_id: String = ""
 var resource_id: String = ""
 var improvement_id: String = ""
 var road_level: int = 0  # 0=none, 1=road, 2=railroad
+var has_goody_hut: bool = false  # Tribal village (discoverable bonus)
 
 # Ownership (untyped to avoid circular dependency)
 var tile_owner = null  # Player
@@ -58,11 +59,13 @@ func _draw() -> void:
 		_draw_resource()
 		_draw_improvement()
 		_draw_road()
+		_draw_goody_hut()
 		_draw_owner_border()
 	else:
 		# Fogged - show known improvements but not resources
 		_draw_improvement()
 		_draw_road()
+		_draw_goody_hut()
 
 	# Apply fog overlay for fogged tiles
 	if vis_state == VisibilityState.FOGGED:
@@ -137,6 +140,20 @@ func _draw_road() -> void:
 
 	draw_line(Vector2(0, center.y), Vector2(TILE_SIZE, center.y), road_color, 3.0)
 	draw_line(Vector2(center.x, 0), Vector2(center.x, TILE_SIZE), road_color, 3.0)
+
+func _draw_goody_hut() -> void:
+	if not has_goody_hut:
+		return
+
+	# Draw tribal village symbol (hut icon)
+	var symbol = "🏠"
+	var color = Color("#8B4513")  # Saddle brown
+
+	var font = ThemeDB.fallback_font
+	var font_size = 20
+	var text_size = font.get_string_size(symbol, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+	var text_pos = Vector2(TILE_SIZE / 2 - text_size.x / 2, TILE_SIZE / 2 + text_size.y / 4)
+	draw_string(font, text_pos, symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
 func _draw_owner_border() -> void:
 	if tile_owner == null:
@@ -341,6 +358,7 @@ func to_dict() -> Dictionary:
 		"resource_id": resource_id,
 		"improvement_id": improvement_id,
 		"road_level": road_level,
+		"has_goody_hut": has_goody_hut,
 		"owner_id": tile_owner.player_id if tile_owner else -1,
 		"visibility": visibility,
 	}
@@ -352,6 +370,7 @@ func from_dict(data: Dictionary) -> void:
 	resource_id = data.get("resource_id", "")
 	improvement_id = data.get("improvement_id", "")
 	road_level = data.get("road_level", 0)
+	has_goody_hut = data.get("has_goody_hut", false)
 	visibility = data.get("visibility", {})
 	position = GridUtils.grid_to_pixel_corner(grid_position)
 	update_visuals()

@@ -40,6 +40,8 @@ EventsSystem="*res://scripts/systems/events_system.gd"
 VotingSystem="*res://scripts/systems/voting_system.gd"
 VisibilitySystem="*res://scripts/systems/visibility_system.gd"
 BorderSystem="*res://scripts/systems/border_system.gd"
+GoodyHutsSystem="*res://scripts/systems/goody_huts_system.gd"
+BarbarianSystem="*res://scripts/systems/barbarian_system.gd"
 
 [display]
 

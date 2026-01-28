@@ -6,7 +6,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1.
 
 **Goal**: Recreate the core gameplay of Civilization IV: Beyond the Sword as a standalone game using the Godot engine.
 
-**Status**: ~92% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions. Recent additions include unique units/buildings with civilization restrictions, worker border restrictions, tech diffusion, AI city specialization, and conscription.
+**Status**: ~95% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions. Recent additions include goody huts (tribal villages), barbarian spawning system, AI naval operations, favorite civics per leader, unique units/buildings with civilization restrictions, worker border restrictions, tech diffusion, and AI city specialization.
 
 **Reference Files**: The original Civ4 BTS XML data files are located in `beyond/` directory for reference. These files should NOT be modified - they're only for understanding the original game's data structures and mechanics.
 
@@ -90,7 +90,9 @@ KULTURIV/
 │       ├── border_system.gd      # Border permissions
 │       ├── diplomacy_system.gd   # Diplomacy calculations
 │       ├── trade_system.gd       # Trade agreements
-│       └── save_system.gd        # Save/load
+│       ├── save_system.gd        # Save/load
+│       ├── goody_huts_system.gd  # Tribal villages with rewards
+│       └── barbarian_system.gd   # Barbarian camps and spawning
 └── project.godot           # Godot project config
 ```
 
@@ -158,7 +160,7 @@ KULTURIV/
 - [x] Domination, Conquest, Cultural, Space Race
 - [x] Diplomatic, Time, Religious
 
-### AI (85%)
+### AI (95%)
 - [x] Research, production, movement decisions
 - [x] War/peace evaluation
 - [x] Trade and diplomacy
@@ -166,6 +168,8 @@ KULTURIV/
 - [x] Espionage operations
 - [x] Random event handling (evaluates choices by flavor)
 - [x] City specialization (production, science, gold, military, culture, food)
+- [x] Naval operations (transports, combat ships, blockades, coastal patrol)
+- [x] Civics adoption based on favorite civics per leader
 
 ### Other Systems
 - [x] Great People (birth, abilities, golden ages)
@@ -183,6 +187,8 @@ KULTURIV/
 - [x] City founding places road on tile automatically
 - [x] Pasture improvement (cattle, sheep, horses, pig)
 - [x] Camp improvement (deer, furs, ivory)
+- [x] Goody huts (tribal villages with 8 reward types: gold, tech, map, XP, unit, settler, population, barbarians)
+- [x] Barbarian system (camps, spawning, pillaging AI, unit scaling by era)
 
 ## Game Settings
 

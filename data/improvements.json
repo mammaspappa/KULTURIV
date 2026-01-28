@@ -172,5 +172,14 @@
 		"requires_resource": ["wine"],
 		"build_turns": 5,
 		"pillage_turns": 1
+	},
+	"barbarian_camp": {
+		"name": "Barbarian Camp",
+		"symbol": "⚔",
+		"color": "#8B0000",
+		"yields": {"food": 0, "production": 0, "commerce": 0},
+		"defense_bonus": 0.25,
+		"is_barbarian": true,
+		"not_buildable": true
 	}
 }

@@ -11,7 +11,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | Units | Enhanced | 98% |
 | Cities | Enhanced | 95% |
 | Combat | Enhanced | 100% |
-| AI | Enhanced | 85% |
+| AI | Enhanced | 95% |
 | UI | Partial | 70% |
 | Diplomacy | Complete | 95% |
 | Religion | Complete | 100% |
@@ -268,8 +268,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] AI event handling (evaluates random event choices based on leader flavor)
 - [x] AI city specialization (production, science, gold, military, culture, food, hybrid)
 
+### Recently Added
+- [x] AI naval operations (transport loading, combat ships, blockades, coastal patrol)
+- [x] AI civics adoption based on leader flavor and favorite civics
+- [x] Favorite civics per leader (AI preference during civic selection)
+
 ### Not Implemented
-- [ ] AI naval operations
 - [ ] AI cheating (visibility at higher difficulties)
 
 ### Files
@@ -498,7 +502,6 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Emancipation anger (+2 unhappiness per known civ with Emancipation, max +6)
 
 ### Not Implemented (Minor)
-- [ ] Favorite civics per leader (AI preference)
 - [ ] Corporation interactions (State Property)
 
 ### Files
@@ -844,15 +847,17 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 20: Polish & Extras (NOT STARTED)
+## Phase 20: Polish & Extras (PARTIAL)
+
+### Implemented
+- [x] Goody huts (tribal villages) - Discoverable rewards on the map
+- [x] Barbarian spawning system - Camps, unit spawning, pillaging AI
+- [x] Barbarian encampments - Camps spawn periodically in unexplored territory
 
 ### To Implement
 - [ ] Loading screens with tips
 - [ ] Animated leaderheads
 - [ ] Wonder splash screens
-- [ ] Goody huts (tribal villages)
-- [ ] Barbarian encampments
-- [ ] Barbarian spawning system
 - [ ] Score calculation refinement
 - [ ] Hall of Fame
 - [ ] Replay system
@@ -992,3 +997,7 @@ See CLAUDE.md for development guidelines and architecture overview.
 20. **Worker Border Restrictions** - Workers cannot build improvements outside borders (except roads and forts)
 21. **City Road Placement** - Founding a city automatically places a road on the tile
 22. **Deer and Pig Resources** - New bonus resources for camp and pasture improvements
+23. **Goody Huts System** - Tribal villages with 8 reward types (gold, tech, map, XP, unit, settler, population, barbarians)
+24. **Barbarian System** - Camps, periodic spawning, pillaging AI, unit scaling by era
+25. **AI Naval Operations** - Transport loading/unloading, combat ships, blockades, coastal patrol
+26. **Favorite Civics** - AI adopts civics based on leader preferences and flavor values

@@ -49,6 +49,12 @@ func execute_turn(player) -> void:
 	for city in player.cities:
 		_process_city_ai(city, player, flavor)
 
+	# Process civics adoption
+	_process_civics(player, flavor)
+
+	# Process naval strategy
+	_process_naval_strategy(player, flavor)
+
 ## Get leader flavor values
 func _get_leader_flavor(player) -> Dictionary:
 	var leader_data = DataManager.get_leader(player.leader_id)
@@ -1016,3 +1022,458 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 func _get_best_building(city, player, flavor: Dictionary) -> String:
 	# Fallback version without specialization
 	return _get_best_building_for_specialization(city, player, flavor, CitySpecialization.HYBRID)
+
+## Process civics adoption based on leader preferences
+func _process_civics(player, flavor: Dictionary) -> void:
+	# Only check civics occasionally
+	if randf() > 0.1:
+		return
+
+	# Get leader data for favorite civic
+	var leader_data = DataManager.get_leader(player.leader_id)
+	var favorite_civic = leader_data.get("favorite_civic", "")
+
+	# Check each civic category
+	for category in CivicsSystem.CIVIC_CATEGORIES:
+		var current_civic = player.civics.get(category, "")
+		var best_civic = _evaluate_best_civic(player, category, flavor, favorite_civic)
+
+		if best_civic != "" and best_civic != current_civic:
+			# Check if we can afford civic change
+			var can_change = CivicsSystem.can_change_civic(player, category, best_civic)
+			if can_change:
+				CivicsSystem.set_civic(player, category, best_civic)
+
+## Evaluate best civic for a category
+func _evaluate_best_civic(player, category: String, flavor: Dictionary, favorite_civic: String) -> String:
+	var available = CivicsSystem.get_available_civics(player, category)
+	if available.is_empty():
+		return ""
+
+	var best_civic = ""
+	var best_score = -INF
+
+	var military_flavor = flavor.get("military", 5)
+	var science_flavor = flavor.get("science", 5)
+	var gold_flavor = flavor.get("gold", 5)
+	var culture_flavor = flavor.get("culture", 5)
+	var religion_flavor = flavor.get("religion", 5)
+	var growth_flavor = flavor.get("growth", 5)
+	var production_flavor = flavor.get("production", 5)
+
+	for civic_id in available:
+		var civic = DataManager.get_civic(civic_id)
+		if civic.is_empty():
+			continue
+
+		var score = 0.0
+		var effects = civic.get("effects", {})
+
+		# Score based on effects and flavor
+		if effects.has("military_experience_rate"):
+			score += effects.military_experience_rate * military_flavor * 2
+		if effects.has("military_production"):
+			score += effects.military_production * military_flavor * 3
+		if effects.has("science_rate"):
+			score += effects.science_rate * science_flavor * 2
+		if effects.has("gold_rate"):
+			score += effects.gold_rate * gold_flavor * 2
+		if effects.has("culture_rate"):
+			score += effects.culture_rate * culture_flavor * 2
+		if effects.has("happiness"):
+			score += effects.happiness * 5
+		if effects.has("health"):
+			score += effects.health * 3
+		if effects.has("growth_rate"):
+			score += effects.growth_rate * growth_flavor * 2
+		if effects.has("production_rate"):
+			score += effects.production_rate * production_flavor * 2
+		if effects.has("great_person_rate"):
+			score += effects.great_person_rate * science_flavor
+		if effects.has("unit_cost"):
+			score -= effects.unit_cost * military_flavor  # Negative is good
+		if effects.has("unit_support"):
+			score += effects.unit_support * military_flavor
+
+		# Religion-based civics
+		if effects.has("state_religion_happiness"):
+			score += effects.state_religion_happiness * religion_flavor
+		if effects.has("missionary_rate"):
+			score += effects.missionary_rate * religion_flavor * 2
+
+		# Penalty for upkeep
+		var upkeep = civic.get("upkeep", "low")
+		match upkeep:
+			"low": score -= 2
+			"medium": score -= 5
+			"high": score -= 10
+
+		# Big bonus for favorite civic
+		if civic_id == favorite_civic:
+			score += 30
+
+		if score > best_score:
+			best_score = score
+			best_civic = civic_id
+
+	return best_civic
+
+## Process naval strategy for AI
+func _process_naval_strategy(player, flavor: Dictionary) -> void:
+	# Check if player has coastal cities
+	var coastal_cities = []
+	for city in player.cities:
+		if _is_coastal_city(city):
+			coastal_cities.append(city)
+
+	if coastal_cities.is_empty():
+		return
+
+	# Count naval units
+	var naval_units = 0
+	var transport_units = 0
+	var combat_naval = 0
+
+	for unit in player.units:
+		var unit_data = DataManager.get_unit(unit.unit_type)
+		var domain = unit_data.get("domain", "land")
+		if domain == "sea":
+			naval_units += 1
+			if unit_data.get("cargo", 0) > 0:
+				transport_units += 1
+			if DataManager.get_unit_strength(unit.unit_type) > 0:
+				combat_naval += 1
+
+	# Determine naval need based on map and enemies
+	var need_naval = _calculate_naval_need(player, flavor)
+
+	# Build naval units if needed
+	if naval_units < need_naval:
+		for city in coastal_cities:
+			if city.current_production == "":
+				var naval_unit = _get_best_naval_unit(city, player, flavor)
+				if naval_unit != "":
+					city.set_production(naval_unit)
+					break
+
+	# Process naval unit AI
+	for unit in player.units:
+		var unit_data = DataManager.get_unit(unit.unit_type)
+		if unit_data.get("domain", "land") == "sea":
+			_process_naval_unit_ai(unit, player, flavor)
+
+## Check if a city is coastal
+func _is_coastal_city(city) -> bool:
+	if GameManager.hex_grid == null:
+		return false
+
+	for tile_pos in city.territory:
+		var tile = GameManager.hex_grid.get_tile(tile_pos)
+		if tile and tile.is_water():
+			return true
+
+	return false
+
+## Calculate how many naval units the AI should have
+func _calculate_naval_need(player, flavor: Dictionary) -> int:
+	var military_flavor = flavor.get("military", 5)
+	var expansion_flavor = flavor.get("expansion", 5)
+
+	# Base naval need
+	var need = 2
+
+	# More if aggressive
+	need += int(military_flavor / 3)
+
+	# More if expansionist (need transports for settlers)
+	need += int(expansion_flavor / 4)
+
+	# More if at war with naval power
+	for other in GameManager.players:
+		if other == player:
+			continue
+		if GameManager.is_at_war(player, other):
+			# Check if enemy has coastal cities
+			for city in other.cities:
+				if _is_coastal_city(city):
+					need += 2
+					break
+
+	# Cap at reasonable number
+	return min(need, 10)
+
+## Get best naval unit to build
+func _get_best_naval_unit(city, player, flavor: Dictionary) -> String:
+	var military_flavor = flavor.get("military", 5)
+	var expansion_flavor = flavor.get("expansion", 5)
+
+	var best_unit = ""
+	var best_score = -1
+
+	for unit_id in DataManager.units:
+		if not city.can_build_unit(unit_id):
+			continue
+
+		var unit_data = DataManager.get_unit(unit_id)
+		if unit_data.get("domain", "land") != "sea":
+			continue
+
+		var score = 0
+		var strength = DataManager.get_unit_strength(unit_id)
+		var cargo = unit_data.get("cargo", 0)
+
+		# Combat ships
+		score += strength * military_flavor
+
+		# Transport ships (for expansion)
+		score += cargo * expansion_flavor * 3
+
+		if score > best_score:
+			best_score = score
+			best_unit = unit_id
+
+	return best_unit
+
+## Process AI for a single naval unit
+func _process_naval_unit_ai(unit, player, flavor: Dictionary) -> void:
+	if unit.has_acted or unit.movement_remaining <= 0:
+		return
+
+	var unit_data = DataManager.get_unit(unit.unit_type)
+	var cargo_capacity = unit_data.get("cargo", 0)
+
+	# Transport ship logic
+	if cargo_capacity > 0:
+		_process_transport_ai(unit, player, flavor)
+		return
+
+	# Combat ship logic
+	_process_combat_naval_ai(unit, player, flavor)
+
+## Process AI for transport ships
+func _process_transport_ai(unit, player, flavor: Dictionary) -> void:
+	var loaded_units = unit.cargo if unit.get("cargo") else []
+
+	# If carrying units, look for landing spot
+	if loaded_units.size() > 0:
+		var landing = _find_landing_spot(unit, player)
+		if landing != Vector2i(-1, -1):
+			_move_naval_toward(unit, landing)
+			# Unload if adjacent to land
+			if _can_unload_at(unit, landing):
+				_unload_units(unit, landing)
+		return
+
+	# If empty, look for units to load
+	var embark_pos = _find_embarkable_unit(unit, player)
+	if embark_pos != Vector2i(-1, -1):
+		_move_naval_toward(unit, embark_pos)
+		# Load if adjacent
+		if GridUtils.are_adjacent(unit.grid_position, embark_pos):
+			_load_unit(unit, embark_pos)
+		return
+
+	# Default: patrol coastal waters
+	_patrol_coast(unit, player)
+
+## Process AI for combat ships
+func _process_combat_naval_ai(unit, player, flavor: Dictionary) -> void:
+	var military_flavor = flavor.get("military", 5)
+
+	# Look for enemy ships
+	var enemy_ship = _find_nearest_enemy_ship(unit, player)
+	if enemy_ship:
+		var odds = CombatSystem.calculate_odds(unit, enemy_ship)
+		var min_odds = 0.4 - (military_flavor - 5) * 0.05
+		min_odds = clamp(min_odds, 0.25, 0.5)
+
+		if odds.win_chance > min_odds:
+			if GridUtils.are_adjacent(unit.grid_position, enemy_ship.grid_position):
+				CombatSystem.resolve_combat(unit, enemy_ship)
+				return
+			else:
+				_move_naval_toward(unit, enemy_ship.grid_position)
+				return
+
+	# Blockade enemy ports
+	var blockade_target = _find_blockade_target(unit, player)
+	if blockade_target != Vector2i(-1, -1):
+		_move_naval_toward(unit, blockade_target)
+		return
+
+	# Patrol
+	_patrol_coast(unit, player)
+
+## Find nearest enemy ship
+func _find_nearest_enemy_ship(unit, player):
+	var nearest = null
+	var nearest_dist = INF
+
+	for other in GameManager.players:
+		if other == player:
+			continue
+		if not GameManager.is_at_war(player, other):
+			continue
+
+		for enemy_unit in other.units:
+			var enemy_data = DataManager.get_unit(enemy_unit.unit_type)
+			if enemy_data.get("domain", "land") != "sea":
+				continue
+
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, enemy_unit.grid_position)
+			if dist < nearest_dist:
+				nearest_dist = dist
+				nearest = enemy_unit
+
+	return nearest
+
+## Find enemy port to blockade
+func _find_blockade_target(unit, player) -> Vector2i:
+	for other in GameManager.players:
+		if other == player:
+			continue
+		if not GameManager.is_at_war(player, other):
+			continue
+
+		for city in other.cities:
+			if not _is_coastal_city(city):
+				continue
+
+			# Find water tile adjacent to city
+			var neighbors = GridUtils.get_neighbors(city.grid_position)
+			for neighbor_pos in neighbors:
+				var tile = GameManager.hex_grid.get_tile(neighbor_pos)
+				if tile and tile.is_water():
+					return neighbor_pos
+
+	return Vector2i(-1, -1)
+
+## Find a spot to land troops
+func _find_landing_spot(unit, player) -> Vector2i:
+	# Look for enemy coastal cities
+	for other in GameManager.players:
+		if other == player:
+			continue
+		if not GameManager.is_at_war(player, other):
+			continue
+
+		for city in other.cities:
+			if not _is_coastal_city(city):
+				continue
+
+			# Find land tile near the city
+			var neighbors = GridUtils.get_neighbors(city.grid_position)
+			for neighbor_pos in neighbors:
+				var tile = GameManager.hex_grid.get_tile(neighbor_pos)
+				if tile and not tile.is_water() and tile.is_passable():
+					# Find water adjacent to this land tile
+					var water_neighbors = GridUtils.get_neighbors(neighbor_pos)
+					for water_pos in water_neighbors:
+						var water_tile = GameManager.hex_grid.get_tile(water_pos)
+						if water_tile and water_tile.is_water():
+							return water_pos
+
+	return Vector2i(-1, -1)
+
+## Find a unit that wants to embark
+func _find_embarkable_unit(unit, player) -> Vector2i:
+	for land_unit in player.units:
+		var land_data = DataManager.get_unit(land_unit.unit_type)
+		if land_data.get("domain", "land") != "land":
+			continue
+
+		# Check if unit is on coast
+		var neighbors = GridUtils.get_neighbors(land_unit.grid_position)
+		for neighbor_pos in neighbors:
+			var tile = GameManager.hex_grid.get_tile(neighbor_pos)
+			if tile and tile.is_water():
+				return land_unit.grid_position
+
+	return Vector2i(-1, -1)
+
+## Move naval unit toward target
+func _move_naval_toward(unit, target: Vector2i) -> void:
+	if GameManager.hex_grid == null:
+		return
+
+	# Simple movement toward target on water
+	var best_pos = unit.grid_position
+	var best_dist = INF
+
+	var neighbors = GridUtils.get_neighbors(unit.grid_position)
+	for neighbor_pos in neighbors:
+		var tile = GameManager.hex_grid.get_tile(neighbor_pos)
+		if tile == null or not tile.is_water():
+			continue
+
+		if GameManager.get_unit_at(neighbor_pos) != null:
+			continue
+
+		var dist = GridUtils.chebyshev_distance(neighbor_pos, target)
+		if dist < best_dist:
+			best_dist = dist
+			best_pos = neighbor_pos
+
+	if best_pos != unit.grid_position:
+		unit.move_to(best_pos)
+
+## Patrol coastal waters
+func _patrol_coast(unit, player) -> void:
+	# Move randomly in water
+	var neighbors = GridUtils.get_neighbors(unit.grid_position)
+	neighbors.shuffle()
+
+	for neighbor_pos in neighbors:
+		var tile = GameManager.hex_grid.get_tile(neighbor_pos)
+		if tile == null or not tile.is_water():
+			continue
+
+		if GameManager.get_unit_at(neighbor_pos) != null:
+			continue
+
+		unit.move_to(neighbor_pos)
+		return
+
+## Check if can unload at position
+func _can_unload_at(unit, pos: Vector2i) -> bool:
+	var neighbors = GridUtils.get_neighbors(unit.grid_position)
+	for neighbor_pos in neighbors:
+		var tile = GameManager.hex_grid.get_tile(neighbor_pos)
+		if tile and not tile.is_water() and tile.is_passable():
+			if GameManager.get_unit_at(neighbor_pos) == null:
+				return true
+	return false
+
+## Unload units from transport
+func _unload_units(unit, target: Vector2i) -> void:
+	if not unit.get("cargo"):
+		return
+
+	var neighbors = GridUtils.get_neighbors(unit.grid_position)
+	for loaded_unit in unit.cargo.duplicate():
+		for neighbor_pos in neighbors:
+			var tile = GameManager.hex_grid.get_tile(neighbor_pos)
+			if tile and not tile.is_water() and tile.is_passable():
+				if GameManager.get_unit_at(neighbor_pos) == null:
+					loaded_unit.grid_position = neighbor_pos
+					loaded_unit.position = GridUtils.grid_to_pixel(neighbor_pos)
+					unit.cargo.erase(loaded_unit)
+					break
+
+## Load unit onto transport
+func _load_unit(unit, pos: Vector2i) -> void:
+	var land_unit = GameManager.get_unit_at(pos)
+	if land_unit == null:
+		return
+
+	var unit_data = DataManager.get_unit(unit.unit_type)
+	var cargo_capacity = unit_data.get("cargo", 0)
+
+	if not unit.get("cargo"):
+		unit.cargo = []
+
+	if unit.cargo.size() >= cargo_capacity:
+		return
+
+	unit.cargo.append(land_unit)
+	land_unit.visible = false  # Hide loaded unit
