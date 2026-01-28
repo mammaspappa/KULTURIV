@@ -142,7 +142,10 @@ func get_improvement_yields(improvement_id: String) -> Dictionary:
 
 # Unit accessors
 func get_unit(unit_id: String) -> Dictionary:
-	return units.get(unit_id, {})
+	var unit = units.get(unit_id, {})
+	if unit is Dictionary:
+		return unit
+	return {}
 
 func get_unit_strength(unit_id: String) -> float:
 	var unit = get_unit(unit_id)
@@ -168,7 +171,10 @@ func can_unit_build_improvements(unit_id: String) -> bool:
 
 # Building accessors
 func get_building(building_id: String) -> Dictionary:
-	return buildings.get(building_id, {})
+	var building = buildings.get(building_id, {})
+	if building is Dictionary:
+		return building
+	return {}
 
 func get_building_cost(building_id: String) -> int:
 	var building = get_building(building_id)
@@ -184,7 +190,10 @@ func get_building_effects(building_id: String) -> Dictionary:
 
 # Tech accessors
 func get_tech(tech_id: String) -> Dictionary:
-	return techs.get(tech_id, {})
+	var tech = techs.get(tech_id, {})
+	if tech is Dictionary:
+		return tech
+	return {}
 
 func get_tech_cost(tech_id: String) -> int:
 	var tech = get_tech(tech_id)
@@ -219,7 +228,10 @@ func is_tech_available(tech_id: String, researched_techs: Array) -> bool:
 
 # Civilization accessors
 func get_civ(civ_id: String) -> Dictionary:
-	return civs.get(civ_id, {})
+	var civ = civs.get(civ_id, {})
+	if civ is Dictionary:
+		return civ
+	return {}
 
 func get_civ_unique_unit(civ_id: String) -> String:
 	var civ = get_civ(civ_id)
@@ -235,7 +247,10 @@ func get_civ_starting_techs(civ_id: String) -> Array:
 
 # Leader accessors
 func get_leader(leader_id: String) -> Dictionary:
-	return leaders.get(leader_id, {})
+	var leader = leaders.get(leader_id, {})
+	if leader is Dictionary:
+		return leader
+	return {}
 
 func get_leader_traits(leader_id: String) -> Array:
 	var leader = get_leader(leader_id)
