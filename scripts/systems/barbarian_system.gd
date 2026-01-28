@@ -28,7 +28,7 @@ func _on_game_started() -> void:
 	# Spawn initial camps
 	_spawn_initial_camps()
 
-func _on_turn_ended(player) -> void:
+func _on_turn_ended(_turn_number: int, player) -> void:
 	# Only process at end of all player turns
 	if player != null and player != barbarian_player:
 		return
