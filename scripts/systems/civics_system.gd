@@ -271,6 +271,39 @@ func get_civic_happiness(player, city) -> int:
 
 	return happiness
 
+## Get unhappiness from civics (like Emancipation anger)
+func get_civic_unhappiness(player, city) -> int:
+	var unhappiness = 0
+
+	# Emancipation anger: if you don't run Emancipation but other civs do
+	unhappiness += _get_emancipation_anger(player, city)
+
+	return unhappiness
+
+## Calculate Emancipation anger
+## If other known civs run Emancipation and this player doesn't,
+## this player gets unhappiness in their cities
+func _get_emancipation_anger(player, _city) -> int:
+	if player == null or GameManager == null:
+		return 0
+
+	# Check if this player runs Emancipation
+	if player.civics.get("labor", "") == "emancipation":
+		return 0  # No anger if we have Emancipation
+
+	# Check if any known civ runs Emancipation
+	var emancipation_count = 0
+	for other_player in GameManager.players:
+		if other_player.player_id == player.player_id:
+			continue
+		if not player.met_players.has(other_player.player_id):
+			continue
+		if other_player.civics.get("labor", "") == "emancipation":
+			emancipation_count += 1
+
+	# +2 unhappiness for each known civ with Emancipation, max +6
+	return min(emancipation_count * 2, 6)
+
 ## Get health bonus from civics for a city
 func get_civic_health(player, _city) -> int:
 	var health = 0

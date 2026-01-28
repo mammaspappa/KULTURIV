@@ -68,8 +68,6 @@ func _on_turn_started(_turn_number, player) -> void:
 		return
 	if player == null:
 		return
-	if not player.is_human:
-		return  # Only trigger events for human players
 
 	initialize_player(player.player_id)
 
@@ -297,14 +295,88 @@ func _trigger_event(event_id: String, player, city) -> void:
 		"city": city
 	}
 
-	# Queue the event
+	# Set cooldown
+	event_cooldowns[player.player_id][event_id] = 10  # 10 turn cooldown between same events
+
+	# AI players make choices automatically
+	if not player.is_human:
+		_ai_handle_event(event_data, player)
+		return
+
+	# Queue the event for human player
 	pending_events.append(event_data)
 
 	# Emit signal for UI
 	EventBus.random_event_triggered.emit(event_data)
 
-	# Set cooldown
-	event_cooldowns[player.player_id][event_id] = 10  # 10 turn cooldown between same events
+## AI automatically handles event choices
+func _ai_handle_event(event_data: Dictionary, player) -> void:
+	var choices = event_data.choices
+	if choices.is_empty():
+		return
+
+	# Evaluate each choice and pick the best one based on AI personality
+	var best_choice = 0
+	var best_score = -INF
+
+	for i in range(choices.size()):
+		var choice = choices[i]
+		var score = _ai_evaluate_choice(choice, player)
+		if score > best_score:
+			best_score = score
+			best_choice = i
+
+	# Apply the chosen option
+	process_event_choice(event_data, best_choice)
+
+## AI evaluates a choice based on effects and personality
+func _ai_evaluate_choice(choice: Dictionary, player) -> float:
+	var score = 0.0
+	var effects = choice.get("effects", {})
+
+	# Get AI leader flavors for weighting
+	var flavors = DataManager.get_leader_flavors(player.leader_id) if DataManager else {}
+	var gold_flavor = flavors.get("gold", 5) / 10.0
+	var military_flavor = flavors.get("military", 5) / 10.0
+	var science_flavor = flavors.get("science", 5) / 10.0
+	var culture_flavor = flavors.get("culture", 5) / 10.0
+	var religion_flavor = flavors.get("religion", 5) / 10.0
+
+	for effect_type in effects:
+		var value = effects[effect_type]
+		if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
+			continue
+
+		match effect_type:
+			"gold":
+				score += value * gold_flavor
+			"gold_per_turn":
+				score += value * 10 * gold_flavor  # Per-turn is worth more
+			"production":
+				score += value * military_flavor
+			"food":
+				score += value * 0.5
+			"research":
+				score += value * science_flavor
+			"culture":
+				score += value * culture_flavor
+			"happiness":
+				score += value * 3  # Happiness is valuable
+			"health":
+				score += value * 2
+			"experience":
+				score += value * military_flavor
+			"population":
+				score += value * 5  # Population is very valuable
+			"free_unit":
+				score += 50 * military_flavor
+
+	# Penalty for risky choices
+	var risk = choice.get("risk", 0)
+	if risk > 0:
+		score -= risk * 10
+
+	return score
 
 func _get_available_choices(event: Dictionary, player) -> Array:
 	var available = []

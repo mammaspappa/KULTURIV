@@ -11,6 +11,17 @@ const HIGH_FLAVOR = 7
 const MEDIUM_FLAVOR = 4
 const LOW_FLAVOR = 2
 
+# City specialization types
+enum CitySpecialization {
+	HYBRID,       # Balanced city
+	PRODUCTION,   # Focus on hammers/military
+	SCIENCE,      # Focus on research
+	GOLD,         # Focus on commerce
+	MILITARY,     # Garrison city, border defense
+	CULTURE,      # Cultural expansion/victory
+	FOOD          # Growth focused city
+}
+
 ## Execute a full turn for an AI player
 func execute_turn(player) -> void:
 	if player.is_human:
@@ -482,6 +493,9 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	var culture_flavor = flavor.get("culture", 5)
 	var expansion_flavor = flavor.get("expansion", 5)
 
+	# Determine city specialization
+	var specialization = _determine_city_specialization(city, player, flavor)
+
 	# Apply difficulty bonuses
 	var bonuses = _get_ai_bonuses()
 	var prod_bonus = bonuses.get("production_percent", 0)
@@ -497,37 +511,45 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if u.can_build_improvements():
 			workers += 1
 
-	# Calculate desired military based on flavor
+	# Calculate desired military based on flavor and specialization
 	var desired_military = num_cities * (1 + military_flavor / 5)
+	if specialization == CitySpecialization.MILITARY:
+		desired_military *= 1.5  # Military cities want more units
 
-	# Need military?
-	if military_units < desired_military:
+	# Need military? (Higher priority for military-specialized cities)
+	var military_priority_threshold = desired_military
+	if specialization == CitySpecialization.MILITARY:
+		military_priority_threshold = desired_military * 0.8  # Build sooner
+
+	if military_units < military_priority_threshold:
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
 			return
 
-	# Need settler? Based on expansion flavor
+	# Need settler? Based on expansion flavor (only from production/food cities)
 	var max_cities = 4 + expansion_flavor
 	if num_cities < max_cities and city.population >= 3:
-		if city.can_build_unit("settler"):
-			city.set_production("settler")
-			return
+		if specialization in [CitySpecialization.PRODUCTION, CitySpecialization.FOOD, CitySpecialization.HYBRID]:
+			if city.can_build_unit("settler"):
+				city.set_production("settler")
+				return
 
-	# Need worker?
+	# Need worker? (Prefer production cities for this)
 	var desired_workers = num_cities * (1 + production_flavor / 10)
 	if workers < desired_workers:
-		if city.can_build_unit("worker"):
-			city.set_production("worker")
-			return
+		if specialization in [CitySpecialization.PRODUCTION, CitySpecialization.HYBRID]:
+			if city.can_build_unit("worker"):
+				city.set_production("worker")
+				return
 
-	# Build infrastructure based on flavor
-	var building_to_build = _get_best_building(city, player, flavor)
+	# Build infrastructure based on flavor AND specialization
+	var building_to_build = _get_best_building_for_specialization(city, player, flavor, specialization)
 	if building_to_build != "":
 		city.set_production(building_to_build)
 		return
 
-	# Default to military
+	# Default to military for military cities, or best unit otherwise
 	var unit_to_build = _get_best_military_unit(city, player, military_flavor)
 	if unit_to_build != "":
 		city.set_production(unit_to_build)
@@ -780,7 +802,130 @@ func _get_best_military_unit(city, player, military_flavor: int) -> String:
 
 	return best_unit
 
-func _get_best_building(city, player, flavor: Dictionary) -> String:
+## Determine the best specialization for a city based on location and resources
+func _determine_city_specialization(city, player, flavor: Dictionary) -> CitySpecialization:
+	if GameManager.hex_grid == null:
+		return CitySpecialization.HYBRID
+
+	# Analyze city's tiles
+	var total_food = 0
+	var total_production = 0
+	var total_commerce = 0
+	var has_strategic = false
+	var coastal = false
+	var near_border = false
+
+	for tile_pos in city.territory:
+		var tile = GameManager.hex_grid.get_tile(tile_pos)
+		if tile == null:
+			continue
+
+		total_food += tile.get_food()
+		total_production += tile.get_production()
+		total_commerce += tile.get_commerce()
+
+		if tile.is_water():
+			coastal = true
+
+		# Check for strategic resources
+		if tile.resource_id != "":
+			var res_data = DataManager.get_resource(tile.resource_id)
+			if res_data.get("type", "") == "strategic":
+				has_strategic = true
+
+	# Check if near enemy borders
+	for other in GameManager.players:
+		if other == player or other.player_id not in player.met_players:
+			continue
+		if GameManager.is_at_war(player, other) or DiplomacySystem.calculate_attitude(player, other) < -2:
+			for other_city in other.cities:
+				if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) < 8:
+					near_border = true
+					break
+
+	# Check if this is the capital (usually best for science/gold)
+	var is_capital = player.cities.size() > 0 and city == player.cities[0]
+
+	# Score each specialization
+	var scores = {
+		CitySpecialization.HYBRID: 10,
+		CitySpecialization.PRODUCTION: 0,
+		CitySpecialization.SCIENCE: 0,
+		CitySpecialization.GOLD: 0,
+		CitySpecialization.MILITARY: 0,
+		CitySpecialization.CULTURE: 0,
+		CitySpecialization.FOOD: 0
+	}
+
+	# Production specialization
+	if total_production > 30:
+		scores[CitySpecialization.PRODUCTION] += 20
+	if has_strategic:
+		scores[CitySpecialization.PRODUCTION] += 15
+	scores[CitySpecialization.PRODUCTION] += flavor.get("production", 5) * 2
+
+	# Science specialization
+	if is_capital:
+		scores[CitySpecialization.SCIENCE] += 15
+	if total_commerce > 25:
+		scores[CitySpecialization.SCIENCE] += 10
+	scores[CitySpecialization.SCIENCE] += flavor.get("science", 5) * 3
+
+	# Gold specialization
+	if coastal:
+		scores[CitySpecialization.GOLD] += 10  # Trade routes
+	if total_commerce > 30:
+		scores[CitySpecialization.GOLD] += 15
+	scores[CitySpecialization.GOLD] += flavor.get("gold", 5) * 2
+
+	# Military specialization
+	if near_border:
+		scores[CitySpecialization.MILITARY] += 25
+	if has_strategic:
+		scores[CitySpecialization.MILITARY] += 10
+	scores[CitySpecialization.MILITARY] += flavor.get("military", 5) * 2
+
+	# Culture specialization
+	scores[CitySpecialization.CULTURE] += flavor.get("culture", 5) * 2
+	if city.religions.size() > 1:
+		scores[CitySpecialization.CULTURE] += 10  # Multiple religions = culture
+
+	# Food specialization
+	if total_food > 35:
+		scores[CitySpecialization.FOOD] += 20
+	scores[CitySpecialization.FOOD] += flavor.get("growth", 5) * 2
+
+	# Find highest scoring specialization
+	var best_spec = CitySpecialization.HYBRID
+	var best_score = scores[CitySpecialization.HYBRID]
+
+	for spec in scores:
+		if scores[spec] > best_score:
+			best_score = scores[spec]
+			best_spec = spec
+
+	return best_spec
+
+## Get building priority modifiers based on city specialization
+func _get_specialization_modifiers(specialization: CitySpecialization) -> Dictionary:
+	match specialization:
+		CitySpecialization.PRODUCTION:
+			return {"production": 2.0, "production_percent": 2.0, "experience": 1.5, "science": 0.8, "gold": 0.8}
+		CitySpecialization.SCIENCE:
+			return {"science": 2.0, "science_percent": 2.5, "culture": 1.2, "production": 0.7}
+		CitySpecialization.GOLD:
+			return {"gold": 2.0, "gold_percent": 2.5, "culture": 1.0, "science": 0.8}
+		CitySpecialization.MILITARY:
+			return {"experience": 3.0, "happiness": 2.0, "production": 1.5, "defense": 2.0, "health": 1.5}
+		CitySpecialization.CULTURE:
+			return {"culture": 3.0, "happiness": 1.5, "science": 1.0, "great_person": 2.0}
+		CitySpecialization.FOOD:
+			return {"food": 2.5, "health": 2.0, "happiness": 1.5, "growth": 2.0}
+		_:  # HYBRID
+			return {}
+
+## Get best building considering city specialization
+func _get_best_building_for_specialization(city, player, flavor: Dictionary, specialization: CitySpecialization) -> String:
 	var science_flavor = flavor.get("science", 5)
 	var gold_flavor = flavor.get("gold", 5)
 	var culture_flavor = flavor.get("culture", 5)
@@ -788,7 +933,10 @@ func _get_best_building(city, player, flavor: Dictionary) -> String:
 	var growth_flavor = flavor.get("growth", 5)
 	var production_flavor = flavor.get("production", 5)
 
-	# Score buildings based on flavor
+	# Get specialization modifiers
+	var spec_mods = _get_specialization_modifiers(specialization)
+
+	# Score buildings based on flavor AND specialization
 	var best_building = ""
 	var best_score = -1
 
@@ -798,41 +946,62 @@ func _get_best_building(city, player, flavor: Dictionary) -> String:
 
 		var building = DataManager.get_building(building_id)
 		var effects = building.get("effects", {})
-		var score = 0
+		var score = 0.0
 
 		# Science
 		if effects.has("science_percent"):
-			score += effects.science_percent * science_flavor / 5
+			var mod = spec_mods.get("science_percent", 1.0)
+			score += effects.science_percent * science_flavor / 5 * mod
 		if effects.has("science"):
-			score += effects.science * science_flavor
+			var mod = spec_mods.get("science", 1.0)
+			score += effects.science * science_flavor * mod
 
 		# Gold
 		if effects.has("gold_percent"):
-			score += effects.gold_percent * gold_flavor / 5
+			var mod = spec_mods.get("gold_percent", 1.0)
+			score += effects.gold_percent * gold_flavor / 5 * mod
 		if effects.has("gold"):
-			score += effects.gold * gold_flavor
+			var mod = spec_mods.get("gold", 1.0)
+			score += effects.gold * gold_flavor * mod
 
 		# Culture
 		if effects.has("culture"):
-			score += effects.culture * culture_flavor
+			var mod = spec_mods.get("culture", 1.0)
+			score += effects.culture * culture_flavor * mod
 
 		# Military
 		if effects.has("experience"):
-			score += effects.experience * military_flavor * 2
+			var mod = spec_mods.get("experience", 1.0)
+			score += effects.experience * military_flavor * 2 * mod
 		if effects.has("happiness"):
-			score += effects.happiness * 5
+			var mod = spec_mods.get("happiness", 1.0)
+			score += effects.happiness * 5 * mod
+
+		# Defense bonus (for military cities)
+		if effects.has("defense"):
+			var mod = spec_mods.get("defense", 1.0)
+			score += effects.defense * military_flavor * mod
 
 		# Growth
 		if effects.has("food"):
-			score += effects.food * growth_flavor * 2
+			var mod = spec_mods.get("food", 1.0)
+			score += effects.food * growth_flavor * 2 * mod
 		if effects.has("health"):
-			score += effects.health * growth_flavor
+			var mod = spec_mods.get("health", 1.0)
+			score += effects.health * growth_flavor * mod
 
 		# Production
 		if effects.has("production"):
-			score += effects.production * production_flavor * 2
+			var mod = spec_mods.get("production", 1.0)
+			score += effects.production * production_flavor * 2 * mod
 		if effects.has("production_percent"):
-			score += effects.production_percent * production_flavor / 5
+			var mod = spec_mods.get("production_percent", 1.0)
+			score += effects.production_percent * production_flavor / 5 * mod
+
+		# Great person points (valuable for culture/science cities)
+		if effects.has("great_person_points"):
+			var mod = spec_mods.get("great_person", 1.0)
+			score += effects.great_person_points * mod * 3
 
 		# Reduce score by cost (prefer cheaper when scores are similar)
 		var cost = building.get("cost", 100)
@@ -843,3 +1012,7 @@ func _get_best_building(city, player, flavor: Dictionary) -> String:
 			best_building = building_id
 
 	return best_building
+
+func _get_best_building(city, player, flavor: Dictionary) -> String:
+	# Fallback version without specialization
+	return _get_best_building_for_specialization(city, player, flavor, CitySpecialization.HYBRID)

@@ -6,7 +6,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1.
 
 **Goal**: Recreate the core gameplay of Civilization IV: Beyond the Sword as a standalone game using the Godot engine.
 
-**Status**: ~85% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions.
+**Status**: ~90% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions. Recent additions include unique units, tech diffusion, AI city specialization, and conscription.
 
 **Reference Files**: The original Civ4 BTS XML data files are located in `beyond/` directory for reference. These files should NOT be modified - they're only for understanding the original game's data structures and mechanics.
 
@@ -16,7 +16,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1.
 KULTURIV/
 ├── beyond/                  # Original Civ4 BTS files (REFERENCE ONLY)
 ├── data/                    # Game data in JSON format
-│   ├── buildings.json       # Building definitions (~100 buildings including wonders)
+│   ├── buildings.json       # Building definitions (~120 buildings incl. wonders, unique buildings)
 │   ├── civs.json           # Civilization definitions (18 civs)
 │   ├── civics.json         # Civic system (25 civics in 5 categories)
 │   ├── corporations.json   # Corporation mechanics (7 corporations)
@@ -35,7 +35,7 @@ KULTURIV/
 │   ├── specialists.json    # City specialists (15 types)
 │   ├── techs.json          # Technology tree (80+ techs)
 │   ├── terrains.json       # Terrain types (10 types)
-│   ├── units.json          # Unit definitions (70+ units)
+│   ├── units.json          # Unit definitions (90+ units, incl. 16 unique units)
 │   ├── victories.json      # Victory conditions (7 types)
 │   └── votes.json          # UN/Apostolic Palace resolutions (22 resolutions)
 ├── scenes/
@@ -140,12 +140,13 @@ KULTURIV/
 - [x] Memory system for events
 - [x] Border crossing restrictions
 
-### Religion (98%)
+### Religion (100%)
 - [x] Religion founding via technology
 - [x] Religion spread via missionaries
 - [x] Holy cities and shrines
 - [x] State religion and happiness
 - [x] Religion-specific buildings (21 total)
+- [x] Inquisitor unit (removes non-state religions)
 
 ### Civics (100%)
 - [x] 25 civics in 5 categories
@@ -157,20 +158,27 @@ KULTURIV/
 - [x] Domination, Conquest, Cultural, Space Race
 - [x] Diplomatic, Time, Religious
 
-### AI (75%)
+### AI (85%)
 - [x] Research, production, movement decisions
 - [x] War/peace evaluation
 - [x] Trade and diplomacy
 - [x] Worker management
 - [x] Espionage operations
+- [x] Random event handling (evaluates choices by flavor)
+- [x] City specialization (production, science, gold, military, culture, food)
 
 ### Other Systems
 - [x] Great People (birth, abilities, golden ages)
-- [x] Corporations (founding, spreading, effects)
+- [x] Corporations (founding, spreading, effects, HQ buildings)
 - [x] Espionage (15 missions, spy mechanics)
-- [x] Random Events (20 events with choices)
+- [x] Random Events (20 events with choices, AI handling)
 - [x] UN/Apostolic Palace voting (22 resolutions)
 - [x] Projects (Manhattan, Apollo, spaceship)
+- [x] Tech diffusion (cost reduction if others know tech)
+- [x] Conscription (draft units with Nationalism + Nationhood)
+- [x] Emancipation civic anger
+- [x] Unique units per civilization (16 total)
+- [x] Unique buildings per civilization (9 total)
 
 ## Game Settings
 

@@ -8,16 +8,16 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 |----------|--------|----------|
 | Core Engine | Complete | 100% |
 | Map System | Complete | 100% |
-| Units | Enhanced | 90% |
-| Cities | Partial | 85% |
+| Units | Enhanced | 95% |
+| Cities | Enhanced | 90% |
 | Combat | Enhanced | 100% |
-| AI | Enhanced | 75% |
+| AI | Enhanced | 85% |
 | UI | Partial | 70% |
 | Diplomacy | Complete | 95% |
-| Religion | Enhanced | 90% |
+| Religion | Complete | 100% |
 | Victory Conditions | Complete | 100% |
 | Civics | Complete | 100% |
-| Corporations | Enhanced | 85% |
+| Corporations | Enhanced | 95% |
 | Espionage | Enhanced | 95% |
 | Projects | Basic | 85% |
 | Events | Basic | 80% |
@@ -76,7 +76,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 3: Units (90% COMPLETE)
+## Phase 3: Units (95% COMPLETE)
 
 ### Implemented
 - [x] Unit class with movement, stats, abilities
@@ -101,10 +101,21 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Explorer automation (auto-explore for scout/recon units)
 - [x] Great Spy unit with infiltrate, counterintelligence HQ, super spy abilities
 - [x] Corporation executive units for all 7 corporations
+- [x] Unique units for all civilizations (16 unique units):
+  - Praetorian (Rome), Phalanx (Greece), War Chariot (Egypt), Cho-Ko-Nu (China)
+  - Immortal (Persia), Redcoat (England), Musketeer (France), Panzer (Germany)
+  - Cossack (Russia), Navy SEAL (America), Samurai (Japan), Fast Worker (India)
+  - Keshik (Mongolia), Jaguar (Aztec), Camel Archer (Arabia), Conquistador (Spain)
+- [x] Inquisitor unit (removes non-state religions from cities)
 
 ### Not Implemented
 - [ ] Unit formations and army groups
-- [ ] Unique unit abilities per civilization
+- [ ] Only applicable civilizations can build their unique unit. Example: Only Germany can build Panzer.
+- [ ] Worker cannot build improvements, except road and fort, outside own border
+- [ ] Worker can build pasture after discovery of tech Animal Husbandry on tiles with cow, sheep, horse or pig
+- [ ] Worker can build camp after discovery of tech Hunting on tiles with deer, furs or ivory
+- [ ] After unit completes action, focus shifts to the closest unit that can do action or has not been Skipped this turn. If all units have cannot do action or has been skipped, then next turn if Wait for next turn not active.
+- [ ] Check that unique units are identical to unique buildings in Reference
 
 ### Files
 - `scripts/entities/unit.gd`
@@ -118,7 +129,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 4: Cities (75% COMPLETE)
+## Phase 4: Cities (90% COMPLETE)
 
 ### Implemented
 - [x] City class with production, growth, buildings
@@ -141,12 +152,17 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] National wonders (10 buildings, one-per-civilization limit)
 - [x] Wonder tracking in GameManager (world_wonders_built, national_wonders_built)
 - [x] Building checks enforce wonder limits
+- [x] Conscription system (requires Nationalism tech, Nationhood civic)
+- [x] Draft anger mechanics (unhappiness per conscripted unit)
+- [x] Unique buildings per civilization (9 unique buildings)
 
 ### Not Implemented
 - [ ] City governor automation
-- [ ] Conscription
 - [ ] City trading (culture flip risk)
 - [ ] Wonder movies/effects
+- [ ] Tile that city is build on gets road improvement.
+- [ ] Unique building can only be built by specific Civilization
+- [ ] Check that unique buildings are identical to unique buildings in Reference
 
 ### Files
 - `scripts/entities/city.gd`
@@ -198,7 +214,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 6: Technology (98% COMPLETE)
+## Phase 6: Technology (95% COMPLETE)
 
 ### Implemented
 - [x] Tech tree with prerequisites (AND/OR logic)
@@ -215,10 +231,10 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] "First to discover" bonuses (gold + beakers, scales by era)
 - [x] Special bonuses for landmark techs (Writing, Alphabet, Philosophy, etc.)
 - [x] First-to-discover tracking in GameManager
+- [x] Tech diffusion (5% cost reduction per known civ with tech, max 30%)
 
 ### Not Implemented
-- [ ] Tech diffusion (slower research if others have it)
-
+- [ ] If no research, then open Science screen once per turn
 ### Files
 - `data/techs.json`
 - `scripts/ui/tech_tree.gd`
@@ -228,7 +244,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 7: AI System (75% COMPLETE)
+## Phase 7: AI System (85% COMPLETE)
 
 ### Implemented
 - [x] Basic AI controller framework
@@ -243,11 +259,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] AI worker management with improvement selection based on flavor
 - [x] Difficulty-based AI bonuses (handicaps.json with 9 difficulty levels)
 - [x] AI target selection in combat (weighted by win chance and aggressiveness)
+- [x] AI espionage operations (personality-based mission selection and targeting)
+- [x] AI event handling (evaluates random event choices based on leader flavor)
+- [x] AI city specialization (production, science, gold, military, culture, food, hybrid)
 
 ### Not Implemented
-- [ ] AI city specialization (production vs science cities)
 - [ ] AI naval operations
-- [ ] AI espionage
 - [ ] AI cheating (visibility at higher difficulties)
 
 ### Files
@@ -314,7 +331,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 9: Religion (98% COMPLETE)
+## Phase 9: Religion (COMPLETE)
 
 ### Implemented
 - [x] Religion founding via technology
@@ -338,10 +355,10 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
   - Confucian: Academy, Study Hall, Grand Academy
   - Taoist: Pagoda, Hermitage, Grand Pagoda
   - Islamic: Mosque, Madrassa, Grand Mosque
+- [x] Inquisitor unit (removes non-state religions from cities)
 
 ### Not Implemented
 - [ ] "No state religion" option
-- [ ] Inquisitor units
 
 ### Files
 - `scripts/systems/religion_system.gd`
@@ -472,9 +489,11 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Effect descriptions and tooltips
 - [x] Pending changes preview with anarchy warning
 
+### Recently Added
+- [x] Emancipation anger (+2 unhappiness per known civ with Emancipation, max +6)
+
 ### Not Implemented (Minor)
 - [ ] Favorite civics per leader (AI preference)
-- [ ] Emancipation anger to other civs
 - [ ] Corporation interactions (State Property)
 
 ### Files
@@ -495,7 +514,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 14: Corporations (90% COMPLETE)
+## Phase 14: Corporations (95% COMPLETE)
 
 ### Implemented
 - [x] Corporation data with all 7 BTS corporations
@@ -511,10 +530,13 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ### Recently Added
 - [x] Executive units for all 7 corporations (Mining Inc, Sid's Sushi, Cereal Mills, Standard Ethanol, Creative Constructions, Civilized Jewelers, Aluminum Co)
+- [x] Corporation headquarters buildings (7 total):
+  - Mining Inc HQ, Sid's Sushi HQ, Cereal Mills HQ
+  - Standard Ethanol HQ, Creative Constructions HQ
+  - Civilized Jewelers HQ, Aluminum Co HQ
 
 ### Not Implemented
 - [ ] Corporation screen UI
-- [ ] Corporation buildings in cities
 
 ### Files
 - `scripts/systems/corporation_system.gd`
@@ -644,10 +666,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - Religion spreading
 - City revolt chances
 
+### Recently Added
+- [x] AI event handling (evaluates choices based on leader flavor values)
+
 ### Not Implemented
 - [ ] Quest events (multi-turn chains)
 - [ ] Global events (affect all players)
-- [ ] AI event handling
 
 ### Files
 - `scripts/systems/events_system.gd`
@@ -950,3 +974,12 @@ See CLAUDE.md for development guidelines and architecture overview.
 7. **Great Spy Unit** - New great person with espionage abilities
 8. **Corporation Executives** - Units to spread all 7 corporations
 9. **Game Data Files** - game_speeds.json and eras.json
+10. **Unique Units** - 16 civilization-specific unique units
+11. **Inquisitor Unit** - Removes non-state religions from cities
+12. **Tech Diffusion** - 5% cost reduction per known civ with tech (max 30%)
+13. **AI Event Handling** - AI evaluates random event choices based on leader flavor
+14. **Emancipation Anger** - +2 unhappiness per known civ with Emancipation
+15. **Corporation HQ Buildings** - 7 headquarters buildings for corporations
+16. **Unique Buildings** - 9 civilization-specific unique buildings
+17. **Conscription System** - Draft units using population (requires Nationalism + Nationhood)
+18. **AI City Specialization** - AI categorizes cities as production, science, gold, military, etc.

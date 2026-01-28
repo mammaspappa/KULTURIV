@@ -113,9 +113,8 @@ func complete_research() -> void:
 	if current_research == "":
 		return
 
-	# Calculate overflow before completing
-	var tech_cost = DataManager.get_tech_cost(current_research)
-	tech_cost = int(tech_cost * GameManager.get_speed_multiplier())
+	# Calculate overflow before completing (use effective cost with diffusion)
+	var tech_cost = get_effective_tech_cost(current_research)
 	var overflow = max(0, research_progress - tech_cost)
 
 	var tech_data = DataManager.get_tech(current_research)
@@ -156,6 +155,38 @@ func get_research_output() -> int:
 	for city in cities:
 		total += city.science_yield
 	return total
+
+## Calculate tech diffusion modifier
+## Tech is cheaper if more civs already have it
+func get_tech_diffusion_modifier(tech_id: String) -> float:
+	if tech_id == "" or GameManager.players.size() <= 1:
+		return 1.0
+
+	# Count how many other players have this tech
+	var count = 0
+	var known_civs = 0
+	for other_player in GameManager.players:
+		if other_player.player_id == player_id:
+			continue
+		if not met_players.has(other_player.player_id):
+			continue
+		known_civs += 1
+		if other_player.has_tech(tech_id):
+			count += 1
+
+	if known_civs == 0:
+		return 1.0
+
+	# Each civ with the tech reduces cost by 5%, max 30% reduction
+	var reduction = min(count * 0.05, 0.30)
+	return 1.0 - reduction
+
+## Get effective tech cost including diffusion
+func get_effective_tech_cost(tech_id: String) -> int:
+	var base_cost = DataManager.get_tech_cost(tech_id)
+	base_cost = int(base_cost * GameManager.get_speed_multiplier())
+	var diffusion = get_tech_diffusion_modifier(tech_id)
+	return int(base_cost * diffusion)
 
 # Golden Age functions
 func is_in_golden_age() -> bool:

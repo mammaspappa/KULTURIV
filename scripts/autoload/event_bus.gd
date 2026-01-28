@@ -33,6 +33,7 @@ signal city_production_completed(city, item)
 signal city_building_constructed(city, building)
 signal city_borders_expanded(city)
 signal wonder_built(wonder_id, player_id, wonder_type)
+signal city_drafted(city, unit_type)
 
 # Combat events
 signal combat_started(attacker, defender)

@@ -1400,5 +1400,249 @@
 			"see_enemy_spies": true
 		},
 		"description": "+4 Espionage in all cities, +25% Spy success"
+	},
+
+	"_comment_corporations": "=== CORPORATION HEADQUARTERS ===",
+
+	"mining_inc_hq": {
+		"name": "Mining Inc. Headquarters",
+		"era": "modern",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"is_corporation_hq": true,
+		"corporation": "mining_inc",
+		"effects": {
+			"production": 4,
+			"gold_per_corp_city": 4
+		},
+		"description": "Mining Inc. Headquarters. +4 Production, +4 Gold per city with Mining Inc."
+	},
+	"sids_sushi_hq": {
+		"name": "Sid's Sushi Headquarters",
+		"era": "modern",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"is_corporation_hq": true,
+		"corporation": "sids_sushi",
+		"effects": {
+			"food": 3,
+			"culture": 2,
+			"gold_per_corp_city": 4
+		},
+		"description": "Sid's Sushi Headquarters. +3 Food, +2 Culture, +4 Gold per city."
+	},
+	"cereal_mills_hq": {
+		"name": "Cereal Mills Headquarters",
+		"era": "modern",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"is_corporation_hq": true,
+		"corporation": "cereal_mills",
+		"effects": {
+			"food": 4,
+			"gold_per_corp_city": 4
+		},
+		"description": "Cereal Mills Headquarters. +4 Food, +4 Gold per city."
+	},
+	"standard_ethanol_hq": {
+		"name": "Standard Ethanol Headquarters",
+		"era": "modern",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"is_corporation_hq": true,
+		"corporation": "standard_ethanol",
+		"effects": {
+			"production": 4,
+			"gold_per_corp_city": 3
+		},
+		"description": "Standard Ethanol Headquarters. +4 Production, +3 Gold per city."
+	},
+	"creative_constructions_hq": {
+		"name": "Creative Constructions Headquarters",
+		"era": "modern",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"is_corporation_hq": true,
+		"corporation": "creative_constructions",
+		"effects": {
+			"production": 3,
+			"culture": 3,
+			"gold_per_corp_city": 4
+		},
+		"description": "Creative Constructions Headquarters. +3 Production, +3 Culture, +4 Gold per city."
+	},
+	"civilized_jewelers_hq": {
+		"name": "Civilized Jewelers Headquarters",
+		"era": "modern",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"is_corporation_hq": true,
+		"corporation": "civilized_jewelers",
+		"effects": {
+			"culture": 4,
+			"gold": 4,
+			"happiness": 1,
+			"gold_per_corp_city": 5
+		},
+		"description": "Civilized Jewelers Headquarters. +4 Culture, +4 Gold, +1 Happiness, +5 Gold per city."
+	},
+	"aluminum_co_hq": {
+		"name": "Aluminum Co. Headquarters",
+		"era": "modern",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "corporation",
+		"is_corporation_hq": true,
+		"corporation": "aluminum_co",
+		"effects": {
+			"production": 5,
+			"gold_per_corp_city": 3
+		},
+		"description": "Aluminum Co. Headquarters. +5 Production, +3 Gold per city."
+	},
+
+	"_comment_unique_buildings": "=== UNIQUE BUILDINGS ===",
+
+	"forum": {
+		"name": "Forum",
+		"era": "classical",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "currency",
+		"replaces": "market",
+		"civilization": "rome",
+		"effects": {
+			"gold_percent": 0.25,
+			"great_merchant_points": 1,
+			"happiness_from_resource": 1,
+			"great_general_points": 2
+		},
+		"description": "Roman unique building. +2 Great General points."
+	},
+	"odeon": {
+		"name": "Odeon",
+		"era": "classical",
+		"cost": 80,
+		"maintenance": 2,
+		"required_tech": "construction",
+		"replaces": "colosseum",
+		"civilization": "greece",
+		"effects": {
+			"happiness": 1,
+			"culture": 2
+		},
+		"description": "Greek unique building. +2 Culture."
+	},
+	"burial_tomb": {
+		"name": "Burial Tomb",
+		"era": "ancient",
+		"cost": 30,
+		"maintenance": 0,
+		"required_tech": "",
+		"replaces": "monument",
+		"civilization": "egypt",
+		"effects": {
+			"culture": 2,
+			"happy_on_capture": -2
+		},
+		"description": "Egyptian unique building. No maintenance, extra culture."
+	},
+	"pavilion": {
+		"name": "Pavilion",
+		"era": "renaissance",
+		"cost": 100,
+		"maintenance": 2,
+		"required_tech": "drama",
+		"replaces": "theatre",
+		"civilization": "china",
+		"effects": {
+			"culture": 3,
+			"happiness": 2,
+			"great_artist_points": 2
+		},
+		"description": "Chinese unique building. +2 Happiness."
+	},
+	"apothecary": {
+		"name": "Apothecary",
+		"era": "renaissance",
+		"cost": 120,
+		"maintenance": 2,
+		"required_tech": "guilds",
+		"requires_building": "granary",
+		"replaces": "grocer",
+		"civilization": "persia",
+		"effects": {
+			"health": 3,
+			"happiness_from_resource": 1
+		},
+		"description": "Persian unique building. +3 Health."
+	},
+	"ger": {
+		"name": "Ger",
+		"era": "classical",
+		"cost": 70,
+		"maintenance": 1,
+		"required_tech": "horseback_riding",
+		"requires_resource": "horses",
+		"replaces": "stable",
+		"civilization": "mongolia",
+		"effects": {
+			"mounted_experience": 4,
+			"mounted_production": 0.25,
+			"experience_all_units": 2
+		},
+		"description": "Mongolian unique building. +2 XP for all units."
+	},
+	"sacrificial_altar": {
+		"name": "Sacrificial Altar",
+		"era": "classical",
+		"cost": 120,
+		"maintenance": 2,
+		"required_tech": "code_of_laws",
+		"replaces": "courthouse",
+		"civilization": "aztec",
+		"effects": {
+			"maintenance_reduction": 0.5,
+			"espionage": 2,
+			"happy_from_sacrifice": 1
+		},
+		"description": "Aztec unique building. Can sacrifice population for happiness."
+	},
+	"madrassa": {
+		"name": "Madrassa",
+		"era": "ancient",
+		"cost": 90,
+		"maintenance": 2,
+		"required_tech": "writing",
+		"replaces": "library",
+		"civilization": "arabia",
+		"effects": {
+			"science_percent": 0.25,
+			"great_scientist_points": 1,
+			"culture": 2
+		},
+		"description": "Arabian unique building. +2 Culture."
+	},
+	"citadel": {
+		"name": "Citadel",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 2,
+		"required_tech": "engineering",
+		"requires_building": "walls",
+		"replaces": "castle",
+		"civilization": "spain",
+		"effects": {
+			"defense": 0.5,
+			"siege_defense": 0.25,
+			"free_experience": 5
+		},
+		"description": "Spanish unique building. +5 XP for units built."
 	}
 }

@@ -703,6 +703,93 @@ func get_defense_strength() -> float:
 
 	return base * defense_mult
 
+# =============================================================================
+# CONSCRIPTION (Draft)
+# =============================================================================
+
+## Maximum drafts per turn based on city population
+const DRAFT_ANGER_TURNS = 10
+const DRAFT_POP_COST = 1
+const MAX_DRAFTS_PER_TURN = 3
+
+var drafts_this_turn: int = 0
+var draft_anger_turns: int = 0
+
+## Check if conscription is available
+func can_conscript() -> bool:
+	if player_owner == null:
+		return false
+
+	# Need Nationalism tech
+	if not player_owner.has_tech("nationalism"):
+		return false
+
+	# Need Nationhood civic
+	if player_owner.civics.get("legal", "") != "nationhood":
+		return false
+
+	# Need minimum population
+	if population < 2:
+		return false
+
+	# Check draft limit this turn
+	if drafts_this_turn >= MAX_DRAFTS_PER_TURN:
+		return false
+
+	return true
+
+## Get the unit type that can be drafted
+func get_draft_unit() -> String:
+	# Draft the best infantry-type unit available
+	var draft_units = ["mechanized_infantry", "infantry", "rifleman", "musketman", "pikeman", "spearman", "warrior"]
+
+	for unit_id in draft_units:
+		var unit_data = DataManager.get_unit(unit_id)
+		if unit_data.is_empty():
+			continue
+
+		var required_tech = unit_data.get("required_tech", "")
+		if required_tech == "" or player_owner.has_tech(required_tech):
+			return unit_id
+
+	return "warrior"  # Fallback
+
+## Perform conscription
+func conscript() -> bool:
+	if not can_conscript():
+		return false
+
+	var draft_unit = get_draft_unit()
+
+	# Reduce population
+	population -= DRAFT_POP_COST
+	if population < 1:
+		population = 1
+
+	# Create the unit
+	if GameManager.game_world:
+		GameManager.game_world.spawn_unit(draft_unit, grid_position, player_owner)
+
+	# Increase draft anger
+	draft_anger_turns = DRAFT_ANGER_TURNS
+	drafts_this_turn += 1
+
+	EventBus.city_drafted.emit(self, draft_unit)
+	calculate_yields()
+	return true
+
+## Get unhappiness from recent drafts
+func get_draft_unhappiness() -> int:
+	if draft_anger_turns > 0:
+		return drafts_this_turn
+	return 0
+
+## Reset drafts at turn start
+func reset_drafts() -> void:
+	drafts_this_turn = 0
+	if draft_anger_turns > 0:
+		draft_anger_turns -= 1
+
 # Selection
 func select() -> void:
 	is_selected = true
