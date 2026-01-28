@@ -198,8 +198,8 @@ func apply_ai_visibility_bonus(player) -> void:
 	if player == null or player.is_human or GameManager.hex_grid == null:
 		return
 
-	# Get handicap data for current difficulty
-	var handicap = DataManager.get_handicap(GameManager.difficulty)
+	# Get handicap data for current difficulty (difficulty is an int level)
+	var handicap = DataManager.get_handicap_by_level(GameManager.difficulty)
 	if handicap == null:
 		return
 
