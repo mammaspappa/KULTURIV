@@ -371,12 +371,8 @@ func _find_nearby_target(unit) -> Vector2i:
 
 ## Move unit toward a target position
 func _move_toward(unit, target_pos: Vector2i) -> void:
-	var path = Pathfinding.find_path(
-		GameManager.hex_grid,
-		unit.grid_position,
-		target_pos,
-		unit
-	)
+	var pathfinder = Pathfinding.new(GameManager.hex_grid, unit)
+	var path = pathfinder.find_path(unit.grid_position, target_pos)
 
 	if path.size() > 1:
 		var next_pos = path[1]
