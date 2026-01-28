@@ -524,6 +524,11 @@ func found_city(settler: Unit) -> City:
 		city_tile.road_level = 1
 		city_tile.update_visuals()
 
+	# Update wrap visuals for cylindrical map (for owned tiles and road)
+	if game_grid:
+		for tile_pos in initial_territory:
+			game_grid.update_wrap_tile(tile_pos)
+
 	# Reveal visibility around the new city
 	VisibilitySystem.reveal_for_city(city)
 

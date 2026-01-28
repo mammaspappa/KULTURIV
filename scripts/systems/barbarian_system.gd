@@ -153,6 +153,9 @@ func _create_camp(pos: Vector2i) -> void:
 	if tile:
 		tile.improvement_id = "barbarian_camp"
 		tile.update_visuals()
+		# Update wrap visuals for cylindrical map
+		if GameManager.hex_grid:
+			GameManager.hex_grid.update_wrap_tile(pos)
 
 	barbarian_camp_spawned.emit(pos)
 	EventBus.notification_added.emit("Barbarian camp spotted!", "warning")
@@ -318,6 +321,9 @@ func _process_single_barbarian(unit) -> void:
 		if tile.tile_owner != null and tile.tile_owner != barbarian_player:
 			tile.improvement_id = ""
 			tile.update_visuals()
+			# Update wrap visuals for cylindrical map
+			if GameManager.hex_grid:
+				GameManager.hex_grid.update_wrap_tile(unit.grid_position)
 			EventBus.notification_added.emit("Barbarians pillaged an improvement!", "warning")
 			return
 
@@ -416,6 +422,9 @@ func destroy_camp(pos: Vector2i) -> void:
 	if tile and tile.improvement_id == "barbarian_camp":
 		tile.improvement_id = ""
 		tile.update_visuals()
+		# Update wrap visuals for cylindrical map
+		if GameManager.hex_grid:
+			GameManager.hex_grid.update_wrap_tile(pos)
 
 	# Award gold to capturing player
 	EventBus.notification_added.emit("Barbarian camp destroyed! +25 Gold", "positive")

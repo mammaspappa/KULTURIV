@@ -30,6 +30,10 @@ func refresh_visibility(player) -> void:
 	for city in player.cities:
 		_reveal_city_territory(city, player_id)
 
+	# Update wrap visuals for human player (so fog of war is synced on wrap edges)
+	if player == GameManager.human_player:
+		GameManager.hex_grid.update_wrap_visuals()
+
 ## Get extra visibility range beyond cultural borders for a city
 func get_city_extra_visibility(city) -> int:
 	# Base visibility is 2 tiles beyond cultural border
