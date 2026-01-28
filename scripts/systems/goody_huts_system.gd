@@ -65,7 +65,7 @@ func _discover_goody_hut(unit, tile) -> void:
 ## Pick a random reward based on weights
 func _pick_reward(player, unit) -> GoodyReward:
 	# Calculate total weight
-	var total_weight = 0
+	var total_weight: int = 0
 	var valid_rewards = {}
 
 	for reward in REWARD_WEIGHTS:

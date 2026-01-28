@@ -147,9 +147,9 @@ func _determine_gp_type(weights: Dictionary) -> String:
 		return types[randi() % types.size()]
 
 	# Weighted random selection
-	var total = 0
+	var total: int = 0
 	for weight in weights.values():
-		total += weight
+		total += int(weight)
 
 	var roll = randi() % max(1, total)
 	var current = 0

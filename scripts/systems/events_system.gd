@@ -112,9 +112,9 @@ func _check_for_events(player, city) -> void:
 		return
 
 	# Weight-based random selection
-	var total_weight = 0
+	var total_weight: int = 0
 	for event_id in valid_events:
-		total_weight += events[event_id].get("weight", 100)
+		total_weight += int(events[event_id].get("weight", 100))
 
 	var roll = randi() % total_weight
 	var cumulative = 0
