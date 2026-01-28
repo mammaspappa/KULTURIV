@@ -1039,10 +1039,9 @@ func _process_civics(player, flavor: Dictionary) -> void:
 		var best_civic = _evaluate_best_civic(player, category, flavor, favorite_civic)
 
 		if best_civic != "" and best_civic != current_civic:
-			# Check if we can afford civic change
-			var can_change = CivicsSystem.can_change_civic(player, category, best_civic)
-			if can_change:
-				CivicsSystem.set_civic(player, category, best_civic)
+			# Check if we can adopt this civic
+			if CivicsSystem.can_adopt_civic(player, best_civic):
+				CivicsSystem.change_civic(player, best_civic)
 
 ## Evaluate best civic for a category
 func _evaluate_best_civic(player, category: String, flavor: Dictionary, favorite_civic: String) -> String:
