@@ -335,7 +335,8 @@ func _ai_evaluate_choice(choice: Dictionary, player) -> float:
 	var effects = choice.get("effects", {})
 
 	# Get AI leader flavors for weighting
-	var flavors = DataManager.get_leader_flavors(player.leader_id) if DataManager else {}
+	var leader_data = DataManager.get_leader(player.leader_id) if DataManager else {}
+	var flavors = leader_data.get("flavor", {})
 	var gold_flavor = flavors.get("gold", 5) / 10.0
 	var military_flavor = flavors.get("military", 5) / 10.0
 	var science_flavor = flavors.get("science", 5) / 10.0
