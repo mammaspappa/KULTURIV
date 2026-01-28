@@ -34,7 +34,7 @@ func _on_turn_ended(_turn_number: int, player) -> void:
 		return
 
 	# Process barbarian camp spawning
-	if GameManager.turn_number % CAMP_SPAWN_INTERVAL == 0:
+	if TurnManager.current_turn % CAMP_SPAWN_INTERVAL == 0:
 		_try_spawn_camp()
 
 	# Process unit spawning from existing camps
@@ -173,7 +173,7 @@ func _process_camp_spawning() -> void:
 			continue
 
 		# Spawn interval check
-		if GameManager.turn_number % UNIT_SPAWN_INTERVAL != 0:
+		if TurnManager.current_turn % UNIT_SPAWN_INTERVAL != 0:
 			continue
 
 		# Don't spawn too many units per camp
@@ -215,7 +215,7 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 
 ## Get appropriate barbarian unit type for current era
 func _get_barbarian_unit_type() -> String:
-	var turn = GameManager.turn_number
+	var turn = TurnManager.current_turn
 
 	# Naval units near coast (10% chance)
 	if randf() < 0.1:

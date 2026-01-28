@@ -91,7 +91,7 @@ func _pick_reward(player, unit) -> GoodyReward:
 
 		elif reward == GoodyReward.BARBARIANS:
 			# More likely in early game
-			weight = int(weight * 1.5) if GameManager.turn_number < 50 else weight
+			weight = int(weight * 1.5) if TurnManager.current_turn < 50 else weight
 
 		valid_rewards[reward] = weight
 		total_weight += weight
