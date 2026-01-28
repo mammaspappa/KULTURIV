@@ -243,7 +243,7 @@ func _city_has_feature_nearby(city, feature_id: String) -> bool:
 
 	var worked_tiles = city.get_worked_tiles() if city.has_method("get_worked_tiles") else []
 	for tile_pos in worked_tiles:
-		var tile = GameManager.game_grid.get_tile(tile_pos.x, tile_pos.y)
+		var tile = GameManager.game_grid.get_tile(tile_pos)
 		if tile and tile.feature == feature_id:
 			return true
 	return false
@@ -254,7 +254,7 @@ func _city_has_terrain_nearby(city, terrain_ids: Array) -> bool:
 
 	var worked_tiles = city.get_worked_tiles() if city.has_method("get_worked_tiles") else []
 	for tile_pos in worked_tiles:
-		var tile = GameManager.game_grid.get_tile(tile_pos.x, tile_pos.y)
+		var tile = GameManager.game_grid.get_tile(tile_pos)
 		if tile and tile.terrain in terrain_ids:
 			return true
 	return false
@@ -265,7 +265,7 @@ func _city_has_improvement_nearby(city, improvement_id: String) -> bool:
 
 	var worked_tiles = city.get_worked_tiles() if city.has_method("get_worked_tiles") else []
 	for tile_pos in worked_tiles:
-		var tile = GameManager.game_grid.get_tile(tile_pos.x, tile_pos.y)
+		var tile = GameManager.game_grid.get_tile(tile_pos)
 		if tile and tile.improvement == improvement_id:
 			return true
 	return false
@@ -274,7 +274,7 @@ func _city_has_road(city) -> bool:
 	if not GameManager or not GameManager.game_grid:
 		return false
 
-	var city_tile = GameManager.game_grid.get_tile(city.position.x, city.position.y)
+	var city_tile = GameManager.game_grid.get_tile(city.grid_position)
 	return city_tile and city_tile.has_road
 
 func _trigger_event(event_id: String, player, city) -> void:
