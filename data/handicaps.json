@@ -163,7 +163,8 @@
 			"starting_gold": 100,
 			"starting_defense_units": 2,
 			"growth_bonus": 10,
-			"maintenance_percent": 80
+			"maintenance_percent": 80,
+			"map_visibility_percent": 25
 		},
 		"human_bonuses": {
 			"production_percent": 0,
@@ -188,7 +189,8 @@
 			"starting_gold": 150,
 			"starting_defense_units": 3,
 			"growth_bonus": 15,
-			"maintenance_percent": 70
+			"maintenance_percent": 70,
+			"map_visibility_percent": 50
 		},
 		"human_bonuses": {
 			"production_percent": 0,
@@ -213,7 +215,8 @@
 			"starting_gold": 200,
 			"starting_defense_units": 4,
 			"growth_bonus": 25,
-			"maintenance_percent": 60
+			"maintenance_percent": 60,
+			"map_visibility_percent": 100
 		},
 		"human_bonuses": {
 			"production_percent": 0,

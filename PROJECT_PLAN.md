@@ -62,6 +62,10 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Road-to-road movement bonus (1/3 movement cost)
 - [x] Railroad-to-railroad movement bonus (0.1 movement cost)
 
+### Not Implemented
+- [ ] Resources hidden on tiles until right tech discovered. (Bronze Working reveals copper, Iron Working reveals iron, Animal Husbandry reveals Horses and so on) Check Reference for more information. 
+
+
 ### Files
 - `scripts/map/grid_utils.gd`
 - `scripts/map/game_grid.gd`
@@ -114,10 +118,14 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Camp improvement works for deer, furs, ivory (requires Hunting)
 - [x] Deer and pig resources added
 
+### Recently Added
+- [x] Unit focus cycling after action (TAB to cycle, PERIOD to skip and cycle)
+- [x] Great General attachment to units (+20% combat strength, +50% XP gain)
+
 ### Not Implemented
 - [ ] Unit formations and army groups
-- [ ] After unit completes action, focus shifts to the closest unit that can do action or has not been Skipped this turn
 - [ ] Check that unique units are identical to Reference
+- [ ] Worker can build mine on any tile which has iron, copper, gems, silver, gold or coal visible.
 
 ### Files
 - `scripts/entities/unit.gd`
@@ -272,9 +280,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] AI naval operations (transport loading, combat ships, blockades, coastal patrol)
 - [x] AI civics adoption based on leader flavor and favorite civics
 - [x] Favorite civics per leader (AI preference during civic selection)
-
-### Not Implemented
-- [ ] AI cheating (visibility at higher difficulties)
+- [x] AI visibility bonuses at higher difficulties (Emperor: 25%, Immortal: 50%, Deity: 100% map revealed)
 
 ### Files
 - `scripts/ai/ai_controller.gd`
@@ -366,8 +372,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
   - Islamic: Mosque, Madrassa, Grand Mosque
 - [x] Inquisitor unit (removes non-state religions from cities)
 
-### Not Implemented
-- [ ] "No state religion" option
+### Recently Added
+- [x] "No state religion" option (clear_state_religion, get_available_state_religions functions)
 
 ### Files
 - `scripts/systems/religion_system.gd`
@@ -410,10 +416,11 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Golden Age count (affects future GP requirements)
 - [x] Golden Age UI notifications (start/end)
 
+### Recently Added
+- [x] Great General attachment to units (+20% combat strength, +50% XP gain)
+
 ### Not Implemented
 - [ ] Settled GP tile yield bonuses
-- [ ] Great General attachment to units
-- [ ] Great Spy unit
 - [ ] GP point display in city screen
 
 ### Files
@@ -1001,3 +1008,7 @@ See CLAUDE.md for development guidelines and architecture overview.
 24. **Barbarian System** - Camps, periodic spawning, pillaging AI, unit scaling by era
 25. **AI Naval Operations** - Transport loading/unloading, combat ships, blockades, coastal patrol
 26. **Favorite Civics** - AI adopts civics based on leader preferences and flavor values
+27. **Unit Focus Cycling** - After action completes, auto-cycles to next unit needing orders (TAB/PERIOD keys)
+28. **No State Religion** - Option to clear state religion for religious freedom
+29. **AI Visibility Bonuses** - Higher difficulties grant AI map visibility (Emperor 25%, Immortal 50%, Deity 100%)
+30. **Great General Attachment** - Attach Great Generals to military units for +20% combat, +50% XP

@@ -20,6 +20,8 @@ signal unit_healed(unit, amount)
 signal unit_order_changed(unit, order)
 signal unit_loaded(unit, transport)
 signal unit_unloaded(unit, transport)
+signal unit_action_completed(unit)  # Emitted when unit finishes action, for focus cycling
+signal cycle_to_next_unit()  # Request to focus on next unit needing orders
 
 # City events
 signal city_founded(city, founder)

@@ -6,7 +6,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1.
 
 **Goal**: Recreate the core gameplay of Civilization IV: Beyond the Sword as a standalone game using the Godot engine.
 
-**Status**: ~95% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions. Recent additions include goody huts (tribal villages), barbarian spawning system, AI naval operations, favorite civics per leader, unique units/buildings with civilization restrictions, worker border restrictions, tech diffusion, and AI city specialization.
+**Status**: ~95% complete. Most core systems implemented including combat, diplomacy, espionage, corporations, religion, and victory conditions. Recent additions include unit focus cycling (auto-cycle to next unit after action), "No State Religion" option, AI visibility bonuses at higher difficulties, Great General attachment to military units (+20% combat, +50% XP), goody huts, barbarian spawning, AI naval operations, and favorite civics per leader.
 
 **Reference Files**: The original Civ4 BTS XML data files are located in `beyond/` directory for reference. These files should NOT be modified - they're only for understanding the original game's data structures and mechanics.
 
@@ -147,6 +147,7 @@ KULTURIV/
 - [x] Religion spread via missionaries
 - [x] Holy cities and shrines
 - [x] State religion and happiness
+- [x] "No State Religion" option (religious freedom)
 - [x] Religion-specific buildings (21 total)
 - [x] Inquisitor unit (removes non-state religions)
 
@@ -170,9 +171,11 @@ KULTURIV/
 - [x] City specialization (production, science, gold, military, culture, food)
 - [x] Naval operations (transports, combat ships, blockades, coastal patrol)
 - [x] Civics adoption based on favorite civics per leader
+- [x] Visibility bonuses at higher difficulties (Emperor 25%, Immortal 50%, Deity 100%)
 
 ### Other Systems
 - [x] Great People (birth, abilities, golden ages)
+- [x] Great General attachment to units (+20% combat, +50% XP)
 - [x] Corporations (founding, spreading, effects, HQ buildings)
 - [x] Espionage (15 missions, spy mechanics)
 - [x] Random Events (20 events with choices, AI handling)
@@ -189,6 +192,7 @@ KULTURIV/
 - [x] Camp improvement (deer, furs, ivory)
 - [x] Goody huts (tribal villages with 8 reward types: gold, tech, map, XP, unit, settler, population, barbarians)
 - [x] Barbarian system (camps, spawning, pillaging AI, unit scaling by era)
+- [x] Unit focus cycling (auto-cycle to next unit after action, TAB/PERIOD keys)
 
 ## Game Settings
 
@@ -206,6 +210,8 @@ KULTURIV/
 - `skip_turn` - Space bar
 - `diplomacy` - D key
 - `civics` - C key
+- `cycle_unit` - TAB key (cycle to next unit needing orders)
+- `skip_and_cycle` - PERIOD key (skip current unit and cycle to next)
 
 ## Common Tasks
 

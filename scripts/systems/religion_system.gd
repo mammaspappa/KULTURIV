@@ -90,6 +90,40 @@ func adopt_state_religion(player, religion_id: String) -> void:
 	player.state_religion = religion_id
 	EventBus.state_religion_adopted.emit(player, religion_id)
 
+## Clear state religion (adopt "No State Religion")
+func clear_state_religion(player) -> void:
+	if player == null:
+		return
+
+	player.state_religion = ""
+	EventBus.state_religion_adopted.emit(player, "")
+
+## Get list of available religions for state religion selection (including "none")
+func get_available_state_religions(player) -> Array:
+	if player == null:
+		return []
+
+	var available = [""]  # Empty string = no state religion
+
+	# Add religions present in player's cities
+	for city in player.cities:
+		for religion_id in city.religions:
+			if religion_id not in available:
+				available.append(religion_id)
+
+	return available
+
+## Check if player has any religion in their cities
+func player_has_religion(player, religion_id: String) -> bool:
+	if player == null:
+		return false
+
+	for city in player.cities:
+		if religion_id in city.religions:
+			return true
+
+	return false
+
 ## Process natural religion spread each turn
 func process_spread() -> void:
 	for city in GameManager.get_all_cities():

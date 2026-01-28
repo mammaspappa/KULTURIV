@@ -3,6 +3,14 @@ extends Node
 
 const GameTileClass = preload("res://scripts/map/game_tile.gd")
 
+func _ready() -> void:
+	# Apply AI visibility bonuses when game starts
+	EventBus.game_started.connect(_on_game_started)
+
+func _on_game_started() -> void:
+	# Give AI players their difficulty-based map visibility bonus
+	apply_all_ai_visibility_bonuses()
+
 ## Refresh visibility for a player at the start of their turn
 ## This fogs previously visible tiles, then recalculates based on units/cities
 func refresh_visibility(player) -> void:
@@ -179,3 +187,53 @@ func is_tile_explored_by_player(tile_pos: Vector2i, player) -> bool:
 		return false
 
 	return tile.is_explored_by(player.player_id)
+
+## Apply AI difficulty visibility bonus - reveals a percentage of the map for AI players
+## at higher difficulties (Emperor: 25%, Immortal: 50%, Deity: 100%)
+func apply_ai_visibility_bonus(player) -> void:
+	if player == null or player.is_human or GameManager.hex_grid == null:
+		return
+
+	# Get handicap data for current difficulty
+	var handicap = DataManager.get_handicap(GameManager.difficulty)
+	if handicap == null:
+		return
+
+	var ai_bonuses = handicap.get("ai_bonuses", {})
+	var visibility_percent = ai_bonuses.get("map_visibility_percent", 0)
+
+	if visibility_percent <= 0:
+		return
+
+	var grid = GameManager.hex_grid
+	var player_id = player.player_id
+	var total_tiles = grid.width * grid.height
+	var tiles_to_reveal = int(total_tiles * visibility_percent / 100.0)
+
+	# Collect all unexplored tiles
+	var unexplored_tiles: Array[Vector2i] = []
+	for x in range(grid.width):
+		for y in range(grid.height):
+			var tile = grid.get_tile(Vector2i(x, y))
+			if tile != null and not tile.is_explored_by(player_id):
+				unexplored_tiles.append(Vector2i(x, y))
+
+	# Shuffle and reveal the required number of tiles
+	unexplored_tiles.shuffle()
+	var revealed_count = 0
+
+	for tile_pos in unexplored_tiles:
+		if revealed_count >= tiles_to_reveal:
+			break
+
+		var tile = grid.get_tile(tile_pos)
+		if tile != null:
+			# Set to FOGGED (explored but not currently visible)
+			tile.visibility[player_id] = GameTileClass.VisibilityState.FOGGED
+			revealed_count += 1
+
+## Apply visibility bonuses for all AI players at game start
+func apply_all_ai_visibility_bonuses() -> void:
+	for player in GameManager.players:
+		if not player.is_human:
+			apply_ai_visibility_bonus(player)

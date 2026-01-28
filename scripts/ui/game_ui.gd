@@ -38,6 +38,9 @@ var last_unit_position: Vector2i = Vector2i.ZERO
 var last_unit_acted: bool = false
 var last_unit_order: int = -1
 
+# Unit cycling state
+var skipped_units_this_turn: Array = []  # Units that have been skipped, won't cycle to them
+
 # Notification system
 var notifications: Array = []
 var notification_container: VBoxContainer
@@ -51,6 +54,9 @@ func _ready() -> void:
 	EventBus.unit_selected.connect(_on_unit_selected)
 	EventBus.unit_deselected.connect(_on_unit_deselected)
 	EventBus.unit_moved.connect(_on_unit_moved)
+	EventBus.unit_action_completed.connect(_on_unit_action_completed)
+	EventBus.unit_movement_finished.connect(_on_unit_movement_finished)
+	EventBus.cycle_to_next_unit.connect(_cycle_to_next_unit)
 
 	# Connect buttons
 	if end_turn_button:
@@ -130,10 +136,23 @@ func _input(event: InputEvent) -> void:
 			KEY_A:
 				_try_automate_worker()
 				get_viewport().set_input_as_handled()
+			KEY_TAB:
+				# Cycle to next unit that needs orders
+				_cycle_to_next_unit()
+				get_viewport().set_input_as_handled()
+			KEY_PERIOD:
+				# Skip current unit and cycle to next
+				if selected_unit and selected_unit.player_owner == GameManager.human_player:
+					selected_unit.skip_turn()
+				get_viewport().set_input_as_handled()
 
 func _on_turn_started(turn: int, player) -> void:
 	if player == GameManager.human_player:
 		_update_top_bar()
+		# Clear skipped units list at start of turn
+		skipped_units_this_turn.clear()
+		# Auto-select first unit needing orders
+		call_deferred("_cycle_to_next_unit")
 
 func _on_turn_ended(_turn: int, _player) -> void:
 	pass
@@ -152,6 +171,105 @@ func _on_unit_deselected(_unit) -> void:
 func _on_unit_moved(_unit, _from: Vector2i, _to: Vector2i) -> void:
 	if selected_unit:
 		_update_unit_panel()
+
+## Called when a unit completes an action (fortify, skip, sleep)
+func _on_unit_action_completed(unit) -> void:
+	if unit == selected_unit and unit.player_owner == GameManager.human_player:
+		# Track skipped units so we don't cycle back to them
+		if unit not in skipped_units_this_turn:
+			skipped_units_this_turn.append(unit)
+		# Cycle to next unit after a brief delay
+		call_deferred("_cycle_to_next_unit")
+
+## Called when a unit runs out of movement points
+func _on_unit_movement_finished(unit) -> void:
+	if unit == selected_unit and unit.player_owner == GameManager.human_player:
+		# Cycle to next unit after movement is done
+		call_deferred("_cycle_to_next_unit")
+
+## Find and select the next unit that needs orders
+func _cycle_to_next_unit() -> void:
+	var player = GameManager.human_player
+	if player == null:
+		return
+
+	var best_unit = null
+	var best_distance = INF
+
+	# Reference position: current selected unit or camera position
+	var ref_pos = Vector2i.ZERO
+	if selected_unit:
+		ref_pos = selected_unit.grid_position
+	elif GameManager.game_world and GameManager.game_world.has_node("Camera"):
+		var camera = GameManager.game_world.get_node("Camera")
+		ref_pos = GridUtils.pixel_to_grid(camera.position)
+
+	# Find units that need orders
+	for unit in player.units:
+		if unit == null or not is_instance_valid(unit):
+			continue
+
+		# Skip units that have already been skipped this turn
+		if unit in skipped_units_this_turn:
+			continue
+
+		# Skip units that have already acted or have no movement
+		if unit.has_acted or unit.movement_remaining <= 0:
+			continue
+
+		# Skip units with active orders (fortified, sleeping, automating)
+		if unit.current_order in [unit.UnitOrder.FORTIFY, unit.UnitOrder.SLEEP, unit.UnitOrder.BUILD, unit.UnitOrder.AUTOMATE]:
+			continue
+
+		# Skip units currently moving
+		if unit.is_moving:
+			continue
+
+		# Calculate distance from reference position
+		var dist = GridUtils.chebyshev_distance(ref_pos, unit.grid_position)
+		if dist < best_distance:
+			best_distance = dist
+			best_unit = unit
+
+	if best_unit:
+		# Select the unit
+		_select_unit(best_unit)
+	else:
+		# No units need orders - deselect current
+		if selected_unit:
+			EventBus.unit_deselected.emit(selected_unit)
+
+## Select a unit and center camera on it
+func _select_unit(unit) -> void:
+	# Deselect previous unit
+	if selected_unit and selected_unit != unit:
+		selected_unit.is_selected = false
+		selected_unit.update_visual()
+
+	# Select new unit
+	unit.is_selected = true
+	unit.update_visual()
+	selected_unit = unit
+	unit_panel.visible = true
+	worker_actions_dirty = true
+	_update_unit_panel()
+
+	# Emit signal
+	EventBus.unit_selected.emit(unit)
+
+	# Center camera on unit
+	_center_camera_on_unit(unit)
+
+## Center the camera on a unit
+func _center_camera_on_unit(unit) -> void:
+	if GameManager.game_world == null:
+		return
+
+	var camera = GameManager.game_world.get_node_or_null("GameCamera")
+	if camera and camera.has_method("center_on"):
+		camera.center_on(unit.position)
+	elif camera:
+		camera.position = unit.position
 
 func _on_end_turn_pressed() -> void:
 	TurnManager.end_turn()

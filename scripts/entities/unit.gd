@@ -41,6 +41,11 @@ var transport: Node2D = null  # Reference to transport unit if loaded
 # Promotions
 var promotions: Array[String] = []
 
+# Great General attachment
+var attached_great_general: Node2D = null  # Reference to attached Great General unit
+const GREAT_GENERAL_COMBAT_BONUS = 0.20  # +20% combat strength when attached
+const GREAT_GENERAL_XP_BONUS = 0.50  # +50% experience gain when attached
+
 # Visual
 const TILE_SIZE: int = 64
 var is_selected: bool = false
@@ -99,6 +104,11 @@ func _draw() -> void:
 	if is_fortified:
 		var shield_pos = Vector2(15, -15)
 		draw_string(font, shield_pos, "⛨", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.CYAN)
+
+	# Great General attachment indicator
+	if attached_great_general != null:
+		var general_pos = Vector2(-20, -15)
+		draw_string(font, general_pos, "★", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.GOLD)
 
 	# Movement points indicator
 	if movement_remaining > 0:
@@ -389,6 +399,10 @@ func get_combat_strength(is_attacking: bool, target_tile = null, defender = null
 		if defender_class in bonus_vs:
 			strength *= (1.0 + bonus_vs[defender_class])
 
+	# Great General attachment bonus
+	if attached_great_general != null:
+		strength *= (1.0 + GREAT_GENERAL_COMBAT_BONUS)
+
 	return strength
 
 func get_first_strikes() -> int:
@@ -458,7 +472,11 @@ func die() -> void:
 
 # Experience and promotions
 func gain_experience(amount: int) -> void:
-	experience += amount
+	var xp_amount = amount
+	# Great General attachment gives bonus XP
+	if attached_great_general != null:
+		xp_amount = int(amount * (1.0 + GREAT_GENERAL_XP_BONUS))
+	experience += xp_amount
 	_check_level_up()
 
 func _check_level_up() -> void:
@@ -509,6 +527,54 @@ func add_promotion(promo_id: String) -> void:
 		EventBus.unit_promoted.emit(self, promo_id)
 		update_visual()
 
+# Great General attachment
+func can_attach_great_general(general) -> bool:
+	if general == null or general == self:
+		return false
+	# General must be a Great General unit type
+	var general_data = DataManager.get_unit(general.unit_id)
+	if general_data.get("great_person_type", "") != "great_general":
+		return false
+	# Must be same owner
+	if general.player_owner != player_owner:
+		return false
+	# This unit must be military (not civilian)
+	var unit_data = DataManager.get_unit(unit_id)
+	var unit_class = unit_data.get("unit_class", "")
+	if unit_class in ["civilian", "work_boat"]:
+		return false
+	# This unit must not already have a general attached
+	if attached_great_general != null:
+		return false
+	# General must be at same position or adjacent
+	var distance = GridUtils.chebyshev_distance(grid_position, general.grid_position)
+	if distance > 1:
+		return false
+	return true
+
+func attach_great_general(general) -> bool:
+	if not can_attach_great_general(general):
+		return false
+
+	attached_great_general = general
+	# The general unit is consumed when attached
+	general.visible = false
+	if general.player_owner:
+		general.player_owner.remove_unit(general)
+	general.queue_free()
+
+	update_visual()
+	return true
+
+func detach_great_general() -> void:
+	# Great Generals cannot be detached once attached (they're consumed)
+	# This function exists for edge cases or if future design changes
+	attached_great_general = null
+	update_visual()
+
+func has_attached_great_general() -> bool:
+	return attached_great_general != null
+
 # Orders
 func fortify() -> void:
 	current_order = UnitOrder.FORTIFY
@@ -517,6 +583,7 @@ func fortify() -> void:
 	has_acted = true
 	EventBus.unit_order_changed.emit(self, current_order)
 	update_visual()
+	EventBus.unit_action_completed.emit(self)
 
 func sleep() -> void:
 	current_order = UnitOrder.SLEEP
@@ -525,6 +592,7 @@ func sleep() -> void:
 	has_acted = true
 	EventBus.unit_order_changed.emit(self, current_order)
 	update_visual()
+	EventBus.unit_action_completed.emit(self)
 
 func wake() -> void:
 	current_order = UnitOrder.NONE
@@ -537,6 +605,7 @@ func skip_turn() -> void:
 	movement_remaining = 0
 	has_acted = true
 	update_visual()
+	EventBus.unit_action_completed.emit(self)
 
 func automate() -> void:
 	if not can_build_improvements():
@@ -1072,6 +1141,7 @@ func to_dict() -> Dictionary:
 		"current_order": current_order,
 		"order_target_improvement": order_target_improvement,
 		"build_progress": build_progress,
+		"has_attached_general": attached_great_general != null,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -1087,5 +1157,8 @@ func from_dict(data: Dictionary) -> void:
 	current_order = data.get("current_order", UnitOrder.NONE)
 	order_target_improvement = data.get("order_target_improvement", "")
 	build_progress = data.get("build_progress", 0)
+	# For attached general, we use a placeholder since the actual general was consumed
+	if data.get("has_attached_general", false):
+		attached_great_general = self  # Non-null marker (actual general was consumed)
 	position = GridUtils.grid_to_pixel(grid_position)
 	update_visual()
