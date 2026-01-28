@@ -275,7 +275,7 @@ func _city_has_road(city) -> bool:
 		return false
 
 	var city_tile = GameManager.game_grid.get_tile(city.grid_position)
-	return city_tile and city_tile.has_road
+	return city_tile and city_tile.road_level >= 1
 
 func _trigger_event(event_id: String, player, city) -> void:
 	var event = events[event_id]
