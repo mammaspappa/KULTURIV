@@ -41,6 +41,21 @@ signal combat_ended(winner, loser)
 signal first_strike(attacker, defender, damage)
 signal unit_withdrew(unit)
 
+# Air combat events
+signal air_strike(air_unit, target_pos, result)
+signal air_intercept(interceptor, attacker, result)
+signal air_superiority_started(air_unit, patrol_pos)
+
+# Nuclear events
+signal nuke_launched(nuke_unit, target_pos, result)
+signal nuke_intercepted(nuke_unit, target_pos, defender)
+signal fallout_created(tile)
+signal fallout_cleared(tile)
+signal diplomacy_modifier_changed(player, modifier_type)
+
+# Tech discovery events
+signal first_to_discover(player, tech_id, bonus)
+
 # Research events
 signal research_started(player, tech)
 signal research_completed(player, tech)

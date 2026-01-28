@@ -720,6 +720,143 @@ func _score_improvement(tile, improvement: String) -> int:
 
 	return score
 
+# =============================================================================
+# EXPLORER AUTOMATION
+# =============================================================================
+
+func can_automate_explore() -> bool:
+	var unit_class = get_unit_class()
+	return unit_class in ["recon", "naval"] or "ignore_terrain_cost" in get_abilities()
+
+func automate_explore() -> void:
+	if not can_automate_explore():
+		return
+	current_order = UnitOrder.EXPLORE
+	EventBus.unit_order_changed.emit(self, current_order)
+	# Process exploration immediately if we have movement
+	if movement_remaining > 0:
+		process_explore_automation()
+	update_visual()
+
+func stop_explore_automation() -> void:
+	if current_order == UnitOrder.EXPLORE:
+		current_order = UnitOrder.NONE
+		EventBus.unit_order_changed.emit(self, current_order)
+		update_visual()
+
+func process_explore_automation() -> void:
+	if current_order != UnitOrder.EXPLORE:
+		return
+	if movement_remaining <= 0 or has_acted:
+		return
+	if GameManager.hex_grid == null or player_owner == null:
+		return
+
+	# Find the best unexplored tile to move to
+	var target_pos = _find_best_explore_target()
+	if target_pos == Vector2i(-1, -1):
+		# No unexplored tiles reachable - stop exploring
+		stop_explore_automation()
+		return
+
+	# Move toward target
+	var pathfinder = PathfindingClass.new(GameManager.hex_grid, self)
+	var path = pathfinder.find_path_with_movement(grid_position, target_pos, movement_remaining)
+	if path.size() > 0:
+		move_along_path(path)
+
+func _find_best_explore_target() -> Vector2i:
+	var best_tile = Vector2i(-1, -1)
+	var best_score = -INF
+	var sight_range = get_sight_range()
+
+	# Search for tiles that would reveal the most fog
+	var search_radius = 15  # How far to search for explore targets
+	var center = grid_position
+
+	for dx in range(-search_radius, search_radius + 1):
+		for dy in range(-search_radius, search_radius + 1):
+			var check_pos = Vector2i(center.x + dx, center.y + dy)
+
+			# Wrap X coordinate for cylindrical map
+			if GameManager.hex_grid:
+				check_pos.x = posmod(check_pos.x, GameManager.hex_grid.width)
+
+			if not GameManager.hex_grid.is_valid_position(check_pos):
+				continue
+
+			var tile = GameManager.hex_grid.get_tile(check_pos)
+			if tile == null:
+				continue
+
+			# Skip impassable tiles
+			if not tile.is_passable():
+				continue
+
+			# Skip water for land units
+			if tile.is_water() and get_unit_class() != "naval":
+				continue
+
+			# Skip land for naval units (unless coastal)
+			if not tile.is_water() and get_unit_class() == "naval":
+				continue
+
+			# Score this tile based on fog it would reveal
+			var score = _score_explore_tile(check_pos, sight_range)
+			var distance = GridUtils.chebyshev_distance(grid_position, check_pos)
+
+			# Prefer closer tiles with high reveal potential
+			score -= distance * 0.5
+
+			if score > best_score:
+				best_score = score
+				best_tile = check_pos
+
+	return best_tile
+
+func _score_explore_tile(tile_pos: Vector2i, sight_range: int) -> float:
+	var score = 0.0
+
+	if player_owner == null or GameManager.hex_grid == null:
+		return score
+
+	# Count fog tiles that would be revealed from this position
+	var tiles_to_check = GridUtils.get_tiles_in_range(tile_pos, sight_range)
+	tiles_to_check.append(tile_pos)
+
+	for check_pos in tiles_to_check:
+		if not GameManager.hex_grid.is_valid_position(check_pos):
+			continue
+
+		var tile = GameManager.hex_grid.get_tile(check_pos)
+		if tile == null:
+			continue
+
+		# Check visibility status for this player
+		var visibility = tile.get_visibility(player_owner.player_id)
+		if visibility == 0:  # HIDDEN - fog of war
+			score += 2.0
+		elif visibility == 1:  # REVEALED - seen before but not currently visible
+			score += 0.5
+
+	# Bonus for goody huts / ancient ruins
+	var center_tile = GameManager.hex_grid.get_tile(tile_pos)
+	if center_tile and center_tile.get_meta("goody_hut", false):
+		score += 20.0
+
+	return score
+
+func get_sight_range() -> int:
+	var unit_data = DataManager.get_unit(unit_id)
+	var base_range = unit_data.get("sight_range", 1)
+
+	# Check for promotions that increase sight range
+	for promo in promotions:
+		var effects = DataManager.get_promotion_effects(promo)
+		base_range += effects.get("visibility_range_increase", 0)
+
+	return base_range
+
 # Special abilities
 func can_found_city() -> bool:
 	return "found_city" in get_abilities()

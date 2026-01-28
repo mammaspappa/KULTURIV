@@ -1,0 +1,50 @@
+{
+	"quick": {
+		"name": "Quick",
+		"research_percent": 67,
+		"build_percent": 67,
+		"train_percent": 67,
+		"growth_percent": 67,
+		"anarchy_percent": 34,
+		"barbarian_percent": 150,
+		"golden_age_percent": 50,
+		"max_turns": 330,
+		"description": "Faster game pace"
+	},
+	"normal": {
+		"name": "Normal",
+		"research_percent": 100,
+		"build_percent": 100,
+		"train_percent": 100,
+		"growth_percent": 100,
+		"anarchy_percent": 100,
+		"barbarian_percent": 100,
+		"golden_age_percent": 100,
+		"max_turns": 500,
+		"description": "Standard game pace"
+	},
+	"epic": {
+		"name": "Epic",
+		"research_percent": 150,
+		"build_percent": 150,
+		"train_percent": 150,
+		"growth_percent": 150,
+		"anarchy_percent": 150,
+		"barbarian_percent": 75,
+		"golden_age_percent": 150,
+		"max_turns": 750,
+		"description": "Longer game with more time for each era"
+	},
+	"marathon": {
+		"name": "Marathon",
+		"research_percent": 300,
+		"build_percent": 300,
+		"train_percent": 300,
+		"growth_percent": 300,
+		"anarchy_percent": 200,
+		"barbarian_percent": 50,
+		"golden_age_percent": 300,
+		"max_turns": 1500,
+		"description": "Very long game for extended gameplay"
+	}
+}

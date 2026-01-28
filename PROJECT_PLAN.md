@@ -8,17 +8,17 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 |----------|--------|----------|
 | Core Engine | Complete | 100% |
 | Map System | Complete | 100% |
-| Units | Partial | 75% |
+| Units | Enhanced | 90% |
 | Cities | Partial | 85% |
-| Combat | Complete | 100% |
+| Combat | Enhanced | 100% |
 | AI | Enhanced | 75% |
 | UI | Partial | 70% |
 | Diplomacy | Complete | 95% |
-| Religion | Basic | 70% |
+| Religion | Enhanced | 90% |
 | Victory Conditions | Complete | 100% |
 | Civics | Complete | 100% |
-| Corporations | Basic | 70% |
-| Espionage | Basic | 80% |
+| Corporations | Enhanced | 85% |
+| Espionage | Enhanced | 95% |
 | Projects | Basic | 85% |
 | Events | Basic | 80% |
 | UN/Voting | Basic | 85% |
@@ -76,7 +76,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 3: Units (85% COMPLETE)
+## Phase 3: Units (90% COMPLETE)
 
 ### Implemented
 - [x] Unit class with movement, stats, abilities
@@ -85,7 +85,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Movement costs and terrain modifiers
 - [x] Promotion system with prerequisites
 - [x] Unit orders (fortify, sleep, sentry, heal, explore, automate)
-- [x] Great People units (Prophet, Artist, Scientist, Merchant, Engineer, General)
+- [x] Great People units (Prophet, Artist, Scientist, Merchant, Engineer, General, Spy)
 - [x] Special abilities (found_city, build_improvements, transport, bombard, etc.)
 - [x] Unit upgrade paths
 - [x] Experience and leveling
@@ -98,13 +98,13 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Worker action buttons with availability check per tile
 - [x] Border permission checking for unit movement
 - [x] Road-to-road movement cost calculation
+- [x] Explorer automation (auto-explore for scout/recon units)
+- [x] Great Spy unit with infiltrate, counterintelligence HQ, super spy abilities
+- [x] Corporation executive units for all 7 corporations
 
 ### Not Implemented
-- [ ] Air units combat system (interception, air superiority, bombing runs)
-- [ ] Nuclear weapons effects (fallout, population kill)
 - [ ] Unit formations and army groups
 - [ ] Unique unit abilities per civilization
-- [ ] Explorer automation
 
 ### Files
 - `scripts/entities/unit.gd`
@@ -159,7 +159,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 5: Combat System (COMPLETE)
+## Phase 5: Combat System (ENHANCED - COMPLETE)
 
 ### Implemented
 - [x] Attack resolution with odds calculation
@@ -174,12 +174,31 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Attacking triggers war declaration automatically
 - [x] Cannot attack across closed borders (must have permission to enter)
 
+### Recently Added - Air Combat System
+- [x] Air strike / bombing runs against ground targets
+- [x] Air interception mechanics (fighters intercept bombers)
+- [x] Air superiority missions (patrol and intercept)
+- [x] Evasion chance for stealth bombers
+- [x] Range-based air operations
+- [x] City defense damage from bombing
+
+### Recently Added - Nuclear Weapons System
+- [x] Nuclear missile and ICBM strikes
+- [x] Blast radius damage calculation (center vs outer tiles)
+- [x] Population kill (30-70% at ground zero)
+- [x] Building destruction in nuked cities
+- [x] Fallout creation on affected tiles
+- [x] Fallout decay over 20 turns
+- [x] SDI interception (75% chance)
+- [x] Diplomatic penalty for using nukes (-5 with everyone)
+- [x] Manhattan Project requirement for nukes
+
 ### Files
 - `scripts/systems/combat_system.gd`
 
 ---
 
-## Phase 6: Technology (95% COMPLETE)
+## Phase 6: Technology (98% COMPLETE)
 
 ### Implemented
 - [x] Tech tree with prerequisites (AND/OR logic)
@@ -192,8 +211,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Research overflow (excess beakers carry to next tech, capped at 500)
 - [x] Tech brokering rules (optional game setting - traded techs cannot be re-traded)
 
+### Recently Added
+- [x] "First to discover" bonuses (gold + beakers, scales by era)
+- [x] Special bonuses for landmark techs (Writing, Alphabet, Philosophy, etc.)
+- [x] First-to-discover tracking in GameManager
+
 ### Not Implemented
-- [ ] "First to discover" bonuses
 - [ ] Tech diffusion (slower research if others have it)
 
 ### Files
@@ -291,7 +314,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 9: Religion (90% COMPLETE)
+## Phase 9: Religion (98% COMPLETE)
 
 ### Implemented
 - [x] Religion founding via technology
@@ -306,10 +329,18 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Shrine income (1 gold per city with religion, built by Great Prophet)
 - [x] 7 religion-specific shrines added (Mahabodhi, Kashi Vishwanath, Temple of Solomon, etc.)
 
+### Recently Added
+- [x] Religious buildings per religion (21 total):
+  - Buddhist: Temple, Monastery, Stupa
+  - Hindu: Mandir, Ashram, Temple Complex
+  - Jewish: Synagogue, Seminary, Great Synagogue
+  - Christian: Church, Monastery, Cathedral
+  - Confucian: Academy, Study Hall, Grand Academy
+  - Taoist: Pagoda, Hermitage, Grand Pagoda
+  - Islamic: Mosque, Madrassa, Grand Mosque
+
 ### Not Implemented
-- [ ] Religious buildings per religion (temples, monasteries, cathedrals)
 - [ ] "No state religion" option
-- [ ] Religious victory conditions
 - [ ] Inquisitor units
 
 ### Files
@@ -464,7 +495,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 14: Corporations (80% COMPLETE)
+## Phase 14: Corporations (90% COMPLETE)
 
 ### Implemented
 - [x] Corporation data with all 7 BTS corporations
@@ -478,8 +509,10 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Corporation serialization
 - [x] State Property civic blocks all corporations (founding and spreading)
 
+### Recently Added
+- [x] Executive units for all 7 corporations (Mining Inc, Sid's Sushi, Cereal Mills, Standard Ethanol, Creative Constructions, Civilized Jewelers, Aluminum Co)
+
 ### Not Implemented
-- [ ] Executive units for spreading (unit data needed)
 - [ ] Corporation screen UI
 - [ ] Corporation buildings in cities
 
@@ -501,7 +534,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 15: Espionage (90% COMPLETE)
+## Phase 15: Espionage (98% COMPLETE)
 
 ### Implemented
 - [x] Espionage points generation per turn
@@ -534,10 +567,14 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Full serialization support
 - [x] AI espionage operations (personality-based mission selection and targeting)
 
+### Recently Added
+- [x] Great Spy unit with infiltrate, counterintelligence HQ, super spy abilities
+- [x] Intelligence Agency (national wonder, +100% espionage)
+- [x] Security Bureau (+4 espionage, +25% counter-espionage, +50% spy defense)
+- [x] Scotland Yard (national wonder, +4 espionage all cities, +25% spy success)
+
 ### Not Implemented
 - [ ] Espionage point slider for distribution
-- [ ] Great Spy unit and abilities
-- [ ] Buildings that boost espionage (Intelligence Agency, Security Bureau)
 
 ### Files
 - `scripts/systems/espionage_system.gd`
@@ -826,12 +863,13 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | projects.json | 11 | Complete |
 | events.json | 20 | Complete |
 | votes.json | 22 | Complete |
+| game_speeds.json | 4 | Complete |
+| eras.json | 7 | Complete |
 
 ### To Add
 | File | Reference | Purpose |
 |------|-----------|---------|
-| game_speeds.json | CIV4GameSpeedInfo.xml | Game speed modifiers |
-| eras.json | CIV4EraInfos.xml | Era definitions |
+| (All core data files complete) | - | - |
 
 ---
 
@@ -897,3 +935,18 @@ See CLAUDE.md for development guidelines and architecture overview.
 ---
 
 *Last updated: January 28, 2026*
+
+---
+
+## Recent Session Updates (January 28, 2026)
+
+### New Features Implemented
+1. **Air Combat System** - Full air warfare with bombing, interception, and air superiority
+2. **Nuclear Weapons** - Complete nuke system with fallout, population kill, SDI interception
+3. **First-to-Discover Bonuses** - Gold and beaker bonuses for pioneering techs
+4. **Religious Buildings** - 21 religion-specific buildings (temples, monasteries, cathedrals)
+5. **Espionage Buildings** - Intelligence Agency, Security Bureau, Scotland Yard
+6. **Explorer Automation** - Auto-explore for scout/recon units
+7. **Great Spy Unit** - New great person with espionage abilities
+8. **Corporation Executives** - Units to spread all 7 corporations
+9. **Game Data Files** - game_speeds.json and eras.json

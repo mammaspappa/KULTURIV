@@ -1039,5 +1039,366 @@
 			"great_prophet_points": 2
 		},
 		"description": "+1 Gold per city with Islam"
+	},
+
+	"_comment_religious": "=== RELIGION-SPECIFIC BUILDINGS ===",
+
+	"buddhist_temple": {
+		"name": "Buddhist Temple",
+		"era": "ancient",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "meditation",
+		"requires_religion": "buddhism",
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness from Buddhism"
+	},
+	"buddhist_monastery": {
+		"name": "Buddhist Monastery",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "meditation",
+		"requires_religion": "buddhism",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"missionary_production": 1
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, can build Buddhist missionaries faster"
+	},
+	"buddhist_cathedral": {
+		"name": "Buddhist Stupa",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "theology",
+		"requires_religion": "buddhism",
+		"requires_building": "buddhist_temple",
+		"effects": {
+			"culture": 4,
+			"happiness_from_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "+4 Culture, +2 Happiness from Buddhism"
+	},
+
+	"hindu_temple": {
+		"name": "Hindu Mandir",
+		"era": "ancient",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "polytheism",
+		"requires_religion": "hinduism",
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness from Hinduism"
+	},
+	"hindu_monastery": {
+		"name": "Hindu Ashram",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "polytheism",
+		"requires_religion": "hinduism",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"missionary_production": 1
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, can build Hindu missionaries faster"
+	},
+	"hindu_cathedral": {
+		"name": "Hindu Temple Complex",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "theology",
+		"requires_religion": "hinduism",
+		"requires_building": "hindu_temple",
+		"effects": {
+			"culture": 4,
+			"happiness_from_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "+4 Culture, +2 Happiness from Hinduism"
+	},
+
+	"jewish_temple": {
+		"name": "Synagogue",
+		"era": "ancient",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "monotheism",
+		"requires_religion": "judaism",
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness from Judaism"
+	},
+	"jewish_monastery": {
+		"name": "Jewish Seminary",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "monotheism",
+		"requires_religion": "judaism",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"missionary_production": 1
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, can build Jewish missionaries faster"
+	},
+	"jewish_cathedral": {
+		"name": "Great Synagogue",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "theology",
+		"requires_religion": "judaism",
+		"requires_building": "jewish_temple",
+		"effects": {
+			"culture": 4,
+			"happiness_from_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "+4 Culture, +2 Happiness from Judaism"
+	},
+
+	"christian_temple": {
+		"name": "Christian Church",
+		"era": "medieval",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "theology",
+		"requires_religion": "christianity",
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness from Christianity"
+	},
+	"christian_monastery": {
+		"name": "Christian Monastery",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "theology",
+		"requires_religion": "christianity",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"missionary_production": 1
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, can build Christian missionaries faster"
+	},
+	"christian_cathedral": {
+		"name": "Cathedral",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "music",
+		"requires_religion": "christianity",
+		"requires_building": "christian_temple",
+		"effects": {
+			"culture": 4,
+			"happiness_from_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "+4 Culture, +2 Happiness from Christianity"
+	},
+
+	"confucian_temple": {
+		"name": "Confucian Academy",
+		"era": "ancient",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "code_of_laws",
+		"requires_religion": "confucianism",
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness from Confucianism"
+	},
+	"confucian_monastery": {
+		"name": "Confucian Study Hall",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "code_of_laws",
+		"requires_religion": "confucianism",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"missionary_production": 1
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, can build Confucian missionaries faster"
+	},
+	"confucian_cathedral": {
+		"name": "Grand Academy",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "theology",
+		"requires_religion": "confucianism",
+		"requires_building": "confucian_temple",
+		"effects": {
+			"culture": 4,
+			"happiness_from_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "+4 Culture, +2 Happiness from Confucianism"
+	},
+
+	"taoist_temple": {
+		"name": "Taoist Pagoda",
+		"era": "ancient",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "philosophy",
+		"requires_religion": "taoism",
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness from Taoism"
+	},
+	"taoist_monastery": {
+		"name": "Taoist Hermitage",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "philosophy",
+		"requires_religion": "taoism",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"missionary_production": 1
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, can build Taoist missionaries faster"
+	},
+	"taoist_cathedral": {
+		"name": "Grand Pagoda",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "theology",
+		"requires_religion": "taoism",
+		"requires_building": "taoist_temple",
+		"effects": {
+			"culture": 4,
+			"happiness_from_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "+4 Culture, +2 Happiness from Taoism"
+	},
+
+	"islamic_temple": {
+		"name": "Islamic Mosque",
+		"era": "medieval",
+		"cost": 80,
+		"maintenance": 1,
+		"required_tech": "divine_right",
+		"requires_religion": "islam",
+		"effects": {
+			"culture": 1,
+			"happiness_from_religion": 1,
+			"great_prophet_points": 1
+		},
+		"description": "+1 Culture, +1 Happiness from Islam"
+	},
+	"islamic_monastery": {
+		"name": "Islamic Madrassa",
+		"era": "medieval",
+		"cost": 100,
+		"maintenance": 1,
+		"required_tech": "divine_right",
+		"requires_religion": "islam",
+		"effects": {
+			"science_percent": 0.1,
+			"culture": 2,
+			"missionary_production": 1
+		},
+		"obsolete_tech": "scientific_method",
+		"description": "+10% Science, can build Islamic missionaries faster"
+	},
+	"islamic_cathedral": {
+		"name": "Grand Mosque",
+		"era": "medieval",
+		"cost": 200,
+		"maintenance": 2,
+		"required_tech": "theology",
+		"requires_religion": "islam",
+		"requires_building": "islamic_temple",
+		"effects": {
+			"culture": 4,
+			"happiness_from_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "+4 Culture, +2 Happiness from Islam"
+	},
+
+	"_comment_espionage": "=== ESPIONAGE BUILDINGS ===",
+
+	"intelligence_agency": {
+		"name": "Intelligence Agency",
+		"era": "modern",
+		"cost": 250,
+		"maintenance": 4,
+		"required_tech": "communism",
+		"effects": {
+			"espionage_percent": 1.0,
+			"espionage": 8,
+			"spy_experience": 2
+		},
+		"wonder_type": "national",
+		"description": "+100% Espionage, +8 Espionage points"
+	},
+	"security_bureau": {
+		"name": "Security Bureau",
+		"era": "modern",
+		"cost": 150,
+		"maintenance": 2,
+		"required_tech": "communism",
+		"effects": {
+			"espionage": 4,
+			"counter_espionage": 0.25,
+			"spy_defense": 0.5
+		},
+		"description": "+4 Espionage points, +25% Counter-espionage, +50% Spy defense"
+	},
+	"scotland_yard": {
+		"name": "Scotland Yard",
+		"era": "industrial",
+		"cost": 400,
+		"maintenance": 0,
+		"required_tech": "nationalism",
+		"wonder_type": "national",
+		"effects": {
+			"espionage_all_cities": 4,
+			"spy_success_chance": 0.25,
+			"see_enemy_spies": true
+		},
+		"description": "+4 Espionage in all cities, +25% Spy success"
 	}
 }

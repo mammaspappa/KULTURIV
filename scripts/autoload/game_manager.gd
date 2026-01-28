@@ -28,6 +28,9 @@ var game_speed: int = 1  # 0=Quick, 1=Normal, 2=Epic, 3=Marathon
 var world_wonders_built: Dictionary = {}  # wonder_id -> player_id who built it
 var national_wonders_built: Dictionary = {}  # player_id -> Array of wonder_ids
 
+# First to discover tracking
+var first_to_discover: Dictionary = {}  # tech_id -> player_id who discovered first
+
 # Options/Settings
 var edge_pan_enabled: bool = true
 var auto_end_turn: bool = false

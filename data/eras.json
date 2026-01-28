@@ -1,0 +1,93 @@
+{
+	"ancient": {
+		"name": "Ancient Era",
+		"order": 0,
+		"start_year": -4000,
+		"year_increment": 40,
+		"research_modifier": 1.0,
+		"build_modifier": 1.0,
+		"maintenance_modifier": 0.75,
+		"unit_support": 4,
+		"max_city_defense": 100,
+		"sound_track": "ancient",
+		"description": "The dawn of civilization"
+	},
+	"classical": {
+		"name": "Classical Era",
+		"order": 1,
+		"start_year": -1000,
+		"year_increment": 25,
+		"research_modifier": 1.0,
+		"build_modifier": 1.0,
+		"maintenance_modifier": 0.85,
+		"unit_support": 3,
+		"max_city_defense": 100,
+		"sound_track": "classical",
+		"description": "The age of empires"
+	},
+	"medieval": {
+		"name": "Medieval Era",
+		"order": 2,
+		"start_year": 500,
+		"year_increment": 20,
+		"research_modifier": 1.0,
+		"build_modifier": 1.0,
+		"maintenance_modifier": 0.95,
+		"unit_support": 3,
+		"max_city_defense": 100,
+		"sound_track": "medieval",
+		"description": "The age of faith and feudalism"
+	},
+	"renaissance": {
+		"name": "Renaissance Era",
+		"order": 3,
+		"start_year": 1200,
+		"year_increment": 10,
+		"research_modifier": 1.0,
+		"build_modifier": 1.0,
+		"maintenance_modifier": 1.0,
+		"unit_support": 2,
+		"max_city_defense": 100,
+		"sound_track": "renaissance",
+		"description": "The rebirth of learning"
+	},
+	"industrial": {
+		"name": "Industrial Era",
+		"order": 4,
+		"start_year": 1600,
+		"year_increment": 5,
+		"research_modifier": 1.0,
+		"build_modifier": 1.0,
+		"maintenance_modifier": 1.1,
+		"unit_support": 2,
+		"max_city_defense": 100,
+		"sound_track": "industrial",
+		"description": "The age of machines"
+	},
+	"modern": {
+		"name": "Modern Era",
+		"order": 5,
+		"start_year": 1850,
+		"year_increment": 2,
+		"research_modifier": 1.0,
+		"build_modifier": 1.0,
+		"maintenance_modifier": 1.2,
+		"unit_support": 1,
+		"max_city_defense": 100,
+		"sound_track": "modern",
+		"description": "The age of innovation"
+	},
+	"future": {
+		"name": "Future Era",
+		"order": 6,
+		"start_year": 2000,
+		"year_increment": 1,
+		"research_modifier": 1.0,
+		"build_modifier": 1.0,
+		"maintenance_modifier": 1.3,
+		"unit_support": 1,
+		"max_city_defense": 100,
+		"sound_track": "future",
+		"description": "The age of possibilities"
+	}
+}

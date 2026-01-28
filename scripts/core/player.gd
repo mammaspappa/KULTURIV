@@ -140,6 +140,9 @@ func complete_research() -> void:
 
 	EventBus.research_completed.emit(self, current_research)
 
+	# Check for first to discover bonus
+	_check_first_to_discover(current_research)
+
 	# Check for unlocks
 	var unlocks = DataManager.get_tech_unlocks(current_research)
 	EventBus.tech_unlocked.emit(self, current_research)
@@ -181,6 +184,74 @@ func get_total_population() -> int:
 	for city in cities:
 		total += city.population
 	return total
+
+## Check if this player is the first to discover a technology and award bonus
+func _check_first_to_discover(tech_id: String) -> void:
+	# Skip if tech already discovered by someone
+	if GameManager.first_to_discover.has(tech_id):
+		return
+
+	# Skip repeatable techs
+	var tech_data = DataManager.get_tech(tech_id)
+	if tech_data.get("repeatable", false):
+		return
+
+	# This player is first to discover!
+	GameManager.first_to_discover[tech_id] = player_id
+
+	# Calculate bonus based on tech era
+	var era = tech_data.get("era", "ancient")
+	var bonus = _get_first_to_discover_bonus(era, tech_id)
+
+	# Apply bonus
+	if bonus.get("gold", 0) > 0:
+		gold += bonus.gold
+
+	if bonus.get("beakers", 0) > 0:
+		research_progress += bonus.beakers
+
+	if bonus.get("great_person_points", 0) > 0 and not cities.is_empty():
+		# Add GP points to capital
+		var capital = cities[0]
+		var current_gp = capital.get_meta("gp_progress", 0)
+		capital.set_meta("gp_progress", current_gp + bonus.great_person_points)
+
+	EventBus.first_to_discover.emit(self, tech_id, bonus)
+
+func _get_first_to_discover_bonus(era: String, tech_id: String) -> Dictionary:
+	# Base bonus scales by era
+	var era_multipliers = {
+		"ancient": 1.0,
+		"classical": 1.5,
+		"medieval": 2.0,
+		"renaissance": 2.5,
+		"industrial": 3.0,
+		"modern": 3.5,
+		"future": 4.0
+	}
+	var multiplier = era_multipliers.get(era, 1.0)
+
+	# Special bonuses for landmark techs
+	var special_techs = {
+		"writing": {"gold": 50, "beakers": 25},
+		"alphabet": {"gold": 75, "beakers": 50},
+		"mathematics": {"gold": 50, "beakers": 50},
+		"philosophy": {"gold": 50, "beakers": 50, "great_person_points": 50},
+		"astronomy": {"gold": 100, "beakers": 75},
+		"printing_press": {"gold": 100, "beakers": 100},
+		"scientific_method": {"gold": 150, "beakers": 150},
+		"physics": {"gold": 150, "beakers": 150, "great_person_points": 100},
+		"computers": {"gold": 200, "beakers": 200}
+	}
+
+	if special_techs.has(tech_id):
+		return special_techs[tech_id]
+
+	# Default bonus
+	return {
+		"gold": int(25 * multiplier),
+		"beakers": int(15 * multiplier)
+	}
 
 func get_num_cities() -> int:
 	return cities.size()
