@@ -18,6 +18,8 @@ signal unit_attacked(attacker, defender)
 signal unit_promoted(unit, promotion)
 signal unit_healed(unit, amount)
 signal unit_order_changed(unit, order)
+signal unit_loaded(unit, transport)
+signal unit_unloaded(unit, transport)
 
 # City events
 signal city_founded(city, founder)

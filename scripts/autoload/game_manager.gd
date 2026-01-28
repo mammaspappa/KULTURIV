@@ -31,6 +31,7 @@ var national_wonders_built: Dictionary = {}  # player_id -> Array of wonder_ids
 # Options/Settings
 var edge_pan_enabled: bool = true
 var auto_end_turn: bool = false
+var tech_brokering: bool = false  # If true, traded techs cannot be re-traded
 
 # Speed multipliers for production/research
 const SPEED_MULTIPLIERS = {
@@ -49,6 +50,7 @@ func start_new_game(settings: Dictionary) -> void:
 	map_height = settings.get("map_height", 50)
 	difficulty = settings.get("difficulty", 4)
 	game_speed = settings.get("game_speed", 1)
+	tech_brokering = settings.get("tech_brokering", false)
 
 	# Initialize game state
 	current_game_state = GameStateClass.new()

@@ -27,11 +27,15 @@ var fortify_bonus: float = 0.0  # Accumulates up to 0.25
 var is_sleeping: bool = false
 
 # Orders
-enum UnitOrder { NONE, FORTIFY, SLEEP, SENTRY, HEAL, EXPLORE, BUILD, GOTO }
+enum UnitOrder { NONE, FORTIFY, SLEEP, SENTRY, HEAL, EXPLORE, BUILD, GOTO, AUTOMATE }
 var current_order: UnitOrder = UnitOrder.NONE
 var order_target: Vector2i = Vector2i.ZERO
 var order_target_improvement: String = ""
 var build_progress: int = 0
+
+# Transport/Cargo
+var cargo: Array = []  # Units being transported
+var transport: Node2D = null  # Reference to transport unit if loaded
 
 # Promotions
 var promotions: Array[String] = []
@@ -207,6 +211,10 @@ func move_to(target: Vector2i) -> bool:
 
 	var old_pos = grid_position
 	grid_position = target
+
+	# Move cargo along with transport
+	for cargo_unit in cargo:
+		cargo_unit.grid_position = target
 
 	# Animate movement
 	_animate_move_to(target)
@@ -431,6 +439,17 @@ func heal(amount: int) -> void:
 	update_visual()
 
 func die() -> void:
+	# Destroy cargo when transport dies
+	for cargo_unit in cargo:
+		cargo_unit.transport = null
+		cargo_unit.die()
+	cargo.clear()
+
+	# If loaded in a transport, remove from cargo
+	if transport != null:
+		transport.cargo.erase(self)
+		transport = null
+
 	EventBus.unit_destroyed.emit(self)
 	if player_owner:
 		player_owner.remove_unit(self)
@@ -518,6 +537,187 @@ func skip_turn() -> void:
 	has_acted = true
 	update_visual()
 
+func automate() -> void:
+	if not can_build_improvements():
+		return
+	current_order = UnitOrder.AUTOMATE
+	EventBus.unit_order_changed.emit(self, current_order)
+	# Process automation immediately if we have movement
+	if movement_remaining > 0:
+		process_automation()
+	update_visual()
+
+func stop_automation() -> void:
+	if current_order == UnitOrder.AUTOMATE:
+		current_order = UnitOrder.NONE
+		EventBus.unit_order_changed.emit(self, current_order)
+		update_visual()
+
+func process_automation() -> void:
+	if current_order != UnitOrder.AUTOMATE or not can_build_improvements():
+		return
+	if movement_remaining <= 0 or has_acted:
+		return
+
+	# If currently building, continue
+	if order_target_improvement != "" and build_progress > 0:
+		return
+
+	var tile = GameManager.hex_grid.get_tile(grid_position) if GameManager.hex_grid else null
+	if tile == null:
+		return
+
+	# Find best improvement for current tile or move to a better tile
+	var best_improvement = _find_best_improvement(tile)
+	if best_improvement != "":
+		# Build this improvement
+		if best_improvement == "road":
+			ImprovementSystem.start_build_road(self)
+		elif best_improvement == "railroad":
+			ImprovementSystem.start_build_railroad(self)
+		else:
+			ImprovementSystem.start_build(self, best_improvement)
+		return
+
+	# Current tile doesn't need improvement, find a tile that does
+	var target_tile = _find_tile_needing_improvement()
+	if target_tile != null and target_tile.grid_position != grid_position:
+		# Move toward the target tile
+		var path = Pathfinding.find_path(self, grid_position, target_tile.grid_position)
+		if path.size() > 1:
+			move_along_path(path)
+
+func _find_best_improvement(tile) -> String:
+	if tile == null or player_owner == null:
+		return ""
+
+	# Check what can be built on this tile
+	var can_road = ImprovementSystem.can_build_road(self, tile)
+	var can_railroad = ImprovementSystem.can_build_railroad(self, tile)
+	var available = ImprovementSystem.get_available_improvements(self, tile)
+
+	# Priority: Resources first, then terrain-appropriate improvements, then roads
+	var resource = tile.resource
+	if resource != "":
+		var resource_data = DataManager.get_resource(resource)
+		var required_imp = resource_data.get("improvement", "")
+		if required_imp != "" and required_imp in available:
+			return required_imp
+
+	# Check if tile is in our territory and worked
+	if tile.city_owner == null or tile.city_owner.player_owner != player_owner:
+		return ""  # Don't improve tiles we don't own
+
+	# Terrain-based improvements
+	var terrain = tile.terrain_type
+	var feature = tile.feature
+
+	# Remove forest/jungle for farms/mines in appropriate cases
+	if feature == "forest" and "lumber_mill" in available:
+		return "lumber_mill"
+	if feature == "jungle" and "farm" in available:
+		return "farm"  # Clears jungle for farm
+
+	# Hills get mines
+	if terrain == "hills" and "mine" in available:
+		return "mine"
+
+	# Grassland/plains get farms for food, cottages for commerce
+	if terrain in ["grassland", "plains", "flood_plains"]:
+		# Prefer farms near city center for food, cottages farther out
+		if tile.city_owner:
+			var dist = GridUtils.chebyshev_distance(tile.grid_position, tile.city_owner.grid_position)
+			if dist <= 2 and "farm" in available:
+				return "farm"
+			elif "cottage" in available:
+				return "cottage"
+			elif "farm" in available:
+				return "farm"
+
+	# Build roads to connect cities
+	if can_road and tile.improvement != "road" and tile.improvement != "railroad":
+		# Check if this tile should have a road (on path between cities)
+		if _should_have_road(tile):
+			return "road"
+
+	# Upgrade roads to railroads
+	if can_railroad and tile.improvement == "road":
+		return "railroad"
+
+	return ""
+
+func _should_have_road(tile) -> bool:
+	if player_owner == null or player_owner.cities.size() < 2:
+		return false
+
+	# Simple heuristic: build roads in our territory
+	if tile.tile_owner == player_owner:
+		# Check if adjacent to a road or city
+		var neighbors = GridUtils.get_neighbors(tile.grid_position)
+		for neighbor_pos in neighbors:
+			var neighbor = GameManager.hex_grid.get_tile(neighbor_pos) if GameManager.hex_grid else null
+			if neighbor:
+				if neighbor.improvement == "road" or neighbor.improvement == "railroad":
+					return true
+				# Check if neighbor has a city
+				var city = GameManager.get_city_at(neighbor_pos)
+				if city and city.player_owner == player_owner:
+					return true
+	return false
+
+func _find_tile_needing_improvement():
+	if player_owner == null:
+		return null
+
+	var best_tile = null
+	var best_score = -1
+	var best_distance = INF
+
+	# Search tiles in player's territory
+	for city in player_owner.cities:
+		for tile_pos in city.territory:
+			var tile = GameManager.hex_grid.get_tile(tile_pos) if GameManager.hex_grid else null
+			if tile == null:
+				continue
+
+			# Skip tiles with workers already
+			var has_worker = false
+			for unit in player_owner.units:
+				if unit != self and unit.grid_position == tile_pos and unit.can_build_improvements():
+					has_worker = true
+					break
+			if has_worker:
+				continue
+
+			var improvement = _find_best_improvement(tile)
+			if improvement != "":
+				var score = _score_improvement(tile, improvement)
+				var dist = GridUtils.chebyshev_distance(grid_position, tile_pos)
+				if score > best_score or (score == best_score and dist < best_distance):
+					best_score = score
+					best_distance = dist
+					best_tile = tile
+
+	return best_tile
+
+func _score_improvement(tile, improvement: String) -> int:
+	var score = 10  # Base score
+
+	# Resources are highest priority
+	if tile.resource != "":
+		score += 50
+
+	# Closer to city is better
+	if tile.city_owner:
+		var dist = GridUtils.chebyshev_distance(tile.grid_position, tile.city_owner.grid_position)
+		score += max(0, 10 - dist * 2)
+
+	# Food improvements near small cities
+	if improvement == "farm" and tile.city_owner and tile.city_owner.population < 6:
+		score += 20
+
+	return score
+
 # Special abilities
 func can_found_city() -> bool:
 	return "found_city" in get_abilities()
@@ -578,6 +778,131 @@ func spread_religion() -> bool:
 	has_acted = true
 	movement_remaining = 0
 	return true
+
+# Transport functions
+func is_transport() -> bool:
+	var unit_data = DataManager.get_unit(unit_id)
+	return unit_data.get("transport_capacity", 0) > 0
+
+func get_transport_capacity() -> int:
+	var unit_data = DataManager.get_unit(unit_id)
+	return unit_data.get("transport_capacity", 0)
+
+func is_loaded() -> bool:
+	return transport != null
+
+func can_load_unit(unit) -> bool:
+	if unit == null or unit == self:
+		return false
+	# Must be a transport
+	if not is_transport():
+		return false
+	# Unit must be at same position
+	if unit.grid_position != grid_position:
+		return false
+	# Unit must be owned by same player
+	if unit.player_owner != player_owner:
+		return false
+	# Unit must not be a naval/air unit (only land units can load)
+	var unit_data = DataManager.get_unit(unit.unit_id)
+	var unit_class = unit_data.get("unit_class", "")
+	if unit_class in ["naval", "air"]:
+		return false
+	# Unit must not already be loaded
+	if unit.is_loaded():
+		return false
+	# Must have space
+	if cargo.size() >= get_transport_capacity():
+		return false
+	return true
+
+func load_unit(unit) -> bool:
+	if not can_load_unit(unit):
+		return false
+
+	cargo.append(unit)
+	unit.transport = self
+	unit.visible = false  # Hide loaded unit
+	EventBus.unit_loaded.emit(unit, self)
+	return true
+
+func can_unload_unit(unit) -> bool:
+	if unit == null or unit not in cargo:
+		return false
+	# Must be at a valid land tile for the unit
+	var tile = GameManager.hex_grid.get_tile(grid_position) if GameManager.hex_grid else null
+	if tile == null:
+		return false
+	# Check if unit can be on this terrain
+	var terrain = tile.terrain_type
+	# Naval transport must be in coast/ocean adjacent to land
+	if terrain in ["coast", "ocean"]:
+		# Check for adjacent land tile to unload to
+		var neighbors = GridUtils.get_neighbors(grid_position)
+		for neighbor_pos in neighbors:
+			var neighbor_tile = GameManager.hex_grid.get_tile(neighbor_pos) if GameManager.hex_grid else null
+			if neighbor_tile and neighbor_tile.terrain_type not in ["coast", "ocean"]:
+				return true
+		return false
+	return true
+
+func unload_unit(unit, target_pos: Vector2i = Vector2i(-1, -1)) -> bool:
+	if unit not in cargo:
+		return false
+
+	# Find a valid position to unload
+	if target_pos == Vector2i(-1, -1):
+		target_pos = _find_unload_position()
+
+	if target_pos == Vector2i(-1, -1):
+		return false
+
+	cargo.erase(unit)
+	unit.transport = null
+	unit.grid_position = target_pos
+	unit.position = GridUtils.grid_to_pixel(target_pos)
+	unit.visible = true
+	unit.movement_remaining = 0  # Unloading uses all movement
+	unit.has_acted = true
+	EventBus.unit_unloaded.emit(unit, self)
+	return true
+
+func unload_all() -> int:
+	var unloaded = 0
+	var units_to_unload = cargo.duplicate()
+	for unit in units_to_unload:
+		if unload_unit(unit):
+			unloaded += 1
+	return unloaded
+
+func _find_unload_position() -> Vector2i:
+	var tile = GameManager.hex_grid.get_tile(grid_position) if GameManager.hex_grid else null
+	if tile == null:
+		return Vector2i(-1, -1)
+
+	# If transport is on land (somehow), unload here
+	if tile.terrain_type not in ["coast", "ocean"]:
+		return grid_position
+
+	# Find adjacent land tile
+	var neighbors = GridUtils.get_neighbors(grid_position)
+	for neighbor_pos in neighbors:
+		var neighbor_tile = GameManager.hex_grid.get_tile(neighbor_pos) if GameManager.hex_grid else null
+		if neighbor_tile and neighbor_tile.terrain_type not in ["coast", "ocean", "mountains"]:
+			# Check for enemy units
+			var enemy_there = false
+			for player in GameManager.players:
+				if player != player_owner and player_owner.is_at_war_with(player.player_id):
+					for enemy_unit in player.units:
+						if enemy_unit.grid_position == neighbor_pos:
+							enemy_there = true
+							break
+				if enemy_there:
+					break
+			if not enemy_there:
+				return neighbor_pos
+
+	return Vector2i(-1, -1)
 
 # Selection
 func select() -> void:

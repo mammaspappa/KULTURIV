@@ -18,6 +18,7 @@ var science_rate: float = 1.0  # Percentage of commerce going to science (0.0 to
 
 # Research
 var researched_techs: Array[String] = []
+var traded_techs: Array[String] = []  # Techs received via trade (cannot be re-traded)
 var current_research: String = ""
 var research_progress: int = 0
 var future_tech_count: int = 0  # Number of times Future Tech has been completed
@@ -434,6 +435,7 @@ func to_dict() -> Dictionary:
 		"color": color.to_html(),
 		"gold": gold,
 		"researched_techs": researched_techs,
+		"traded_techs": traded_techs,
 		"current_research": current_research,
 		"research_progress": research_progress,
 		"at_war_with": at_war_with,
@@ -462,6 +464,7 @@ func from_dict(data: Dictionary) -> void:
 	color = Color(data.get("color", "#FFFFFF"))
 	gold = data.get("gold", 0)
 	researched_techs.assign(data.get("researched_techs", []))
+	traded_techs.assign(data.get("traded_techs", []))
 	current_research = data.get("current_research", "")
 	research_progress = data.get("research_progress", 0)
 	at_war_with.assign(data.get("at_war_with", []))

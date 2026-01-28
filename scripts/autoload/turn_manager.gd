@@ -64,6 +64,11 @@ func _start_turn_for_player(player) -> void:
 		unit.refresh_movement()
 		unit.has_acted = false
 
+	# Process automated workers
+	for unit in player.units:
+		if unit.current_order == UnitClass.UnitOrder.AUTOMATE:
+			unit.process_automation()
+
 	# Process cities
 	for city in player.cities:
 		_process_city_turn_start(city)

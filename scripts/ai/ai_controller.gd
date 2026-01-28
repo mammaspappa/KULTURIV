@@ -25,6 +25,9 @@ func execute_turn(player) -> void:
 	# Process research
 	_process_research(player, flavor)
 
+	# Process espionage
+	_process_espionage(player, flavor)
+
 	# Process units
 	for unit in player.units.duplicate():
 		if unit == null or not is_instance_valid(unit):
@@ -192,6 +195,121 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 			# Declare war with some randomness
 			if randf() < 0.3 * (military_flavor / 10.0):
 				GameManager.declare_war(player, other)
+
+## Process AI espionage decisions
+func _process_espionage(player, flavor: Dictionary) -> void:
+	var military_flavor = flavor.get("military", 5)
+	var gold_flavor = flavor.get("gold", 5)
+	var science_flavor = flavor.get("science", 5)
+
+	# AI uses espionage more when aggressive or behind in tech
+	var espionage_priority = (military_flavor + gold_flavor) / 2
+
+	# Only do espionage occasionally (25-50% chance per turn based on personality)
+	if randf() > 0.25 + espionage_priority * 0.025:
+		return
+
+	# Find best target (enemies or rivals)
+	var best_target = null
+	var best_target_score = -1
+
+	for other in GameManager.players:
+		if other == player or other.player_id not in player.met_players:
+			continue
+
+		# Calculate target priority
+		var target_score = 0
+
+		# Prefer enemies
+		if GameManager.is_at_war(player, other):
+			target_score += 50
+
+		# Prefer those with more tech
+		target_score += (other.researched_techs.size() - player.researched_techs.size()) * 5
+
+		# Prefer those we dislike
+		var attitude = DiplomacySystem.calculate_attitude(player, other)
+		target_score -= attitude * 3
+
+		# Check if we have espionage points against them
+		var points = EspionageSystem.get_espionage_points(player.player_id, other.player_id)
+		if points < 50:
+			continue  # Not enough points to do anything
+
+		if target_score > best_target_score:
+			best_target_score = target_score
+			best_target = other
+
+	if best_target == null:
+		return
+
+	# Find best mission to execute
+	var target_city = best_target.cities[0] if not best_target.cities.is_empty() else null
+	var available_missions = EspionageSystem.get_available_missions(player, best_target, target_city)
+
+	if available_missions.is_empty():
+		return
+
+	# Prioritize missions based on personality
+	var best_mission = null
+	var best_mission_score = -1
+
+	for mission_id in available_missions:
+		var mission_score = _score_espionage_mission(mission_id, player, best_target, target_city, flavor)
+		if mission_score > best_mission_score:
+			best_mission_score = mission_score
+			best_mission = mission_id
+
+	if best_mission != null:
+		var result = EspionageSystem.execute_mission(best_mission, player, best_target, target_city)
+		# AI doesn't need to react to results, just execute
+
+## Score an espionage mission based on AI personality
+func _score_espionage_mission(mission_id: String, player, target, target_city, flavor: Dictionary) -> int:
+	var score = 10  # Base score
+
+	var military_flavor = flavor.get("military", 5)
+	var gold_flavor = flavor.get("gold", 5)
+	var science_flavor = flavor.get("science", 5)
+
+	match mission_id:
+		"steal_treasury":
+			score += gold_flavor * 5
+		"steal_technology":
+			score += science_flavor * 8
+			# Higher priority if behind in tech
+			if target.researched_techs.size() > player.researched_techs.size():
+				score += 30
+		"sabotage_production":
+			score += military_flavor * 4
+			# Higher priority if at war
+			if GameManager.is_at_war(player, target):
+				score += 20
+		"destroy_building":
+			score += military_flavor * 3
+		"incite_revolt":
+			score += military_flavor * 5
+			if GameManager.is_at_war(player, target):
+				score += 25
+		"poison_water", "spread_unhappiness":
+			score += military_flavor * 2
+			if GameManager.is_at_war(player, target):
+				score += 15
+		"counter_espionage":
+			score += 5  # Defensive, lower priority for AI
+		"see_demographics", "investigate_city", "see_research":
+			score += 5  # Information gathering, low priority
+		"force_civic_change", "force_religion_change":
+			score += military_flavor * 3
+
+	# Reduce score for risky missions if AI is cautious (low military flavor)
+	var mission_data = DataManager.get_espionage_mission(mission_id)
+	if mission_data:
+		var discovery_chance = mission_data.get("discovery_chance", 0)
+		if discovery_chance > 50 and military_flavor < MEDIUM_FLAVOR:
+			score -= 20
+
+	return score
 
 func _process_unit_ai(unit, player, flavor: Dictionary) -> void:
 	if unit.has_acted or unit.movement_remaining <= 0:

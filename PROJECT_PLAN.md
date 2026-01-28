@@ -76,7 +76,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 3: Units (70% COMPLETE)
+## Phase 3: Units (85% COMPLETE)
 
 ### Implemented
 - [x] Unit class with movement, stats, abilities
@@ -84,25 +84,26 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Combat stats (strength, first strikes, withdraw chance)
 - [x] Movement costs and terrain modifiers
 - [x] Promotion system with prerequisites
-- [x] Unit orders (fortify, sleep, sentry, heal, explore)
+- [x] Unit orders (fortify, sleep, sentry, heal, explore, automate)
 - [x] Great People units (Prophet, Artist, Scientist, Merchant, Engineer, General)
 - [x] Special abilities (found_city, build_improvements, transport, bombard, etc.)
 - [x] Unit upgrade paths
 - [x] Experience and leveling
+- [x] Worker automation AI (A key to toggle, intelligent improvement selection)
+- [x] Naval transport loading/unloading (Load/Unload/Disembark buttons)
+- [x] Cargo tracking for transports (cargo moves with transport)
 
 ### Recently Added
-- [x] Worker keyboard shortcuts (R=road, M=mine, I=farm, O=cottage)
+- [x] Worker keyboard shortcuts (R=road, M=mine, I=farm, O=cottage, A=automate)
 - [x] Worker action buttons with availability check per tile
 - [x] Border permission checking for unit movement
 - [x] Road-to-road movement cost calculation
 
 ### Not Implemented
 - [ ] Air units combat system (interception, air superiority, bombing runs)
-- [ ] Naval transport loading/unloading
 - [ ] Nuclear weapons effects (fallout, population kill)
 - [ ] Unit formations and army groups
 - [ ] Unique unit abilities per civilization
-- [ ] Worker automation AI
 - [ ] Explorer automation
 
 ### Files
@@ -178,7 +179,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 6: Technology (90% COMPLETE)
+## Phase 6: Technology (95% COMPLETE)
 
 ### Implemented
 - [x] Tech tree with prerequisites (AND/OR logic)
@@ -189,9 +190,9 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Tech trading framework
 - [x] Future Tech (repeatable research with cumulative bonuses)
 - [x] Research overflow (excess beakers carry to next tech, capped at 500)
+- [x] Tech brokering rules (optional game setting - traded techs cannot be re-traded)
 
 ### Not Implemented
-- [ ] Tech brokering rules
 - [ ] "First to discover" bonuses
 - [ ] Tech diffusion (slower research if others have it)
 
@@ -500,7 +501,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 15: Espionage (80% COMPLETE)
+## Phase 15: Espionage (90% COMPLETE)
 
 ### Implemented
 - [x] Espionage points generation per turn
@@ -531,11 +532,11 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Distance-based cost modifiers
 - [x] Diplomatic penalty on discovery
 - [x] Full serialization support
+- [x] AI espionage operations (personality-based mission selection and targeting)
 
 ### Not Implemented
 - [ ] Espionage point slider for distribution
 - [ ] Great Spy unit and abilities
-- [ ] AI espionage operations
 - [ ] Buildings that boost espionage (Intelligence Agency, Security Bureau)
 
 ### Files

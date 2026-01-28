@@ -114,7 +114,8 @@ func _collect_save_data() -> Dictionary:
 			"map_width": GameManager.map_width,
 			"map_height": GameManager.map_height,
 			"difficulty": GameManager.difficulty,
-			"game_speed": GameManager.game_speed
+			"game_speed": GameManager.game_speed,
+			"tech_brokering": GameManager.tech_brokering
 		},
 		"turn": TurnManager.current_turn,
 		"year": TurnManager.current_year,
@@ -178,6 +179,7 @@ func _restore_save_data(data: Dictionary) -> bool:
 	GameManager.map_height = settings.get("map_height", 50)
 	GameManager.difficulty = settings.get("difficulty", 4)
 	GameManager.game_speed = settings.get("game_speed", 1)
+	GameManager.tech_brokering = settings.get("tech_brokering", false)
 
 	# Restore turn info
 	TurnManager.current_turn = data.get("turn", 1)

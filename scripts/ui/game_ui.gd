@@ -127,6 +127,9 @@ func _input(event: InputEvent) -> void:
 			KEY_O:
 				_try_worker_action("cottage")
 				get_viewport().set_input_as_handled()
+			KEY_A:
+				_try_automate_worker()
+				get_viewport().set_input_as_handled()
 
 func _on_turn_started(turn: int, player) -> void:
 	if player == GameManager.human_player:
@@ -288,15 +291,49 @@ func _update_worker_actions() -> void:
 	for child in worker_buttons_container.get_children():
 		child.queue_free()
 
-	# Show for workers or units with special actions (missionaries, etc.)
+	# Show for workers or units with special actions (missionaries, transports, etc.)
 	var is_worker = selected_unit != null and selected_unit.can_build_improvements()
 	var can_spread = selected_unit != null and selected_unit.can_spread_religion()
+	var is_transport = selected_unit != null and selected_unit.is_transport()
+	var is_loaded = selected_unit != null and selected_unit.is_loaded()
 
-	if selected_unit == null or (not is_worker and not can_spread):
+	if selected_unit == null or (not is_worker and not can_spread and not is_transport and not is_loaded):
 		worker_actions.visible = false
 		return
 
 	worker_actions.visible = true
+
+	# Handle transport loading/unloading
+	if is_transport and not selected_unit.cargo.is_empty():
+		var unload_button = Button.new()
+		unload_button.text = "Unload (%d)" % selected_unit.cargo.size()
+		unload_button.custom_minimum_size = Vector2(110, 30)
+		unload_button.tooltip_text = "Unload all units from transport"
+		unload_button.pressed.connect(_on_unload_pressed)
+		# Check if can unload (must be adjacent to land)
+		unload_button.disabled = not selected_unit.can_unload_unit(selected_unit.cargo[0]) if not selected_unit.cargo.is_empty() else true
+		worker_buttons_container.add_child(unload_button)
+
+	# Handle unit loading into transport
+	if is_loaded:
+		var disembark_button = Button.new()
+		disembark_button.text = "Disembark"
+		disembark_button.custom_minimum_size = Vector2(110, 30)
+		disembark_button.tooltip_text = "Leave transport"
+		disembark_button.pressed.connect(_on_disembark_pressed)
+		disembark_button.disabled = not selected_unit.transport.can_unload_unit(selected_unit) if selected_unit.transport else true
+		worker_buttons_container.add_child(disembark_button)
+
+	# Check if land unit can load onto a transport at same position
+	if not is_loaded and not is_transport and selected_unit != null:
+		var available_transport = _find_transport_at_position(selected_unit.grid_position)
+		if available_transport and available_transport.can_load_unit(selected_unit):
+			var load_button = Button.new()
+			load_button.text = "Load"
+			load_button.custom_minimum_size = Vector2(110, 30)
+			load_button.tooltip_text = "Load onto transport"
+			load_button.pressed.connect(_on_load_pressed.bind(available_transport))
+			worker_buttons_container.add_child(load_button)
 
 	# Handle missionary spread religion action
 	if can_spread:
@@ -317,6 +354,15 @@ func _update_worker_actions() -> void:
 	# Get tile at unit's position
 	var tile = GameManager.hex_grid.get_tile(selected_unit.grid_position) if GameManager.hex_grid else null
 	if tile == null:
+		return
+
+	# Check if automated - show stop automation button
+	if selected_unit.current_order == selected_unit.UnitOrder.AUTOMATE:
+		var stop_button = Button.new()
+		stop_button.text = "Stop Automation"
+		stop_button.custom_minimum_size = Vector2(110, 30)
+		stop_button.pressed.connect(_on_stop_automation_pressed)
+		worker_buttons_container.add_child(stop_button)
 		return
 
 	# Check if currently building - show cancel button
@@ -359,6 +405,15 @@ func _update_worker_actions() -> void:
 		var button = _create_worker_button(imp_name, imp_id, build_time)
 		worker_buttons_container.add_child(button)
 		buttons_added += 1
+
+	# Automate button (always available for workers)
+	var automate_button = Button.new()
+	automate_button.text = "Automate (A)"
+	automate_button.custom_minimum_size = Vector2(110, 30)
+	automate_button.tooltip_text = "Automate worker to build improvements"
+	automate_button.pressed.connect(_on_automate_pressed)
+	worker_buttons_container.add_child(automate_button)
+	buttons_added += 1
 
 	# Show message if no actions available
 	if buttons_added == 0:
@@ -410,6 +465,59 @@ func _on_spread_religion_pressed() -> void:
 	else:
 		_add_notification("Failed to spread religion", "warning")
 
+func _on_automate_pressed() -> void:
+	if selected_unit == null or not selected_unit.can_build_improvements():
+		return
+
+	selected_unit.automate()
+	_add_notification("Worker automated", "system")
+	_update_unit_panel()
+
+func _on_unload_pressed() -> void:
+	if selected_unit == null or not selected_unit.is_transport():
+		return
+
+	var count = selected_unit.unload_all()
+	if count > 0:
+		_add_notification("Unloaded %d unit(s)" % count, "system")
+	_update_unit_panel()
+
+func _on_disembark_pressed() -> void:
+	if selected_unit == null or not selected_unit.is_loaded():
+		return
+
+	var transport = selected_unit.transport
+	if transport and transport.unload_unit(selected_unit):
+		_add_notification("Unit disembarked", "system")
+	_update_unit_panel()
+
+func _on_load_pressed(transport) -> void:
+	if selected_unit == null or transport == null:
+		return
+
+	if transport.load_unit(selected_unit):
+		_add_notification("Unit loaded onto transport", "system")
+		# Deselect since unit is now hidden
+		EventBus.unit_deselected.emit(selected_unit)
+		selected_unit = null
+		unit_panel.visible = false
+
+func _find_transport_at_position(pos: Vector2i):
+	if GameManager.human_player == null:
+		return null
+	for unit in GameManager.human_player.units:
+		if unit.grid_position == pos and unit.is_transport():
+			return unit
+	return null
+
+func _on_stop_automation_pressed() -> void:
+	if selected_unit == null:
+		return
+
+	selected_unit.stop_automation()
+	_add_notification("Automation stopped", "system")
+	_update_unit_panel()
+
 ## Try to perform a worker action via keyboard shortcut
 func _try_worker_action(action: String) -> void:
 	if selected_unit == null or not selected_unit.can_build_improvements():
@@ -436,6 +544,19 @@ func _try_worker_action(action: String) -> void:
 			if ImprovementSystem.can_build(selected_unit, tile, action):
 				ImprovementSystem.start_build(selected_unit, action)
 				_update_unit_panel()
+
+## Automate worker via keyboard shortcut
+func _try_automate_worker() -> void:
+	if selected_unit == null or not selected_unit.can_build_improvements():
+		return
+
+	if selected_unit.current_order == selected_unit.UnitOrder.AUTOMATE:
+		selected_unit.stop_automation()
+		_add_notification("Automation stopped", "system")
+	else:
+		selected_unit.automate()
+		_add_notification("Worker automated", "system")
+	_update_unit_panel()
 
 # Notification system
 func _setup_notifications() -> void:

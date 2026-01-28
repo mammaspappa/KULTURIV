@@ -142,15 +142,17 @@ func execute_trade(proposal: Dictionary) -> void:
 		to_player.gold -= to_offers["gold"]
 		from_player.gold += to_offers["gold"]
 
-	# Transfer techs immediately
+	# Transfer techs immediately (and mark as traded for brokering rules)
 	for tech_id in from_offers["techs"]:
 		if tech_id not in to_player.researched_techs:
 			to_player.researched_techs.append(tech_id)
+			to_player.traded_techs.append(tech_id)  # Mark as traded (can't re-trade)
 			EventBus.tech_unlocked.emit(to_player, tech_id)
 
 	for tech_id in to_offers["techs"]:
 		if tech_id not in from_player.researched_techs:
 			from_player.researched_techs.append(tech_id)
+			from_player.traded_techs.append(tech_id)  # Mark as traded (can't re-trade)
 			EventBus.tech_unlocked.emit(from_player, tech_id)
 
 	# Mark trade as active if it has ongoing components
@@ -254,6 +256,9 @@ func get_tradeable_techs(from_player, to_player) -> Array:
 	for tech_id in from_player.researched_techs:
 		# Player has tech, other doesn't
 		if tech_id not in to_player.researched_techs:
+			# Tech brokering rule: traded techs cannot be re-traded
+			if GameManager.tech_brokering and tech_id in from_player.traded_techs:
+				continue
 			# Other player must have prerequisites
 			if DataManager.is_tech_available(tech_id, to_player.researched_techs):
 				tradeable.append(tech_id)
