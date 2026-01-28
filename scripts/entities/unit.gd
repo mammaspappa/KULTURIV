@@ -3,6 +3,7 @@ extends Node2D
 ## Represents a single unit on the map.
 
 const GameTileClass = preload("res://scripts/map/game_tile.gd")
+const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
 
 # Identity
 var unit_id: String = "warrior"
@@ -583,7 +584,8 @@ func process_automation() -> void:
 	var target_tile = _find_tile_needing_improvement()
 	if target_tile != null and target_tile.grid_position != grid_position:
 		# Move toward the target tile
-		var path = Pathfinding.find_path(self, grid_position, target_tile.grid_position)
+		var pathfinder = PathfindingClass.new(GameManager.hex_grid, self)
+		var path = pathfinder.find_path(grid_position, target_tile.grid_position)
 		if path.size() > 1:
 			move_along_path(path)
 
