@@ -941,5 +941,103 @@
 			"great_artist_points": 2
 		},
 		"description": "-25% War weariness"
+	},
+	"buddhist_shrine": {
+		"name": "Mahabodhi",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "meditation",
+		"requires_holy_city": "buddhism",
+		"requires_great_prophet": true,
+		"effects": {
+			"culture": 4,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Gold per city with Buddhism"
+	},
+	"hindu_shrine": {
+		"name": "Kashi Vishwanath",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "polytheism",
+		"requires_holy_city": "hinduism",
+		"requires_great_prophet": true,
+		"effects": {
+			"culture": 4,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Gold per city with Hinduism"
+	},
+	"jewish_shrine": {
+		"name": "Temple of Solomon",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "monotheism",
+		"requires_holy_city": "judaism",
+		"requires_great_prophet": true,
+		"effects": {
+			"culture": 4,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Gold per city with Judaism"
+	},
+	"confucian_shrine": {
+		"name": "Kong Miao",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "code_of_laws",
+		"requires_holy_city": "confucianism",
+		"requires_great_prophet": true,
+		"effects": {
+			"culture": 4,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Gold per city with Confucianism"
+	},
+	"christian_shrine": {
+		"name": "Church of the Nativity",
+		"era": "medieval",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "theology",
+		"requires_holy_city": "christianity",
+		"requires_great_prophet": true,
+		"effects": {
+			"culture": 4,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Gold per city with Christianity"
+	},
+	"taoist_shrine": {
+		"name": "Dai Miao",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "philosophy",
+		"requires_holy_city": "taoism",
+		"requires_great_prophet": true,
+		"effects": {
+			"culture": 4,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Gold per city with Taoism"
+	},
+	"islamic_shrine": {
+		"name": "Masjid Al-Haram",
+		"era": "medieval",
+		"cost": 0,
+		"maintenance": 0,
+		"required_tech": "divine_right",
+		"requires_holy_city": "islam",
+		"requires_great_prophet": true,
+		"effects": {
+			"culture": 4,
+			"great_prophet_points": 2
+		},
+		"description": "+1 Gold per city with Islam"
 	}
 }

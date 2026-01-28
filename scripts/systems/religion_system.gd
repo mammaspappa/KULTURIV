@@ -176,6 +176,16 @@ func get_religious_gold(city) -> int:
 	if city == null or city.holy_city_of == "":
 		return 0
 
+	# Get the shrine building for this religion
+	var religion_data = DataManager.get_religion(city.holy_city_of)
+	var shrine_building = religion_data.get("shrine", "")
+	if shrine_building == "":
+		return 0
+
+	# Check if city has the shrine
+	if not city.has_building(shrine_building):
+		return 0
+
 	# Count cities with this religion
 	var count = 0
 	for other_city in GameManager.get_all_cities():
@@ -183,10 +193,7 @@ func get_religious_gold(city) -> int:
 			count += 1
 
 	# Shrine gives 1 gold per city with religion
-	if city.has_building("shrine"):
-		return count
-
-	return 0
+	return count
 
 func _on_research_completed(player, tech: String) -> void:
 	# Check if this tech founds a religion

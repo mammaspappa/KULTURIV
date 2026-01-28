@@ -112,6 +112,11 @@ func complete_research() -> void:
 	if current_research == "":
 		return
 
+	# Calculate overflow before completing
+	var tech_cost = DataManager.get_tech_cost(current_research)
+	tech_cost = int(tech_cost * GameManager.get_speed_multiplier())
+	var overflow = max(0, research_progress - tech_cost)
+
 	var tech_data = DataManager.get_tech(current_research)
 	var is_repeatable = tech_data.get("repeatable", false)
 
@@ -139,7 +144,8 @@ func complete_research() -> void:
 	EventBus.tech_unlocked.emit(self, current_research)
 
 	current_research = ""
-	research_progress = 0
+	# Preserve overflow beakers for next research (cap at 50% of a typical tech cost)
+	research_progress = min(overflow, 500)
 
 func get_research_output() -> int:
 	var total = 0

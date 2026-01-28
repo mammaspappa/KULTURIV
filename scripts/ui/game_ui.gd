@@ -288,12 +288,31 @@ func _update_worker_actions() -> void:
 	for child in worker_buttons_container.get_children():
 		child.queue_free()
 
-	# Only show for workers
-	if selected_unit == null or not selected_unit.can_build_improvements():
+	# Show for workers or units with special actions (missionaries, etc.)
+	var is_worker = selected_unit != null and selected_unit.can_build_improvements()
+	var can_spread = selected_unit != null and selected_unit.can_spread_religion()
+
+	if selected_unit == null or (not is_worker and not can_spread):
 		worker_actions.visible = false
 		return
 
 	worker_actions.visible = true
+
+	# Handle missionary spread religion action
+	if can_spread:
+		var spread_button = Button.new()
+		spread_button.text = "Spread Religion"
+		spread_button.custom_minimum_size = Vector2(110, 30)
+		var religion_id = selected_unit.player_owner.state_religion if selected_unit.player_owner else ""
+		var rel_data = DataManager.get_religion(religion_id) if religion_id != "" else {}
+		var rel_name = rel_data.get("name", "Religion")
+		spread_button.tooltip_text = "Spread %s to this city" % rel_name
+		spread_button.pressed.connect(_on_spread_religion_pressed)
+		worker_buttons_container.add_child(spread_button)
+
+	# If not a worker, stop here (only show spread religion button)
+	if not is_worker:
+		return
 
 	# Get tile at unit's position
 	var tile = GameManager.hex_grid.get_tile(selected_unit.grid_position) if GameManager.hex_grid else null
@@ -375,6 +394,21 @@ func _on_cancel_build_pressed() -> void:
 
 	ImprovementSystem.cancel_build(selected_unit)
 	_update_unit_panel()
+
+func _on_spread_religion_pressed() -> void:
+	if selected_unit == null:
+		return
+
+	if selected_unit.spread_religion():
+		_add_notification("Religion spread successfully!", "religion")
+		# Check if unit was consumed (died)
+		if not is_instance_valid(selected_unit) or selected_unit.is_queued_for_deletion():
+			selected_unit = null
+			unit_panel.visible = false
+		else:
+			_update_unit_panel()
+	else:
+		_add_notification("Failed to spread religion", "warning")
 
 ## Try to perform a worker action via keyboard shortcut
 func _try_worker_action(action: String) -> void:

@@ -200,6 +200,8 @@ func use_great_person(unit, ability: String) -> bool:
 			return _spread_religion(unit, city)
 		"culture_bomb":
 			return _culture_bomb(unit, tile)
+		"build_shrine":
+			return _build_shrine(unit, city)
 		_:
 			return false
 
@@ -349,6 +351,48 @@ func _culture_bomb(unit, tile) -> bool:
 	unit.die()
 	return true
 
+func _build_shrine(unit, city) -> bool:
+	if city == null or city.player_owner != unit.player_owner:
+		return false
+
+	# Must be in the holy city
+	if city.holy_city_of == "":
+		return false
+
+	# Get the shrine building for this religion
+	var religion_data = DataManager.get_religion(city.holy_city_of)
+	var shrine_building = religion_data.get("shrine", "")
+	if shrine_building == "":
+		return false
+
+	# Check if shrine already exists
+	if city.has_building(shrine_building):
+		return false
+
+	# Build the shrine
+	city.add_building(shrine_building)
+	EventBus.city_production_completed.emit(city, shrine_building)
+
+	# Remove unit
+	unit.die()
+	return true
+
+## Check if Great Prophet can build a shrine in this city
+func can_build_shrine(unit, city) -> bool:
+	if city == null or unit == null:
+		return false
+	if city.player_owner != unit.player_owner:
+		return false
+	if city.holy_city_of == "":
+		return false
+
+	var religion_data = DataManager.get_religion(city.holy_city_of)
+	var shrine_building = religion_data.get("shrine", "")
+	if shrine_building == "":
+		return false
+
+	return not city.has_building(shrine_building)
+
 ## Get available abilities for a great person unit
 func get_available_abilities(unit) -> Array:
 	if unit == null:
@@ -359,7 +403,7 @@ func get_available_abilities(unit) -> Array:
 
 	match unit_id:
 		"great_prophet":
-			abilities = ["settle", "golden_age", "spread_religion"]
+			abilities = ["settle", "golden_age", "spread_religion", "build_shrine"]
 		"great_artist":
 			abilities = ["settle", "golden_age", "culture_bomb"]
 		"great_scientist":

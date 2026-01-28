@@ -525,6 +525,60 @@ func can_found_city() -> bool:
 func can_build_improvements() -> bool:
 	return "build_improvements" in get_abilities()
 
+func can_spread_religion() -> bool:
+	if "spread_religion" not in get_abilities():
+		return false
+	# Check if unit has uses remaining
+	var unit_data = DataManager.get_unit(unit_id)
+	var max_uses = unit_data.get("uses", -1)
+	if max_uses > 0:
+		var uses_remaining = get_meta("uses_remaining", max_uses)
+		if uses_remaining <= 0:
+			return false
+	# Check if we're in a city
+	var city = GameManager.get_city_at(grid_position)
+	if city == null:
+		return false
+	# Check if city already has our religion
+	if player_owner == null or player_owner.state_religion == "":
+		return false
+	if player_owner.state_religion in city.religions:
+		return false
+	# Check if target city's owner has Theocracy (blocks non-state religion spread)
+	if city.player_owner != null:
+		if CivicsSystem.has_civic_effect(city.player_owner, "no_non_state_religion_spread"):
+			# Can only spread if it matches the city owner's state religion
+			if player_owner.state_religion != city.player_owner.state_religion:
+				return false
+	return true
+
+func spread_religion() -> bool:
+	if not can_spread_religion():
+		return false
+	if player_owner == null or player_owner.state_religion == "":
+		return false
+
+	var city = GameManager.get_city_at(grid_position)
+	if city == null:
+		return false
+
+	# Spread the state religion
+	ReligionSystem.spread_religion(city, player_owner.state_religion)
+
+	# Consume a use
+	var unit_data = DataManager.get_unit(unit_id)
+	var max_uses = unit_data.get("uses", -1)
+	if max_uses > 0:
+		var uses_remaining = get_meta("uses_remaining", max_uses)
+		uses_remaining -= 1
+		set_meta("uses_remaining", uses_remaining)
+		if uses_remaining <= 0:
+			die()  # Unit is consumed after all uses
+
+	has_acted = true
+	movement_remaining = 0
+	return true
+
 # Selection
 func select() -> void:
 	is_selected = true

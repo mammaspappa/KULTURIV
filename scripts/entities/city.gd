@@ -258,8 +258,10 @@ func _calculate_science() -> void:
 	for building_id in buildings:
 		var effects = DataManager.get_building_effects(building_id)
 		gold_bonus += effects.get("gold", 0)
+	# Add shrine income (gold per city with religion in holy city)
+	var shrine_gold = ReligionSystem.get_religious_gold(self)
 	# Store in a city property for reference (gold_yield)
-	gold_yield = gold_from_commerce + gold_bonus
+	gold_yield = gold_from_commerce + gold_bonus + shrine_gold
 
 func _calculate_culture() -> void:
 	culture_yield = 0

@@ -135,12 +135,17 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Civic-based specialist bonuses (Representation, Caste System, Mercantilism)
 - [x] Settled Great People specialists
 
+### Recently Added
+- [x] World wonders (25 unique buildings, one-per-game limit)
+- [x] National wonders (10 buildings, one-per-civilization limit)
+- [x] Wonder tracking in GameManager (world_wonders_built, national_wonders_built)
+- [x] Building checks enforce wonder limits
+
 ### Not Implemented
 - [ ] City governor automation
 - [ ] Conscription
 - [ ] City trading (culture flip risk)
 - [ ] Wonder movies/effects
-- [ ] National wonders vs World wonders limits
 
 ### Files
 - `scripts/entities/city.gd`
@@ -173,7 +178,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 6: Technology (80% COMPLETE)
+## Phase 6: Technology (90% COMPLETE)
 
 ### Implemented
 - [x] Tech tree with prerequisites (AND/OR logic)
@@ -182,12 +187,13 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Tech unlocks (units, buildings, improvements)
 - [x] Civilization starting techs
 - [x] Tech trading framework
+- [x] Future Tech (repeatable research with cumulative bonuses)
+- [x] Research overflow (excess beakers carry to next tech, capped at 500)
 
 ### Not Implemented
 - [ ] Tech brokering rules
 - [ ] "First to discover" bonuses
 - [ ] Tech diffusion (slower research if others have it)
-- [ ] Future techs (repeatable)
 
 ### Files
 - `data/techs.json`
@@ -284,7 +290,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 9: Religion (70% COMPLETE)
+## Phase 9: Religion (90% COMPLETE)
 
 ### Implemented
 - [x] Religion founding via technology
@@ -293,14 +299,16 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] State religion adoption
 - [x] Religious happiness bonuses
 - [x] Missionary unit support
+- [x] Missionary spread religion UI button
+- [x] Religious diplomacy modifiers (shared faith +2 attitude bonus)
+- [x] Theocracy civic blocks non-state religion spread
+- [x] Shrine income (1 gold per city with religion, built by Great Prophet)
+- [x] 7 religion-specific shrines added (Mahabodhi, Kashi Vishwanath, Temple of Solomon, etc.)
 
 ### Not Implemented
 - [ ] Religious buildings per religion (temples, monasteries, cathedrals)
-- [ ] Shrine income based on religion spread
 - [ ] "No state religion" option
 - [ ] Religious victory conditions
-- [ ] Apostolic Palace voting
-- [ ] Religious diplomacy modifiers (shared faith bonus)
 - [ ] Inquisitor units
 
 ### Files
@@ -332,19 +340,22 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 11: Great People (80% COMPLETE)
+## Phase 11: Great People (90% COMPLETE)
 
 ### Implemented
 - [x] Great People point generation
 - [x] GP type weighting based on buildings
 - [x] GP birth in cities
 - [x] GP abilities: settle, golden age, discover tech, trade mission, hurry production, culture bomb, spread religion
+- [x] Golden Age mechanics (+1 production/commerce per productive tile)
+- [x] Golden Age duration tracking and turn processing
+- [x] Golden Age count (affects future GP requirements)
+- [x] Golden Age UI notifications (start/end)
 
 ### Not Implemented
 - [ ] Settled GP tile yield bonuses
 - [ ] Great General attachment to units
 - [ ] Great Spy unit
-- [ ] Golden Age length calculation
 - [ ] GP point display in city screen
 
 ### Files
@@ -452,7 +463,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 14: Corporations (70% COMPLETE)
+## Phase 14: Corporations (80% COMPLETE)
 
 ### Implemented
 - [x] Corporation data with all 7 BTS corporations
@@ -464,11 +475,11 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Headquarters income from foreign cities
 - [x] Tech requirements for corporations
 - [x] Corporation serialization
+- [x] State Property civic blocks all corporations (founding and spreading)
 
 ### Not Implemented
 - [ ] Executive units for spreading (unit data needed)
 - [ ] Corporation screen UI
-- [ ] State Property civic disabling corporations
 - [ ] Corporation buildings in cities
 
 ### Files
@@ -884,4 +895,4 @@ See CLAUDE.md for development guidelines and architecture overview.
 
 ---
 
-*Last updated: January 27, 2026*
+*Last updated: January 28, 2026*

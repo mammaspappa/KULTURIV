@@ -21,6 +21,10 @@ func found_corporation(corporation_id: String, city, founder) -> bool:
 	if corp_data.is_empty():
 		return false
 
+	# Check if player has State Property civic (no corporations allowed)
+	if city.player_owner != null and CivicsSystem.has_civic_effect(city.player_owner, "no_corporations"):
+		return false
+
 	# Check tech requirement
 	var required_tech = corp_data.get("tech_required", "")
 	if required_tech != "" and required_tech not in city.player_owner.researched_techs:
@@ -44,6 +48,10 @@ func spread_corporation(corporation_id: String, city, executive_unit) -> bool:
 
 	if has_corporation(city, corporation_id):
 		return false  # Already has this corporation
+
+	# Check if player has State Property civic (no corporations allowed)
+	if city.player_owner != null and CivicsSystem.has_civic_effect(city.player_owner, "no_corporations"):
+		return false
 
 	var corp_data = DataManager.get_corporation(corporation_id)
 
@@ -223,9 +231,13 @@ func get_corporation_city_count(player, corporation_id: String) -> int:
 	return count
 
 ## Check if a Great Person can found a specific corporation
-func can_found_corporation(gp_type: String, corporation_id: String) -> bool:
+func can_found_corporation(gp_type: String, corporation_id: String, player = null) -> bool:
 	if corporation_id in headquarters:
 		return false  # Already founded
+
+	# Check if player has State Property civic (no corporations allowed)
+	if player != null and CivicsSystem.has_civic_effect(player, "no_corporations"):
+		return false
 
 	var corp_data = DataManager.get_corporation(corporation_id)
 	if corp_data.is_empty():
@@ -237,6 +249,10 @@ func can_found_corporation(gp_type: String, corporation_id: String) -> bool:
 ## Get corporations that can be founded by a Great Person type
 func get_foundable_corporations(gp_type: String, player) -> Array:
 	var foundable = []
+
+	# State Property civic prevents all corporations
+	if player != null and CivicsSystem.has_civic_effect(player, "no_corporations"):
+		return foundable
 
 	for corporation_id in DataManager.corporations:
 		if corporation_id.begins_with("_"):
@@ -264,6 +280,10 @@ func can_spread_to_city(corporation_id: String, city) -> bool:
 		return false
 
 	if has_corporation(city, corporation_id):
+		return false
+
+	# Check if player has State Property civic (no corporations allowed)
+	if city.player_owner != null and CivicsSystem.has_civic_effect(city.player_owner, "no_corporations"):
 		return false
 
 	var corp_data = DataManager.get_corporation(corporation_id)
