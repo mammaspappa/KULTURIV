@@ -335,7 +335,9 @@ func can_build_unit(unit_id: String) -> bool:
 func _is_unit_replaced_by_unique(unit_id: String) -> bool:
 	# Search all units to find if any unique unit replaces this one for our civ
 	for check_unit_id in DataManager.units:
-		var check_unit = DataManager.units[check_unit_id]
+		var check_unit = DataManager.get_unit(check_unit_id)
+		if check_unit.is_empty():
+			continue
 		if check_unit.get("civilization", "") == civilization_id:
 			if check_unit.get("replaces", "") == unit_id:
 				return true  # Our civ has a unique unit that replaces this one
@@ -366,7 +368,9 @@ func can_build_building(building_id: String) -> bool:
 func _is_building_replaced_by_unique(building_id: String) -> bool:
 	# Search all buildings to find if any unique building replaces this one for our civ
 	for check_building_id in DataManager.buildings:
-		var check_building = DataManager.buildings[check_building_id]
+		var check_building = DataManager.get_building(check_building_id)
+		if check_building.is_empty():
+			continue
 		if check_building.get("civilization", "") == civilization_id:
 			if check_building.get("replaces", "") == building_id:
 				return true  # Our civ has a unique building that replaces this one
