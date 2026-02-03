@@ -120,9 +120,17 @@ func _handle_edge_pan(delta: float) -> void:
 			-cylinder_height / 2.0, cylinder_height / 2.0)
 
 func _smooth_camera(delta: float) -> void:
-	orbit_angle = lerp_angle(orbit_angle, target_orbit_angle, smooth_speed * delta)
-	orbit_elevation = lerpf(orbit_elevation, target_orbit_elevation, smooth_speed * delta)
-	orbit_distance = lerpf(orbit_distance, target_orbit_distance, smooth_speed * delta)
+	var t: float = minf(smooth_speed * delta, 1.0)
+	orbit_angle = lerp_angle(orbit_angle, target_orbit_angle, t)
+	orbit_elevation = lerpf(orbit_elevation, target_orbit_elevation, t)
+	orbit_distance = lerpf(orbit_distance, target_orbit_distance, t)
+	# Snap to target when close to prevent endless micro-oscillation
+	if absf(angle_difference(orbit_angle, target_orbit_angle)) < 0.0001:
+		orbit_angle = target_orbit_angle
+	if absf(orbit_elevation - target_orbit_elevation) < 0.0001:
+		orbit_elevation = target_orbit_elevation
+	if absf(orbit_distance - target_orbit_distance) < 0.001:
+		orbit_distance = target_orbit_distance
 
 func _apply_transform() -> void:
 	var dist: float = cylinder_radius + orbit_distance
