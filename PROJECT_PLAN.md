@@ -837,7 +837,119 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 19: Sound & Music (NOT STARTED)
+## Phase 19: 3D Cylinder Map (NOT STARTED)
+
+### Overview
+Migrate the flat 2D tile map onto a 3D cylinder to achieve natural horizontal wrapping. Each tile becomes a quad on the cylinder surface. The camera orbits the cylinder, giving seamless wrap with no edge duplication or ghost entities needed.
+
+### Architecture
+
+**Scene Structure:**
+```
+GameWorld (Node3D)
+├── CylinderMap (Node3D)
+│   ├── TileMeshes (MultiMeshInstance3D per terrain type)
+│   └── EntityLayer (Node3D)  — units/cities as 3D sprites or quads
+├── GameCamera3D (Camera3D)
+│   └── Orbits around Y-axis, dollies along Y-axis for vertical pan
+└── UILayer (CanvasLayer)  — remains 2D overlay
+```
+
+**Cylinder Geometry:**
+- Cylinder axis = Y (vertical)
+- Radius R chosen so that circumference = map_width * TILE_SIZE: `R = (map_width * TILE_SIZE) / (2 * PI)`
+- Cylinder height = map_height * TILE_SIZE
+- Each tile at grid (x, y) maps to angle `theta = (x / map_width) * 2 * PI` and height `h = y * TILE_SIZE`
+- Tile quad corners:
+  ```
+  theta0 = (x / width) * TAU
+  theta1 = ((x+1) / width) * TAU
+  y0 = y * TILE_SIZE
+  y1 = (y+1) * TILE_SIZE
+  top_left  = Vector3(R * cos(theta0), -y0, R * sin(theta0))
+  top_right = Vector3(R * cos(theta1), -y0, R * sin(theta1))
+  bot_left  = Vector3(R * cos(theta0), -y1, R * sin(theta0))
+  bot_right = Vector3(R * cos(theta1), -y1, R * sin(theta1))
+  ```
+
+### Implementation Steps
+
+**Step 1: CylinderMapRenderer (new file: `scripts/map/cylinder_map.gd`)**
+- Extends Node3D
+- Builds mesh geometry: one quad per tile placed on cylinder surface
+- Uses MultiMesh or SurfaceTool for batched rendering
+- Each tile's terrain/feature determines material/color
+- Normals point outward from cylinder center
+- UV mapping for texture atlases if needed
+
+**Step 2: Camera3D Orbital Controller (new file: `scripts/core/game_camera_3d.gd`)**
+- Orbits around Y-axis (horizontal pan = rotation around cylinder)
+- Translates along Y-axis (vertical pan = camera height)
+- Zoom = adjust distance from cylinder surface (dolly in/out)
+- Mouse wheel → change orbit radius
+- WASD/arrows/edge pan → rotate orbit angle and vertical offset
+- Left click → raycast from camera to cylinder surface → map to grid position
+- Right click → same raycast for unit commands
+
+**Step 3: Coordinate Conversion**
+- `grid_to_cylinder(pos: Vector2i) -> Vector3`: convert grid position to 3D point on surface
+- `cylinder_to_grid(world_pos: Vector3) -> Vector2i`: convert 3D point back to grid (atan2 for angle → x, height → y)
+- `screen_to_grid(screen_pos: Vector2) -> Vector2i`: camera raycast → intersect cylinder → grid coords
+- Wrapping is automatic: angle wraps naturally via atan2
+
+**Step 4: Entity Rendering on Cylinder**
+- Units and cities rendered as Billboard3D or Sprite3D placed on cylinder surface
+- Position = `grid_to_cylinder(entity.grid_position)` offset slightly outward (R + epsilon)
+- Face outward from cylinder center (look_at cylinder axis)
+- Selection highlights, movement overlays also placed on surface
+
+**Step 5: Tile Interaction**
+- Replace pixel_to_grid with raycast-based picking
+- PhysicsServer3D ray query from camera through mouse position
+- Intersect with cylinder collision shape or use mathematical ray-cylinder intersection
+- Convert hit point to grid coordinates
+
+**Step 6: Migrate Existing Systems**
+- GameGrid remains the authoritative data store (Dictionary of Vector2i → GameTile)
+- Only rendering changes from 2D draw to 3D mesh
+- All game logic (pathfinding, combat, diplomacy) unchanged
+- UI overlays (city screen, tech tree, diplomacy) remain CanvasLayer 2D
+- Fog of war → per-tile vertex color alpha or shader uniform
+
+### Key Considerations
+
+**Performance:**
+- MultiMeshInstance3D for terrain tiles (one per terrain type) — single draw call per type
+- LOD: at far zoom, reduce mesh detail or switch to texture
+- Frustum culling handled automatically by Godot 3D renderer
+- Typical map 80x50 = 4000 quads — well within budget
+
+**Visual:**
+- At normal zoom, curvature barely visible (large radius cylinder looks flat)
+- Panning feels identical to 2D but wraps seamlessly
+- Zooming out reveals the cylindrical shape — a distinctive visual feature
+- Poles (top/bottom of cylinder) have natural map boundaries
+
+**Migration Path:**
+- Keep 2D rendering as fallback (toggle in settings)
+- 3D mode shares all game data and logic
+- Only rendering and input layers change
+
+### Files
+- NEW: `scripts/map/cylinder_map.gd` — 3D cylinder mesh builder
+- NEW: `scripts/core/game_camera_3d.gd` — Orbital camera controller
+- MODIFY: `scripts/core/game_world.gd` — Toggle between 2D/3D renderers
+- MODIFY: `scripts/map/grid_utils.gd` — Add grid_to_cylinder / cylinder_to_grid
+- MODIFY: `scripts/entities/unit.gd` — 3D positioning for sprite
+- MODIFY: `scripts/entities/city.gd` — 3D positioning for sprite
+
+### Priority: Medium
+### Complexity: High
+### Dependencies: None (all game logic stays 2D grid-based)
+
+---
+
+## Phase 20: Sound & Music (NOT STARTED)
 
 ### To Implement
 - [ ] Background music per era

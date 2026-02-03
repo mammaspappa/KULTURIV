@@ -262,6 +262,13 @@ func _select_unit(unit) -> void:
 
 ## Center the camera on a unit
 func _center_camera_on_unit(unit) -> void:
+	# Prefer 3D camera
+	var camera_3d = GameManager.get_meta("camera_3d") if GameManager.has_meta("camera_3d") else null
+	if camera_3d:
+		camera_3d.center_on_grid(unit.grid_position)
+		return
+
+	# Fallback: look for 2D camera
 	if GameManager.game_world == null:
 		return
 

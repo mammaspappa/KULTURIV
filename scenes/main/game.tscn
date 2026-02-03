@@ -11,17 +11,22 @@
 [ext_resource type="PackedScene" uid="uid://dw3kpm8t7qr5n" path="res://scenes/ui/trade_screen.tscn" id="9_trade"]
 [ext_resource type="PackedScene" uid="uid://cx9k4pm7t8r2q" path="res://scenes/ui/diplomacy_screen.tscn" id="10_diplomacy"]
 
-[node name="Game" type="Node2D"]
+[node name="Game" type="Node3D"]
 script = ExtResource("1_game")
 
-[node name="GameWorld" type="Node2D" parent="."]
+[node name="MapViewport" type="SubViewport" parent="."]
+size = Vector2i(5120, 3200)
+render_target_update_mode = 4
+handle_input_locally = false
+
+[node name="GameWorld" type="Node2D" parent="MapViewport"]
 script = ExtResource("2_game_world")
 
-[node name="GridLayer" type="Node2D" parent="GameWorld"]
+[node name="GridLayer" type="Node2D" parent="MapViewport/GameWorld"]
 
-[node name="EntityLayer" type="Node2D" parent="GameWorld"]
+[node name="EntityLayer" type="Node2D" parent="MapViewport/GameWorld"]
 
-[node name="UILayer" type="CanvasLayer" parent="GameWorld"]
+[node name="UILayer" type="CanvasLayer" parent="MapViewport/GameWorld"]
 
 [node name="ScreenUILayer" type="CanvasLayer" parent="."]
 layer = 10

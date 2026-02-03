@@ -125,6 +125,28 @@ func _update_viewport_rect() -> void:
 		viewport_rect.visible = false
 		return
 
+	# Use 3D camera if available, fall back to 2D camera
+	var camera_3d = GameManager.get_meta("camera_3d") if GameManager.has_meta("camera_3d") else null
+	if camera_3d != null:
+		viewport_rect.visible = true
+		var center_grid = camera_3d.get_view_center_grid()
+		var visible_w = camera_3d.get_visible_tile_width()
+		var visible_h = camera_3d.get_visible_tile_height()
+
+		var scale_x = minimap_size.x / GameManager.map_width
+		var scale_y = minimap_size.y / GameManager.map_height
+
+		var half_w = visible_w / 2.0
+		var half_h = visible_h / 2.0
+
+		viewport_rect.position = Vector2(
+			(center_grid.x - half_w) * scale_x,
+			(center_grid.y - half_h) * scale_y)
+		viewport_rect.size = Vector2(visible_w * scale_x, visible_h * scale_y)
+		viewport_rect.size = viewport_rect.size.clamp(Vector2(10, 10), minimap_size)
+		return
+
+	# Fallback: 2D camera path
 	var camera = get_viewport().get_camera_2d()
 	if camera == null:
 		viewport_rect.visible = false
@@ -132,16 +154,13 @@ func _update_viewport_rect() -> void:
 
 	viewport_rect.visible = true
 
-	# Calculate viewport position on minimap
 	var viewport_size = get_viewport().get_visible_rect().size
 	var camera_pos = camera.global_position
 	var zoom = camera.zoom
 
-	# Convert to grid coordinates
 	var top_left_grid = GridUtils.pixel_to_grid(camera_pos - viewport_size / (2.0 * zoom))
 	var bottom_right_grid = GridUtils.pixel_to_grid(camera_pos + viewport_size / (2.0 * zoom))
 
-	# Convert to minimap coordinates
 	var scale_x = minimap_size.x / GameManager.map_width
 	var scale_y = minimap_size.y / GameManager.map_height
 
@@ -150,8 +169,6 @@ func _update_viewport_rect() -> void:
 		(bottom_right_grid.x - top_left_grid.x) * scale_x,
 		(bottom_right_grid.y - top_left_grid.y) * scale_y
 	)
-
-	# Clamp size
 	viewport_rect.size = viewport_rect.size.clamp(Vector2(10, 10), minimap_size)
 
 func _gui_input(event: InputEvent) -> void:
@@ -174,7 +191,13 @@ func _handle_minimap_click(local_pos: Vector2) -> void:
 	grid_x = clamp(grid_x, 0, GameManager.map_width - 1)
 	grid_y = clamp(grid_y, 0, GameManager.map_height - 1)
 
-	# Pan camera to location
+	# Pan camera to location (prefer 3D camera)
+	var camera_3d = GameManager.get_meta("camera_3d") if GameManager.has_meta("camera_3d") else null
+	if camera_3d:
+		camera_3d.center_on_grid(Vector2i(grid_x, grid_y))
+		return
+
+	# Fallback: 2D camera
 	var camera = get_viewport().get_camera_2d()
 	if camera and camera is GameCamera:
 		camera.center_on_grid(Vector2i(grid_x, grid_y))

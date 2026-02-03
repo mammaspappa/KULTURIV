@@ -43,6 +43,11 @@ BorderSystem="*res://scripts/systems/border_system.gd"
 GoodyHutsSystem="*res://scripts/systems/goody_huts_system.gd"
 BarbarianSystem="*res://scripts/systems/barbarian_system.gd"
 
+[debug]
+
+file_logging/enable_file_logging=true
+file_logging/log_path="//home/localuser/KULTURIV/godot.log"
+
 [display]
 
 window/size/viewport_width=1920

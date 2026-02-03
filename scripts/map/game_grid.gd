@@ -5,7 +5,7 @@ extends Node2D
 # Map dimensions
 var width: int = 80
 var height: int = 50
-var wrap_x: bool = false
+var wrap_x: bool = true
 var wrap_y: bool = false
 
 # Tile storage
@@ -373,7 +373,7 @@ func to_dict() -> Dictionary:
 func from_dict(data: Dictionary) -> void:
 	width = data.get("width", 80)
 	height = data.get("height", 50)
-	wrap_x = data.get("wrap_x", false)
+	wrap_x = data.get("wrap_x", true)
 	wrap_y = data.get("wrap_y", false)
 
 	# Clear existing

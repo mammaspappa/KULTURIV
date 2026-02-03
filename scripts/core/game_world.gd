@@ -11,7 +11,6 @@ const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
 
 # References
 var game_grid = null  # GameGrid (untyped to avoid load-order issues)
-var game_camera: GameCamera = null
 
 # Selection state
 var selected_unit = null  # Unit (untyped to avoid load-order issues)
@@ -153,12 +152,6 @@ func initialize_game(settings: Dictionary) -> void:
 	game_grid.generate_map(map_width, map_height)
 	print("[DEBUG] Map generated: %dx%d, tiles count: %d" % [map_width, map_height, game_grid.tiles.size()])
 
-	# Create camera
-	game_camera = GameCamera.new()
-	game_camera.set_map_bounds(map_width, map_height)
-	add_child(game_camera)
-	print("[DEBUG] Camera created, position: %s, zoom: %s" % [game_camera.position, game_camera.zoom])
-
 	# Connect grid signals
 	game_grid.tile_clicked.connect(_on_tile_clicked)
 
@@ -170,10 +163,7 @@ func initialize_game(settings: Dictionary) -> void:
 	TurnManager.start_game()
 	print("[DEBUG] Game started, turn: %d" % TurnManager.current_turn)
 
-	# Center camera on human player's starting location
-	if GameManager.human_player and GameManager.human_player.units.size() > 0:
-		var start_unit = GameManager.human_player.units[0]
-		game_camera.center_on_grid(start_unit.grid_position)
+	# Note: Camera centering is handled by game.gd (the 3D camera)
 
 func _place_starting_units() -> void:
 	var start_positions: Array[Vector2i] = []
@@ -206,8 +196,12 @@ func _find_adjacent_land(pos: Vector2i) -> Vector2i:
 	return pos  # Fallback to same position
 
 func _handle_left_click(screen_pos: Vector2) -> void:
-	var world_pos = game_camera.get_global_mouse_position() if game_camera else get_global_mouse_position()
-	var grid_pos = GridUtils.pixel_to_grid(world_pos)
+	var raycast = GameManager.get_meta("input_raycast") if GameManager.has_meta("input_raycast") else null
+	if raycast == null:
+		return
+	var grid_pos = raycast.screen_to_grid(screen_pos)
+	if grid_pos == Vector2i(-1, -1):
+		return
 
 	# Check for unit at click position
 	var clicked_unit = _get_unit_at_screen_pos(grid_pos)
@@ -233,8 +227,12 @@ func _handle_left_click(screen_pos: Vector2) -> void:
 	_deselect_all()
 
 func _handle_right_click(screen_pos: Vector2) -> void:
-	var world_pos = game_camera.get_global_mouse_position() if game_camera else get_global_mouse_position()
-	var grid_pos = GridUtils.pixel_to_grid(world_pos)
+	var raycast = GameManager.get_meta("input_raycast") if GameManager.has_meta("input_raycast") else null
+	if raycast == null:
+		return
+	var grid_pos = raycast.screen_to_grid(screen_pos)
+	if grid_pos == Vector2i(-1, -1):
+		return
 
 	# If unit selected, try to move or attack
 	if selected_unit:
@@ -386,11 +384,17 @@ func _clear_movement_overlay() -> void:
 func _update_path_preview() -> void:
 	_clear_path_preview()
 
-	if not selected_unit or not game_camera:
+	if not selected_unit:
 		return
 
-	var world_pos = game_camera.get_global_mouse_position()
-	var target_pos = GridUtils.pixel_to_grid(world_pos)
+	var raycast = GameManager.get_meta("input_raycast") if GameManager.has_meta("input_raycast") else null
+	if raycast == null:
+		return
+
+	var mouse_pos = get_tree().root.get_mouse_position()
+	var target_pos = raycast.screen_to_grid(mouse_pos)
+	if target_pos == Vector2i(-1, -1):
+		return
 
 	if target_pos not in reachable_tiles:
 		return
