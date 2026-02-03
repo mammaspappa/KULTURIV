@@ -197,10 +197,6 @@ func _complete_build(worker) -> void:
 
 	tile.update_visuals()
 
-	# Update wrap visuals for cylindrical map
-	if GameManager.hex_grid:
-		GameManager.hex_grid.update_wrap_tile(worker.grid_position)
-
 	EventBus.tile_improved.emit(worker.grid_position, improvement_id)
 
 	_clear_build_order(worker)

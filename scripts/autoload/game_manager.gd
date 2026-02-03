@@ -7,7 +7,7 @@ const PlayerClass = preload("res://scripts/core/player.gd")
 # Game settings
 var map_width: int = 80
 var map_height: int = 50
-var wrap_x: bool = true  # Cylindrical map
+var wrap_x: bool = false
 var wrap_y: bool = false
 
 # Game state

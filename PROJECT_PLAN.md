@@ -57,13 +57,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Resources (strategic, luxury, bonus)
 - [x] Tile improvements (farm, mine, cottage, road, railroad, etc.)
 - [x] Fog of war and visibility system
-- [x] Cylindrical map wrapping (X-axis)
 - [x] A* pathfinding
 - [x] Road-to-road movement bonus (1/3 movement cost)
 - [x] Railroad-to-railroad movement bonus (0.1 movement cost)
 
 ### Not Implemented
-- [ ] Resources hidden on tiles until right tech discovered. (Bronze Working reveals copper, Iron Working reveals iron, Animal Husbandry reveals Horses and so on) Check Reference for more information. 
+- [ ] Resources hidden on tiles until right tech discovered. (Bronze Working reveals copper, Iron Working reveals iron, Animal Husbandry reveals Horses and so on) Check Reference for more information.
 
 
 ### Files

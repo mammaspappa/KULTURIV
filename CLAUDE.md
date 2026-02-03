@@ -115,7 +115,7 @@ KULTURIV/
 ### Coordinate System
 - Uses **square grid** with 8-directional movement
 - Tile size: 64x64 pixels
-- Map wraps on X-axis (cylindrical), not Y-axis
+- Map does not wrap (flat map with clamped edges)
 - Conversion: `GridUtils.grid_to_pixel()` / `GridUtils.pixel_to_grid()`
 
 ## Implemented Systems

@@ -5,17 +5,11 @@ extends Node2D
 # Map dimensions
 var width: int = 80
 var height: int = 50
-var wrap_x: bool = true
+var wrap_x: bool = false
 var wrap_y: bool = false
 
 # Tile storage
 var tiles: Dictionary = {}  # Vector2i -> GameTile
-
-# Wrap visual copies (for cylindrical display)
-var left_wrap_container: Node2D
-var right_wrap_container: Node2D
-var wrap_tiles_left: Dictionary = {}  # Vector2i -> GameTile (visual copies)
-var wrap_tiles_right: Dictionary = {}  # Vector2i -> GameTile (visual copies)
 
 # Map generation settings
 var sea_level: float = 0.4
@@ -85,10 +79,6 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 
 	# Ensure starting locations have good terrain
 	_prepare_starting_locations()
-
-	# Create visual wrap copies for cylindrical display
-	if wrap_x:
-		_create_wrap_visuals()
 
 	map_generated.emit()
 
@@ -250,86 +240,6 @@ func _add_goody_huts() -> void:
 
 	print("[MapGen] Placed %d goody huts" % placed)
 
-## Width of edge strip to duplicate for wrap visuals (in tiles)
-const WRAP_EDGE_WIDTH: int = 20
-
-## Create visual copies of edge tiles for cylindrical wrapping
-## Only creates a strip of tiles at each edge to minimize overhead
-func _create_wrap_visuals() -> void:
-	# Clear existing wrap visuals
-	if left_wrap_container:
-		left_wrap_container.queue_free()
-	if right_wrap_container:
-		right_wrap_container.queue_free()
-	wrap_tiles_left.clear()
-	wrap_tiles_right.clear()
-
-	# Create containers for wrap visuals
-	# Left container shows the RIGHT edge of the map (appears when camera is at left edge)
-	left_wrap_container = Node2D.new()
-	left_wrap_container.name = "LeftWrapContainer"
-	left_wrap_container.position.x = -width * GridUtils.TILE_SIZE
-	add_child(left_wrap_container)
-
-	# Right container shows the LEFT edge of the map (appears when camera is at right edge)
-	right_wrap_container = Node2D.new()
-	right_wrap_container.name = "RightWrapContainer"
-	right_wrap_container.position.x = width * GridUtils.TILE_SIZE
-	add_child(right_wrap_container)
-
-	# Determine how many edge columns to duplicate (based on typical screen width)
-	var edge_width = min(WRAP_EDGE_WIDTH, width / 2)
-
-	# Create copies of edge tiles only
-	for y in range(height):
-		# Right edge tiles -> appear in left wrap container
-		for x in range(width - edge_width, width):
-			var pos = Vector2i(x, y)
-			if pos in tiles:
-				var left_tile = GameTile.new(pos)
-				left_tile.copy_from(tiles[pos])
-				wrap_tiles_left[pos] = left_tile
-				left_wrap_container.add_child(left_tile)
-
-		# Left edge tiles -> appear in right wrap container
-		for x in range(edge_width):
-			var pos = Vector2i(x, y)
-			if pos in tiles:
-				var right_tile = GameTile.new(pos)
-				right_tile.copy_from(tiles[pos])
-				wrap_tiles_right[pos] = right_tile
-				right_wrap_container.add_child(right_tile)
-
-	print("[MapGen] Created wrap visuals: %d left, %d right tiles" % [wrap_tiles_left.size(), wrap_tiles_right.size()])
-
-## Update the wrap tile visuals to match the main tiles
-func update_wrap_visuals() -> void:
-	if not wrap_x:
-		return
-
-	for pos in tiles:
-		var original_tile = tiles[pos]
-
-		if pos in wrap_tiles_left:
-			wrap_tiles_left[pos].copy_from(original_tile)
-		if pos in wrap_tiles_right:
-			wrap_tiles_right[pos].copy_from(original_tile)
-
-## Update a single tile's wrap copies (call when tile state changes)
-func update_wrap_tile(pos: Vector2i) -> void:
-	if not wrap_x:
-		return
-
-	if pos not in tiles:
-		return
-
-	var original_tile = tiles[pos]
-
-	if pos in wrap_tiles_left:
-		wrap_tiles_left[pos].copy_from(original_tile)
-	if pos in wrap_tiles_right:
-		wrap_tiles_right[pos].copy_from(original_tile)
-
 # Tile access
 func get_tile(pos: Vector2i) -> GameTile:
 	var wrapped_pos = _wrap_position(pos)
@@ -445,8 +355,6 @@ func _input(event: InputEvent) -> void:
 func update_all_tiles() -> void:
 	for tile in tiles.values():
 		tile.update_visuals()
-	# Also update wrap visuals
-	update_wrap_visuals()
 
 # Serialization
 func to_dict() -> Dictionary:
@@ -465,23 +373,13 @@ func to_dict() -> Dictionary:
 func from_dict(data: Dictionary) -> void:
 	width = data.get("width", 80)
 	height = data.get("height", 50)
-	wrap_x = data.get("wrap_x", true)
+	wrap_x = data.get("wrap_x", false)
 	wrap_y = data.get("wrap_y", false)
 
 	# Clear existing
 	for tile in tiles.values():
 		tile.queue_free()
 	tiles.clear()
-
-	# Clear wrap visuals
-	if left_wrap_container:
-		left_wrap_container.queue_free()
-		left_wrap_container = null
-	if right_wrap_container:
-		right_wrap_container.queue_free()
-		right_wrap_container = null
-	wrap_tiles_left.clear()
-	wrap_tiles_right.clear()
 
 	# Load tiles
 	var tiles_data = data.get("tiles", {})
@@ -492,7 +390,3 @@ func from_dict(data: Dictionary) -> void:
 		tile.from_dict(tiles_data[key])
 		tiles[pos] = tile
 		add_child(tile)
-
-	# Recreate wrap visuals
-	if wrap_x:
-		_create_wrap_visuals()
