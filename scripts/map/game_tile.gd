@@ -31,20 +31,12 @@ enum VisibilityState { UNEXPLORED, FOGGED, VISIBLE }
 func _init(pos: Vector2i = Vector2i.ZERO) -> void:
 	grid_position = pos
 	position = GridUtils.grid_to_pixel_corner(grid_position)
-	# Debug only for first tile
-	if pos == Vector2i(0, 0):
-		print("[DEBUG] Tile(0,0) created at position: %s" % position)
-
 func _draw() -> void:
 	# Check visibility for human player
 	var human_player = GameManager.human_player
 	var vis_state = VisibilityState.VISIBLE  # Default to visible if no human player
 	if human_player != null:
 		vis_state = get_visibility_for_player(human_player.player_id)
-
-	# Debug output for tile at (0,0) to check visibility system
-	if grid_position == Vector2i(0, 0):
-		print("[DEBUG] Tile(0,0) _draw: human_player=%s, vis_state=%d, visibility dict=%s" % [human_player, vis_state, visibility])
 
 	# Don't render unexplored tiles
 	if vis_state == VisibilityState.UNEXPLORED:

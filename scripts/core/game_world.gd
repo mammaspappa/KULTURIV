@@ -139,29 +139,24 @@ func _process(_delta: float) -> void:
 
 ## Initialize the game world with generated map
 func initialize_game(settings: Dictionary) -> void:
-	print("[DEBUG] initialize_game() starting")
 	# Create grid
 	game_grid = GameGrid.new()
 	grid_layer.add_child(game_grid)
 	GameManager.game_grid = game_grid
-	print("[DEBUG] GameManager.game_grid set, hex_grid is: ", GameManager.hex_grid)
 
 	# Generate map
 	var map_width = settings.get("map_width", 40)
 	var map_height = settings.get("map_height", 25)
 	game_grid.generate_map(map_width, map_height)
-	print("[DEBUG] Map generated: %dx%d, tiles count: %d" % [map_width, map_height, game_grid.tiles.size()])
 
 	# Connect grid signals
 	game_grid.tile_clicked.connect(_on_tile_clicked)
 
 	# Place starting units for players
 	_place_starting_units()
-	print("[DEBUG] Starting units placed, human_player units: %d" % GameManager.human_player.units.size())
 
 	# Start the game
 	TurnManager.start_game()
-	print("[DEBUG] Game started, turn: %d" % TurnManager.current_turn)
 
 	# Note: Camera centering is handled by game.gd (the 3D camera)
 
@@ -541,7 +536,6 @@ func found_city(settler: Unit) -> City:
 func _debug_spawn_unit(unit_type: String) -> void:
 	var player = GameManager.human_player
 	if player == null:
-		print("[DEBUG] No human player")
 		return
 
 	# Find capital (first city or city with palace)
@@ -554,7 +548,6 @@ func _debug_spawn_unit(unit_type: String) -> void:
 		capital = player.cities[0]
 
 	if capital == null:
-		print("[DEBUG] No capital city found")
 		return
 
 	# Find an empty tile near the capital
@@ -572,5 +565,4 @@ func _debug_spawn_unit(unit_type: String) -> void:
 
 	var unit = spawn_unit(unit_type, spawn_pos, player)
 	if unit:
-		print("[DEBUG] Spawned %s at %s" % [unit_type, spawn_pos])
 		_select_unit(unit)

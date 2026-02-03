@@ -137,24 +137,15 @@ func set_map_bounds(width: int, height: int, tile_size: int = 64) -> void:
 	call_deferred("_calculate_min_zoom")
 
 func _calculate_min_zoom() -> void:
-	print("[DEBUG] _calculate_min_zoom called, map_bounds: %s" % map_bounds)
 	if map_bounds.size.x <= 0:
-		print("[DEBUG] map_bounds.size.x <= 0, returning early")
 		return
 
 	var viewport_size = get_viewport_rect().size
-	print("[DEBUG] viewport_size: %s" % viewport_size)
 	if viewport_size.x > 0:
-		# At zoom Z, viewport shows viewport_width / Z pixels
-		# We want: viewport_width / Z = map_width * 0.6
-		# So: Z = viewport_width / (map_width * 0.6)
 		var map_sixty_percent = map_bounds.size.x * 0.6
 		var calculated_min = viewport_size.x / map_sixty_percent
-		# Ensure min_zoom is reasonable (between 0.1 and 1.0)
 		min_zoom = clamp(calculated_min, 0.1, 1.0)
-		# Clamp target zoom if it's now below the new minimum
 		target_zoom = max(target_zoom, min_zoom)
-		print("[DEBUG] min_zoom set to: %f, target_zoom: %f" % [min_zoom, target_zoom])
 
 ## Center camera on a position
 func center_on(world_pos: Vector2) -> void:

@@ -40,14 +40,11 @@ func _ready() -> void:
 	call_deferred("_setup_minimap")
 
 func _setup_minimap() -> void:
-	print("[DEBUG] Minimap _setup_minimap called, hex_grid: ", GameManager.hex_grid)
 	if GameManager.hex_grid == null:
-		print("[DEBUG] Minimap: hex_grid is null, returning early")
 		return
 
 	var width = GameManager.map_width
 	var height = GameManager.map_height
-	print("[DEBUG] Minimap: creating image %dx%d" % [width, height])
 
 	# Create image
 	minimap_image = Image.create(width, height, false, Image.FORMAT_RGBA8)
@@ -64,12 +61,10 @@ func _process(_delta: float) -> void:
 
 func _update_minimap() -> void:
 	if minimap_image == null or GameManager.hex_grid == null:
-		print("[DEBUG] Minimap _update_minimap: early return, image=%s, grid=%s" % [minimap_image, GameManager.hex_grid])
 		return
 
 	var player = GameManager.human_player
 	var player_id = player.player_id if player else -1
-	print("[DEBUG] Minimap _update_minimap: player_id=%d" % player_id)
 
 	var visible_count = 0
 	var fogged_count = 0
@@ -117,7 +112,6 @@ func _update_minimap() -> void:
 
 			minimap_image.set_pixel(x, y, color)
 
-	print("[DEBUG] Minimap visibility counts: visible=%d, fogged=%d, unexplored=%d" % [visible_count, fogged_count, unexplored_count])
 	minimap_texture.update(minimap_image)
 
 func _update_viewport_rect() -> void:
