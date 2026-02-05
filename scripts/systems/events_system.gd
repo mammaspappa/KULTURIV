@@ -23,10 +23,14 @@ var pending_events: Array = []
 var events_enabled: bool = true
 var base_event_chance: int = 10  # % chance per turn per city
 
+# Global event cooldowns (shared across all players)
+var global_event_cooldowns: Dictionary = {}
+
 func _ready() -> void:
 	_load_event_data()
 	EventBus.turn_started.connect(_on_turn_started)
 	EventBus.turn_ended.connect(_on_turn_ended)
+	EventBus.all_turns_completed.connect(_on_all_turns_completed)
 
 func _load_event_data() -> void:
 	var path = "res://data/events.json"
@@ -101,6 +105,132 @@ func _on_turn_ended(_turn_number, player) -> void:
 		if event_cooldowns[player.player_id][event_id] <= 0:
 			event_cooldowns[player.player_id].erase(event_id)
 
+# Check for global events at end of round (after all players have gone)
+func _on_all_turns_completed(_turn_number) -> void:
+	if not events_enabled:
+		return
+
+	# Decrease global cooldowns
+	for event_id in global_event_cooldowns.keys():
+		global_event_cooldowns[event_id] -= 1
+		if global_event_cooldowns[event_id] <= 0:
+			global_event_cooldowns.erase(event_id)
+
+	# Check for global events
+	_check_for_global_events()
+
+func _check_for_global_events() -> void:
+	# Roll for global event chance (lower than regular events)
+	if randi() % 100 >= 5:  # 5% chance per round
+		return
+
+	var valid_events = _get_valid_global_events()
+	if valid_events.is_empty():
+		return
+
+	# Weight-based random selection
+	var total_weight: int = 0
+	for event_id in valid_events:
+		total_weight += int(events[event_id].get("weight", 100))
+
+	var roll = randi() % total_weight
+	var cumulative = 0
+	var selected_event = ""
+
+	for event_id in valid_events:
+		cumulative += events[event_id].get("weight", 100)
+		if roll < cumulative:
+			selected_event = event_id
+			break
+
+	if selected_event != "":
+		_trigger_global_event(selected_event)
+
+func _get_valid_global_events() -> Array:
+	var valid = []
+	var current_turn = TurnManager.current_turn if TurnManager else 0
+
+	for event_id in events:
+		var event = events[event_id]
+
+		# Only consider global events
+		if not event.get("global", false):
+			continue
+
+		var triggers = event.get("triggers", {})
+
+		# Check if non-recurring event already occurred
+		if not event.get("recurring", true):
+			if occurred_events.has(event_id):
+				continue
+
+		# Check global cooldown
+		if global_event_cooldowns.get(event_id, 0) > 0:
+			continue
+
+		# Check global triggers
+		if not _check_global_triggers(triggers, current_turn):
+			continue
+
+		valid.append(event_id)
+
+	return valid
+
+func _check_global_triggers(triggers: Dictionary, current_turn: int) -> bool:
+	# Minimum turn requirement
+	if triggers.get("min_turn", 0) > current_turn:
+		return false
+
+	# Era requirement
+	var req_era = triggers.get("era", "")
+	if req_era != "":
+		var current_era = TurnManager.get_era().to_lower() if TurnManager else ""
+		if current_era != req_era:
+			return false
+
+	# Minimum cities across all players
+	var min_cities = triggers.get("min_cities", 0)
+	if min_cities > 0:
+		var total_cities = 0
+		var players = GameManager.get_all_players() if GameManager else []
+		for player in players:
+			total_cities += player.cities.size()
+		if total_cities < min_cities:
+			return false
+
+	return true
+
+func _trigger_global_event(event_id: String) -> void:
+	var event = events[event_id]
+
+	# Set global cooldown
+	global_event_cooldowns[event_id] = 20  # 20 turn cooldown for global events
+
+	# Mark as occurred for non-recurring events
+	if not event.get("recurring", true):
+		if not occurred_events.has(event_id):
+			occurred_events[event_id] = []
+
+	# Trigger for all players
+	var players = GameManager.get_all_players() if GameManager else []
+	for player in players:
+		if player.cities.is_empty():
+			continue
+
+		# Pick a city (capital if possible)
+		var city = player.cities[0]
+		for c in player.cities:
+			if c.is_capital:
+				city = c
+				break
+
+		_trigger_event(event_id, player, city)
+
+		# Mark player as having experienced this event
+		if not event.get("recurring", true):
+			if not player.player_id in occurred_events[event_id]:
+				occurred_events[event_id].append(player.player_id)
+
 func _check_for_events(player, city) -> void:
 	# Roll for event chance
 	if randi() % 100 >= base_event_chance:
@@ -135,6 +265,11 @@ func _get_valid_events(player, city) -> Array:
 
 	for event_id in events:
 		var event = events[event_id]
+
+		# Skip global events (handled separately)
+		if event.get("global", false):
+			continue
+
 		var triggers = event.get("triggers", {})
 
 		# Check if non-recurring event already occurred for this player

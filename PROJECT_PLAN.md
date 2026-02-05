@@ -20,8 +20,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | Corporations | Enhanced | 95% |
 | Espionage | Enhanced | 95% |
 | Projects | Enhanced | 90% |
-| Events | Basic | 80% |
-| UN/Voting | Enhanced | 90% |
+| Events | Enhanced | 90% |
+| UN/Voting | Enhanced | 95% |
 | Borders | Complete | 100% |
 | Multiplayer | Not Started | 0% |
 
@@ -317,12 +317,14 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Trade screen with gold, gold/turn, resources, technologies
 - [x] Keyboard shortcut (D key)
 
+### Recently Added
+- [x] AI personality in negotiations (trade evaluation uses leader flavor values and relationship modifiers)
+
 ### Not Implemented
 - [ ] Permanent alliances
 - [ ] Tribute demands
 - [ ] Map trading
 - [ ] City trading
-- [ ] AI personality in negotiations
 
 ### Recently Added
 - [x] Border crossing restrictions (own borders, at war, open borders, vassal)
@@ -643,7 +645,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 16: Random Events (80% COMPLETE)
+## Phase 16: Random Events (90% COMPLETE)
 
 ### Implemented
 - [x] Event trigger system with multiple conditions
@@ -686,9 +688,14 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 ### Recently Added
 - [x] AI event handling (evaluates choices based on leader flavor values)
 
+### Recently Added
+- [x] Global events (affect all players simultaneously):
+  - Climate Change (Industrial era, environmental choices)
+  - World's Fair (Renaissance era, cultural exhibition)
+  - Pandemic (affects all civilizations with 3+ cities)
+
 ### Not Implemented
 - [ ] Quest events (multi-turn chains)
-- [ ] Global events (affect all players)
 
 ### Files
 - `scripts/systems/events_system.gd`
@@ -745,7 +752,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 18: United Nations & Voting (90% COMPLETE)
+## Phase 18: United Nations & Voting (95% COMPLETE)
 
 ### Implemented
 - [x] Two vote sources: United Nations and Apostolic Palace
@@ -799,8 +806,10 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 ### Recently Added
 - [x] Defying resolutions penalties (-2 attitude from voters who supported a passed resolution)
 
+### Recently Added
+- [x] Vassal voting (vassals automatically vote with their master)
+
 ### Not Implemented
-- [ ] Vassal voting
 - [ ] Team voting
 
 ### Files

@@ -276,22 +276,48 @@ func evaluate_trade_for_ai(proposal: Dictionary, ai_player_id: int) -> float:
 		return -1000.0
 
 	var is_from = ai_player_id == proposal["from_player_id"]
+	var ai_player = from_player if is_from else to_player
+	var other_player = to_player if is_from else from_player
 	var ai_receives = proposal["to_offers"] if is_from else proposal["from_offers"]
 	var ai_gives = proposal["from_offers"] if is_from else proposal["to_offers"]
 
-	# Value what AI receives
-	score += ai_receives["gold"] * 1.0
-	score += ai_receives["gold_per_turn"] * proposal["duration"] * 0.8
-	score += ai_receives["resources"].size() * 30.0
-	score += ai_receives["techs"].size() * 100.0
+	# Get AI leader flavor values for personality-based evaluation
+	var flavor = _get_leader_flavor(ai_player)
+	var gold_flavor = flavor.get("gold", 5) / 5.0  # Normalize around 1.0
+	var science_flavor = flavor.get("science", 5) / 5.0
 
-	# Subtract what AI gives
-	score -= ai_gives["gold"] * 1.0
-	score -= ai_gives["gold_per_turn"] * proposal["duration"] * 0.8
+	# Value what AI receives (modified by personality)
+	score += ai_receives["gold"] * 1.0 * gold_flavor
+	score += ai_receives["gold_per_turn"] * proposal["duration"] * 0.8 * gold_flavor
+	score += ai_receives["resources"].size() * 30.0
+	score += ai_receives["techs"].size() * 100.0 * science_flavor
+
+	# Subtract what AI gives (modified by personality)
+	score -= ai_gives["gold"] * 1.0 * gold_flavor
+	score -= ai_gives["gold_per_turn"] * proposal["duration"] * 0.8 * gold_flavor
 	score -= ai_gives["resources"].size() * 35.0  # AI values own resources slightly more
-	score -= ai_gives["techs"].size() * 120.0  # AI is reluctant to give techs
+	score -= ai_gives["techs"].size() * 120.0 * science_flavor  # AI is reluctant to give techs
+
+	# Relationship modifier - friendly AI is more generous
+	var relations = ai_player.get_relationship(other_player.player_id)
+	match relations:
+		"friendly": score += 30
+		"pleased": score += 15
+		"cautious": score += 0
+		"annoyed": score -= 20
+		"furious": score -= 50
+
+	# Vassal modifier - vassals are more generous to their master
+	if ai_player.is_vassal_of(other_player.player_id):
+		score += 40
 
 	return score
+
+func _get_leader_flavor(player) -> Dictionary:
+	if player == null or player.leader_id == "":
+		return {"gold": 5, "science": 5, "military": 5, "culture": 5, "religion": 5}
+	var leader = DataManager.get_leader(player.leader_id)
+	return leader.get("flavor", {"gold": 5, "science": 5, "military": 5, "culture": 5, "religion": 5})
 
 ## Check if AI would accept a trade
 func would_ai_accept(proposal: Dictionary, ai_player_id: int) -> bool:

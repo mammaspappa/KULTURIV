@@ -629,5 +629,117 @@
 				}
 			}
 		]
+	},
+	"global_warming": {
+		"name": "Climate Change",
+		"description": "Rising temperatures are affecting civilizations across the world!",
+		"category": "global",
+		"weight": 15,
+		"recurring": true,
+		"global": true,
+		"triggers": {
+			"min_turn": 200,
+			"era": "industrial"
+		},
+		"choices": [
+			{
+				"text": "Invest in environmental protection",
+				"effects": {
+					"gold": -100,
+					"health": 2,
+					"health_turns": 20
+				}
+			},
+			{
+				"text": "Focus on adaptation",
+				"effects": {
+					"production_bonus": 10,
+					"production_bonus_turns": 10,
+					"health": -1,
+					"health_turns": 10
+				}
+			},
+			{
+				"text": "Ignore the problem",
+				"effects": {
+					"health": -2,
+					"health_turns": 15
+				}
+			}
+		]
+	},
+	"world_fair": {
+		"name": "World's Fair",
+		"description": "A grand World's Fair is being organized, showcasing achievements of all civilizations!",
+		"category": "global",
+		"weight": 25,
+		"recurring": true,
+		"global": true,
+		"triggers": {
+			"min_turn": 150,
+			"era": "renaissance"
+		},
+		"choices": [
+			{
+				"text": "Host a grand exhibition",
+				"effects": {
+					"gold": -80,
+					"culture_bonus": 50,
+					"happiness": 2,
+					"happiness_turns": 15
+				}
+			},
+			{
+				"text": "Send modest displays",
+				"effects": {
+					"gold": -20,
+					"culture_bonus": 15
+				}
+			},
+			{
+				"text": "Decline participation",
+				"effects": {
+					"diplomatic_penalty": -1
+				}
+			}
+		]
+	},
+	"plague_pandemic": {
+		"name": "Pandemic",
+		"description": "A devastating plague is spreading across all known civilizations!",
+		"category": "global",
+		"weight": 10,
+		"recurring": false,
+		"global": true,
+		"triggers": {
+			"min_turn": 80,
+			"min_cities": 3
+		},
+		"choices": [
+			{
+				"text": "Quarantine major cities",
+				"effects": {
+					"gold": -50,
+					"production_penalty": -10,
+					"production_penalty_turns": 5,
+					"population": -1
+				}
+			},
+			{
+				"text": "Invest in medicine",
+				"effects": {
+					"gold": -150,
+					"research_bonus": 30
+				}
+			},
+			{
+				"text": "Hope for the best",
+				"effects": {
+					"population": -2,
+					"health": -3,
+					"health_turns": 10
+				}
+			}
+		]
 	}
 }

@@ -207,6 +207,62 @@ func _initiate_secretary_election(source_id: String) -> void:
 
 	EventBus.secretary_election_started.emit(source_id, candidates)
 
+	# AI players vote immediately in elections
+	var players = GameManager.get_all_players() if GameManager else []
+	for player in players:
+		if not player.is_human and _is_eligible_voter(player.player_id, source_id):
+			var candidate = _ai_choose_secretary_candidate(player.player_id, candidates, source_id)
+			cast_secretary_vote(player.player_id, candidate)
+
+func _ai_choose_secretary_candidate(player_id: int, candidates: Array, source_id: String) -> int:
+	var player = GameManager.get_player(player_id) if GameManager else null
+	if player == null or candidates.is_empty():
+		return candidates[0].player_id if candidates.size() > 0 else -1
+
+	# Vassal voting: vote for whoever master votes for
+	if player.is_vassal():
+		var master = GameManager.get_player(player.master_id)
+		if master:
+			# If master already voted, follow their vote
+			if pending_vote.votes.has(player.master_id):
+				return pending_vote.votes[player.master_id].candidate
+			# If master is a candidate, vote for them
+			for candidate in candidates:
+				if candidate.player_id == player.master_id:
+					return player.master_id
+			# Otherwise determine what master would choose
+			return _ai_choose_secretary_candidate(player.master_id, candidates, source_id)
+
+	# Vote for self if a candidate
+	for candidate in candidates:
+		if candidate.player_id == player_id:
+			return player_id
+
+	# Vote based on relationship with candidates
+	var best_candidate = candidates[0].player_id
+	var best_score = -100
+
+	for candidate in candidates:
+		var score = 0
+		var relations = player.get_relationship(candidate.player_id)
+		match relations:
+			"friendly": score = 10
+			"pleased": score = 5
+			"cautious": score = 0
+			"annoyed": score = -5
+			"furious": score = -10
+
+		# Bonus for shared religion
+		var cand_player = GameManager.get_player(candidate.player_id)
+		if cand_player and player.state_religion != "" and player.state_religion == cand_player.state_religion:
+			score += 3
+
+		if score > best_score:
+			best_score = score
+			best_candidate = candidate.player_id
+
+	return best_candidate
+
 func _get_secretary_candidates(source_id: String) -> Array:
 	# Top 2 vote power players are candidates
 	var players = GameManager.get_all_players() if GameManager else []
@@ -559,6 +615,20 @@ func _ai_choose_resolution(player_id: int, available: Array, source_id: String) 
 	return ""
 
 func _ai_decide_vote(player_id: int, resolution_id: String, proposer_id: int, target) -> bool:
+	var player = GameManager.get_player(player_id) if GameManager else null
+	if player == null:
+		return randf() > 0.5
+
+	# Vassal voting: vassals always vote with their master
+	if player.is_vassal():
+		var master = GameManager.get_player(player.master_id)
+		if master:
+			# Check if master has already voted
+			if pending_vote.votes.has(player.master_id):
+				return pending_vote.votes[player.master_id].vote_for
+			# Otherwise, determine what master would vote
+			return _ai_decide_vote(player.master_id, resolution_id, proposer_id, target)
+
 	var resolution = resolutions.get(resolution_id, {})
 	var effects = resolution.get("effects", {})
 
@@ -567,9 +637,8 @@ func _ai_decide_vote(player_id: int, resolution_id: String, proposer_id: int, ta
 		if player_id == proposer_id:
 			return true
 		# Check relationship
-		var player = GameManager.get_player(player_id) if GameManager else null
 		var proposer = GameManager.get_player(proposer_id) if GameManager else null
-		if player and proposer:
+		if proposer:
 			var relations = player.get_relationship(proposer_id)
 			return relations in ["friendly", "pleased"]
 
@@ -582,13 +651,11 @@ func _ai_decide_vote(player_id: int, resolution_id: String, proposer_id: int, ta
 		return false
 
 	# Most other resolutions: vote based on relationship with proposer
-	var player = GameManager.get_player(player_id) if GameManager else null
-	if player:
-		var relations = player.get_relationship(proposer_id)
-		if relations in ["friendly", "pleased"]:
-			return true
-		elif relations in ["furious", "annoyed"]:
-			return false
+	var relations = player.get_relationship(proposer_id)
+	if relations in ["friendly", "pleased"]:
+		return true
+	elif relations in ["furious", "annoyed"]:
+		return false
 
 	return randf() > 0.5  # Random tie-breaker
 
