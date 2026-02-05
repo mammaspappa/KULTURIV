@@ -86,6 +86,10 @@ func _start_turn_for_player(player) -> void:
 	# Emit turn_started AFTER movement is refreshed so UI updates correctly
 	EventBus.turn_started.emit(current_turn, player)
 
+	# If human player has no research, open tech tree
+	if player.is_human and player.current_research == "":
+		EventBus.show_tech_tree.emit()
+
 	# If AI, execute AI turn
 	if not player.is_human:
 		_execute_ai_turn(player)

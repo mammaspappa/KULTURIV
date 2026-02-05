@@ -7,7 +7,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | Category | Status | Progress |
 |----------|--------|----------|
 | Core Engine | Complete | 100% |
-| Map System | Complete | 100% |
+| Map System | Enhanced | 100% |
 | Units | Enhanced | 98% |
 | Cities | Enhanced | 95% |
 | Combat | Enhanced | 100% |
@@ -61,8 +61,8 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Road-to-road movement bonus (1/3 movement cost)
 - [x] Railroad-to-railroad movement bonus (0.1 movement cost)
 
-### Not Implemented
-- [ ] Resources hidden on tiles until right tech discovered. (Bronze Working reveals copper, Iron Working reveals iron, Animal Husbandry reveals Horses and so on) Check Reference for more information.
+### Recently Added
+- [x] Resources hidden on tiles until right tech discovered (Bronze Working reveals copper, Iron Working reveals iron, Animal Husbandry reveals horses, etc.)
 
 
 ### Files
@@ -121,10 +121,12 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] Unit focus cycling after action (TAB to cycle, PERIOD to skip and cycle)
 - [x] Great General attachment to units (+20% combat strength, +50% XP gain)
 
+### Recently Added
+- [x] Worker can build mine on any tile with visible iron, copper, gems, silver, gold, coal, or uranium
+
 ### Not Implemented
 - [ ] Unit formations and army groups
 - [ ] Check that unique units are identical to Reference
-- [ ] Worker can build mine on any tile which has iron, copper, gems, silver, gold or coal visible.
 
 ### Files
 - `scripts/entities/unit.gd`
@@ -245,8 +247,9 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 - [x] First-to-discover tracking in GameManager
 - [x] Tech diffusion (5% cost reduction per known civ with tech, max 30%)
 
-### Not Implemented
-- [ ] If no research, then open Science screen once per turn
+### Recently Added
+- [x] If no research, tech tree opens automatically at turn start
+
 ### Files
 - `data/techs.json`
 - `scripts/ui/tech_tree.gd`
@@ -837,7 +840,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 19: 3D Cylinder Map (NOT STARTED)
+## Phase 19: 3D Cylinder Map (COMPLETE)
 
 ### Overview
 Migrate the flat 2D tile map onto a 3D cylinder to achieve natural horizontal wrapping. Each tile becomes a quad on the cylinder surface. The camera orbits the cylinder, giving seamless wrap with no edge duplication or ghost entities needed.

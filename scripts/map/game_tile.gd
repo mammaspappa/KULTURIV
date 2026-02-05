@@ -91,6 +91,11 @@ func _draw_resource() -> void:
 	if resource_id == "":
 		return
 
+	# Check if resource is revealed to human player
+	var human_player = GameManager.human_player
+	if human_player != null and not is_resource_visible_to_player(human_player):
+		return
+
 	var resource = DataManager.get_resource(resource_id)
 	if resource.is_empty():
 		return
@@ -247,7 +252,7 @@ func get_defense_bonus() -> float:
 	return bonus
 
 # Yield calculations
-func get_yields() -> Dictionary:
+func get_yields(for_player = null) -> Dictionary:
 	var yields = DataManager.get_terrain_yields(terrain_id).duplicate()
 
 	# Add feature yields
@@ -256,11 +261,17 @@ func get_yields() -> Dictionary:
 		for key in feature_yields:
 			yields[key] = yields.get(key, 0) + feature_yields[key]
 
-	# Add resource yields (only if improved)
+	# Add resource yields (only if improved AND visible to player)
 	if resource_id != "" and _is_resource_improved():
-		var resource_yields = DataManager.get_resource_yields(resource_id)
-		for key in resource_yields:
-			yields[key] = yields.get(key, 0) + resource_yields[key]
+		var resource_visible = true
+		if for_player != null:
+			resource_visible = is_resource_visible_to_player(for_player)
+		elif tile_owner != null:
+			resource_visible = is_resource_visible_to_player(tile_owner)
+		if resource_visible:
+			var resource_yields = DataManager.get_resource_yields(resource_id)
+			for key in resource_yields:
+				yields[key] = yields.get(key, 0) + resource_yields[key]
 
 	# Add improvement yields
 	if improvement_id != "":
@@ -300,15 +311,22 @@ func is_visible_to(player_id: int) -> bool:
 func is_explored_by(player_id: int) -> bool:
 	return get_visibility_for_player(player_id) != VisibilityState.UNEXPLORED
 
+## Check if the resource on this tile is visible to a player (has required tech)
+func is_resource_visible_to_player(player) -> bool:
+	if resource_id == "":
+		return false
+	var resource = DataManager.get_resource(resource_id)
+	if resource.is_empty():
+		return false
+	var revealed_by = resource.get("revealed_by", "")
+	if revealed_by == "":
+		return true  # No tech required, always visible
+	return player.has_tech(revealed_by)
+
 # Improvement building
 func can_build_improvement(improvement_type: String, builder_owner) -> bool:
 	var improvement = DataManager.get_improvement(improvement_type)
 	if improvement.is_empty():
-		return false
-
-	# Check if terrain is valid
-	var valid_terrains = improvement.get("valid_terrains", [])
-	if not valid_terrains.is_empty() and terrain_id not in valid_terrains:
 		return false
 
 	# Check tech requirement
@@ -316,10 +334,26 @@ func can_build_improvement(improvement_type: String, builder_owner) -> bool:
 	if required_tech != "" and not builder_owner.has_tech(required_tech):
 		return false
 
+	# Check if terrain is valid
+	var valid_terrains = improvement.get("valid_terrains", [])
+	var terrain_valid = valid_terrains.is_empty() or terrain_id in valid_terrains
+
+	# Special case: mines can be built on any terrain with mineable resources
+	if improvement_type == "mine" and not terrain_valid:
+		var mineable_resources = ["iron", "copper", "gems", "silver", "gold_resource", "coal", "uranium"]
+		if resource_id in mineable_resources and is_resource_visible_to_player(builder_owner):
+			terrain_valid = true
+
+	if not terrain_valid:
+		return false
+
 	# Check resource requirement
 	var required_resources = improvement.get("requires_resource", [])
 	if not required_resources.is_empty():
 		if resource_id == "" or resource_id not in required_resources:
+			return false
+		# Also check if resource is visible to builder
+		if not is_resource_visible_to_player(builder_owner):
 			return false
 
 	# Check if requires existing improvement
