@@ -555,6 +555,12 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		city.set_production(building_to_build)
 		return
 
+	# Consider projects (high production cities, late game)
+	var project_to_build = _get_best_project(city, player, flavor, specialization)
+	if project_to_build != "":
+		city.set_production(project_to_build)
+		return
+
 	# Default to military for military cities, or best unit otherwise
 	var unit_to_build = _get_best_military_unit(city, player, military_flavor)
 	if unit_to_build != "":
@@ -807,6 +813,58 @@ func _get_best_military_unit(city, player, military_flavor: int) -> String:
 			best_unit = unit_id
 
 	return best_unit
+
+## Get the best project to build based on AI flavor and game state
+func _get_best_project(city, player, flavor: Dictionary, specialization) -> String:
+	# Only high-production cities should build projects
+	if city.production_yield < 15:
+		return ""
+
+	# Only production-focused cities build projects
+	if specialization not in [CitySpecialization.PRODUCTION, CitySpecialization.HYBRID]:
+		return ""
+
+	var science_flavor = flavor.get("science", 5)
+	var military_flavor = flavor.get("military", 5)
+
+	var best_project = ""
+	var best_score = 0
+
+	for project_id in ProjectsSystem.projects:
+		var check = ProjectsSystem.can_build_project(project_id, player, city)
+		if not check.can_build:
+			continue
+
+		var project = ProjectsSystem.projects[project_id]
+		var score = 0
+		var project_type = project.get("type", "")
+
+		# Spaceship parts - prioritize if going for space victory
+		if project.get("spaceship_part", false):
+			score = 100 + science_flavor * 10
+
+		# Apollo Program - high priority for science-focused AI
+		elif project_id == "apollo_program":
+			score = 80 + science_flavor * 8
+
+		# Manhattan Project - military AI wants nukes
+		elif project_id == "manhattan_project":
+			score = 50 + military_flavor * 10
+
+		# SDI - defensive, prioritize if nukes exist
+		elif project_id == "sdi":
+			if ProjectsSystem.global_projects.has("manhattan_project"):
+				score = 70
+
+		# The Internet - science AI loves this
+		elif project_id == "the_internet":
+			score = 60 + science_flavor * 8
+
+		if score > best_score:
+			best_score = score
+			best_project = project_id
+
+	return best_project
 
 ## Determine the best specialization for a city based on location and resources
 func _determine_city_specialization(city, player, flavor: Dictionary) -> CitySpecialization:

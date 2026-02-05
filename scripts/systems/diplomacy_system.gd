@@ -18,7 +18,8 @@ enum MemoryType {
 	SHARED_RELIGION,
 	WORST_ENEMY_OF_FRIEND,
 	TRADED_WITH_ENEMY,
-	HELPED_IN_WAR
+	HELPED_IN_WAR,
+	DEFIED_RESOLUTION
 }
 
 # Memory decay rates (per turn)
@@ -35,7 +36,8 @@ const MEMORY_DECAY = {
 	MemoryType.SHARED_RELIGION: 0.0,       # Never decays
 	MemoryType.WORST_ENEMY_OF_FRIEND: 0.03,
 	MemoryType.TRADED_WITH_ENEMY: 0.05,
-	MemoryType.HELPED_IN_WAR: 0.05
+	MemoryType.HELPED_IN_WAR: 0.05,
+	MemoryType.DEFIED_RESOLUTION: 0.05     # Medium decay
 }
 
 # Memory attitude effects
@@ -52,7 +54,8 @@ const MEMORY_EFFECTS = {
 	MemoryType.SHARED_RELIGION: 2,
 	MemoryType.WORST_ENEMY_OF_FRIEND: -3,
 	MemoryType.TRADED_WITH_ENEMY: -2,
-	MemoryType.HELPED_IN_WAR: 4
+	MemoryType.HELPED_IN_WAR: 4,
+	MemoryType.DEFIED_RESOLUTION: -2
 }
 
 # Diplomacy memory storage: player_id -> {target_id -> [{type, strength, turns}]}

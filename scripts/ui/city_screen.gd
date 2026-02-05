@@ -222,7 +222,24 @@ func _update_yields() -> void:
 	text += "Science: %d\n" % current_city.science_yield
 	text += "Culture: %d\n" % current_city.culture_yield
 	text += "\nHappiness: %d / %d\n" % [current_city.happiness, current_city.unhappiness]
-	text += "Health: %d / %d" % [current_city.health, current_city.unhealthiness]
+	text += "Health: %d / %d\n" % [current_city.health, current_city.unhealthiness]
+
+	# Great People points
+	var gp_progress = current_city.get_meta("gp_progress") if current_city.has_meta("gp_progress") else 0
+	var gp_points_per_turn = 0
+	var gp_breakdown = current_city.get_great_people_points()
+	for gp_type in gp_breakdown:
+		gp_points_per_turn += gp_breakdown[gp_type]
+	# Add settled GP bonus
+	if current_city.has_meta("settled_great_people"):
+		gp_points_per_turn += current_city.get_meta("settled_great_people").size() * 2
+
+	var threshold = 100 + (GreatPeopleSystem.great_people_born.get(current_city.player_owner.player_id, 0) * 50) if current_city.player_owner else 100
+	if gp_points_per_turn > 0:
+		var turns_to_gp = ceili((threshold - gp_progress) / float(gp_points_per_turn))
+		text += "\nGreat Person: %d/%d (+%d/turn, %d turns)" % [gp_progress, threshold, gp_points_per_turn, turns_to_gp]
+	else:
+		text += "\nGreat Person: %d/%d" % [gp_progress, threshold]
 
 	yields_label.text = text
 

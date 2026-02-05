@@ -331,9 +331,52 @@ func _tally_votes() -> void:
 
 	if passed:
 		_apply_resolution(pending_vote.resolution_id, pending_vote.source_id, pending_vote.target)
+		# Apply defiance penalties to players who voted against
+		_apply_defiance_penalties(pending_vote.source_id, pending_vote.votes)
 
 	EventBus.vote_completed.emit(pending_vote.source_id, pending_vote.resolution_id, passed, result)
 	pending_vote = {}
+
+func _apply_defiance_penalties(source_id: String, votes: Dictionary) -> void:
+	# Collect players who voted for vs against
+	var voters_for = []
+	var voters_against = []
+
+	for player_id in votes:
+		var vote_data = votes[player_id]
+		if vote_data.vote_for:
+			voters_for.append(player_id)
+		else:
+			voters_against.append(player_id)
+
+	# Apply diplomatic penalty: -2 attitude from each "for" voter to each "against" voter
+	# This reflects the Civ4 mechanic where defying resolutions damages relationships
+	var notified_defiers = []  # Track which defiers we've already notified about
+	for defier_id in voters_against:
+		var defier = GameManager.get_player(defier_id) if GameManager else null
+		if defier == null:
+			continue
+
+		for supporter_id in voters_for:
+			if supporter_id == defier_id:
+				continue
+			var supporter = GameManager.get_player(supporter_id) if GameManager else null
+			if supporter == null:
+				continue
+
+			# Add diplomacy memory for defying resolution using DiplomacySystem
+			if DiplomacySystem:
+				DiplomacySystem.add_memory(supporter_id, defier_id, DiplomacySystem.MemoryType.DEFIED_RESOLUTION)
+
+		# Notify about defiance (once per defier)
+		if defier_id not in notified_defiers:
+			notified_defiers.append(defier_id)
+			var source = vote_sources.get(source_id, {})
+			var source_name = source.get("name", source_id)
+			EventBus.notification_added.emit(
+				defier.civ_name + " defied the " + source_name + " resolution!",
+				"diplomacy"
+			)
 
 func _tally_secretary_election() -> void:
 	var candidate_votes = {}

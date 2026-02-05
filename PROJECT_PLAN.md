@@ -19,9 +19,9 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | Civics | Complete | 100% |
 | Corporations | Enhanced | 95% |
 | Espionage | Enhanced | 95% |
-| Projects | Basic | 85% |
+| Projects | Enhanced | 90% |
 | Events | Basic | 80% |
-| UN/Voting | Basic | 85% |
+| UN/Voting | Enhanced | 90% |
 | Borders | Complete | 100% |
 | Multiplayer | Not Started | 0% |
 
@@ -406,7 +406,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 11: Great People (90% COMPLETE)
+## Phase 11: Great People (100% COMPLETE)
 
 ### Implemented
 - [x] Great People point generation
@@ -421,9 +421,9 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 ### Recently Added
 - [x] Great General attachment to units (+20% combat strength, +50% XP gain)
 
-### Not Implemented
-- [ ] Settled GP tile yield bonuses
-- [ ] GP point display in city screen
+### Recently Added
+- [x] Settled GP tile yield bonuses (Great Prophet, Artist, Scientist, Merchant, Engineer bonuses)
+- [x] GP point display in city screen (progress, per-turn rate, turns to next GP)
 
 ### Files
 - `scripts/systems/great_people_system.gd`
@@ -700,7 +700,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 17: Projects (85% COMPLETE)
+## Phase 17: Projects (90% COMPLETE)
 
 ### Implemented
 - [x] World project system (unique global wonders)
@@ -729,9 +729,11 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | SS Casing | Spaceship | 1200 | Composites | 1-5 (launch success) |
 | SS Thrusters | Spaceship | 1200 | Superconductors | 1-5 (faster travel) |
 
+### Recently Added
+- [x] AI project prioritization (flavor-based project selection for production cities)
+
 ### Not Implemented
 - [ ] Spaceship viewer/animation (basic screen exists)
-- [ ] AI project prioritization
 - [ ] Team projects (multiplayer)
 
 ### Files
@@ -743,7 +745,7 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 
 ---
 
-## Phase 18: United Nations & Voting (85% COMPLETE)
+## Phase 18: United Nations & Voting (90% COMPLETE)
 
 ### Implemented
 - [x] Two vote sources: United Nations and Apostolic Palace
@@ -794,8 +796,10 @@ A Civilization IV: Beyond the Sword clone built in Godot 4.5.1
 | Holy War | 62% | Force war |
 | Assign Holy City | 62% | Transfer city |
 
+### Recently Added
+- [x] Defying resolutions penalties (-2 attitude from voters who supported a passed resolution)
+
 ### Not Implemented
-- [ ] Defying resolutions (penalties)
 - [ ] Vassal voting
 - [ ] Team voting
 

@@ -217,9 +217,19 @@ func calculate_yields() -> void:
 				if tile_yields.get("commerce", 0) > 0:
 					commerce_yield += 1
 
+	# Settled Great People bonuses
+	var settled_gp_bonuses = get_settled_gp_bonuses()
+	production_yield += settled_gp_bonuses.get("production", 0)
+	commerce_yield += settled_gp_bonuses.get("commerce", 0)
+
 	# Calculate science and culture
 	_calculate_science()
 	_calculate_culture()
+
+	# Add settled GP science/culture/gold bonuses after base calculation
+	science_yield += settled_gp_bonuses.get("science", 0)
+	culture_yield += settled_gp_bonuses.get("culture", 0)
+	gold_yield += settled_gp_bonuses.get("gold", 0)
 
 	# Calculate food surplus
 	var food_consumed = population * 2
@@ -511,6 +521,31 @@ func get_great_people_points() -> Dictionary:
 			gp_points[building_gp_type] = gp_points.get(building_gp_type, 0) + building_gp
 
 	return gp_points
+
+## Get yield bonuses from settled Great People
+func get_settled_gp_bonuses() -> Dictionary:
+	var bonuses = {"production": 0, "commerce": 0, "science": 0, "culture": 0, "gold": 0}
+	if not has_meta("settled_great_people"):
+		return bonuses
+
+	var settled = get_meta("settled_great_people")
+	for gp_type in settled:
+		match gp_type:
+			"great_prophet":
+				bonuses["production"] += 2
+				bonuses["gold"] += 5
+			"great_artist":
+				bonuses["culture"] += 12
+			"great_scientist":
+				bonuses["science"] += 6
+			"great_merchant":
+				bonuses["gold"] += 6
+				bonuses["commerce"] += 6
+			"great_engineer":
+				bonuses["production"] += 3
+			"great_general":
+				bonuses["production"] += 2
+	return bonuses
 
 # Production
 func set_production(item: String) -> void:
