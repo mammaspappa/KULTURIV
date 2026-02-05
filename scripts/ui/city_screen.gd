@@ -13,6 +13,7 @@ var production_list: VBoxContainer
 var production_scroll: ScrollContainer
 var production_progress_label: Label
 var change_production_btn: Button
+var building_scroll: ScrollContainer
 var building_list: Label
 var close_button: Button
 
@@ -119,18 +120,23 @@ func _create_ui() -> void:
 	production_list.name = "ProductionList"
 	production_scroll.add_child(production_list)
 
-	# Buildings section (right side)
+	# Buildings section (right side) with scroll container
 	var buildings_header = Label.new()
 	buildings_header.text = "Buildings"
 	buildings_header.position = Vector2(400, 85)
 	buildings_header.add_theme_font_size_override("font_size", 18)
 	panel.add_child(buildings_header)
 
+	building_scroll = ScrollContainer.new()
+	building_scroll.name = "BuildingScroll"
+	building_scroll.position = Vector2(400, 115)
+	building_scroll.custom_minimum_size = Vector2(280, 420)
+	panel.add_child(building_scroll)
+
 	building_list = Label.new()
 	building_list.name = "BuildingList"
-	building_list.position = Vector2(400, 115)
 	building_list.add_theme_font_size_override("font_size", 14)
-	panel.add_child(building_list)
+	building_scroll.add_child(building_list)
 
 func _on_show_city_screen(city) -> void:
 	# Close all other popups first
@@ -329,18 +335,56 @@ func _update_building_list() -> void:
 		building_list.text = "(No buildings yet)"
 		return
 
-	var text = ""
+	# Categorize buildings
+	var regular_buildings = []
+	var national_wonders = []
+	var world_wonders = []
+
 	for building_id in current_city.buildings:
 		var building = DataManager.get_building(building_id)
-		text += "- %s\n" % building.get("name", building_id)
+		var wonder_type = building.get("wonder_type", "")
+		if wonder_type == "world":
+			world_wonders.append(building_id)
+		elif wonder_type == "national":
+			national_wonders.append(building_id)
+		else:
+			regular_buildings.append(building_id)
 
-		# Show effects
-		var effects = building.get("effects", {})
-		for key in effects:
-			if effects[key] != 0:
-				text += "    %s: %s\n" % [key.replace("_", " ").capitalize(), str(effects[key])]
+	var text = ""
+
+	# World Wonders section
+	if not world_wonders.is_empty():
+		text += "=== WORLD WONDERS ===\n"
+		for building_id in world_wonders:
+			text += _format_building_entry(building_id)
+		text += "\n"
+
+	# National Wonders section
+	if not national_wonders.is_empty():
+		text += "=== NATIONAL WONDERS ===\n"
+		for building_id in national_wonders:
+			text += _format_building_entry(building_id)
+		text += "\n"
+
+	# Regular Buildings section
+	if not regular_buildings.is_empty():
+		text += "=== BUILDINGS ===\n"
+		for building_id in regular_buildings:
+			text += _format_building_entry(building_id)
 
 	building_list.text = text
+
+func _format_building_entry(building_id: String) -> String:
+	var building = DataManager.get_building(building_id)
+	var text = "- %s\n" % building.get("name", building_id)
+
+	# Show effects
+	var effects = building.get("effects", {})
+	for key in effects:
+		if effects[key] != 0:
+			text += "    %s: %s\n" % [key.replace("_", " ").capitalize(), str(effects[key])]
+
+	return text
 
 func _on_close_pressed() -> void:
 	hide()
