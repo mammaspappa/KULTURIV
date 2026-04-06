@@ -751,6 +751,15 @@ func complete_production() -> void:
 	update_visual()
 
 func _produce_unit(unit_type: String) -> void:
+	var unit_data = DataManager.get_unit(unit_type)
+
+	# Settler: consume population on completion (Civ4 BTS mechanic)
+	var food_cost = unit_data.get("food_cost", 0)
+	if food_cost > 0 and population > 1:
+		population -= 1
+		food_stockpile = 0
+		calculate_yields()
+
 	var unit = UnitClass.new(unit_type, grid_position)
 	player_owner.add_unit(unit)
 
@@ -788,6 +797,10 @@ func has_building(building_id: String) -> bool:
 
 func can_build_unit(unit_id: String) -> bool:
 	if player_owner == null:
+		return false
+	# Settlers require minimum population of 2 (Civ4 BTS)
+	var unit_data = DataManager.get_unit(unit_id)
+	if unit_data.get("food_cost", 0) > 0 and population < 2:
 		return false
 	return player_owner.can_build_unit(unit_id)
 

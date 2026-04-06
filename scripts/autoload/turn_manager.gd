@@ -160,12 +160,28 @@ func _process_city_turn_start(city) -> void:
 	# Calculate yields
 	city.calculate_yields()
 
+	# Check if building a settler (food → production conversion)
+	var building_settler = false
+	if city.current_production != "":
+		var unit_data = DataManager.get_unit(city.current_production)
+		if not unit_data.is_empty() and unit_data.get("food_cost", 0) > 0:
+			building_settler = true
+
 	# Process food and growth
-	city.food_stockpile += city.food_surplus
-	if city.food_stockpile >= city.food_needed_for_growth():
-		city.grow()
-	elif city.food_stockpile < 0:
-		city.starve()
+	if building_settler:
+		# Civ4 BTS: food surplus goes to production, city does NOT grow
+		# Food deficit still causes starvation
+		if city.food_surplus < 0:
+			city.food_stockpile += city.food_surplus
+			if city.food_stockpile < 0:
+				city.starve()
+		# Positive food surplus is NOT added to stockpile (goes to production below)
+	else:
+		city.food_stockpile += city.food_surplus
+		if city.food_stockpile >= city.food_needed_for_growth():
+			city.grow()
+		elif city.food_stockpile < 0:
+			city.starve()
 
 	# Process resistance
 	if city.resistance_turns > 0:
@@ -174,7 +190,11 @@ func _process_city_turn_start(city) -> void:
 
 	# Process production
 	if city.current_production != "":
-		city.production_progress += city.production_yield
+		var production = city.production_yield
+		# Settlers: add food surplus as bonus production (Civ4 BTS mechanic)
+		if building_settler and city.food_surplus > 0:
+			production += city.food_surplus
+		city.production_progress += production
 		var cost = city.get_production_cost()
 		if city.production_progress >= cost:
 			city.complete_production()
