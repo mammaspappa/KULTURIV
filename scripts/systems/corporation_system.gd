@@ -369,6 +369,30 @@ func to_dict() -> Dictionary:
 	}
 
 func from_dict(data: Dictionary) -> void:
-	# Note: This requires cities to be loaded first
-	# Full implementation would resolve city references after load
-	pass
+	headquarters.clear()
+	city_corporations.clear()
+
+	# Restore headquarters (requires cities to be loaded first)
+	var hq_data = data.get("headquarters", {})
+	for corp_id in hq_data:
+		var info = hq_data[corp_id]
+		var player = GameManager.get_player(info.get("player_id", -1))
+		if player:
+			for city in player.cities:
+				if city.city_name == info.get("city_name", ""):
+					headquarters[corp_id] = city
+					break
+
+	# Restore city corporations
+	var city_data = data.get("city_corporations", {})
+	for key in city_data:
+		var parts = key.split("_", true, 1)
+		if parts.size() == 2:
+			var player_id = int(parts[0])
+			var city_name = parts[1]
+			var player = GameManager.get_player(player_id)
+			if player:
+				for city in player.cities:
+					if city.city_name == city_name:
+						city_corporations[city] = city_data[key]
+						break

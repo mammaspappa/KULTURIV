@@ -32,6 +32,12 @@ var worked_tiles: Array[Vector2i] = []  # Tiles being worked
 var specialists: Dictionary = {}  # specialist_id -> count
 var free_specialists: int = 0  # Free specialists from civics
 
+# City focus for citizen assignment: "", "food", "production", "commerce", "science", "culture", "gpp"
+var city_focus: String = ""
+
+# Manual tile locks: tiles the player has manually assigned (won't be auto-reassigned)
+var locked_tiles: Array[Vector2i] = []
+
 # Yields (calculated)
 var food_yield: int = 0
 var production_yield: int = 0
@@ -315,6 +321,12 @@ func _calculate_happiness() -> void:
 		if resource.get("type", "") == "luxury":
 			happiness += resource.get("happiness", 1)
 
+	# Wonder effects
+	if WonderSystem and player_owner:
+		happiness += WonderSystem.get_wonder_happiness_bonus(player_owner)
+		if WonderSystem.city_has_no_unhappiness(self):
+			unhappiness = 0
+
 func _calculate_health() -> void:
 	health = 0
 	unhealthiness = 0
@@ -381,9 +393,9 @@ func starve() -> void:
 		update_visual()
 
 func _auto_assign_citizen() -> void:
-	# Find best unworked tile in territory
+	# Find best unworked tile in territory based on city focus
 	var best_tile: Vector2i = Vector2i(-1, -1)
-	var best_value = -1
+	var best_value = -1.0
 
 	for tile_pos in territory:
 		if tile_pos in worked_tiles:
@@ -394,7 +406,7 @@ func _auto_assign_citizen() -> void:
 			continue
 
 		var yields = tile.get_yields()
-		var value = yields.get("food", 0) * 3 + yields.get("production", 0) * 2 + yields.get("commerce", 0)
+		var value = _score_tile_for_focus(yields)
 
 		if value > best_value:
 			best_value = value
@@ -402,6 +414,63 @@ func _auto_assign_citizen() -> void:
 
 	if best_tile.x >= 0:
 		worked_tiles.append(best_tile)
+
+func _score_tile_for_focus(yields: Dictionary) -> float:
+	var food = yields.get("food", 0)
+	var prod = yields.get("production", 0)
+	var commerce = yields.get("commerce", 0)
+	match city_focus:
+		"food":
+			return food * 5 + prod * 1 + commerce * 1
+		"production":
+			return food * 1 + prod * 5 + commerce * 1
+		"commerce", "science":
+			return food * 1 + prod * 1 + commerce * 5
+		"culture":
+			return food * 1 + prod * 1 + commerce * 4
+		_:
+			return food * 3 + prod * 2 + commerce * 1
+
+## Toggle whether a tile is manually worked or unworked
+func toggle_tile_work(tile_pos: Vector2i) -> void:
+	if tile_pos not in territory or tile_pos == grid_position:
+		return
+
+	if tile_pos in worked_tiles:
+		# Unwork the tile
+		worked_tiles.erase(tile_pos)
+		locked_tiles.erase(tile_pos)
+	else:
+		# Work the tile if we have available population
+		if get_available_population() > 0:
+			worked_tiles.append(tile_pos)
+			if tile_pos not in locked_tiles:
+				locked_tiles.append(tile_pos)
+
+	calculate_yields()
+
+## Reassign all non-locked citizens based on city focus
+func reassign_citizens() -> void:
+	# Remove non-locked tiles
+	var new_worked = []
+	for tile_pos in worked_tiles:
+		if tile_pos in locked_tiles:
+			new_worked.append(tile_pos)
+	worked_tiles.assign(new_worked)
+
+	# Fill remaining slots
+	while get_available_population() > 0:
+		var had = worked_tiles.size()
+		_auto_assign_citizen()
+		if worked_tiles.size() == had:
+			break
+
+	calculate_yields()
+
+## Set city focus and reassign citizens
+func set_city_focus(focus: String) -> void:
+	city_focus = focus
+	reassign_citizens()
 
 # Specialist management
 func get_specialist_count(specialist_id: String) -> int:
@@ -438,6 +507,10 @@ func get_specialist_slots(specialist_id: String) -> int:
 		if free_spec > 0:
 			# Free specialists can be any type
 			slots += free_spec
+
+	# Free specialists from wonders (Statue of Liberty)
+	if player_owner and WonderSystem:
+		slots += WonderSystem.get_wonder_free_specialist_slots(player_owner)
 
 	return slots
 
@@ -856,6 +929,8 @@ func to_dict() -> Dictionary:
 		"religions": religions,
 		"holy_city_of": holy_city_of,
 		"specialists": specialists,
+		"city_focus": city_focus,
+		"locked_tiles": locked_tiles.map(func(v): return {"x": v.x, "y": v.y}),
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -881,6 +956,10 @@ func from_dict(data: Dictionary) -> void:
 	religions.assign(data.get("religions", []))
 	holy_city_of = data.get("holy_city_of", "")
 	specialists = data.get("specialists", {})
+	city_focus = data.get("city_focus", "")
+	locked_tiles.clear()
+	for t in data.get("locked_tiles", []):
+		locked_tiles.append(Vector2i(t.x, t.y))
 
 	position = GridUtils.grid_to_pixel(grid_position)
 	calculate_yields()

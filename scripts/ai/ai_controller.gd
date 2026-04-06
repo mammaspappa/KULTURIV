@@ -533,8 +533,10 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 			return
 
-	# Need settler? Based on expansion flavor (only from production/food cities)
-	var max_cities = 4 + expansion_flavor
+	# Need settler? Based on expansion flavor, scaled to map size
+	var map_tiles = GameManager.map_width * GameManager.map_height
+	var base_cities = max(4, map_tiles / 200)
+	var max_cities = base_cities + expansion_flavor
 	if num_cities < max_cities and city.population >= 3:
 		if specialization in [CitySpecialization.PRODUCTION, CitySpecialization.FOOD, CitySpecialization.HYBRID]:
 			if city.can_build_unit("settler"):
@@ -795,9 +797,18 @@ func _find_nearest_unexplored(unit, player) -> Vector2i:
 	return best_pos
 
 func _get_best_military_unit(city, player, military_flavor: int) -> String:
-	# Prefer strongest available
+	# Analyze enemy army composition to build counters
+	var enemy_classes = {}
+	for other in GameManager.players:
+		if other == player or other.player_id not in player.at_war_with:
+			continue
+		for unit in other.units:
+			var udata = DataManager.get_unit(unit.unit_id)
+			var uclass = udata.get("unit_class", "")
+			enemy_classes[uclass] = enemy_classes.get(uclass, 0) + 1
+
 	var best_unit = ""
-	var best_strength = 0
+	var best_score = 0.0
 
 	for unit_id in DataManager.units:
 		if not city.can_build_unit(unit_id):
@@ -807,9 +818,26 @@ func _get_best_military_unit(city, player, military_flavor: int) -> String:
 		var strength = DataManager.get_unit_strength(unit_id)
 		var unit_class = unit_data.get("unit_class", "")
 
-		# Combat classes
-		if unit_class in ["melee", "mounted", "gunpowder", "archery", "armor", "siege"] and strength > best_strength:
-			best_strength = strength
+		if unit_class not in ["melee", "mounted", "gunpowder", "archery", "armor", "siege"]:
+			continue
+
+		var score = float(strength)
+
+		# Counter bonuses: prefer units that counter enemy composition
+		if not enemy_classes.is_empty():
+			# Mounted counters archery/siege; melee/gunpowder counter mounted; archery/siege counter melee
+			if unit_class == "mounted" and (enemy_classes.get("archery", 0) + enemy_classes.get("siege", 0)) > 0:
+				score *= 1.3
+			elif unit_class in ["melee", "gunpowder"] and enemy_classes.get("mounted", 0) > 0:
+				score *= 1.3
+			elif unit_class in ["archery", "siege"] and enemy_classes.get("melee", 0) > 0:
+				score *= 1.2
+			# Siege is always valuable when at war
+			if unit_class == "siege":
+				score *= 1.2
+
+		if score > best_score:
+			best_score = score
 			best_unit = unit_id
 
 	return best_unit
@@ -1009,6 +1037,18 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 			continue
 
 		var building = DataManager.get_building(building_id)
+
+		# Avoid building a wonder that another of our cities is already building
+		var wonder_type = building.get("wonder_type", "")
+		if wonder_type != "":
+			var already_building = false
+			for other_city in player.cities:
+				if other_city != city and other_city.current_production == building_id:
+					already_building = true
+					break
+			if already_building:
+				continue
+
 		var effects = building.get("effects", {})
 		var score = 0.0
 

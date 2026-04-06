@@ -57,13 +57,5 @@
 			"end_year": 2050
 		},
 		"enabled_by_default": true
-	},
-	"religious": {
-		"name": "Religious Victory",
-		"description": "Spread your religion to 75% of all cities",
-		"requirements": {
-			"religion_spread_percentage": 0.75
-		},
-		"enabled_by_default": false
 	}
 }

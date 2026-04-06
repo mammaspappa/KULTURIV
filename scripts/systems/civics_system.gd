@@ -147,9 +147,6 @@ func _calculate_anarchy_turns(player) -> int:
 	if player.has_trait("spiritual"):
 		return 0
 
-	# Some wonders might reduce anarchy
-	# TODO: Add wonder effects
-
 	return base_turns
 
 ## Start anarchy period for a player

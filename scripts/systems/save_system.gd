@@ -149,6 +149,18 @@ func _collect_save_data() -> Dictionary:
 			var city_data = city.to_dict()
 			data.cities.append(city_data)
 
+	# Save subsystem states
+	if EspionageSystem:
+		data["espionage"] = EspionageSystem.to_dict()
+	if VotingSystem:
+		data["voting"] = VotingSystem.to_dict()
+	if BarbarianSystem:
+		data["barbarians"] = BarbarianSystem.to_dict()
+	if EventsSystem:
+		data["events"] = EventsSystem.to_dict()
+	if CorporationSystem:
+		data["corporations"] = CorporationSystem.to_dict()
+
 	return data
 
 func _collect_map_data() -> Dictionary:
@@ -240,6 +252,18 @@ func _restore_save_data(data: Dictionary) -> bool:
 					tile.tile_owner = owner
 					tile.city_owner = city
 					tile.update_visuals()
+
+	# Restore subsystem states (after cities/units are loaded)
+	if EspionageSystem and data.has("espionage"):
+		EspionageSystem.from_dict(data.espionage)
+	if VotingSystem and data.has("voting"):
+		VotingSystem.from_dict(data.voting)
+	if BarbarianSystem and data.has("barbarians"):
+		BarbarianSystem.from_dict(data.barbarians)
+	if EventsSystem and data.has("events"):
+		EventsSystem.from_dict(data.events)
+	if CorporationSystem and data.has("corporations"):
+		CorporationSystem.from_dict(data.corporations)
 
 	return true
 

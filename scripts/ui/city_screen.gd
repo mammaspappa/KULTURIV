@@ -17,6 +17,10 @@ var building_scroll: ScrollContainer
 var building_list: Label
 var close_button: Button
 
+# City focus & specialist UI
+var focus_dropdown: OptionButton
+var specialist_container: VBoxContainer
+
 # Colors
 const BG_COLOR = Color(0.1, 0.1, 0.15, 1.0)
 const HEADER_COLOR = Color(0.2, 0.2, 0.3)
@@ -120,6 +124,38 @@ func _create_ui() -> void:
 	production_list.name = "ProductionList"
 	production_scroll.add_child(production_list)
 
+	# City Focus dropdown
+	var focus_label = Label.new()
+	focus_label.text = "City Focus:"
+	focus_label.position = Vector2(200, 50)
+	focus_label.add_theme_font_size_override("font_size", 14)
+	panel.add_child(focus_label)
+
+	focus_dropdown = OptionButton.new()
+	focus_dropdown.position = Vector2(290, 47)
+	focus_dropdown.custom_minimum_size = Vector2(120, 28)
+	focus_dropdown.add_item("Balanced", 0)
+	focus_dropdown.add_item("Food", 1)
+	focus_dropdown.add_item("Production", 2)
+	focus_dropdown.add_item("Commerce", 3)
+	focus_dropdown.add_item("Science", 4)
+	focus_dropdown.add_item("Culture", 5)
+	focus_dropdown.item_selected.connect(_on_focus_changed)
+	panel.add_child(focus_dropdown)
+
+	# Specialist section (below yields)
+	var spec_header = Label.new()
+	spec_header.text = "Specialists"
+	spec_header.position = Vector2(200, 85)
+	spec_header.add_theme_font_size_override("font_size", 18)
+	panel.add_child(spec_header)
+
+	specialist_container = VBoxContainer.new()
+	specialist_container.position = Vector2(200, 115)
+	specialist_container.custom_minimum_size = Vector2(180, 100)
+	specialist_container.add_theme_constant_override("separation", 2)
+	panel.add_child(specialist_container)
+
 	# Buildings section (right side) with scroll container
 	var buildings_header = Label.new()
 	buildings_header.text = "Buildings"
@@ -203,6 +239,12 @@ func _update_display() -> void:
 
 	# Update buildings
 	_update_building_list()
+
+	# Update focus dropdown
+	_update_focus_dropdown()
+
+	# Update specialists
+	_update_specialist_ui()
 
 func _update_yields() -> void:
 	current_city.calculate_yields()
@@ -385,6 +427,86 @@ func _format_building_entry(building_id: String) -> String:
 			text += "    %s: %s\n" % [key.replace("_", " ").capitalize(), str(effects[key])]
 
 	return text
+
+func _update_focus_dropdown() -> void:
+	if focus_dropdown == null or current_city == null:
+		return
+	var focus_map = {"": 0, "food": 1, "production": 2, "commerce": 3, "science": 4, "culture": 5}
+	focus_dropdown.selected = focus_map.get(current_city.city_focus, 0)
+
+func _on_focus_changed(index: int) -> void:
+	if current_city == null:
+		return
+	var focuses = ["", "food", "production", "commerce", "science", "culture"]
+	if index < focuses.size():
+		current_city.set_city_focus(focuses[index])
+		_update_display()
+
+func _update_specialist_ui() -> void:
+	if specialist_container == null or current_city == null:
+		return
+
+	for child in specialist_container.get_children():
+		child.queue_free()
+
+	var available_pop = current_city.get_available_population()
+	var pop_label = Label.new()
+	pop_label.text = "Available: %d" % available_pop
+	pop_label.add_theme_font_size_override("font_size", 12)
+	specialist_container.add_child(pop_label)
+
+	var spec_types = ["citizen", "priest", "artist", "merchant", "engineer", "scientist", "spy"]
+	for spec_id in spec_types:
+		var slots = current_city.get_specialist_slots(spec_id)
+		if slots <= 0:
+			continue
+
+		var current = current_city.get_specialist_count(spec_id)
+		var hbox = HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 4)
+
+		var name_label = Label.new()
+		name_label.text = DataManager.get_specialist_name(spec_id)
+		name_label.custom_minimum_size = Vector2(70, 0)
+		name_label.add_theme_font_size_override("font_size", 12)
+		hbox.add_child(name_label)
+
+		var minus_btn = Button.new()
+		minus_btn.text = "-"
+		minus_btn.custom_minimum_size = Vector2(25, 25)
+		minus_btn.disabled = current <= 0
+		minus_btn.pressed.connect(_on_specialist_minus.bind(spec_id))
+		hbox.add_child(minus_btn)
+
+		var count_label = Label.new()
+		count_label.text = "%d/%d" % [current, slots]
+		count_label.custom_minimum_size = Vector2(35, 0)
+		count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		count_label.add_theme_font_size_override("font_size", 12)
+		hbox.add_child(count_label)
+
+		var plus_btn = Button.new()
+		plus_btn.text = "+"
+		plus_btn.custom_minimum_size = Vector2(25, 25)
+		plus_btn.disabled = current >= slots or available_pop <= 0
+		plus_btn.pressed.connect(_on_specialist_plus.bind(spec_id))
+		hbox.add_child(plus_btn)
+
+		specialist_container.add_child(hbox)
+
+func _on_specialist_plus(spec_id: String) -> void:
+	if current_city == null or not current_city.can_add_specialist(spec_id):
+		return
+	current_city.add_specialist(spec_id)
+	current_city.calculate_yields()
+	_update_display()
+
+func _on_specialist_minus(spec_id: String) -> void:
+	if current_city == null or current_city.get_specialist_count(spec_id) <= 0:
+		return
+	current_city.remove_specialist(spec_id)
+	current_city.calculate_yields()
+	_update_display()
 
 func _on_close_pressed() -> void:
 	hide()

@@ -476,8 +476,7 @@ func _show_build_menu() -> void:
 	var can_road = ImprovementSystem.can_build_road(selected_unit, tile)
 	var can_railroad = ImprovementSystem.can_build_railroad(selected_unit, tile)
 
-	# For now, just build the first available or road
-	# TODO: Create proper build menu UI
+	# Fallback auto-build (proper UI is in game_ui.gd _update_worker_actions)
 	if can_road:
 		ImprovementSystem.start_build_road(selected_unit)
 	elif can_railroad:

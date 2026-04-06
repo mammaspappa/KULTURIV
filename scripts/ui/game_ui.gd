@@ -41,6 +41,11 @@ var last_unit_order: int = -1
 # Unit cycling state
 var skipped_units_this_turn: Array = []  # Units that have been skipped, won't cycle to them
 
+# Promotion UI
+var promote_button: Button = null
+var promotion_popup: PanelContainer = null
+var promotion_list_container: VBoxContainer = null
+
 # Notification system
 var notifications: Array = []
 var notification_container: VBoxContainer
@@ -85,6 +90,9 @@ func _ready() -> void:
 
 	# Initial state
 	unit_panel.visible = false
+
+	# Setup promotion UI
+	_setup_promotion_ui()
 
 	# Setup notification system
 	_setup_notifications()
@@ -398,6 +406,8 @@ func _update_unit_panel() -> void:
 		fortify_button.disabled = selected_unit.has_acted or selected_unit.get_strength() <= 0
 	if skip_button:
 		skip_button.disabled = selected_unit.has_acted
+	if promote_button:
+		promote_button.visible = selected_unit.can_promote()
 
 	# Only update worker actions when state changes
 	var current_order = selected_unit.current_order
@@ -682,6 +692,116 @@ func _try_automate_worker() -> void:
 		selected_unit.automate()
 		_add_notification("Worker automated", "system")
 	_update_unit_panel()
+
+# Promotion system
+func _setup_promotion_ui() -> void:
+	# Add promote button to the unit panel action buttons
+	promote_button = Button.new()
+	promote_button.text = "Promote"
+	promote_button.custom_minimum_size = Vector2(80, 30)
+	promote_button.tooltip_text = "Choose a promotion for this unit"
+	promote_button.pressed.connect(_on_promote_pressed)
+	promote_button.visible = false
+	var action_buttons = $UnitPanel/VBoxContainer/ActionButtons
+	if action_buttons:
+		action_buttons.add_child(promote_button)
+
+	# Create promotion popup overlay
+	promotion_popup = PanelContainer.new()
+	promotion_popup.visible = false
+	promotion_popup.custom_minimum_size = Vector2(320, 200)
+	promotion_popup.set_anchors_preset(Control.PRESET_CENTER)
+	promotion_popup.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.15, 0.95)
+	style.border_color = Color(0.6, 0.5, 0.2)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(12)
+	promotion_popup.add_theme_stylebox_override("panel", style)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+
+	var title = Label.new()
+	title.text = "Choose Promotion"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5))
+	vbox.add_child(title)
+
+	var separator = HSeparator.new()
+	vbox.add_child(separator)
+
+	var scroll = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(296, 150)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	promotion_list_container = VBoxContainer.new()
+	promotion_list_container.add_theme_constant_override("separation", 4)
+	scroll.add_child(promotion_list_container)
+	vbox.add_child(scroll)
+
+	var close_button = Button.new()
+	close_button.text = "Cancel"
+	close_button.pressed.connect(_close_promotion_popup)
+	vbox.add_child(close_button)
+
+	promotion_popup.add_child(vbox)
+	add_child(promotion_popup)
+
+func _on_promote_pressed() -> void:
+	if selected_unit == null or not selected_unit.can_promote():
+		return
+	_show_promotion_popup()
+
+func _show_promotion_popup() -> void:
+	if promotion_popup == null or promotion_list_container == null or selected_unit == null:
+		return
+
+	# Clear existing entries
+	for child in promotion_list_container.get_children():
+		child.queue_free()
+
+	var available = selected_unit._get_available_promotions()
+	for promo_id in available:
+		var promo_data = DataManager.promotions.get(promo_id, {})
+		var button = Button.new()
+		var promo_name = promo_data.get("name", promo_id.replace("_", " ").capitalize())
+		var description = promo_data.get("description", "")
+		var prereqs = promo_data.get("prerequisites", [])
+		var prereq_text = ""
+		if not prereqs.is_empty():
+			var prereq_names = []
+			for p in prereqs:
+				var pd = DataManager.promotions.get(p, {})
+				prereq_names.append(pd.get("name", p))
+			prereq_text = " (requires: %s)" % ", ".join(prereq_names)
+		button.text = "%s — %s%s" % [promo_name, description, prereq_text]
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.custom_minimum_size = Vector2(280, 35)
+		button.tooltip_text = "%s\n%s%s" % [promo_name, description, prereq_text]
+		button.pressed.connect(_on_promotion_chosen.bind(promo_id))
+		promotion_list_container.add_child(button)
+
+	promotion_popup.visible = true
+	# Position at center of screen
+	promotion_popup.position = (get_viewport_rect().size - promotion_popup.size) / 2
+
+func _on_promotion_chosen(promo_id: String) -> void:
+	if selected_unit == null:
+		return
+	selected_unit.add_promotion(promo_id)
+	var promo_data = DataManager.promotions.get(promo_id, {})
+	var promo_name = promo_data.get("name", promo_id)
+	_add_notification("Unit promoted: %s" % promo_name, "system")
+	_close_promotion_popup()
+	_update_unit_panel()
+
+func _close_promotion_popup() -> void:
+	if promotion_popup:
+		promotion_popup.visible = false
 
 # Notification system
 func _setup_notifications() -> void:

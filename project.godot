@@ -42,6 +42,7 @@ VisibilitySystem="*res://scripts/systems/visibility_system.gd"
 BorderSystem="*res://scripts/systems/border_system.gd"
 GoodyHutsSystem="*res://scripts/systems/goody_huts_system.gd"
 BarbarianSystem="*res://scripts/systems/barbarian_system.gd"
+WonderSystem="*res://scripts/systems/wonder_system.gd"
 
 [debug]
 
