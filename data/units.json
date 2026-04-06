@@ -21,25 +21,29 @@
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["found_city"],
+		"abilities": [
+			"found_city"
+		],
 		"unit_class": "civilian",
 		"food_cost": 2
 	},
 	"worker": {
 		"name": "Worker",
-		"symbol": "☭",
+		"symbol": "\u262d",
 		"era": "ancient",
 		"cost": 60,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["build_improvements"],
+		"abilities": [
+			"build_improvements"
+		],
 		"unit_class": "civilian"
 	},
 	"scout": {
 		"name": "Scout",
-		"symbol": "○",
+		"symbol": "\u25cb",
 		"era": "ancient",
 		"cost": 20,
 		"strength": 1.0,
@@ -47,7 +51,9 @@
 		"sight_range": 2,
 		"required_tech": "hunting",
 		"required_resource": "",
-		"abilities": ["ignore_terrain_cost"],
+		"abilities": [
+			"ignore_terrain_cost"
+		],
 		"unit_class": "recon",
 		"upgrades_to": "explorer"
 	},
@@ -60,7 +66,9 @@
 		"movement": 1,
 		"required_tech": "archery",
 		"required_resource": "",
-		"abilities": ["city_defense_bonus"],
+		"abilities": [
+			"city_defense_bonus"
+		],
 		"unit_class": "archery",
 		"first_strikes": 1,
 		"city_defense": 0.5,
@@ -75,9 +83,13 @@
 		"movement": 1,
 		"required_tech": "bronze_working",
 		"required_resource": "copper",
-		"abilities": ["bonus_vs_mounted"],
+		"abilities": [
+			"bonus_vs_mounted"
+		],
 		"unit_class": "melee",
-		"bonus_vs": {"mounted": 1.0},
+		"bonus_vs": {
+			"mounted": 1.0
+		},
 		"upgrades_to": "pikeman"
 	},
 	"axeman": {
@@ -89,9 +101,13 @@
 		"movement": 1,
 		"required_tech": "bronze_working",
 		"required_resource": "copper",
-		"abilities": ["bonus_vs_melee"],
+		"abilities": [
+			"bonus_vs_melee"
+		],
 		"unit_class": "melee",
-		"bonus_vs": {"melee": 0.5},
+		"bonus_vs": {
+			"melee": 0.5
+		},
 		"upgrades_to": "maceman"
 	},
 	"chariot": {
@@ -103,7 +119,9 @@
 		"movement": 2,
 		"required_tech": "the_wheel",
 		"required_resource": "horses",
-		"abilities": ["withdraw"],
+		"abilities": [
+			"withdraw"
+		],
 		"unit_class": "mounted",
 		"withdraw_chance": 0.2,
 		"no_defense_bonus": true,
@@ -111,7 +129,7 @@
 	},
 	"swordsman": {
 		"name": "Swordsman",
-		"symbol": "♟",
+		"symbol": "\u265f",
 		"era": "classical",
 		"cost": 40,
 		"strength": 6.0,
@@ -131,7 +149,10 @@
 		"movement": 2,
 		"required_tech": "horseback_riding",
 		"required_resource": "horses",
-		"abilities": ["withdraw", "flanking"],
+		"abilities": [
+			"withdraw",
+			"flanking"
+		],
 		"unit_class": "mounted",
 		"withdraw_chance": 0.15,
 		"flanking_bonus": 0.1,
@@ -140,14 +161,17 @@
 	},
 	"catapult": {
 		"name": "Catapult",
-		"symbol": "⌂",
+		"symbol": "\u2302",
 		"era": "classical",
 		"cost": 40,
-		"strength": 5.0,
+		"strength": 6.0,
 		"movement": 1,
 		"required_tech": "construction",
 		"required_resource": "",
-		"abilities": ["bombard", "collateral"],
+		"abilities": [
+			"bombard",
+			"collateral"
+		],
 		"unit_class": "siege",
 		"bombard_strength": 6,
 		"collateral_damage": 4,
@@ -156,7 +180,7 @@
 	},
 	"galley": {
 		"name": "Galley",
-		"symbol": "⛵",
+		"symbol": "\u26f5",
 		"era": "ancient",
 		"cost": 30,
 		"strength": 2.0,
@@ -164,7 +188,9 @@
 		"sight_range": 2,
 		"required_tech": "sailing",
 		"required_resource": "",
-		"abilities": ["transport"],
+		"abilities": [
+			"transport"
+		],
 		"unit_class": "naval",
 		"transport_capacity": 2,
 		"ocean_travel": false,
@@ -172,7 +198,7 @@
 	},
 	"trireme": {
 		"name": "Trireme",
-		"symbol": "⚓",
+		"symbol": "\u2693",
 		"era": "classical",
 		"cost": 40,
 		"strength": 4.0,
@@ -187,22 +213,24 @@
 	},
 	"longbowman": {
 		"name": "Longbowman",
-		"symbol": "↑",
+		"symbol": "\u2191",
 		"era": "medieval",
 		"cost": 60,
 		"strength": 6.0,
 		"movement": 1,
 		"required_tech": "machinery",
 		"required_resource": "",
-		"abilities": ["city_defense_bonus"],
+		"abilities": [
+			"city_defense_bonus"
+		],
 		"unit_class": "archery",
-		"first_strikes": 2,
+		"first_strikes": 1,
 		"city_defense": 0.25,
 		"upgrades_to": "crossbowman"
 	},
 	"crossbowman": {
 		"name": "Crossbowman",
-		"symbol": "†",
+		"symbol": "\u2020",
 		"era": "medieval",
 		"cost": 50,
 		"strength": 6.0,
@@ -216,16 +244,20 @@
 	},
 	"pikeman": {
 		"name": "Pikeman",
-		"symbol": "Ψ",
+		"symbol": "\u03a8",
 		"era": "medieval",
 		"cost": 45,
 		"strength": 6.0,
 		"movement": 1,
 		"required_tech": "civil_service",
 		"required_resource": "",
-		"abilities": ["bonus_vs_mounted"],
+		"abilities": [
+			"bonus_vs_mounted"
+		],
 		"unit_class": "melee",
-		"bonus_vs": {"mounted": 1.0},
+		"bonus_vs": {
+			"mounted": 1.0
+		},
 		"upgrades_to": "musketman"
 	},
 	"maceman": {
@@ -237,9 +269,13 @@
 		"movement": 1,
 		"required_tech": "civil_service",
 		"required_resource": "iron",
-		"abilities": ["bonus_vs_melee"],
+		"abilities": [
+			"bonus_vs_melee"
+		],
 		"unit_class": "melee",
-		"bonus_vs": {"melee": 0.5},
+		"bonus_vs": {
+			"melee": 0.5
+		},
 		"upgrades_to": "grenadier"
 	},
 	"knight": {
@@ -251,7 +287,9 @@
 		"movement": 2,
 		"required_tech": "guilds",
 		"required_resource": "horses",
-		"abilities": ["flanking"],
+		"abilities": [
+			"flanking"
+		],
 		"unit_class": "mounted",
 		"flanking_bonus": 0.1,
 		"no_defense_bonus": true,
@@ -259,14 +297,17 @@
 	},
 	"trebuchet": {
 		"name": "Trebuchet",
-		"symbol": "⚐",
+		"symbol": "\u2690",
 		"era": "medieval",
 		"cost": 60,
 		"strength": 6.0,
 		"movement": 1,
 		"required_tech": "machinery",
 		"required_resource": "",
-		"abilities": ["bombard", "collateral"],
+		"abilities": [
+			"bombard",
+			"collateral"
+		],
 		"unit_class": "siege",
 		"bombard_strength": 10,
 		"collateral_damage": 6,
@@ -275,7 +316,7 @@
 	},
 	"caravel": {
 		"name": "Caravel",
-		"symbol": "⛵",
+		"symbol": "\u26f5",
 		"era": "renaissance",
 		"cost": 50,
 		"strength": 3.0,
@@ -283,14 +324,16 @@
 		"sight_range": 2,
 		"required_tech": "optics",
 		"required_resource": "",
-		"abilities": ["explore"],
+		"abilities": [
+			"explore"
+		],
 		"unit_class": "naval",
 		"ocean_travel": true,
 		"upgrades_to": "frigate"
 	},
 	"musketman": {
 		"name": "Musketman",
-		"symbol": "⌐",
+		"symbol": "\u2310",
 		"era": "renaissance",
 		"cost": 80,
 		"strength": 9.0,
@@ -303,14 +346,17 @@
 	},
 	"cannon": {
 		"name": "Cannon",
-		"symbol": "⌾",
+		"symbol": "\u233e",
 		"era": "renaissance",
 		"cost": 100,
 		"strength": 8.0,
 		"movement": 1,
 		"required_tech": "chemistry",
 		"required_resource": "",
-		"abilities": ["bombard", "collateral"],
+		"abilities": [
+			"bombard",
+			"collateral"
+		],
 		"unit_class": "siege",
 		"bombard_strength": 15,
 		"collateral_damage": 8,
@@ -319,7 +365,7 @@
 	},
 	"frigate": {
 		"name": "Frigate",
-		"symbol": "⚓",
+		"symbol": "\u2693",
 		"era": "renaissance",
 		"cost": 110,
 		"strength": 6.0,
@@ -327,7 +373,9 @@
 		"sight_range": 2,
 		"required_tech": "astronomy",
 		"required_resource": "",
-		"abilities": ["bombard"],
+		"abilities": [
+			"bombard"
+		],
 		"unit_class": "naval",
 		"ocean_travel": true,
 		"bombard_strength": 8,
@@ -348,14 +396,16 @@
 	},
 	"cavalry": {
 		"name": "Cavalry",
-		"symbol": "⚔",
+		"symbol": "\u2694",
 		"era": "industrial",
 		"cost": 120,
 		"strength": 15.0,
 		"movement": 2,
 		"required_tech": "military_tradition",
 		"required_resource": "horses",
-		"abilities": ["flanking"],
+		"abilities": [
+			"flanking"
+		],
 		"unit_class": "mounted",
 		"flanking_bonus": 0.15,
 		"no_defense_bonus": true,
@@ -363,14 +413,17 @@
 	},
 	"artillery": {
 		"name": "Artillery",
-		"symbol": "⌖",
+		"symbol": "\u2316",
 		"era": "industrial",
 		"cost": 150,
 		"strength": 12.0,
 		"movement": 1,
 		"required_tech": "steel",
 		"required_resource": "",
-		"abilities": ["bombard", "collateral"],
+		"abilities": [
+			"bombard",
+			"collateral"
+		],
 		"unit_class": "siege",
 		"bombard_strength": 20,
 		"collateral_damage": 10,
@@ -398,14 +451,16 @@
 		"movement": 2,
 		"required_tech": "industrialism",
 		"required_resource": "oil",
-		"abilities": ["blitz"],
+		"abilities": [
+			"blitz"
+		],
 		"unit_class": "armor",
 		"no_defense_bonus": true,
 		"upgrades_to": "modern_armor"
 	},
 	"fighter": {
 		"name": "Fighter",
-		"symbol": "✈",
+		"symbol": "\u2708",
 		"era": "modern",
 		"cost": 140,
 		"strength": 0.0,
@@ -415,14 +470,17 @@
 		"range": 6,
 		"required_tech": "flight",
 		"required_resource": "oil",
-		"abilities": ["intercept", "air_superiority"],
+		"abilities": [
+			"intercept",
+			"air_superiority"
+		],
 		"unit_class": "air",
 		"intercept_chance": 0.4,
 		"upgrades_to": "jet_fighter"
 	},
 	"bomber": {
 		"name": "Bomber",
-		"symbol": "✈",
+		"symbol": "\u2708",
 		"era": "modern",
 		"cost": 180,
 		"strength": 0.0,
@@ -432,14 +490,16 @@
 		"range": 8,
 		"required_tech": "flight",
 		"required_resource": "oil",
-		"abilities": ["air_bomb"],
+		"abilities": [
+			"air_bomb"
+		],
 		"unit_class": "air",
 		"bomb_damage": 16,
 		"upgrades_to": "stealth_bomber"
 	},
 	"destroyer": {
 		"name": "Destroyer",
-		"symbol": "⚓",
+		"symbol": "\u2693",
 		"era": "modern",
 		"cost": 120,
 		"strength": 25.0,
@@ -447,13 +507,15 @@
 		"sight_range": 2,
 		"required_tech": "combustion",
 		"required_resource": "oil",
-		"abilities": ["see_submarines"],
+		"abilities": [
+			"see_submarines"
+		],
 		"unit_class": "naval",
 		"ocean_travel": true
 	},
 	"battleship": {
 		"name": "Battleship",
-		"symbol": "⚓",
+		"symbol": "\u2693",
 		"era": "modern",
 		"cost": 250,
 		"strength": 40.0,
@@ -461,14 +523,16 @@
 		"sight_range": 2,
 		"required_tech": "industrialism",
 		"required_resource": "oil",
-		"abilities": ["bombard"],
+		"abilities": [
+			"bombard"
+		],
 		"unit_class": "naval",
 		"ocean_travel": true,
 		"bombard_strength": 25
 	},
 	"submarine": {
 		"name": "Submarine",
-		"symbol": "⊛",
+		"symbol": "\u229b",
 		"era": "modern",
 		"cost": 140,
 		"strength": 20.0,
@@ -476,14 +540,17 @@
 		"sight_range": 2,
 		"required_tech": "combustion",
 		"required_resource": "oil",
-		"abilities": ["invisible", "first_strike"],
+		"abilities": [
+			"invisible",
+			"first_strike"
+		],
 		"unit_class": "naval",
 		"ocean_travel": true,
 		"first_strikes": 2
 	},
 	"mechanized_infantry": {
 		"name": "Mechanized Infantry",
-		"symbol": "Ⅲ",
+		"symbol": "\u2162",
 		"era": "modern",
 		"cost": 180,
 		"strength": 32.0,
@@ -495,20 +562,22 @@
 	},
 	"modern_armor": {
 		"name": "Modern Armor",
-		"symbol": "⬢",
+		"symbol": "\u2b22",
 		"era": "future",
 		"cost": 220,
 		"strength": 40.0,
 		"movement": 2,
 		"required_tech": "composites",
 		"required_resource": "oil",
-		"abilities": ["blitz"],
+		"abilities": [
+			"blitz"
+		],
 		"unit_class": "armor",
 		"no_defense_bonus": true
 	},
 	"nuclear_missile": {
 		"name": "Nuclear Missile",
-		"symbol": "☢",
+		"symbol": "\u2622",
 		"era": "modern",
 		"cost": 400,
 		"strength": 0.0,
@@ -516,7 +585,9 @@
 		"range": 12,
 		"required_tech": "fission",
 		"required_resource": "uranium",
-		"abilities": ["nuke"],
+		"abilities": [
+			"nuke"
+		],
 		"unit_class": "missile",
 		"nuke_damage": 50,
 		"nuke_radius": 2,
@@ -524,7 +595,7 @@
 	},
 	"icbm": {
 		"name": "ICBM",
-		"symbol": "☢",
+		"symbol": "\u2622",
 		"era": "future",
 		"cost": 500,
 		"strength": 0.0,
@@ -532,7 +603,9 @@
 		"range": 99,
 		"required_tech": "advanced_flight",
 		"required_resource": "uranium",
-		"abilities": ["nuke"],
+		"abilities": [
+			"nuke"
+		],
 		"unit_class": "missile",
 		"nuke_damage": 75,
 		"nuke_radius": 3,
@@ -540,38 +613,50 @@
 	},
 	"great_general": {
 		"name": "Great General",
-		"symbol": "★",
+		"symbol": "\u2605",
 		"era": "ancient",
 		"cost": 0,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["great_person", "military_academy", "attach"],
+		"abilities": [
+			"great_person",
+			"military_academy",
+			"attach"
+		],
 		"unit_class": "great_person"
 	},
 	"great_prophet": {
 		"name": "Great Prophet",
-		"symbol": "☆",
+		"symbol": "\u2606",
 		"era": "ancient",
 		"cost": 0,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["great_person", "found_religion", "build_shrine"],
+		"abilities": [
+			"great_person",
+			"found_religion",
+			"build_shrine"
+		],
 		"unit_class": "great_person"
 	},
 	"great_scientist": {
 		"name": "Great Scientist",
-		"symbol": "⚗",
+		"symbol": "\u2697",
 		"era": "ancient",
 		"cost": 0,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["great_person", "academy", "discover_tech"],
+		"abilities": [
+			"great_person",
+			"academy",
+			"discover_tech"
+		],
 		"unit_class": "great_person"
 	},
 	"great_merchant": {
@@ -583,43 +668,57 @@
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["great_person", "trade_mission", "build_custom_house"],
+		"abilities": [
+			"great_person",
+			"trade_mission",
+			"build_custom_house"
+		],
 		"unit_class": "great_person"
 	},
 	"great_engineer": {
 		"name": "Great Engineer",
-		"symbol": "⚙",
+		"symbol": "\u2699",
 		"era": "ancient",
 		"cost": 0,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["great_person", "hurry_wonder", "build_manufactory"],
+		"abilities": [
+			"great_person",
+			"hurry_wonder",
+			"build_manufactory"
+		],
 		"unit_class": "great_person"
 	},
 	"great_artist": {
 		"name": "Great Artist",
-		"symbol": "♪",
+		"symbol": "\u266a",
 		"era": "ancient",
 		"cost": 0,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["great_person", "culture_bomb", "golden_age"],
+		"abilities": [
+			"great_person",
+			"culture_bomb",
+			"golden_age"
+		],
 		"unit_class": "great_person"
 	},
 	"missionary": {
 		"name": "Missionary",
-		"symbol": "✝",
+		"symbol": "\u271d",
 		"era": "ancient",
 		"cost": 40,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["spread_religion"],
+		"abilities": [
+			"spread_religion"
+		],
 		"unit_class": "civilian",
 		"uses": 2
 	},
@@ -632,12 +731,15 @@
 		"movement": 2,
 		"required_tech": "nationalism",
 		"required_resource": "",
-		"abilities": ["invisible", "espionage"],
+		"abilities": [
+			"invisible",
+			"espionage"
+		],
 		"unit_class": "civilian"
 	},
 	"explorer": {
 		"name": "Explorer",
-		"symbol": "⚲",
+		"symbol": "\u26b2",
 		"era": "renaissance",
 		"cost": 40,
 		"strength": 4.0,
@@ -645,7 +747,9 @@
 		"sight_range": 2,
 		"required_tech": "optics",
 		"required_resource": "",
-		"abilities": ["ignore_terrain_cost"],
+		"abilities": [
+			"ignore_terrain_cost"
+		],
 		"unit_class": "recon"
 	},
 	"grenadier": {
@@ -663,7 +767,7 @@
 	},
 	"jet_fighter": {
 		"name": "Jet Fighter",
-		"symbol": "✈",
+		"symbol": "\u2708",
 		"era": "modern",
 		"cost": 200,
 		"strength": 0.0,
@@ -673,13 +777,16 @@
 		"range": 10,
 		"required_tech": "rocketry",
 		"required_resource": "oil",
-		"abilities": ["intercept", "air_superiority"],
+		"abilities": [
+			"intercept",
+			"air_superiority"
+		],
 		"unit_class": "air",
 		"intercept_chance": 0.6
 	},
 	"stealth_bomber": {
 		"name": "Stealth Bomber",
-		"symbol": "✈",
+		"symbol": "\u2708",
 		"era": "future",
 		"cost": 300,
 		"strength": 0.0,
@@ -689,14 +796,17 @@
 		"range": 12,
 		"required_tech": "stealth",
 		"required_resource": "oil",
-		"abilities": ["air_bomb", "evasion"],
+		"abilities": [
+			"air_bomb",
+			"evasion"
+		],
 		"unit_class": "air",
 		"bomb_damage": 24,
 		"evasion_chance": 0.5
 	},
 	"carrier": {
 		"name": "Carrier",
-		"symbol": "⚓",
+		"symbol": "\u2693",
 		"era": "modern",
 		"cost": 300,
 		"strength": 12.0,
@@ -704,14 +814,16 @@
 		"sight_range": 2,
 		"required_tech": "industrialism",
 		"required_resource": "oil",
-		"abilities": ["carry_aircraft"],
+		"abilities": [
+			"carry_aircraft"
+		],
 		"unit_class": "naval",
 		"ocean_travel": true,
 		"aircraft_capacity": 4
 	},
 	"transport": {
 		"name": "Transport",
-		"symbol": "⛴",
+		"symbol": "\u26f4",
 		"era": "industrial",
 		"cost": 80,
 		"strength": 6.0,
@@ -719,126 +831,145 @@
 		"sight_range": 2,
 		"required_tech": "steam_power",
 		"required_resource": "",
-		"abilities": ["transport"],
+		"abilities": [
+			"transport"
+		],
 		"unit_class": "naval",
 		"ocean_travel": true,
 		"transport_capacity": 4
 	},
 	"great_spy": {
 		"name": "Great Spy",
-		"symbol": "⊕",
+		"symbol": "\u2295",
 		"era": "medieval",
 		"cost": 0,
 		"strength": 0.0,
 		"movement": 3,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["great_person", "infiltrate", "counterintelligence_hq", "super_spy"],
+		"abilities": [
+			"great_person",
+			"infiltrate",
+			"counterintelligence_hq",
+			"super_spy"
+		],
 		"unit_class": "great_person",
 		"espionage_modifier": 3.0,
 		"description": "Can infiltrate enemy civs for massive espionage gains, build Intelligence HQ, or become a Super Spy"
 	},
 	"executive_mining": {
 		"name": "Mining Inc. Executive",
-		"symbol": "⛏",
+		"symbol": "\u26cf",
 		"era": "modern",
 		"cost": 150,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "corporation",
 		"required_resource": "",
-		"abilities": ["spread_corporation"],
+		"abilities": [
+			"spread_corporation"
+		],
 		"unit_class": "civilian",
 		"corporation": "mining_inc",
 		"uses": 3
 	},
 	"executive_sushi": {
 		"name": "Sid's Sushi Executive",
-		"symbol": "🍣",
+		"symbol": "\ud83c\udf63",
 		"era": "modern",
 		"cost": 150,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "corporation",
 		"required_resource": "",
-		"abilities": ["spread_corporation"],
+		"abilities": [
+			"spread_corporation"
+		],
 		"unit_class": "civilian",
 		"corporation": "sids_sushi",
 		"uses": 3
 	},
 	"executive_cereal": {
 		"name": "Cereal Mills Executive",
-		"symbol": "🌾",
+		"symbol": "\ud83c\udf3e",
 		"era": "modern",
 		"cost": 150,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "corporation",
 		"required_resource": "",
-		"abilities": ["spread_corporation"],
+		"abilities": [
+			"spread_corporation"
+		],
 		"unit_class": "civilian",
 		"corporation": "cereal_mills",
 		"uses": 3
 	},
 	"executive_ethanol": {
 		"name": "Standard Ethanol Executive",
-		"symbol": "⛽",
+		"symbol": "\u26fd",
 		"era": "modern",
 		"cost": 150,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "corporation",
 		"required_resource": "",
-		"abilities": ["spread_corporation"],
+		"abilities": [
+			"spread_corporation"
+		],
 		"unit_class": "civilian",
 		"corporation": "standard_ethanol",
 		"uses": 3
 	},
 	"executive_construction": {
 		"name": "Creative Constructions Executive",
-		"symbol": "🏗",
+		"symbol": "\ud83c\udfd7",
 		"era": "modern",
 		"cost": 150,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "corporation",
 		"required_resource": "",
-		"abilities": ["spread_corporation"],
+		"abilities": [
+			"spread_corporation"
+		],
 		"unit_class": "civilian",
 		"corporation": "creative_constructions",
 		"uses": 3
 	},
 	"executive_jewelers": {
 		"name": "Civilized Jewelers Executive",
-		"symbol": "💎",
+		"symbol": "\ud83d\udc8e",
 		"era": "modern",
 		"cost": 150,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "corporation",
 		"required_resource": "",
-		"abilities": ["spread_corporation"],
+		"abilities": [
+			"spread_corporation"
+		],
 		"unit_class": "civilian",
 		"corporation": "civilized_jewelers",
 		"uses": 3
 	},
 	"executive_aluminum": {
 		"name": "Aluminum Co. Executive",
-		"symbol": "🏭",
+		"symbol": "\ud83c\udfed",
 		"era": "modern",
 		"cost": 150,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "corporation",
 		"required_resource": "",
-		"abilities": ["spread_corporation"],
+		"abilities": [
+			"spread_corporation"
+		],
 		"unit_class": "civilian",
 		"corporation": "aluminum_co",
 		"uses": 3
 	},
-
 	"_comment_unique": "=== UNIQUE UNITS ===",
-
 	"praetorian": {
 		"name": "Praetorian",
 		"symbol": "P",
@@ -857,16 +988,20 @@
 	},
 	"phalanx": {
 		"name": "Phalanx",
-		"symbol": "Φ",
+		"symbol": "\u03a6",
 		"era": "ancient",
 		"cost": 35,
 		"strength": 5.0,
 		"movement": 1,
 		"required_tech": "bronze_working",
 		"required_resource": "copper",
-		"abilities": ["bonus_vs_mounted"],
+		"abilities": [
+			"bonus_vs_mounted"
+		],
 		"unit_class": "melee",
-		"bonus_vs": {"mounted": 1.0},
+		"bonus_vs": {
+			"mounted": 1.0
+		},
 		"upgrades_to": "pikeman",
 		"replaces": "spearman",
 		"civilization": "greece",
@@ -881,7 +1016,9 @@
 		"movement": 2,
 		"required_tech": "the_wheel",
 		"required_resource": "",
-		"abilities": ["withdraw"],
+		"abilities": [
+			"withdraw"
+		],
 		"unit_class": "mounted",
 		"withdraw_chance": 0.2,
 		"no_defense_bonus": true,
@@ -892,7 +1029,7 @@
 	},
 	"cho_ko_nu": {
 		"name": "Cho-Ko-Nu",
-		"symbol": "弩",
+		"symbol": "\u5f29",
 		"era": "medieval",
 		"cost": 50,
 		"strength": 6.0,
@@ -917,9 +1054,13 @@
 		"movement": 2,
 		"required_tech": "the_wheel",
 		"required_resource": "",
-		"abilities": ["bonus_vs_mounted"],
+		"abilities": [
+			"bonus_vs_mounted"
+		],
 		"unit_class": "melee",
-		"bonus_vs": {"mounted": 0.5},
+		"bonus_vs": {
+			"mounted": 0.5
+		},
 		"no_defense_bonus": true,
 		"upgrades_to": "horseman",
 		"replaces": "chariot",
@@ -935,9 +1076,13 @@
 		"movement": 1,
 		"required_tech": "rifling",
 		"required_resource": "",
-		"abilities": ["bonus_vs_gunpowder"],
+		"abilities": [
+			"bonus_vs_gunpowder"
+		],
 		"unit_class": "gunpowder",
-		"bonus_vs": {"gunpowder": 0.25},
+		"bonus_vs": {
+			"gunpowder": 0.25
+		},
 		"upgrades_to": "infantry",
 		"replaces": "rifleman",
 		"civilization": "england",
@@ -961,14 +1106,16 @@
 	},
 	"panzer": {
 		"name": "Panzer",
-		"symbol": "⬢",
+		"symbol": "\u2b22",
 		"era": "modern",
 		"cost": 180,
 		"strength": 32.0,
 		"movement": 2,
 		"required_tech": "industrialism",
 		"required_resource": "oil",
-		"abilities": ["blitz"],
+		"abilities": [
+			"blitz"
+		],
 		"unit_class": "armor",
 		"no_defense_bonus": true,
 		"upgrades_to": "modern_armor",
@@ -978,17 +1125,22 @@
 	},
 	"cossack": {
 		"name": "Cossack",
-		"symbol": "К",
+		"symbol": "\u041a",
 		"era": "industrial",
 		"cost": 120,
 		"strength": 18.0,
 		"movement": 2,
 		"required_tech": "military_tradition",
 		"required_resource": "horses",
-		"abilities": ["flanking", "bonus_vs_mounted"],
+		"abilities": [
+			"flanking",
+			"bonus_vs_mounted"
+		],
 		"unit_class": "mounted",
 		"flanking_bonus": 0.15,
-		"bonus_vs": {"mounted": 0.5},
+		"bonus_vs": {
+			"mounted": 0.5
+		},
 		"no_defense_bonus": true,
 		"upgrades_to": "tank",
 		"replaces": "cavalry",
@@ -1004,7 +1156,11 @@
 		"movement": 2,
 		"required_tech": "robotics",
 		"required_resource": "oil",
-		"abilities": ["amphibious", "march", "can_use_enemy_roads"],
+		"abilities": [
+			"amphibious",
+			"march",
+			"can_use_enemy_roads"
+		],
 		"unit_class": "gunpowder",
 		"replaces": "mechanized_infantry",
 		"civilization": "america",
@@ -1012,16 +1168,20 @@
 	},
 	"samurai": {
 		"name": "Samurai",
-		"symbol": "侍",
+		"symbol": "\u4f8d",
 		"era": "medieval",
 		"cost": 50,
 		"strength": 8.0,
 		"movement": 1,
 		"required_tech": "civil_service",
 		"required_resource": "iron",
-		"abilities": ["bonus_vs_melee"],
+		"abilities": [
+			"bonus_vs_melee"
+		],
 		"unit_class": "melee",
-		"bonus_vs": {"melee": 0.5},
+		"bonus_vs": {
+			"melee": 0.5
+		},
 		"first_strikes": 2,
 		"upgrades_to": "grenadier",
 		"replaces": "maceman",
@@ -1030,14 +1190,16 @@
 	},
 	"fast_worker": {
 		"name": "Fast Worker",
-		"symbol": "☭",
+		"symbol": "\u262d",
 		"era": "ancient",
 		"cost": 60,
 		"strength": 0.0,
 		"movement": 3,
 		"required_tech": "",
 		"required_resource": "",
-		"abilities": ["build_improvements"],
+		"abilities": [
+			"build_improvements"
+		],
 		"unit_class": "civilian",
 		"replaces": "worker",
 		"civilization": "india",
@@ -1045,14 +1207,17 @@
 	},
 	"keshik": {
 		"name": "Keshik",
-		"symbol": "蒙",
+		"symbol": "\u8499",
 		"era": "medieval",
 		"cost": 90,
 		"strength": 10.0,
 		"movement": 3,
 		"required_tech": "guilds",
 		"required_resource": "horses",
-		"abilities": ["flanking", "ignore_terrain_cost"],
+		"abilities": [
+			"flanking",
+			"ignore_terrain_cost"
+		],
 		"unit_class": "mounted",
 		"flanking_bonus": 0.1,
 		"no_defense_bonus": true,
@@ -1070,7 +1235,9 @@
 		"movement": 1,
 		"required_tech": "iron_working",
 		"required_resource": "iron",
-		"abilities": ["woodsman"],
+		"abilities": [
+			"woodsman"
+		],
 		"unit_class": "melee",
 		"forest_defense": 0.25,
 		"jungle_defense": 0.25,
@@ -1081,14 +1248,17 @@
 	},
 	"camel_archer": {
 		"name": "Camel Archer",
-		"symbol": "🐪",
+		"symbol": "\ud83d\udc2a",
 		"era": "medieval",
 		"cost": 90,
 		"strength": 10.0,
 		"movement": 2,
 		"required_tech": "guilds",
 		"required_resource": "horses",
-		"abilities": ["withdraw", "immune_first_strikes"],
+		"abilities": [
+			"withdraw",
+			"immune_first_strikes"
+		],
 		"unit_class": "mounted",
 		"withdraw_chance": 0.25,
 		"no_defense_bonus": true,
@@ -1099,35 +1269,40 @@
 	},
 	"conquistador": {
 		"name": "Conquistador",
-		"symbol": "⚔",
+		"symbol": "\u2694",
 		"era": "medieval",
 		"cost": 90,
 		"strength": 10.0,
 		"movement": 2,
 		"required_tech": "guilds",
 		"required_resource": "horses",
-		"abilities": ["bonus_vs_melee", "can_attack_from_sea"],
+		"abilities": [
+			"bonus_vs_melee",
+			"can_attack_from_sea"
+		],
 		"unit_class": "mounted",
-		"bonus_vs": {"melee": 0.5},
+		"bonus_vs": {
+			"melee": 0.5
+		},
 		"no_defense_bonus": true,
 		"upgrades_to": "cavalry",
 		"replaces": "knight",
 		"civilization": "spain",
 		"description": "Spanish unique unit. +50% vs Melee, can attack from ship."
 	},
-
 	"_comment_inquisitor": "=== INQUISITOR ===",
-
 	"inquisitor": {
 		"name": "Inquisitor",
-		"symbol": "⚖",
+		"symbol": "\u2696",
 		"era": "medieval",
 		"cost": 60,
 		"strength": 0.0,
 		"movement": 2,
 		"required_tech": "theology",
 		"required_resource": "",
-		"abilities": ["remove_religion"],
+		"abilities": [
+			"remove_religion"
+		],
 		"unit_class": "civilian",
 		"uses": 2,
 		"description": "Can remove non-state religions from cities."

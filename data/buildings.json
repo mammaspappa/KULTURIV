@@ -29,7 +29,7 @@
 	"barracks": {
 		"name": "Barracks",
 		"era": "ancient",
-		"cost": 60,
+		"cost": 50,
 		"maintenance": 1,
 		"required_tech": "",
 		"effects": {
@@ -145,7 +145,11 @@
 			"great_merchant_points": 1,
 			"happiness_from_resource": 1
 		},
-		"happiness_resources": ["fur", "ivory", "silk"],
+		"happiness_resources": [
+			"fur",
+			"ivory",
+			"silk"
+		],
 		"description": "+25% Gold, +1 Happiness from luxury resources"
 	},
 	"colosseum": {
@@ -275,7 +279,11 @@
 			"health": 2,
 			"happiness_from_resource": 1
 		},
-		"happiness_resources": ["spices", "wine", "dye"],
+		"happiness_resources": [
+			"spices",
+			"wine",
+			"dye"
+		],
 		"description": "+2 Health, +1 Happiness from resources"
 	},
 	"harbor": {
@@ -315,7 +323,10 @@
 			"production_percent": 0.25,
 			"unhealthiness": 2
 		},
-		"exclusive_with": ["hydro_plant", "nuclear_plant"],
+		"exclusive_with": [
+			"hydro_plant",
+			"nuclear_plant"
+		],
 		"description": "+25% Production, +2 Unhealthiness"
 	},
 	"hydro_plant": {
@@ -329,7 +340,10 @@
 		"effects": {
 			"production_percent": 0.25
 		},
-		"exclusive_with": ["coal_plant", "nuclear_plant"],
+		"exclusive_with": [
+			"coal_plant",
+			"nuclear_plant"
+		],
 		"description": "+25% Production (clean)"
 	},
 	"nuclear_plant": {
@@ -343,7 +357,10 @@
 			"production_percent": 0.5,
 			"meltdown_chance": 0.01
 		},
-		"exclusive_with": ["coal_plant", "hydro_plant"],
+		"exclusive_with": [
+			"coal_plant",
+			"hydro_plant"
+		],
 		"description": "+50% Production, risk of meltdown"
 	},
 	"hospital": {
@@ -458,9 +475,7 @@
 		},
 		"description": "+1 Happiness, removes 1 unhealthiness"
 	},
-
 	"_comment_wonders": "=== WORLD WONDERS (Only one per game) ===",
-
 	"stonehenge": {
 		"name": "Stonehenge",
 		"era": "ancient",
@@ -811,9 +826,7 @@
 		},
 		"description": "+50% Spaceship production in all cities"
 	},
-
 	"_comment_national": "=== NATIONAL WONDERS (One per civilization) ===",
-
 	"heroic_epic": {
 		"name": "Heroic Epic",
 		"era": "classical",
@@ -1054,9 +1067,7 @@
 		},
 		"description": "+1 Gold per city with Islam"
 	},
-
 	"_comment_religious": "=== RELIGION-SPECIFIC BUILDINGS ===",
-
 	"buddhist_temple": {
 		"name": "Buddhist Temple",
 		"era": "ancient",
@@ -1101,7 +1112,6 @@
 		},
 		"description": "+4 Culture, +2 Happiness from Buddhism"
 	},
-
 	"hindu_temple": {
 		"name": "Hindu Mandir",
 		"era": "ancient",
@@ -1146,7 +1156,6 @@
 		},
 		"description": "+4 Culture, +2 Happiness from Hinduism"
 	},
-
 	"jewish_temple": {
 		"name": "Synagogue",
 		"era": "ancient",
@@ -1191,7 +1200,6 @@
 		},
 		"description": "+4 Culture, +2 Happiness from Judaism"
 	},
-
 	"christian_temple": {
 		"name": "Christian Church",
 		"era": "medieval",
@@ -1236,7 +1244,6 @@
 		},
 		"description": "+4 Culture, +2 Happiness from Christianity"
 	},
-
 	"confucian_temple": {
 		"name": "Confucian Academy",
 		"era": "ancient",
@@ -1281,7 +1288,6 @@
 		},
 		"description": "+4 Culture, +2 Happiness from Confucianism"
 	},
-
 	"taoist_temple": {
 		"name": "Taoist Pagoda",
 		"era": "ancient",
@@ -1326,7 +1332,6 @@
 		},
 		"description": "+4 Culture, +2 Happiness from Taoism"
 	},
-
 	"islamic_temple": {
 		"name": "Islamic Mosque",
 		"era": "medieval",
@@ -1371,9 +1376,7 @@
 		},
 		"description": "+4 Culture, +2 Happiness from Islam"
 	},
-
 	"_comment_espionage": "=== ESPIONAGE BUILDINGS ===",
-
 	"intelligence_agency": {
 		"name": "Intelligence Agency",
 		"era": "modern",
@@ -1415,9 +1418,7 @@
 		},
 		"description": "+4 Espionage in all cities, +25% Spy success"
 	},
-
 	"_comment_corporations": "=== CORPORATION HEADQUARTERS ===",
-
 	"mining_inc_hq": {
 		"name": "Mining Inc. Headquarters",
 		"era": "modern",
@@ -1520,9 +1521,7 @@
 		},
 		"description": "Aluminum Co. Headquarters. +5 Production, +3 Gold per city."
 	},
-
 	"_comment_unique_buildings": "=== UNIQUE BUILDINGS ===",
-
 	"forum": {
 		"name": "Forum",
 		"era": "classical",

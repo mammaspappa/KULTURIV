@@ -15,14 +15,14 @@ enum GoodyReward {
 
 # Reward weights (higher = more common)
 const REWARD_WEIGHTS = {
-	GoodyReward.GOLD: 30,
-	GoodyReward.TECH: 15,
-	GoodyReward.MAP: 20,
-	GoodyReward.EXPERIENCE: 15,
-	GoodyReward.UNIT: 10,
-	GoodyReward.SETTLER: 2,
-	GoodyReward.POPULATION: 5,
-	GoodyReward.BARBARIANS: 3,
+	GoodyReward.GOLD: 20,
+	GoodyReward.TECH: 20,
+	GoodyReward.MAP: 15,
+	GoodyReward.EXPERIENCE: 10,
+	GoodyReward.UNIT: 15,
+	GoodyReward.SETTLER: 5,
+	GoodyReward.POPULATION: 10,
+	GoodyReward.BARBARIANS: 5,
 }
 
 signal goody_hut_discovered(unit, tile, reward_type, reward_value)

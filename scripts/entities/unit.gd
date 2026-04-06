@@ -627,8 +627,8 @@ func _check_level_up() -> void:
 		xp_needed = _xp_for_next_level()
 
 func _xp_for_next_level() -> int:
-	# 2, 5, 10, 17, 26, 37, 50...
-	return level * (level + 1)
+	# Civ4 BTS XP thresholds: 2, 5, 10, 17, 26, 37...
+	return level * level + 1
 
 func can_promote() -> bool:
 	return experience >= _xp_for_next_level() and _get_available_promotions().size() > 0
