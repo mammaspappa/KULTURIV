@@ -65,9 +65,148 @@ func _draw() -> void:
 
 func _draw_terrain() -> void:
 	var color = DataManager.get_terrain_color(terrain_id)
+
+	# Per-tile brightness variation to break up the flat grid look
+	var hash_val = (grid_position.x * 7 + grid_position.y * 13) % 20
+	var brightness = 0.95 + float(hash_val) / 200.0  # Range 0.95 to 1.05
+	color = Color(
+		clampf(color.r * brightness, 0.0, 1.0),
+		clampf(color.g * brightness, 0.0, 1.0),
+		clampf(color.b * brightness, 0.0, 1.0),
+		color.a
+	)
+
+	# Draw base terrain rectangle
 	draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), color)
-	# Draw grid lines
-	draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), Color(0, 0, 0, 0.2), false, 1.0)
+
+	# Terrain-specific decorations
+	match terrain_id:
+		"grassland":
+			_draw_grassland_details(color)
+		"plains":
+			_draw_grassland_details(color)  # Similar subtle dots
+		"desert":
+			_draw_desert_details(color)
+		"hills":
+			_draw_hills_details(color)
+		"mountains":
+			_draw_mountain_details()
+		"coast":
+			_draw_coast_details(color)
+		"ocean":
+			_draw_ocean_details(color)
+		"snow":
+			_draw_snow_details()
+		"tundra":
+			_draw_tundra_details()
+
+	# Soft 1px darkened edges instead of hard grid lines
+	var edge_color = Color(
+		color.r * 0.8,
+		color.g * 0.8,
+		color.b * 0.8,
+		0.5
+	)
+	draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), edge_color, false, 1.0)
+
+func _draw_grassland_details(base_color: Color) -> void:
+	# Draw 3-5 small dark green dots at deterministic pseudo-random positions
+	var dot_color = Color(base_color.r * 0.7, base_color.g * 0.85, base_color.b * 0.6)
+	var seed_val = grid_position.x * 31 + grid_position.y * 17
+	var dot_count = 3 + (seed_val % 3)  # 3 to 5
+	for i in dot_count:
+		var px = 8 + ((seed_val * (i + 1) * 7 + 13) % (TILE_SIZE - 16))
+		var py = 8 + ((seed_val * (i + 1) * 11 + 23) % (TILE_SIZE - 16))
+		draw_circle(Vector2(px, py), 1.5, dot_color)
+
+func _draw_desert_details(base_color: Color) -> void:
+	# Draw 2 subtle wavy horizontal lines in slightly darker tan
+	var line_color = Color(base_color.r * 0.9, base_color.g * 0.88, base_color.b * 0.85, 0.5)
+	for i in 2:
+		var y_base = 18.0 + i * 20.0
+		var prev_point = Vector2(0, y_base)
+		for seg in range(1, 9):
+			var x = seg * 8.0
+			var wave_offset = sin(float(seg + grid_position.x * 3 + i * 5)) * 2.5
+			var next_point = Vector2(x, y_base + wave_offset)
+			draw_line(prev_point, next_point, line_color, 1.0)
+			prev_point = next_point
+
+func _draw_hills_details(base_color: Color) -> void:
+	# Draw a simple arc/dome shape in darker shade, centered in lower half
+	var dome_color = Color(base_color.r * 0.75, base_color.g * 0.75, base_color.b * 0.75)
+	var cx = TILE_SIZE / 2.0
+	var cy = TILE_SIZE * 0.65
+	var arc_points: PackedVector2Array = []
+	for j in range(0, 13):
+		var angle = PI + float(j) / 12.0 * PI  # PI to 2*PI (bottom half of circle)
+		arc_points.append(Vector2(cx + cos(angle) * 20.0, cy + sin(angle) * 12.0))
+	# Close the bottom
+	arc_points.append(arc_points[0])
+	for j in range(0, arc_points.size() - 1):
+		draw_line(arc_points[j], arc_points[j + 1], dome_color, 2.0)
+
+func _draw_mountain_details() -> void:
+	# Main mountain triangle (dark gray)
+	var peak = Vector2(TILE_SIZE / 2.0, 10.0)
+	var left = Vector2(8.0, TILE_SIZE - 8.0)
+	var right = Vector2(TILE_SIZE - 8.0, TILE_SIZE - 8.0)
+	draw_colored_polygon(PackedVector2Array([peak, left, right]), Color(0.35, 0.35, 0.35))
+	# Snow cap (small white triangle on top)
+	var snow_left = Vector2(TILE_SIZE / 2.0 - 8.0, 22.0)
+	var snow_right = Vector2(TILE_SIZE / 2.0 + 8.0, 22.0)
+	draw_colored_polygon(PackedVector2Array([peak, snow_left, snow_right]), Color(0.95, 0.95, 0.98))
+
+func _draw_coast_details(base_color: Color) -> void:
+	# Draw 2-3 thin wavy horizontal lines in slightly lighter blue
+	var line_color = Color(
+		minf(base_color.r + 0.12, 1.0),
+		minf(base_color.g + 0.12, 1.0),
+		minf(base_color.b + 0.12, 1.0),
+		0.6
+	)
+	var wave_count = 2 + (grid_position.x + grid_position.y) % 2  # 2 or 3
+	for i in wave_count:
+		var y_base = 14.0 + i * 16.0
+		var prev_point = Vector2(0, y_base)
+		for seg in range(1, 9):
+			var x = seg * 8.0
+			var wave_offset = sin(float(seg + grid_position.x * 2 + i * 4)) * 3.0
+			var next_point = Vector2(x, y_base + wave_offset)
+			draw_line(prev_point, next_point, line_color, 1.0)
+			prev_point = next_point
+
+func _draw_ocean_details(base_color: Color) -> void:
+	# Draw 1-2 wavy lines in darker blue
+	var line_color = Color(base_color.r * 0.8, base_color.g * 0.8, base_color.b * 1.1, 0.5)
+	var wave_count = 1 + (grid_position.x * 3 + grid_position.y) % 2  # 1 or 2
+	for i in wave_count:
+		var y_base = 20.0 + i * 18.0
+		var prev_point = Vector2(0, y_base)
+		for seg in range(1, 9):
+			var x = seg * 8.0
+			var wave_offset = sin(float(seg + grid_position.y * 2 + i * 3)) * 3.5
+			var next_point = Vector2(x, y_base + wave_offset)
+			draw_line(prev_point, next_point, line_color, 1.0)
+			prev_point = next_point
+
+func _draw_snow_details() -> void:
+	# Scattered white dots (snowflakes)
+	var seed_val = grid_position.x * 23 + grid_position.y * 41
+	var dot_count = 4 + (seed_val % 3)  # 4 to 6
+	for i in dot_count:
+		var px = 6 + ((seed_val * (i + 1) * 13 + 7) % (TILE_SIZE - 12))
+		var py = 6 + ((seed_val * (i + 1) * 19 + 11) % (TILE_SIZE - 12))
+		draw_circle(Vector2(px, py), 1.0, Color(1.0, 1.0, 1.0, 0.7))
+
+func _draw_tundra_details() -> void:
+	# Scattered white dots (sparse snowflakes) on tundra
+	var seed_val = grid_position.x * 29 + grid_position.y * 37
+	var dot_count = 2 + (seed_val % 3)  # 2 to 4
+	for i in dot_count:
+		var px = 8 + ((seed_val * (i + 1) * 11 + 3) % (TILE_SIZE - 16))
+		var py = 8 + ((seed_val * (i + 1) * 17 + 9) % (TILE_SIZE - 16))
+		draw_circle(Vector2(px, py), 1.0, Color(1.0, 1.0, 1.0, 0.5))
 
 func _draw_feature() -> void:
 	if feature_id == "":
@@ -77,15 +216,116 @@ func _draw_feature() -> void:
 	if feature.is_empty():
 		return
 
-	var symbol = feature.get("symbol", "?")
-	var color = Color(feature.get("color", "#228B22"))
+	match feature_id:
+		"forest":
+			_draw_feature_forest()
+		"jungle":
+			_draw_feature_jungle()
+		"flood_plains":
+			_draw_feature_flood_plains()
+		"oasis":
+			_draw_feature_oasis()
+		"ice":
+			_draw_feature_ice()
+		_:
+			# Fallback: draw the symbol for any unknown features
+			var symbol = feature.get("symbol", "?")
+			var color = Color(feature.get("color", "#228B22"))
+			var font = ThemeDB.fallback_font
+			var font_size = 20
+			var text_size = font.get_string_size(symbol, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+			var text_pos = Vector2(TILE_SIZE / 2 - text_size.x / 2, TILE_SIZE / 2 + text_size.y / 4)
+			draw_string(font, text_pos, symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
-	# Draw feature symbol in center
-	var font = ThemeDB.fallback_font
-	var font_size = 20
-	var text_size = font.get_string_size(symbol, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
-	var text_pos = Vector2(TILE_SIZE / 2 - text_size.x / 2, TILE_SIZE / 2 + text_size.y / 4)
-	draw_string(font, text_pos, symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+func _draw_feature_forest() -> void:
+	# 2-3 small green triangles (pointed up) at slightly offset positions
+	var tree_color = Color(0.13, 0.55, 0.13)
+	var seed_val = grid_position.x * 11 + grid_position.y * 23
+	var tree_count = 2 + (seed_val % 2)  # 2 or 3
+
+	# Predefined base positions for trees (center-ish of tile)
+	var base_positions = [
+		Vector2(TILE_SIZE * 0.3, TILE_SIZE * 0.55),
+		Vector2(TILE_SIZE * 0.6, TILE_SIZE * 0.45),
+		Vector2(TILE_SIZE * 0.45, TILE_SIZE * 0.7),
+	]
+
+	for i in tree_count:
+		var bx = base_positions[i].x + float((seed_val * (i + 1)) % 7) - 3.0
+		var by = base_positions[i].y + float((seed_val * (i + 2)) % 5) - 2.0
+		# Triangle: base ~8px, height ~12px
+		var top = Vector2(bx, by - 12.0)
+		var bl = Vector2(bx - 4.0, by)
+		var br = Vector2(bx + 4.0, by)
+		draw_colored_polygon(PackedVector2Array([top, bl, br]), tree_color)
+
+func _draw_feature_jungle() -> void:
+	# 3-4 shorter, wider triangles in very dark green, packed tighter
+	var jungle_color = Color(0.0, 0.4, 0.0)
+	var seed_val = grid_position.x * 13 + grid_position.y * 19
+	var tree_count = 3 + (seed_val % 2)  # 3 or 4
+
+	var base_positions = [
+		Vector2(TILE_SIZE * 0.25, TILE_SIZE * 0.5),
+		Vector2(TILE_SIZE * 0.5, TILE_SIZE * 0.4),
+		Vector2(TILE_SIZE * 0.7, TILE_SIZE * 0.55),
+		Vector2(TILE_SIZE * 0.4, TILE_SIZE * 0.7),
+	]
+
+	for i in tree_count:
+		var bx = base_positions[i].x + float((seed_val * (i + 1)) % 5) - 2.0
+		var by = base_positions[i].y + float((seed_val * (i + 2)) % 5) - 2.0
+		# Shorter, wider triangles: base ~10px, height ~9px
+		var top = Vector2(bx, by - 9.0)
+		var bl = Vector2(bx - 5.0, by)
+		var br = Vector2(bx + 5.0, by)
+		draw_colored_polygon(PackedVector2Array([top, bl, br]), jungle_color)
+
+func _draw_feature_flood_plains() -> void:
+	# 3 thin horizontal wavy blue lines across the tile
+	var line_color = Color(0.2, 0.5, 0.9, 0.6)
+	for i in 3:
+		var y_base = 16.0 + i * 14.0
+		var prev_point = Vector2(4.0, y_base)
+		for seg in range(1, 8):
+			var x = 4.0 + seg * 8.0
+			var wave_offset = sin(float(seg + grid_position.x * 5 + i * 3)) * 2.0
+			var next_point = Vector2(x, y_base + wave_offset)
+			draw_line(prev_point, next_point, line_color, 1.0)
+			prev_point = next_point
+
+func _draw_feature_oasis() -> void:
+	# Small filled blue circle for water, green circle outline for vegetation
+	var center = Vector2(TILE_SIZE / 2.0, TILE_SIZE / 2.0)
+	draw_circle(center, 6.0, Color(0.1, 0.5, 0.9))  # Blue water
+	# Green vegetation ring (draw as an unfilled circle via arc)
+	var ring_color = Color(0.2, 0.7, 0.2)
+	var point_count = 24
+	for j in point_count:
+		var angle_a = float(j) / float(point_count) * TAU
+		var angle_b = float(j + 1) / float(point_count) * TAU
+		var pa = center + Vector2(cos(angle_a), sin(angle_a)) * 8.0
+		var pb = center + Vector2(cos(angle_b), sin(angle_b)) * 8.0
+		draw_line(pa, pb, ring_color, 1.5)
+
+func _draw_feature_ice() -> void:
+	# Angular white shapes: 2-3 short diagonal white lines crossing each other
+	var ice_color = Color(0.9, 0.95, 1.0, 0.85)
+	var seed_val = grid_position.x * 17 + grid_position.y * 29
+	var group_count = 2 + (seed_val % 2)  # 2 or 3
+
+	var base_positions = [
+		Vector2(TILE_SIZE * 0.3, TILE_SIZE * 0.35),
+		Vector2(TILE_SIZE * 0.65, TILE_SIZE * 0.55),
+		Vector2(TILE_SIZE * 0.45, TILE_SIZE * 0.7),
+	]
+
+	for i in group_count:
+		var cx = base_positions[i].x + float((seed_val * (i + 1)) % 7) - 3.0
+		var cy = base_positions[i].y + float((seed_val * (i + 2)) % 5) - 2.0
+		# Draw crossing diagonal lines
+		draw_line(Vector2(cx - 5, cy - 4), Vector2(cx + 5, cy + 4), ice_color, 1.5)
+		draw_line(Vector2(cx - 4, cy + 5), Vector2(cx + 4, cy - 5), ice_color, 1.5)
 
 func _draw_resource() -> void:
 	if resource_id == "":

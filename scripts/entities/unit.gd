@@ -80,12 +80,8 @@ func _draw() -> void:
 	if is_selected:
 		draw_arc(Vector2.ZERO, 26, 0, TAU, 32, Color.WHITE, 3.0)
 
-	# Unit symbol
-	var font = ThemeDB.fallback_font
-	var font_size = 24
-	var text_size = font.get_string_size(symbol, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
-	var text_pos = Vector2(-text_size.x / 2, text_size.y / 4)
-	draw_string(font, text_pos, symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)
+	# Unit icon
+	_draw_unit_icon(Vector2.ZERO, unit_class, symbol)
 
 	# Health bar
 	if health < max_health:
@@ -101,6 +97,7 @@ func _draw() -> void:
 		draw_rect(Rect2(-bar_width/2, bar_y, bar_width * health_percent, bar_height), health_color)
 
 	# Fortification indicator
+	var font = ThemeDB.fallback_font
 	if is_fortified:
 		var shield_pos = Vector2(15, -15)
 		draw_string(font, shield_pos, "⛨", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.CYAN)
@@ -114,6 +111,150 @@ func _draw() -> void:
 	if movement_remaining > 0:
 		var move_text = str(int(movement_remaining))
 		draw_string(font, Vector2(15, 20), move_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+
+func _draw_unit_icon(center: Vector2, unit_class: String, symbol: String) -> void:
+	var col = Color.WHITE
+	var lw = 2.0  # line width
+
+	match unit_class:
+		"melee":
+			# Sword: vertical blade + crossguard + grip
+			draw_rect(Rect2(center.x - 1, center.y - 10, 2, 16), col)  # blade
+			draw_rect(Rect2(center.x - 4, center.y + 2, 8, 2), col)   # crossguard
+			draw_rect(Rect2(center.x - 1, center.y + 6, 2, 5), col)   # grip
+			# Pommel dot
+			draw_circle(center + Vector2(0, 12), 1.5, col)
+
+		"archery":
+			# Bow: curved arc + string line
+			draw_arc(center + Vector2(-3, 0), 10, -PI / 3, PI / 3, 16, col, lw)
+			# String (straight line from arc endpoints)
+			var string_top = center + Vector2(-3, 0) + Vector2(10 * cos(-PI / 3), 10 * sin(-PI / 3))
+			var string_bot = center + Vector2(-3, 0) + Vector2(10 * cos(PI / 3), 10 * sin(PI / 3))
+			draw_line(string_top, string_bot, col, lw)
+			# Arrow
+			draw_line(center + Vector2(-8, 0), center + Vector2(8, 0), col, lw)
+			# Arrowhead
+			draw_line(center + Vector2(8, 0), center + Vector2(5, -3), col, lw)
+			draw_line(center + Vector2(8, 0), center + Vector2(5, 3), col, lw)
+
+		"mounted":
+			# Chevron / inverted V (horseshoe shape)
+			draw_line(center + Vector2(-8, 8), center + Vector2(0, -8), col, lw)
+			draw_line(center + Vector2(0, -8), center + Vector2(8, 8), col, lw)
+			# Second inner chevron for emphasis
+			draw_line(center + Vector2(-5, 5), center + Vector2(0, -3), col, lw)
+			draw_line(center + Vector2(0, -3), center + Vector2(5, 5), col, lw)
+
+		"gunpowder":
+			# Musket: long diagonal barrel + angled stock
+			draw_line(center + Vector2(-10, 6), center + Vector2(8, -8), col, lw)  # barrel
+			draw_line(center + Vector2(-10, 6), center + Vector2(-6, 12), col, lw)  # stock
+			# Trigger guard
+			draw_line(center + Vector2(-4, 4), center + Vector2(-3, 7), col, 1.5)
+
+		"armor":
+			# Tank: body rectangle + turret + barrel
+			draw_rect(Rect2(center.x - 10, center.y - 2, 20, 10), col, false, lw)  # body
+			draw_rect(Rect2(center.x - 5, center.y - 7, 10, 6), col, false, lw)    # turret
+			draw_line(center + Vector2(5, -5), center + Vector2(14, -5), col, lw)   # barrel
+			# Treads (bottom lines)
+			draw_line(center + Vector2(-10, 9), center + Vector2(10, 9), col, lw)
+
+		"siege":
+			# Wheel + barrel/arm
+			draw_arc(center + Vector2(-3, 3), 7, 0, TAU, 20, col, lw)  # wheel
+			# Spokes
+			draw_line(center + Vector2(-3, 3), center + Vector2(-3, -4), col, 1.0)
+			draw_line(center + Vector2(-3, 3), center + Vector2(4, 3), col, 1.0)
+			# Barrel pointing up-right
+			draw_line(center + Vector2(2, -1), center + Vector2(12, -10), col, lw)
+
+		"naval":
+			# Hull (filled half-oval polygon)
+			var hull_points = PackedVector2Array()
+			hull_points.append(center + Vector2(-12, 0))
+			for i in range(9):
+				var angle = PI + (PI * i / 8.0)
+				hull_points.append(center + Vector2(cos(angle) * 12, sin(angle) * 6 + 3))
+			hull_points.append(center + Vector2(12, 0))
+			draw_colored_polygon(hull_points, col)
+			# Mast
+			draw_line(center + Vector2(0, 0), center + Vector2(0, -12), col, lw)
+			# Sail (small triangle)
+			var sail = PackedVector2Array([
+				center + Vector2(0, -11),
+				center + Vector2(8, -6),
+				center + Vector2(0, -3)
+			])
+			draw_colored_polygon(sail, col)
+
+		"recon":
+			# Eye shape: two arcs forming almond shape + center dot
+			# Upper arc (curved up)
+			draw_arc(center + Vector2(0, 8), 12, -1.1, -PI + 1.1, 16, col, lw)
+			# Lower arc (curved down)
+			draw_arc(center + Vector2(0, -8), 12, 1.1, PI - 1.1, 16, col, lw)
+			# Pupil
+			draw_circle(center, 3, col)
+
+		"civilian":
+			_draw_civilian_icon(center, col, lw)
+
+		_:
+			# Fallback: draw the text symbol
+			var font = ThemeDB.fallback_font
+			var font_size = 24
+			var text_size = font.get_string_size(symbol, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+			var text_pos = center + Vector2(-text_size.x / 2, text_size.y / 4)
+			draw_string(font, text_pos, symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
+
+
+func _draw_civilian_icon(center: Vector2, col: Color, lw: float) -> void:
+	match unit_id:
+		"settler":
+			# House: rectangle base + triangle roof
+			draw_rect(Rect2(center.x - 7, center.y - 2, 14, 10), col, false, lw)
+			var roof = PackedVector2Array([
+				center + Vector2(-9, -2),
+				center + Vector2(0, -11),
+				center + Vector2(9, -2)
+			])
+			draw_polyline(roof, col, lw)
+			# Door
+			draw_rect(Rect2(center.x - 2, center.y + 3, 4, 5), col, false, lw)
+
+		"worker":
+			# Crossed tools: X shape with thicker ends
+			draw_line(center + Vector2(-8, -8), center + Vector2(8, 8), col, lw)
+			draw_line(center + Vector2(8, -8), center + Vector2(-8, 8), col, lw)
+			# Thicker ends (tool heads)
+			draw_circle(center + Vector2(-8, -8), 2.5, col)
+			draw_circle(center + Vector2(8, -8), 2.5, col)
+			draw_circle(center + Vector2(-8, 8), 2.5, col)
+			draw_circle(center + Vector2(8, 8), 2.5, col)
+
+		"missionary", "inquisitor":
+			# Cross shape
+			draw_rect(Rect2(center.x - 2, center.y - 11, 4, 20), col)  # vertical bar
+			draw_rect(Rect2(center.x - 7, center.y - 6, 14, 4), col)   # horizontal bar
+
+		"spy":
+			# Target/eye: circle with crosshairs
+			draw_arc(center, 7, 0, TAU, 20, col, lw)
+			draw_line(center + Vector2(-10, 0), center + Vector2(10, 0), col, 1.5)
+			draw_line(center + Vector2(0, -10), center + Vector2(0, 10), col, 1.5)
+			draw_circle(center, 2.5, col)
+
+		_:
+			# Fallback: draw the text symbol
+			var font = ThemeDB.fallback_font
+			var font_size = 24
+			var symbol = DataManager.get_unit(unit_id).get("symbol", "?")
+			var text_size = font.get_string_size(symbol, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+			var text_pos = center + Vector2(-text_size.x / 2, text_size.y / 4)
+			draw_string(font, text_pos, symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
+
 
 func update_visual() -> void:
 	# Check if this unit should be visible to the human player

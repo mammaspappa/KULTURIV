@@ -23,6 +23,7 @@ var game_world: Node2D = null
 # Game configuration
 var difficulty: int = 4  # Prince difficulty (0-8 scale)
 var game_speed: int = 1  # 0=Quick, 1=Normal, 2=Epic, 3=Marathon
+var map_type: String = "fractal"  # fractal, pangaea, continents, archipelago
 
 # Wonder tracking
 var world_wonders_built: Dictionary = {}  # wonder_id -> player_id who built it
@@ -54,6 +55,7 @@ func start_new_game(settings: Dictionary) -> void:
 	difficulty = settings.get("difficulty", 4)
 	game_speed = settings.get("game_speed", 1)
 	tech_brokering = settings.get("tech_brokering", false)
+	map_type = settings.get("map_type", "fractal")
 
 	# Initialize game state
 	current_game_state = GameStateClass.new()

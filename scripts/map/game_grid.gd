@@ -62,6 +62,15 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 	moisture_noise.seed = randi()
 	temperature_noise.seed = randi()
 
+	# Apply map type settings
+	var map_type = GameManager.map_type if GameManager else "fractal"
+	if map_type == "archipelago":
+		elevation_noise.frequency = 0.04
+		sea_level = 0.55  # base 0.4 + 0.15
+	else:
+		elevation_noise.frequency = 0.02
+		sea_level = 0.4
+
 	# Generate all tiles
 	for y in range(height):
 		for x in range(width):
@@ -110,7 +119,49 @@ func _get_elevation(pos: Vector2i) -> float:
 	if latitude > 0.8:
 		value *= 0.5
 
+	# Apply map type modifier
+	value = _apply_map_type_modifier(pos.x, pos.y, value)
+
 	return value
+
+func _apply_map_type_modifier(x: int, y: int, base_elevation: float) -> float:
+	var map_type = GameManager.map_type if GameManager else "fractal"
+
+	if map_type == "pangaea":
+		# Radial bias: tiles near center get boosted, edges get reduced
+		var center_x = width / 2.0
+		var center_y = height / 2.0
+		var dist_x = abs(x - center_x) / center_x
+		var dist_y = abs(y - center_y) / center_y
+		var dist = sqrt(dist_x * dist_x + dist_y * dist_y) / sqrt(2.0)  # Normalize to [0, 1]
+		var bias = 0.3 * (1.0 - dist * 1.5)
+		return clamp(base_elevation + bias, 0.0, 1.0)
+
+	elif map_type == "continents":
+		# Three elevation hotspots with Gaussian falloff
+		var hotspots = [
+			Vector2(width * 0.25, height * 0.5),
+			Vector2(width * 0.6, height * 0.3),
+			Vector2(width * 0.75, height * 0.7),
+		]
+		var sigma = width * 0.15
+		var best_bias = 0.0
+		for hotspot in hotspots:
+			var dx = x - hotspot.x
+			var dy = y - hotspot.y
+			var dist_sq = dx * dx + dy * dy
+			var falloff = 0.25 * exp(-dist_sq / (sigma * sigma))
+			if falloff > best_bias:
+				best_bias = falloff
+		return clamp(base_elevation + best_bias, 0.0, 1.0)
+
+	elif map_type == "archipelago":
+		# No additional elevation modifier -- the higher frequency and sea_level
+		# are already set in generate_map() to create many small islands
+		return base_elevation
+
+	# Fractal (default): no modification
+	return base_elevation
 
 func _get_moisture(pos: Vector2i) -> float:
 	var value = moisture_noise.get_noise_2d(pos.x, pos.y)
@@ -191,28 +242,84 @@ func _add_features() -> void:
 func _add_resources() -> void:
 	var all_resources = DataManager.resources
 
+	# Separate resources by type for controlled distribution
+	var strategic_resources = []
+	var luxury_resources = []
+	var bonus_resources = []
+
+	for resource_id in all_resources:
+		var resource = all_resources[resource_id]
+		match resource.get("type", ""):
+			"strategic":
+				strategic_resources.append(resource_id)
+			"luxury":
+				luxury_resources.append(resource_id)
+			_:
+				bonus_resources.append(resource_id)
+
+	var total_land = 0
+	for pos in tiles:
+		if not tiles[pos].is_water():
+			total_land += 1
+
+	# Strategic resources: limited quantity, terrain-specific
+	var strategic_count = max(4, total_land / 80)  # ~1 per 80 land tiles
+	for resource_id in strategic_resources:
+		var resource = all_resources[resource_id]
+		var valid_terrains = resource.get("valid_terrains", [])
+		var placed = 0
+		var target = strategic_count / strategic_resources.size() + 1
+		var attempts = 0
+		while placed < target and attempts < 500:
+			attempts += 1
+			var pos = tiles.keys()[randi() % tiles.size()]
+			var tile = tiles[pos]
+			if tile.resource_id != "" or tile.is_water():
+				continue
+			if tile.terrain_id in valid_terrains or tile.feature_id in valid_terrains:
+				tile.resource_id = resource_id
+				placed += 1
+
+	# Luxury resources: clustered (2-3 of same type near each other)
+	var luxury_count = max(6, total_land / 60)  # ~1 per 60 land tiles
+	for resource_id in luxury_resources:
+		var resource = all_resources[resource_id]
+		var valid_terrains = resource.get("valid_terrains", [])
+		var placed = 0
+		var target = max(2, luxury_count / luxury_resources.size())
+		var cluster_center = Vector2i(-1, -1)
+		var attempts = 0
+		while placed < target and attempts < 500:
+			attempts += 1
+			var pos = tiles.keys()[randi() % tiles.size()]
+			var tile = tiles[pos]
+			if tile.resource_id != "" or tile.is_water():
+				continue
+			if tile.terrain_id in valid_terrains or tile.feature_id in valid_terrains:
+				# Cluster: after first placement, prefer nearby tiles
+				if cluster_center != Vector2i(-1, -1) and placed > 0:
+					if GridUtils.chebyshev_distance(pos, cluster_center) > 5:
+						continue
+				tile.resource_id = resource_id
+				if cluster_center == Vector2i(-1, -1):
+					cluster_center = pos
+				placed += 1
+
+	# Bonus resources: more generous, 10% of valid land tiles
 	for pos in tiles:
 		var tile = tiles[pos]
-
-		# Random chance for resource
-		if randf() > 0.15:
+		if tile.resource_id != "" or tile.is_water():
 			continue
-
-		# Find valid resources for this terrain
-		var valid_resources = []
-		for resource_id in all_resources:
+		if randf() > 0.10:
+			continue
+		var valid = []
+		for resource_id in bonus_resources:
 			var resource = all_resources[resource_id]
 			var valid_terrains = resource.get("valid_terrains", [])
-
-			# Check terrain
-			if tile.terrain_id in valid_terrains:
-				valid_resources.append(resource_id)
-			# Check feature
-			elif tile.feature_id in valid_terrains:
-				valid_resources.append(resource_id)
-
-		if not valid_resources.is_empty():
-			tile.resource_id = valid_resources[randi() % valid_resources.size()]
+			if tile.terrain_id in valid_terrains or tile.feature_id in valid_terrains:
+				valid.append(resource_id)
+		if not valid.is_empty():
+			tile.resource_id = valid[randi() % valid.size()]
 
 func _prepare_starting_locations() -> void:
 	# Find good starting spots for players
@@ -292,10 +399,16 @@ func get_tiles_in_range(center: Vector2i, range_val: int) -> Array:
 
 	return result
 
-# Find suitable starting location
-func find_starting_location(avoid_positions: Array[Vector2i], min_distance: int = 10) -> Vector2i:
+# Find suitable starting location — scores candidates for best placement
+func find_starting_location(avoid_positions: Array[Vector2i], min_distance: int = -1) -> Vector2i:
+	# Scale minimum distance with map size
+	if min_distance < 0:
+		min_distance = max(8, int(sqrt(width * height) / 4))
+
+	var best_pos = Vector2i(width / 2, height / 2)
+	var best_score = -999.0
 	var attempts = 0
-	var max_attempts = 1000
+	var max_attempts = 2000
 
 	while attempts < max_attempts:
 		var x = randi() % width
@@ -303,14 +416,9 @@ func find_starting_location(avoid_positions: Array[Vector2i], min_distance: int 
 
 		var pos = Vector2i(x, y)
 		var tile = get_tile(pos)
+		attempts += 1
 
-		if tile == null:
-			attempts += 1
-			continue
-
-		# Must be passable land
-		if not tile.is_passable() or tile.is_water():
-			attempts += 1
+		if tile == null or not tile.is_passable() or tile.is_water():
 			continue
 
 		# Check distance from other starts
@@ -319,27 +427,57 @@ func find_starting_location(avoid_positions: Array[Vector2i], min_distance: int 
 			if GridUtils.chebyshev_distance(pos, avoid_pos) < min_distance:
 				too_close = true
 				break
-
 		if too_close:
-			attempts += 1
 			continue
 
-		# Check for nearby good terrain
-		var good_tiles = 0
+		# Score this location
+		var score = 0.0
 		var nearby = get_tiles_in_range(pos, 2)
-		for nearby_tile in nearby:
-			if nearby_tile.is_passable() and not nearby_tile.is_water():
-				if nearby_tile.get_food() >= 2:
-					good_tiles += 1
+		var food_tiles = 0
+		var prod_tiles = 0
+		var has_fresh_water = false
+		var has_resource = false
 
-		if good_tiles < 3:
-			attempts += 1
+		for nearby_tile in nearby:
+			if nearby_tile == null or not nearby_tile.is_passable():
+				continue
+			if nearby_tile.is_water():
+				has_fresh_water = true  # Coastal access
+				continue
+			var yields = nearby_tile.get_yields()
+			if yields.get("food", 0) >= 2:
+				food_tiles += 1
+			if yields.get("production", 0) >= 1:
+				prod_tiles += 1
+			if nearby_tile.resource_id != "":
+				has_resource = true
+
+		# Need minimum food
+		if food_tiles < 3:
 			continue
 
-		return pos
+		score += food_tiles * 3.0
+		score += prod_tiles * 2.0
+		if has_fresh_water:
+			score += 5.0
+		if has_resource:
+			score += 4.0
 
-	# Fallback: return center of map
-	return Vector2i(width / 2, height / 2)
+		# Check range 3 for strategic/luxury resources
+		var extended = get_tiles_in_range(pos, 3)
+		for ext_tile in extended:
+			if ext_tile != null and ext_tile.resource_id != "":
+				var res = DataManager.get_resource(ext_tile.resource_id)
+				if res.get("type", "") == "strategic":
+					score += 3.0
+				elif res.get("type", "") == "luxury":
+					score += 2.0
+
+		if score > best_score:
+			best_score = score
+			best_pos = pos
+
+	return best_pos
 
 # Input handling
 func _input(event: InputEvent) -> void:

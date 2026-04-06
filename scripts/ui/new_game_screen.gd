@@ -16,6 +16,7 @@ var speed_option: OptionButton
 var civ_option: OptionButton
 var leader_option: OptionButton
 var player_name_edit: LineEdit
+var map_type_option: OptionButton
 
 var start_button: Button
 var back_button: Button
@@ -24,13 +25,16 @@ const BG_COLOR = Color(0.08, 0.08, 0.12, 1.0)
 const PANEL_COLOR = Color(0.12, 0.12, 0.18, 1.0)
 
 const MAP_SIZES = {
-	"Duel": {"width": 24, "height": 16},
-	"Tiny": {"width": 32, "height": 20},
-	"Small": {"width": 40, "height": 25},
-	"Standard": {"width": 52, "height": 32},
-	"Large": {"width": 64, "height": 40},
-	"Huge": {"width": 80, "height": 50}
+	"Duel": {"width": 40, "height": 24},
+	"Tiny": {"width": 52, "height": 32},
+	"Small": {"width": 64, "height": 40},
+	"Standard": {"width": 84, "height": 52},
+	"Large": {"width": 104, "height": 64},
+	"Huge": {"width": 128, "height": 80}
 }
+
+const MAP_TYPES = ["Fractal", "Pangaea", "Continents", "Archipelago"]
+const MAP_TYPE_IDS = ["fractal", "pangaea", "continents", "archipelago"]
 
 const DIFFICULTIES = ["Settler", "Chieftain", "Warlord", "Noble", "Prince", "Monarch", "Emperor", "Immortal", "Deity"]
 const SPEEDS = ["Quick", "Normal", "Epic", "Marathon"]
@@ -53,7 +57,7 @@ func _build_ui() -> void:
 
 	# Main panel
 	panel = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(600, 550)
+	panel.custom_minimum_size = Vector2(600, 600)
 	var style = StyleBoxFlat.new()
 	style.bg_color = PANEL_COLOR
 	style.border_color = Color(0.3, 0.3, 0.4)
@@ -109,6 +113,15 @@ func _build_ui() -> void:
 		map_size_option.add_item("%s (%dx%d)" % [size_name, size.width, size.height])
 	map_size_option.selected = 2  # Small as default
 	grid.add_child(map_size_option)
+
+	# Map Type
+	_add_label(grid, "Map Type:")
+	map_type_option = OptionButton.new()
+	map_type_option.custom_minimum_size = Vector2(200, 30)
+	for i in range(MAP_TYPES.size()):
+		map_type_option.add_item(MAP_TYPES[i])
+	map_type_option.selected = 0  # Fractal as default
+	grid.add_child(map_type_option)
 
 	# Number of Players
 	_add_label(grid, "Opponents:")
@@ -211,9 +224,12 @@ func _on_start_pressed() -> void:
 	var civ_id = civ_option.get_item_metadata(civ_option.selected)
 	var leader_id = leader_option.get_item_metadata(leader_option.selected)
 
+	var selected_map_type = MAP_TYPE_IDS[map_type_option.selected]
+
 	var settings = {
 		"map_width": size.width,
 		"map_height": size.height,
+		"map_type": selected_map_type,
 		"num_players": int(num_players_spin.value) + 1,  # +1 for human player
 		"human_civ": civ_id if civ_id else "rome",
 		"human_leader": leader_id if leader_id else "julius_caesar",
