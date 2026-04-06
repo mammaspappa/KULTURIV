@@ -155,6 +155,12 @@ func execute_trade(proposal: Dictionary) -> void:
 			from_player.traded_techs.append(tech_id)  # Mark as traded (can't re-trade)
 			EventBus.tech_unlocked.emit(from_player, tech_id)
 
+	# Map trading: reveal explored tiles
+	if from_offers.get("map", false):
+		_reveal_map(from_player, to_player)
+	if to_offers.get("map", false):
+		_reveal_map(to_player, from_player)
+
 	# Mark trade as active if it has ongoing components
 	if from_offers["gold_per_turn"] > 0 or to_offers["gold_per_turn"] > 0 or not from_offers["resources"].is_empty() or not to_offers["resources"].is_empty():
 		proposal["accepted"] = true
@@ -373,3 +379,19 @@ func _on_trade_rejected(_from_player, _to_player) -> void:
 
 func _on_turn_completed(_turn: int) -> void:
 	process_trades()
+
+## Reveal all explored tiles from one player to another (map trading)
+func _reveal_map(from_player, to_player) -> void:
+	if GameManager.hex_grid == null:
+		return
+	var GameTileClass = preload("res://scripts/map/game_tile.gd")
+	for x in range(GameManager.hex_grid.width):
+		for y in range(GameManager.hex_grid.height):
+			var tile = GameManager.hex_grid.get_tile(Vector2i(x, y))
+			if tile == null:
+				continue
+			var from_vis = tile.get_visibility_for_player(from_player.player_id)
+			var to_vis = tile.get_visibility_for_player(to_player.player_id)
+			# Reveal fogged/visible tiles that the receiver hasn't seen
+			if from_vis != GameTileClass.VisibilityState.UNEXPLORED and to_vis == GameTileClass.VisibilityState.UNEXPLORED:
+				tile.set_visibility_for_player(to_player.player_id, GameTileClass.VisibilityState.FOGGED)

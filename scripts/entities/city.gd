@@ -68,6 +68,9 @@ var available_resources: Array[String] = []
 var defense_strength: float = 0.0
 var defense_damage: float = 0.0
 
+# Resistance (after capture)
+var resistance_turns: int = 0
+
 # Visual
 const TILE_SIZE: int = 64
 var is_selected: bool = false
@@ -277,6 +280,18 @@ func calculate_yields() -> void:
 				if tile_yields.get("commerce", 0) > 0:
 					commerce_yield += 1
 
+	# We Love the King Day bonuses
+	if is_wltkd_active():
+		for tile_pos in worked_tiles:
+			var tile = _get_tile(tile_pos)
+			if tile != null:
+				food_yield += 1
+				commerce_yield += 1
+
+	# Whip anger decay
+	if has_meta("whip_anger_turns") and get_meta("whip_anger_turns") > 0:
+		set_meta("whip_anger_turns", get_meta("whip_anger_turns") - 1)
+
 	# Settled Great People bonuses
 	var settled_gp_bonuses = get_settled_gp_bonuses()
 	production_yield += settled_gp_bonuses.get("production", 0)
@@ -380,6 +395,26 @@ func _calculate_happiness() -> void:
 		happiness += WonderSystem.get_wonder_happiness_bonus(player_owner)
 		if WonderSystem.city_has_no_unhappiness(self):
 			unhappiness = 0
+
+	# War weariness unhappiness
+	if player_owner and player_owner.war_weariness > 0:
+		var ww_unhappy = player_owner.war_weariness / max(player_owner.cities.size(), 1)
+		# Civic modifier
+		if CivicsSystem:
+			var ww_mod = CivicsSystem.get_civic_effects(player_owner).get("war_weariness_modifier", 0)
+			ww_unhappy = int(ww_unhappy * (1.0 + ww_mod / 100.0))
+		# Wonder reduction
+		if WonderSystem:
+			var ww_reduction = WonderSystem.get_war_weariness_reduction(player_owner)
+			ww_unhappy = int(ww_unhappy * (1.0 - ww_reduction))
+		unhappiness += max(0, ww_unhappy)
+
+	# Draft anger
+	unhappiness += get_draft_unhappiness()
+
+	# Whip anger
+	if has_meta("whip_anger_turns") and get_meta("whip_anger_turns") > 0:
+		unhappiness += 1
 
 func _calculate_health() -> void:
 	health = 0
@@ -951,6 +986,63 @@ func reset_drafts() -> void:
 	drafts_this_turn = 0
 	if draft_anger_turns > 0:
 		draft_anger_turns -= 1
+
+# Whipping (Slavery civic)
+const WHIP_PRODUCTION = 30  # Hammers per population sacrificed
+const WHIP_ANGER_TURNS = 10
+
+func can_whip() -> bool:
+	if player_owner == null or population <= 1:
+		return false
+	if current_production == "":
+		return false
+	# Requires Slavery civic (can_hurry_with_population)
+	if not CivicsSystem.has_civic_effect(player_owner, "can_hurry_with_population"):
+		return false
+	return true
+
+func whip() -> bool:
+	if not can_whip():
+		return false
+	population -= 1
+	production_progress += WHIP_PRODUCTION
+	set_meta("whip_anger_turns", WHIP_ANGER_TURNS)
+	# Check if production completed
+	var cost = get_production_cost()
+	if production_progress >= cost:
+		complete_production()
+	calculate_yields()
+	EventBus.notification_added.emit("Population whipped in %s!" % city_name)
+	return true
+
+# Hurrying with gold (Universal Suffrage civic)
+func can_hurry_gold() -> bool:
+	if player_owner == null:
+		return false
+	if current_production == "":
+		return false
+	if not CivicsSystem.has_civic_effect(player_owner, "can_hurry_with_gold"):
+		return false
+	return player_owner.gold >= get_hurry_cost()
+
+func get_hurry_cost() -> int:
+	var cost = get_production_cost()
+	var remaining = cost - production_progress
+	return max(1, remaining * 4)  # 4 gold per remaining hammer
+
+func hurry_with_gold() -> bool:
+	if not can_hurry_gold():
+		return false
+	player_owner.gold -= get_hurry_cost()
+	production_progress = get_production_cost()
+	complete_production()
+	calculate_yields()
+	EventBus.notification_added.emit("Production rushed in %s!" % city_name)
+	return true
+
+# We Love the King Day
+func is_wltkd_active() -> bool:
+	return happiness - unhappiness >= 3 and population >= 5
 
 # Selection
 func select() -> void:

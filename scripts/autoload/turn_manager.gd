@@ -2,6 +2,7 @@ extends Node
 ## Manages turn progression and per-turn processing for all players.
 
 const UnitClass = preload("res://scripts/entities/unit.gd")
+const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
 
 signal turn_processing_started()
 signal turn_processing_finished()
@@ -69,6 +70,11 @@ func _start_turn_for_player(player) -> void:
 		if unit.current_order == UnitClass.UnitOrder.AUTOMATE:
 			unit.process_automation()
 
+	# Process GOTO orders (multi-turn movement)
+	for unit in player.units:
+		if unit.current_order == UnitClass.UnitOrder.GOTO and unit.can_move():
+			_process_goto_order(unit)
+
 	# Process cities
 	for city in player.cities:
 		_process_city_turn_start(city)
@@ -112,6 +118,9 @@ func _end_turn_for_player(player) -> void:
 func _complete_round() -> void:
 	# All players have taken their turn
 	GameManager.current_player_index = 0
+
+	# Check culture flipping
+	_check_culture_flipping()
 
 	# Advance turn counter
 	current_turn += 1
@@ -158,6 +167,11 @@ func _process_city_turn_start(city) -> void:
 	elif city.food_stockpile < 0:
 		city.starve()
 
+	# Process resistance
+	if city.resistance_turns > 0:
+		city.resistance_turns -= 1
+		return  # No production, growth, or culture during resistance
+
 	# Process production
 	if city.current_production != "":
 		city.production_progress += city.production_yield
@@ -175,16 +189,68 @@ func _process_gold(player) -> void:
 	for city in player.cities:
 		total_gold += city.gold_yield
 
-	# Subtract unit maintenance costs (basic implementation)
-	var unit_maintenance = player.units.size()  # 1 gold per unit
+	# --- City Maintenance (distance + city count) ---
+	var num_cities = player.cities.size()
+	var capital_pos = player.cities[0].grid_position if not player.cities.is_empty() else Vector2i.ZERO
+	# Find actual capital
+	for city in player.cities:
+		if "palace" in city.buildings:
+			capital_pos = city.grid_position
+			break
 
-	# Calculate net gold per turn
-	player.gold_per_turn = total_gold - unit_maintenance
+	var city_maintenance = 0
+	for city in player.cities:
+		# Distance maintenance: 0.5 gold per tile from capital
+		var dist = GridUtils.chebyshev_distance(city.grid_position, capital_pos)
+		var dist_cost = int(dist * 0.5)
+
+		# Check for civic that removes distance maintenance
+		if CivicsSystem and CivicsSystem.has_civic_effect(player, "no_distance_maintenance"):
+			dist_cost = 0
+
+		# Courthouse reduces maintenance by 50%
+		if "courthouse" in city.buildings:
+			dist_cost = dist_cost / 2
+
+		# City count maintenance: 0.5 gold per total city
+		var count_cost = int((num_cities - 1) * 0.5)
+
+		city_maintenance += dist_cost + count_cost
+
+	# --- Unit Supply Costs ---
+	var military_count = 0
+	for unit in player.units:
+		if DataManager.get_unit_strength(unit.unit_id) > 0:
+			military_count += 1
+
+	var free_units = num_cities + 2  # Base free supply
+	# Civic bonuses for free units
+	if CivicsSystem:
+		var civic_effects = CivicsSystem.get_civic_effects(player)
+		free_units += civic_effects.get("free_units", 0)
+
+	var excess_units = max(0, military_count - free_units)
+	var unit_supply_cost = excess_units  # 1 gold per excess unit
+
+	# --- Inflation (0.3% per turn, cap at 3x) ---
+	var inflation_rate = min(1.0 + current_turn * 0.003, 3.0)
+	city_maintenance = int(city_maintenance * inflation_rate)
+	unit_supply_cost = int(unit_supply_cost * inflation_rate)
+
+	# --- War Weariness ---
+	if player.at_war_with.size() > 0:
+		player.war_weariness += player.at_war_with.size()
+	else:
+		player.war_weariness = max(0, player.war_weariness - 2)
+
+	# --- Total ---
+	var total_costs = city_maintenance + unit_supply_cost
+	player.gold_per_turn = total_gold - total_costs
 
 	# Add to player's gold treasury
 	player.gold += player.gold_per_turn
 
-	# Ensure gold doesn't go below 0 (could add deficit handling later)
+	# Ensure gold doesn't go below 0
 	if player.gold < 0:
 		player.gold = 0
 
@@ -198,6 +264,78 @@ func _process_research(player) -> void:
 
 	if player.research_progress >= cost:
 		player.complete_research()
+
+func _check_culture_flipping() -> void:
+	# Civ4 culture flip: if rival culture dominates a city, small chance it defects
+	for player in GameManager.players:
+		for city in player.cities.duplicate():  # duplicate to avoid modifying during iteration
+			if city.population > 3:
+				continue  # Only small cities can flip
+
+			# Count rival culture in territory
+			var rival_tiles = 0
+			var total_tiles = city.territory.size()
+			var dominant_rival = null
+			var rival_tile_counts = {}
+
+			for tile_pos in city.territory:
+				var tile = GameManager.hex_grid.get_tile(tile_pos) if GameManager.hex_grid else null
+				if tile and tile.tile_owner != null and tile.tile_owner != player:
+					rival_tiles += 1
+					var rid = tile.tile_owner.player_id
+					rival_tile_counts[rid] = rival_tile_counts.get(rid, 0) + 1
+
+			if total_tiles == 0:
+				continue
+
+			# Need >75% rival culture to have flip chance
+			if float(rival_tiles) / total_tiles < 0.75:
+				continue
+
+			# Find dominant rival
+			var max_count = 0
+			for rid in rival_tile_counts:
+				if rival_tile_counts[rid] > max_count:
+					max_count = rival_tile_counts[rid]
+					dominant_rival = GameManager.get_player(rid)
+
+			if dominant_rival == null:
+				continue
+
+			# Garrison reduces flip chance
+			var garrison = GameManager.get_units_at(city.grid_position)
+			var garrison_count = 0
+			for u in garrison:
+				if u.player_owner == player and u.get_strength() > 0:
+					garrison_count += 1
+
+			var flip_chance = 0.05 - garrison_count * 0.02  # 5% base, -2% per garrison
+			if randf() < flip_chance:
+				# City flips to rival
+				player.cities.erase(city)
+				city.player_owner = dominant_rival
+				dominant_rival.cities.append(city)
+				city.resistance_turns = 0
+				city.calculate_yields()
+				EventBus.notification_added.emit("%s has defected to %s!" % [city.city_name, dominant_rival.player_name])
+
+func _process_goto_order(unit) -> void:
+	if unit.order_target == Vector2i.ZERO or unit.grid_position == unit.order_target:
+		unit.current_order = UnitClass.UnitOrder.NONE
+		return
+
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return
+
+	var pathfinder = PathfindingClass.new(grid, unit)
+	var path = pathfinder.find_path_with_movement(unit.grid_position, unit.order_target, unit.movement_remaining)
+	if not path.is_empty():
+		unit.move_along_path(path)
+
+	# Check if arrived
+	if unit.grid_position == unit.order_target:
+		unit.current_order = UnitClass.UnitOrder.NONE
 
 func _process_unit_healing(unit) -> void:
 	if unit.health >= unit.max_health:

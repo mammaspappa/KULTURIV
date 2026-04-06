@@ -527,6 +527,64 @@ func add_promotion(promo_id: String) -> void:
 		EventBus.unit_promoted.emit(self, promo_id)
 		update_visual()
 
+# Unit upgrades
+func get_upgrade_target() -> String:
+	var unit_data = DataManager.get_unit(unit_id)
+	return unit_data.get("upgrades_to", "")
+
+func can_upgrade() -> bool:
+	var target = get_upgrade_target()
+	if target == "":
+		return false
+	if player_owner == null:
+		return false
+	# Must be in a friendly city
+	var city = GameManager.get_city_at(grid_position)
+	if city == null or city.player_owner != player_owner:
+		return false
+	# Must have the tech for the target unit
+	var target_data = DataManager.get_unit(target)
+	var required_tech = target_data.get("required_tech", "")
+	if required_tech != "" and not player_owner.has_tech(required_tech):
+		return false
+	# Must afford it
+	if player_owner.gold < get_upgrade_cost():
+		return false
+	return true
+
+func get_upgrade_cost() -> int:
+	var target = get_upgrade_target()
+	if target == "":
+		return 0
+	var current_cost = DataManager.get_unit_cost(unit_id)
+	var target_cost = DataManager.get_unit_cost(target)
+	return int(max(15, (target_cost - current_cost) * 1.5))
+
+func upgrade() -> bool:
+	if not can_upgrade():
+		return false
+	var target = get_upgrade_target()
+	var cost = get_upgrade_cost()
+	player_owner.gold -= cost
+	# Keep experience, promotions, health
+	unit_id = target
+	# Refresh movement
+	movement_remaining = 0
+	has_acted = true
+	EventBus.notification_added.emit("Unit upgraded to %s" % DataManager.get_unit(target).get("name", target))
+	update_visual()
+	queue_redraw()
+	return true
+
+# Unit disbanding
+func disband() -> void:
+	if player_owner == null:
+		return
+	var refund = DataManager.get_unit_cost(unit_id) / 2
+	player_owner.gold += refund
+	EventBus.notification_added.emit("Unit disbanded for %d gold" % refund)
+	die()
+
 # Great General attachment
 func can_attach_great_general(general) -> bool:
 	if general == null or general == self:

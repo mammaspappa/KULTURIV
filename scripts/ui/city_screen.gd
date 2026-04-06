@@ -35,6 +35,10 @@ var culture_label_display: Label = null
 var building_tooltip: PanelContainer = null
 var building_tooltip_label: Label = null
 
+# Whip/Buy buttons
+var whip_button: Button = null
+var buy_button: Button = null
+
 # Happiness visualization
 var happiness_container: HBoxContainer = null
 
@@ -128,6 +132,24 @@ func _create_ui() -> void:
 	change_production_btn.custom_minimum_size = Vector2(150, 30)
 	change_production_btn.pressed.connect(_toggle_production_list)
 	panel.add_child(change_production_btn)
+
+	# Whip button (Slavery civic)
+	whip_button = Button.new()
+	whip_button.text = "Whip (-1 Pop)"
+	whip_button.position = Vector2(20, 345)
+	whip_button.custom_minimum_size = Vector2(100, 28)
+	whip_button.visible = false
+	whip_button.pressed.connect(_on_whip_pressed)
+	panel.add_child(whip_button)
+
+	# Buy button (Universal Suffrage civic)
+	buy_button = Button.new()
+	buy_button.text = "Buy"
+	buy_button.position = Vector2(130, 345)
+	buy_button.custom_minimum_size = Vector2(100, 28)
+	buy_button.visible = false
+	buy_button.pressed.connect(_on_buy_pressed)
+	panel.add_child(buy_button)
 
 	# Production options (scrollable, initially hidden)
 	production_scroll = ScrollContainer.new()
@@ -328,6 +350,16 @@ func _update_display() -> void:
 
 	# Update production queue
 	_update_production_queue()
+
+	# Update whip/buy buttons
+	if whip_button:
+		whip_button.visible = current_city.can_whip()
+	if buy_button:
+		if current_city.can_hurry_gold():
+			buy_button.visible = true
+			buy_button.text = "Buy (%dg)" % current_city.get_hurry_cost()
+		else:
+			buy_button.visible = false
 
 func _update_yields() -> void:
 	current_city.calculate_yields()
@@ -785,6 +817,16 @@ func _on_queue_move_up(index: int) -> void:
 		var item = current_city.production_queue[index]
 		current_city.production_queue.remove_at(index)
 		current_city.production_queue.insert(index - 1, item)
+		_update_display()
+
+func _on_whip_pressed() -> void:
+	if current_city and current_city.can_whip():
+		current_city.whip()
+		_update_display()
+
+func _on_buy_pressed() -> void:
+	if current_city and current_city.can_hurry_gold():
+		current_city.hurry_with_gold()
 		_update_display()
 
 func _on_specialist_plus(spec_id: String) -> void:

@@ -279,6 +279,18 @@
 		},
 		"description": "Enables Hereditary Rule civic"
 	},
+	"literature": {
+		"name": "Literature",
+		"era": "classical",
+		"cost": 200,
+		"prerequisites": ["aesthetics"],
+		"unlocks": {
+			"units": [],
+			"buildings": ["national_epic", "heroic_epic"],
+			"improvements": []
+		},
+		"description": "Enables National Epic, Heroic Epic"
+	},
 	"theology": {
 		"name": "Theology",
 		"era": "medieval",
@@ -407,6 +419,33 @@
 		},
 		"description": "Enables Bank"
 	},
+	"paper": {
+		"name": "Paper",
+		"era": "medieval",
+		"cost": 400,
+		"prerequisites": ["theology", "civil_service"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": [],
+			"buildings": [],
+			"improvements": []
+		},
+		"description": "Prerequisite for Education"
+	},
+	"divine_right": {
+		"name": "Divine Right",
+		"era": "medieval",
+		"cost": 600,
+		"prerequisites": ["theology", "monarchy"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": [],
+			"buildings": [],
+			"improvements": [],
+			"enables_religion_founding": true
+		},
+		"description": "Can found Islam. Enables Versailles wonder."
+	},
 	"education": {
 		"name": "Education",
 		"era": "medieval",
@@ -510,6 +549,20 @@
 		"first_to_discover_bonus": "free_great_merchant",
 		"description": "First to discover gets a free Great Merchant"
 	},
+	"liberalism": {
+		"name": "Liberalism",
+		"era": "renaissance",
+		"cost": 900,
+		"prerequisites": ["philosophy", "education"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": [],
+			"buildings": [],
+			"improvements": []
+		},
+		"first_to_discover_bonus": "free_tech",
+		"description": "Enables Free Speech and Free Religion civics. First to discover gets a free tech."
+	},
 	"military_tradition": {
 		"name": "Military Tradition",
 		"era": "industrial",
@@ -595,6 +648,69 @@
 		"prereq_type": "AND",
 		"unlocks": {},
 		"description": "Doubles research from scientists"
+	},
+	"military_science": {
+		"name": "Military Science",
+		"era": "industrial",
+		"cost": 1200,
+		"prerequisites": ["chemistry", "guilds"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["grenadier", "cavalry"],
+			"buildings": [],
+			"improvements": []
+		},
+		"description": "Enables Grenadier, Cavalry. Enables West Point national wonder."
+	},
+	"replaceable_parts": {
+		"name": "Replaceable Parts",
+		"era": "industrial",
+		"cost": 1400,
+		"prerequisites": ["engineering", "steel"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": ["infantry"],
+			"buildings": [],
+			"improvements": ["lumbermill"]
+		},
+		"description": "Enables Infantry, Lumbermill improvement"
+	},
+	"democracy": {
+		"name": "Democracy",
+		"era": "industrial",
+		"cost": 1400,
+		"prerequisites": ["printing_press", "constitution"],
+		"prereq_type": "AND",
+		"unlocks": {
+			"units": [],
+			"buildings": [],
+			"improvements": []
+		},
+		"description": "Enables Universal Suffrage and Emancipation civics. Enables Statue of Liberty."
+	},
+	"communism": {
+		"name": "Communism",
+		"era": "industrial",
+		"cost": 1500,
+		"prerequisites": ["scientific_method"],
+		"unlocks": {
+			"units": [],
+			"buildings": [],
+			"improvements": []
+		},
+		"description": "Enables State Property civic. Enables Intelligence Agency, Security Bureau."
+	},
+	"fascism": {
+		"name": "Fascism",
+		"era": "industrial",
+		"cost": 1400,
+		"prerequisites": ["industrialism"],
+		"unlocks": {
+			"units": [],
+			"buildings": [],
+			"improvements": []
+		},
+		"description": "Enables Police State civic. Enables Mt. Rushmore national wonder."
 	},
 	"electricity": {
 		"name": "Electricity",

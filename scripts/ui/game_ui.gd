@@ -46,6 +46,11 @@ var promote_button: Button = null
 var promotion_popup: PanelContainer = null
 var promotion_list_container: VBoxContainer = null
 
+# Upgrade, disband, and bombard buttons
+var upgrade_button: Button = null
+var disband_button: Button = null
+var bombard_button: Button = null
+
 # Enhanced unit panel elements
 var xp_bar: ProgressBar = null
 var xp_label: Label = null
@@ -458,6 +463,27 @@ func _update_unit_panel() -> void:
 		skip_button.disabled = selected_unit.has_acted
 	if promote_button:
 		promote_button.visible = selected_unit.can_promote()
+	if upgrade_button:
+		upgrade_button.visible = selected_unit.can_upgrade()
+		if selected_unit.can_upgrade():
+			var target_data = DataManager.get_unit(selected_unit.get_upgrade_target())
+			upgrade_button.text = "Upgrade (%dg)" % selected_unit.get_upgrade_cost()
+			upgrade_button.tooltip_text = "Upgrade to %s" % target_data.get("name", "")
+	if disband_button:
+		disband_button.visible = selected_unit.get_strength() > 0 or selected_unit.can_build_improvements()
+	if bombard_button:
+		# Show bombard button for siege units near enemy cities
+		var can_bombard = false
+		if "bombard" in selected_unit.get_abilities():
+			for dx in range(-1, 2):
+				for dy in range(-1, 2):
+					if dx == 0 and dy == 0: continue
+					var adj_pos = selected_unit.grid_position + Vector2i(dx, dy)
+					if CombatSystem.can_bombard(selected_unit, adj_pos):
+						can_bombard = true
+						break
+				if can_bombard: break
+		bombard_button.visible = can_bombard
 
 	# XP bar, promotions, and stack (only update when unit state changes)
 	_update_unit_xp_and_promotions()
@@ -1293,6 +1319,33 @@ func _setup_promotion_ui() -> void:
 	if action_buttons:
 		action_buttons.add_child(promote_button)
 
+	# Upgrade button
+	upgrade_button = Button.new()
+	upgrade_button.text = "Upgrade"
+	upgrade_button.custom_minimum_size = Vector2(80, 30)
+	upgrade_button.visible = false
+	upgrade_button.pressed.connect(_on_upgrade_pressed)
+	if action_buttons:
+		action_buttons.add_child(upgrade_button)
+
+	# Disband button
+	disband_button = Button.new()
+	disband_button.text = "Disband"
+	disband_button.custom_minimum_size = Vector2(80, 30)
+	disband_button.visible = false
+	disband_button.pressed.connect(_on_disband_pressed)
+	if action_buttons:
+		action_buttons.add_child(disband_button)
+
+	# Bombard button (for siege units)
+	bombard_button = Button.new()
+	bombard_button.text = "Bombard"
+	bombard_button.custom_minimum_size = Vector2(80, 30)
+	bombard_button.visible = false
+	bombard_button.pressed.connect(_on_bombard_pressed)
+	if action_buttons:
+		action_buttons.add_child(bombard_button)
+
 	# Create promotion popup overlay
 	promotion_popup = PanelContainer.new()
 	promotion_popup.visible = false
@@ -1337,6 +1390,30 @@ func _setup_promotion_ui() -> void:
 
 	promotion_popup.add_child(vbox)
 	add_child(promotion_popup)
+
+func _on_upgrade_pressed() -> void:
+	if selected_unit and selected_unit.can_upgrade():
+		selected_unit.upgrade()
+		_update_unit_panel()
+
+func _on_disband_pressed() -> void:
+	if selected_unit:
+		selected_unit.disband()
+		selected_unit = null
+		unit_panel.visible = false
+
+func _on_bombard_pressed() -> void:
+	if selected_unit == null:
+		return
+	# Find adjacent enemy city to bombard
+	for dx in range(-1, 2):
+		for dy in range(-1, 2):
+			if dx == 0 and dy == 0: continue
+			var adj_pos = selected_unit.grid_position + Vector2i(dx, dy)
+			if CombatSystem.can_bombard(selected_unit, adj_pos):
+				CombatSystem.bombard_city(selected_unit, adj_pos)
+				_update_unit_panel()
+				return
 
 func _on_promote_pressed() -> void:
 	if selected_unit == null or not selected_unit.can_promote():

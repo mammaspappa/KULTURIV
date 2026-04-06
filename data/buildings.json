@@ -639,6 +639,20 @@
 		},
 		"description": "+1 Free Priest in all cities"
 	},
+	"apostolic_palace": {
+		"name": "Apostolic Palace",
+		"era": "medieval",
+		"cost": 400,
+		"maintenance": 0,
+		"required_tech": "theology",
+		"wonder_type": "world",
+		"requires_state_religion": true,
+		"effects": {
+			"production_state_religion": 2,
+			"great_prophet_points": 2
+		},
+		"description": "Enables Apostolic Palace votes. +2 Production in cities with state religion"
+	},
 	"university_of_sankore": {
 		"name": "University of Sankore",
 		"era": "medieval",

@@ -504,6 +504,61 @@ func _apply_nuke_diplomacy_penalty(attacker_player) -> void:
 	EventBus.diplomacy_modifier_changed.emit(attacker_player, "used_nuke")
 
 ## Clean up fallout each turn
+## Check if a siege unit can bombard a city
+func can_bombard(unit, target_pos: Vector2i) -> bool:
+	if unit == null or unit.has_acted:
+		return false
+	var unit_data = DataManager.get_unit(unit.unit_id)
+	if "bombard" not in unit_data.get("abilities", []):
+		return false
+	# Must be adjacent to target city
+	var distance = GridUtils.chebyshev_distance(unit.grid_position, target_pos)
+	if distance > 1:
+		return false
+	# Target must have a city
+	var city = GameManager.get_city_at(target_pos)
+	if city == null or city.player_owner == unit.player_owner:
+		return false
+	return true
+
+## Bombard a city, reducing its defense strength
+func bombard_city(attacker, target_pos: Vector2i) -> Dictionary:
+	var result = {"success": false}
+	if not can_bombard(attacker, target_pos):
+		return result
+
+	_ensure_war_declared(attacker, GameManager.get_city_at(target_pos))
+
+	var city = GameManager.get_city_at(target_pos)
+	var unit_data = DataManager.get_unit(attacker.unit_id)
+	var bombard_str = unit_data.get("bombard_strength", 5)
+
+	# Reduce city defense
+	var defense_reduction = bombard_str * 0.02  # Each point reduces 2%
+	city.defense_damage = min(city.defense_damage + defense_reduction, 1.0)  # Cap at 100% damaged
+
+	result["success"] = true
+	result["defense_reduction"] = defense_reduction
+	result["total_damage"] = city.defense_damage
+
+	# Collateral damage to defending units
+	var collateral = unit_data.get("collateral_damage", 0)
+	var collateral_limit = unit_data.get("collateral_limit", 0.5)
+	if collateral > 0:
+		var defenders = GameManager.get_units_at(target_pos)
+		var damaged_count = 0
+		for defender in defenders:
+			if defender.player_owner != attacker.player_owner and damaged_count < 4:
+				var dmg = defender.max_health * collateral * 0.01
+				var min_health = defender.max_health * (1.0 - collateral_limit)
+				defender.health = max(min_health, defender.health - dmg)
+				damaged_count += 1
+
+	attacker.has_acted = true
+	attacker.movement_remaining = 0
+	EventBus.notification_added.emit("Bombarded %s! Defense reduced to %d%%" % [city.city_name, int((1.0 - city.defense_damage) * 100)])
+	return result
+
 func process_fallout_decay() -> void:
 	if GameManager.hex_grid == null:
 		return

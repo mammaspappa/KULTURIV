@@ -45,6 +45,9 @@ var founded_religion: String = ""
 var golden_age_turns: int = 0
 var golden_ages_count: int = 0  # Number of golden ages this player has had
 
+# War Weariness
+var war_weariness: int = 0
+
 # Civics
 var civics: Dictionary = {}
 var anarchy_turns: int = 0

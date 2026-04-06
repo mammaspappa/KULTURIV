@@ -255,6 +255,11 @@ func _handle_right_click(screen_pos: Vector2) -> void:
 			if not path.is_empty():
 				selected_unit.move_along_path(path)
 				_update_reachable_tiles()
+
+				# If destination not reached, set GOTO order for multi-turn movement
+				if selected_unit.grid_position != grid_pos:
+					selected_unit.current_order = selected_unit.UnitOrder.GOTO
+					selected_unit.order_target = grid_pos
 			return
 
 func _get_unit_at_screen_pos(grid_pos: Vector2i) -> Unit:
