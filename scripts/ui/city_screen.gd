@@ -14,12 +14,29 @@ var production_scroll: ScrollContainer
 var production_progress_label: Label
 var change_production_btn: Button
 var building_scroll: ScrollContainer
-var building_list: Label
+var building_container: VBoxContainer
 var close_button: Button
 
 # City focus & specialist UI
 var focus_dropdown: OptionButton
 var specialist_container: VBoxContainer
+
+# Tile grid view
+var tile_grid: Control = null
+
+# Production queue
+var queue_container: VBoxContainer = null
+
+# Culture bar
+var culture_bar: ProgressBar = null
+var culture_label_display: Label = null
+
+# Building tooltip
+var building_tooltip: PanelContainer = null
+var building_tooltip_label: Label = null
+
+# Happiness visualization
+var happiness_container: HBoxContainer = null
 
 # Colors
 const BG_COLOR = Color(0.1, 0.1, 0.15, 1.0)
@@ -51,7 +68,7 @@ func _create_ui() -> void:
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
 	panel.add_theme_stylebox_override("panel", style)
-	panel.custom_minimum_size = Vector2(700, 550)
+	panel.custom_minimum_size = Vector2(960, 650)
 	add_child(panel)
 
 	# Close button (top right)
@@ -124,15 +141,40 @@ func _create_ui() -> void:
 	production_list.name = "ProductionList"
 	production_scroll.add_child(production_list)
 
-	# City Focus dropdown
+	# Tile Grid View (left column, below yields)
+	tile_grid = Control.new()
+	tile_grid.position = Vector2(20, 290)
+	tile_grid.custom_minimum_size = Vector2(210, 210)
+	tile_grid.gui_input.connect(_on_tile_grid_input)
+	panel.add_child(tile_grid)
+
+	# Culture bar (below tile grid)
+	culture_label_display = Label.new()
+	culture_label_display.position = Vector2(20, 505)
+	culture_label_display.add_theme_font_size_override("font_size", 11)
+	panel.add_child(culture_label_display)
+
+	culture_bar = ProgressBar.new()
+	culture_bar.position = Vector2(20, 522)
+	culture_bar.custom_minimum_size = Vector2(210, 8)
+	culture_bar.show_percentage = false
+	panel.add_child(culture_bar)
+
+	# Happiness visualization (below population)
+	happiness_container = HBoxContainer.new()
+	happiness_container.position = Vector2(20, 72)
+	happiness_container.add_theme_constant_override("separation", 1)
+	panel.add_child(happiness_container)
+
+	# City Focus dropdown (middle column)
 	var focus_label = Label.new()
 	focus_label.text = "City Focus:"
-	focus_label.position = Vector2(200, 50)
+	focus_label.position = Vector2(250, 15)
 	focus_label.add_theme_font_size_override("font_size", 14)
 	panel.add_child(focus_label)
 
 	focus_dropdown = OptionButton.new()
-	focus_dropdown.position = Vector2(290, 47)
+	focus_dropdown.position = Vector2(340, 12)
 	focus_dropdown.custom_minimum_size = Vector2(120, 28)
 	focus_dropdown.add_item("Balanced", 0)
 	focus_dropdown.add_item("Food", 1)
@@ -143,36 +185,65 @@ func _create_ui() -> void:
 	focus_dropdown.item_selected.connect(_on_focus_changed)
 	panel.add_child(focus_dropdown)
 
-	# Specialist section (below yields)
+	# Specialist section (middle column)
 	var spec_header = Label.new()
 	spec_header.text = "Specialists"
-	spec_header.position = Vector2(200, 85)
-	spec_header.add_theme_font_size_override("font_size", 18)
+	spec_header.position = Vector2(250, 50)
+	spec_header.add_theme_font_size_override("font_size", 16)
 	panel.add_child(spec_header)
 
 	specialist_container = VBoxContainer.new()
-	specialist_container.position = Vector2(200, 115)
-	specialist_container.custom_minimum_size = Vector2(180, 100)
+	specialist_container.position = Vector2(250, 75)
+	specialist_container.custom_minimum_size = Vector2(200, 100)
 	specialist_container.add_theme_constant_override("separation", 2)
 	panel.add_child(specialist_container)
 
-	# Buildings section (right side) with scroll container
+	# Production queue (middle column, below specialists)
+	var queue_header = Label.new()
+	queue_header.text = "Production Queue"
+	queue_header.position = Vector2(250, 220)
+	queue_header.add_theme_font_size_override("font_size", 16)
+	panel.add_child(queue_header)
+
+	queue_container = VBoxContainer.new()
+	queue_container.position = Vector2(250, 245)
+	queue_container.custom_minimum_size = Vector2(220, 80)
+	queue_container.add_theme_constant_override("separation", 2)
+	panel.add_child(queue_container)
+
+	# Buildings section (right column) with scroll and individual building buttons
 	var buildings_header = Label.new()
 	buildings_header.text = "Buildings"
-	buildings_header.position = Vector2(400, 85)
-	buildings_header.add_theme_font_size_override("font_size", 18)
+	buildings_header.position = Vector2(500, 50)
+	buildings_header.add_theme_font_size_override("font_size", 16)
 	panel.add_child(buildings_header)
 
 	building_scroll = ScrollContainer.new()
 	building_scroll.name = "BuildingScroll"
-	building_scroll.position = Vector2(400, 115)
-	building_scroll.custom_minimum_size = Vector2(280, 420)
+	building_scroll.position = Vector2(500, 75)
+	building_scroll.custom_minimum_size = Vector2(440, 420)
 	panel.add_child(building_scroll)
 
-	building_list = Label.new()
-	building_list.name = "BuildingList"
-	building_list.add_theme_font_size_override("font_size", 14)
-	building_scroll.add_child(building_list)
+	building_container = VBoxContainer.new()
+	building_container.add_theme_constant_override("separation", 1)
+	building_scroll.add_child(building_container)
+
+	# Building tooltip (floating)
+	building_tooltip = PanelContainer.new()
+	building_tooltip.visible = false
+	building_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tt_style = StyleBoxFlat.new()
+	tt_style.bg_color = Color(0.08, 0.08, 0.12, 0.95)
+	tt_style.border_color = Color(0.4, 0.4, 0.5)
+	tt_style.set_border_width_all(1)
+	tt_style.set_corner_radius_all(4)
+	tt_style.set_content_margin_all(8)
+	building_tooltip.add_theme_stylebox_override("panel", tt_style)
+	building_tooltip_label = Label.new()
+	building_tooltip_label.add_theme_font_size_override("font_size", 12)
+	building_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	building_tooltip.add_child(building_tooltip_label)
+	panel.add_child(building_tooltip)
 
 func _on_show_city_screen(city) -> void:
 	# Close all other popups first
@@ -237,7 +308,7 @@ func _update_display() -> void:
 	if production_scroll.visible:
 		_update_production_list()
 
-	# Update buildings
+	# Update buildings (interactive)
 	_update_building_list()
 
 	# Update focus dropdown
@@ -245,6 +316,18 @@ func _update_display() -> void:
 
 	# Update specialists
 	_update_specialist_ui()
+
+	# Update tile grid
+	_update_tile_grid()
+
+	# Update culture bar
+	_update_culture_display()
+
+	# Update happiness visualization
+	_update_happiness_display()
+
+	# Update production queue
+	_update_production_queue()
 
 func _update_yields() -> void:
 	current_city.calculate_yields()
@@ -366,67 +449,84 @@ func _update_production_list() -> void:
 			production_list.add_child(btn)
 
 func _on_production_selected(item_id: String) -> void:
-	current_city.set_production(item_id)
-	# Close the build menu after selection
-	production_scroll.visible = false
-	change_production_btn.text = "Change Production"
+	# Shift-click adds to queue instead of replacing
+	if Input.is_key_pressed(KEY_SHIFT) and current_city.current_production != "":
+		if current_city.production_queue.size() < 6:
+			current_city.production_queue.append(item_id)
+	else:
+		current_city.set_production(item_id)
+		# Close the build menu after selection
+		production_scroll.visible = false
+		change_production_btn.text = "Change Production"
 	_update_display()
 
 func _update_building_list() -> void:
+	if building_container == null:
+		return
+
+	for child in building_container.get_children():
+		child.queue_free()
+
 	if current_city.buildings.is_empty():
-		building_list.text = "(No buildings yet)"
+		var empty_label = Label.new()
+		empty_label.text = "(No buildings yet)"
+		empty_label.add_theme_font_size_override("font_size", 12)
+		building_container.add_child(empty_label)
 		return
 
 	# Categorize buildings
-	var regular_buildings = []
-	var national_wonders = []
-	var world_wonders = []
-
+	var categories = {"world": [], "national": [], "regular": []}
 	for building_id in current_city.buildings:
 		var building = DataManager.get_building(building_id)
 		var wonder_type = building.get("wonder_type", "")
 		if wonder_type == "world":
-			world_wonders.append(building_id)
+			categories["world"].append(building_id)
 		elif wonder_type == "national":
-			national_wonders.append(building_id)
+			categories["national"].append(building_id)
 		else:
-			regular_buildings.append(building_id)
+			categories["regular"].append(building_id)
 
-	var text = ""
+	for cat in [["world", "WORLD WONDERS"], ["national", "NATIONAL WONDERS"], ["regular", "BUILDINGS"]]:
+		if categories[cat[0]].is_empty():
+			continue
+		var header = Label.new()
+		header.text = "=== %s ===" % cat[1]
+		header.add_theme_font_size_override("font_size", 11)
+		header.add_theme_color_override("font_color", Color(0.6, 0.6, 0.5))
+		building_container.add_child(header)
 
-	# World Wonders section
-	if not world_wonders.is_empty():
-		text += "=== WORLD WONDERS ===\n"
-		for building_id in world_wonders:
-			text += _format_building_entry(building_id)
-		text += "\n"
+		for building_id in categories[cat[0]]:
+			var building = DataManager.get_building(building_id)
+			var btn = Button.new()
+			btn.text = building.get("name", building_id)
+			btn.flat = true
+			btn.custom_minimum_size = Vector2(0, 22)
+			btn.add_theme_font_size_override("font_size", 12)
+			btn.mouse_entered.connect(_on_building_hover.bind(building_id, btn))
+			btn.mouse_exited.connect(_on_building_unhover)
+			building_container.add_child(btn)
 
-	# National Wonders section
-	if not national_wonders.is_empty():
-		text += "=== NATIONAL WONDERS ===\n"
-		for building_id in national_wonders:
-			text += _format_building_entry(building_id)
-		text += "\n"
-
-	# Regular Buildings section
-	if not regular_buildings.is_empty():
-		text += "=== BUILDINGS ===\n"
-		for building_id in regular_buildings:
-			text += _format_building_entry(building_id)
-
-	building_list.text = text
-
-func _format_building_entry(building_id: String) -> String:
+func _on_building_hover(building_id: String, btn: Button) -> void:
+	if building_tooltip == null or building_tooltip_label == null:
+		return
 	var building = DataManager.get_building(building_id)
-	var text = "- %s\n" % building.get("name", building_id)
-
-	# Show effects
 	var effects = building.get("effects", {})
+	var text = "[b]%s[/b]\n" % building.get("name", building_id)
 	for key in effects:
 		if effects[key] != 0:
-			text += "    %s: %s\n" % [key.replace("_", " ").capitalize(), str(effects[key])]
+			var value = effects[key]
+			var label = key.replace("_", " ").capitalize()
+			if value is float and value < 1.0 and value > -1.0:
+				text += "+%d%% %s\n" % [int(value * 100), label]
+			else:
+				text += "+%s %s\n" % [str(value), label]
+	building_tooltip_label.text = text.strip_edges()
+	building_tooltip.visible = true
+	building_tooltip.position = Vector2(btn.global_position.x - panel.global_position.x - 200, btn.global_position.y - panel.global_position.y)
 
-	return text
+func _on_building_unhover() -> void:
+	if building_tooltip:
+		building_tooltip.visible = false
 
 func _update_focus_dropdown() -> void:
 	if focus_dropdown == null or current_city == null:
@@ -493,6 +593,199 @@ func _update_specialist_ui() -> void:
 		hbox.add_child(plus_btn)
 
 		specialist_container.add_child(hbox)
+
+func _update_tile_grid() -> void:
+	if tile_grid == null or current_city == null:
+		return
+	tile_grid.queue_redraw()
+
+	# We need to draw the tile grid via a connected draw signal or by overriding
+	# Since tile_grid is a plain Control, we connect its draw signal
+	if not tile_grid.draw.is_connected(_draw_tile_grid):
+		tile_grid.draw.connect(_draw_tile_grid)
+
+func _draw_tile_grid() -> void:
+	if current_city == null or GameManager.hex_grid == null:
+		return
+
+	var fat_cross = GridUtils.get_fat_cross(current_city.grid_position)
+	var all_tiles = [current_city.grid_position]
+	all_tiles.append_array(fat_cross)
+
+	var cell_size = 38
+	var center_offset = Vector2(105, 105)  # Center of the 210x210 area
+
+	for tile_pos in all_tiles:
+		var tile = GameManager.hex_grid.get_tile(tile_pos)
+		if tile == null:
+			continue
+
+		var rel = tile_pos - current_city.grid_position
+		var draw_pos = Vector2(rel.x * cell_size, rel.y * cell_size) + center_offset - Vector2(cell_size / 2, cell_size / 2)
+
+		# Background color
+		var bg = DataManager.get_terrain_color(tile.terrain_id)
+		if tile_pos not in current_city.territory:
+			bg = bg.darkened(0.6)
+
+		tile_grid.draw_rect(Rect2(draw_pos, Vector2(cell_size - 2, cell_size - 2)), bg)
+
+		# Border: green if worked, yellow if locked, gray otherwise
+		var border_color = Color(0.3, 0.3, 0.3, 0.5)
+		if tile_pos in current_city.worked_tiles:
+			border_color = Color(0.2, 0.8, 0.2, 0.8)
+		if tile_pos in current_city.locked_tiles:
+			border_color = Color(0.9, 0.8, 0.2, 0.8)
+
+		tile_grid.draw_rect(Rect2(draw_pos, Vector2(cell_size - 2, cell_size - 2)), border_color, false, 2.0)
+
+		# Yield numbers (only for tiles in territory)
+		if tile_pos in current_city.territory:
+			var yields = tile.get_yields()
+			var font = ThemeDB.fallback_font
+			var fs = 9
+			var f = yields.get("food", 0)
+			var p = yields.get("production", 0)
+			var c = yields.get("commerce", 0)
+			if f > 0:
+				tile_grid.draw_string(font, draw_pos + Vector2(2, 12), str(f), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0.3, 0.9, 0.3))
+			if p > 0:
+				tile_grid.draw_string(font, draw_pos + Vector2(14, 12), str(p), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0.9, 0.6, 0.2))
+			if c > 0:
+				tile_grid.draw_string(font, draw_pos + Vector2(26, 12), str(c), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0.9, 0.9, 0.3))
+
+		# City center marker
+		if tile_pos == current_city.grid_position:
+			tile_grid.draw_string(ThemeDB.fallback_font, draw_pos + Vector2(cell_size / 2 - 5, cell_size - 6), "★", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+
+func _on_tile_grid_input(event: InputEvent) -> void:
+	if current_city == null or not (event is InputEventMouseButton):
+		return
+	if not event.pressed or event.button_index != MOUSE_BUTTON_LEFT:
+		return
+
+	var cell_size = 38
+	var center_offset = Vector2(105, 105)
+	var click_pos = event.position
+
+	# Convert click to grid offset
+	var rel_pos = (click_pos - center_offset + Vector2(cell_size / 2, cell_size / 2)) / cell_size
+	var grid_offset = Vector2i(roundi(rel_pos.x), roundi(rel_pos.y))
+	var tile_pos = current_city.grid_position + grid_offset
+
+	# Check if this is in the fat cross
+	var fat_cross = GridUtils.get_fat_cross(current_city.grid_position)
+	if tile_pos in fat_cross and tile_pos in current_city.territory:
+		current_city.toggle_tile_work(tile_pos)
+		_update_display()
+
+func _update_culture_display() -> void:
+	if current_city == null:
+		return
+
+	var culture_names = ["Poor", "Fledgling", "Developing", "Refined", "Influential", "Legendary"]
+	var level = min(current_city.culture_level, culture_names.size() - 1)
+	var next_threshold = current_city.CULTURE_THRESHOLDS[min(current_city.culture_level + 1, current_city.CULTURE_THRESHOLDS.size() - 1)]
+
+	if culture_label_display:
+		var turns_text = ""
+		if current_city.culture_yield > 0 and current_city.culture < next_threshold:
+			var turns = ceili((next_threshold - current_city.culture) / float(current_city.culture_yield))
+			turns_text = " (%d turns)" % turns
+		culture_label_display.text = "Culture: %s — %d/%d%s" % [culture_names[level], current_city.culture, next_threshold, turns_text]
+
+	if culture_bar:
+		culture_bar.max_value = max(next_threshold, 1)
+		culture_bar.value = min(current_city.culture, next_threshold)
+
+func _update_happiness_display() -> void:
+	if happiness_container == null or current_city == null:
+		return
+
+	for child in happiness_container.get_children():
+		child.queue_free()
+
+	var happy = current_city.happiness
+	var unhappy = current_city.unhappiness
+	var total = min(happy + unhappy, 20)  # Cap at 20 circles
+
+	for i in range(total):
+		var dot = Label.new()
+		if i < happy:
+			dot.text = "●"
+			dot.add_theme_color_override("font_color", Color(0.2, 0.8, 0.2))
+		else:
+			dot.text = "●"
+			dot.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
+		dot.add_theme_font_size_override("font_size", 10)
+		happiness_container.add_child(dot)
+
+func _update_production_queue() -> void:
+	if queue_container == null or current_city == null:
+		return
+
+	for child in queue_container.get_children():
+		child.queue_free()
+
+	if current_city.production_queue.is_empty():
+		var empty = Label.new()
+		empty.text = "(Empty — Shift-click to queue)"
+		empty.add_theme_font_size_override("font_size", 11)
+		empty.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		queue_container.add_child(empty)
+		return
+
+	for i in range(current_city.production_queue.size()):
+		var item_id = current_city.production_queue[i]
+		var hbox = HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 4)
+
+		# Item name
+		var item_name = item_id
+		var udata = DataManager.get_unit(item_id)
+		if not udata.is_empty():
+			item_name = udata.get("name", item_id)
+		else:
+			var bdata = DataManager.get_building(item_id)
+			if not bdata.is_empty():
+				item_name = bdata.get("name", item_id)
+
+		var label = Label.new()
+		label.text = "%d. %s" % [i + 1, item_name]
+		label.add_theme_font_size_override("font_size", 11)
+		label.custom_minimum_size = Vector2(140, 0)
+		hbox.add_child(label)
+
+		# Remove button
+		var remove_btn = Button.new()
+		remove_btn.text = "X"
+		remove_btn.custom_minimum_size = Vector2(22, 20)
+		remove_btn.add_theme_font_size_override("font_size", 10)
+		remove_btn.pressed.connect(_on_queue_remove.bind(i))
+		hbox.add_child(remove_btn)
+
+		# Move up button
+		if i > 0:
+			var up_btn = Button.new()
+			up_btn.text = "▲"
+			up_btn.custom_minimum_size = Vector2(22, 20)
+			up_btn.add_theme_font_size_override("font_size", 10)
+			up_btn.pressed.connect(_on_queue_move_up.bind(i))
+			hbox.add_child(up_btn)
+
+		queue_container.add_child(hbox)
+
+func _on_queue_remove(index: int) -> void:
+	if current_city and index < current_city.production_queue.size():
+		current_city.production_queue.remove_at(index)
+		_update_display()
+
+func _on_queue_move_up(index: int) -> void:
+	if current_city and index > 0 and index < current_city.production_queue.size():
+		var item = current_city.production_queue[index]
+		current_city.production_queue.remove_at(index)
+		current_city.production_queue.insert(index - 1, item)
+		_update_display()
 
 func _on_specialist_plus(spec_id: String) -> void:
 	if current_city == null or not current_city.can_add_specialist(spec_id):

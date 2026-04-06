@@ -2,9 +2,9 @@ class_name TechTree
 extends Control
 ## Technology tree screen showing all techs and research options.
 
-const TECH_NODE_SIZE = Vector2(140, 70)
-const TECH_SPACING_X = 180
-const TECH_SPACING_Y = 90
+const TECH_NODE_SIZE = Vector2(160, 85)
+const TECH_SPACING_X = 200
+const TECH_SPACING_Y = 105
 
 var tech_nodes: Dictionary = {}  # tech_id -> Control
 var current_player = null  # Player (untyped to avoid load-order issues)
@@ -238,6 +238,56 @@ func _create_tech_node(tech_id: String) -> Control:
 	cost_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	node.add_child(cost_label)
 
+	# Unlock badges row
+	var unlocks = DataManager.get_tech_unlocks(tech_id)
+	var badge_container = HBoxContainer.new()
+	badge_container.position = Vector2(5, 42)
+	badge_container.add_theme_constant_override("separation", 3)
+	node.add_child(badge_container)
+
+	var unlock_units = unlocks.get("units", [])
+	var unlock_buildings = unlocks.get("buildings", [])
+	var unlock_improvements = unlocks.get("improvements", [])
+
+	for i in range(unlock_units.size()):
+		var badge = _create_badge("U", Color(0.85, 0.2, 0.2))
+		badge_container.add_child(badge)
+		if i >= 3:
+			break  # Limit to avoid overflow
+
+	for i in range(unlock_buildings.size()):
+		var badge = _create_badge("B", Color(0.2, 0.35, 0.85))
+		badge_container.add_child(badge)
+		if i >= 3:
+			break
+
+	for i in range(unlock_improvements.size()):
+		var badge = _create_badge("I", Color(0.2, 0.7, 0.25))
+		badge_container.add_child(badge)
+		if i >= 3:
+			break
+
+	# Progress bar for currently-researching tech
+	if state == "current" and current_player != null:
+		var progress_bar = ProgressBar.new()
+		progress_bar.position = Vector2(2, TECH_NODE_SIZE.y - 10)
+		progress_bar.custom_minimum_size = Vector2(TECH_NODE_SIZE.x - 4, 8)
+		progress_bar.size = Vector2(TECH_NODE_SIZE.x - 4, 8)
+		progress_bar.max_value = cost
+		progress_bar.value = current_player.research_progress
+		progress_bar.show_percentage = false
+		var bar_bg = StyleBoxFlat.new()
+		bar_bg.bg_color = Color(0.15, 0.15, 0.15)
+		bar_bg.corner_radius_bottom_left = 2
+		bar_bg.corner_radius_bottom_right = 2
+		progress_bar.add_theme_stylebox_override("background", bar_bg)
+		var bar_fill = StyleBoxFlat.new()
+		bar_fill.bg_color = Color(0.3, 0.8, 0.3)
+		bar_fill.corner_radius_bottom_left = 2
+		bar_fill.corner_radius_bottom_right = 2
+		progress_bar.add_theme_stylebox_override("fill", bar_fill)
+		node.add_child(progress_bar)
+
 	# If available and not researched, make clickable
 	if state == "available":
 		var button = Button.new()
@@ -258,6 +308,25 @@ func _create_tech_node(tech_id: String) -> Control:
 		node.add_child(button)
 
 	return node
+
+func _create_badge(letter: String, bg_color: Color) -> Label:
+	var badge = Label.new()
+	badge.text = letter
+	badge.custom_minimum_size = Vector2(16, 16)
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge.add_theme_font_size_override("font_size", 10)
+	badge.add_theme_color_override("font_color", Color.WHITE)
+	var badge_style = StyleBoxFlat.new()
+	badge_style.bg_color = bg_color
+	badge_style.corner_radius_top_left = 3
+	badge_style.corner_radius_top_right = 3
+	badge_style.corner_radius_bottom_left = 3
+	badge_style.corner_radius_bottom_right = 3
+	badge_style.content_margin_left = 2
+	badge_style.content_margin_right = 2
+	badge.add_theme_stylebox_override("normal", badge_style)
+	return badge
 
 func _get_tech_state(tech_id: String) -> String:
 	if current_player == null:
@@ -282,7 +351,11 @@ func _draw_connections() -> void:
 	tech_container.add_child(line_container)
 	line_container.set_script(load("res://scripts/ui/tech_lines.gd") if ResourceLoader.exists("res://scripts/ui/tech_lines.gd") else null)
 
-	# Store line data for drawing
+	# Store line data for drawing with colors based on research state
+	var researched_techs = []
+	if current_player != null:
+		researched_techs = current_player.researched_techs
+
 	var lines = []
 	for tech_id in tech_nodes:
 		var prereqs = DataManager.get_tech_prerequisites(tech_id)
@@ -293,14 +366,26 @@ func _draw_connections() -> void:
 			if prereq in tech_nodes:
 				var from_node = tech_nodes[prereq]
 				var from_pos = from_node.position + Vector2(TECH_NODE_SIZE.x, TECH_NODE_SIZE.y / 2)
-				lines.append({"from": from_pos, "to": to_pos})
+
+				# Determine line color based on research state
+				var prereq_researched = prereq in researched_techs
+				var tech_researched = tech_id in researched_techs
+				var line_color: Color
+				if prereq_researched and tech_researched:
+					line_color = Color(0.2, 0.75, 0.2)  # Green - both researched
+				elif prereq_researched and not tech_researched:
+					line_color = Color(0.85, 0.85, 0.2)  # Yellow - prereq done, dependent not
+				else:
+					line_color = Color(0.5, 0.5, 0.6)  # Gray - neither researched
+
+				lines.append({"from": from_pos, "to": to_pos, "color": line_color})
 
 	# Draw lines manually
 	for line_data in lines:
 		var line = Line2D.new()
 		line.add_point(line_data.from)
 		line.add_point(line_data.to)
-		line.default_color = Color(0.5, 0.5, 0.6)
+		line.default_color = line_data.color
 		line.width = 2.0
 		line_container.add_child(line)
 

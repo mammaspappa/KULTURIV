@@ -17,6 +17,8 @@ var leader_name_label: Label
 var relation_label: Label
 var attitude_label: Label
 var breakdown_label: Label
+var religion_label: Label
+var civics_label: Label
 
 # Action buttons
 var declare_war_btn: Button
@@ -179,6 +181,19 @@ func _setup_detail_content() -> void:
 	breakdown_label.add_theme_color_override("font_color", Color.LIGHT_GRAY)
 	detail_container.add_child(breakdown_label)
 
+	# State religion
+	religion_label = Label.new()
+	religion_label.text = ""
+	religion_label.add_theme_font_size_override("font_size", 13)
+	detail_container.add_child(religion_label)
+
+	# Civics
+	civics_label = Label.new()
+	civics_label.text = ""
+	civics_label.add_theme_font_size_override("font_size", 13)
+	civics_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail_container.add_child(civics_label)
+
 	# Spacer
 	var spacer = Control.new()
 	spacer.custom_minimum_size = Vector2(0, 15)
@@ -273,7 +288,14 @@ func _refresh_player_list() -> void:
 		elif player.player_id in human.defensive_pact_with:
 			status = " [ALLY]"
 
-		player_list.add_item(civ_name + status)
+		# Append treaty badges
+		var treaties = ""
+		if player.player_id in human.open_borders_with:
+			treaties += " [OB]"
+		if player.player_id in human.defensive_pact_with:
+			treaties += " [DP]"
+
+		player_list.add_item(civ_name + status + treaties)
 		player_list.set_item_metadata(player_list.item_count - 1, player)
 
 		# Color based on relationship
@@ -281,6 +303,8 @@ func _refresh_player_list() -> void:
 			player_list.set_item_custom_fg_color(player_list.item_count - 1, Color.RED)
 		elif player.player_id in human.defensive_pact_with:
 			player_list.set_item_custom_fg_color(player_list.item_count - 1, Color.GREEN)
+		elif player.player_id in human.open_borders_with:
+			player_list.set_item_custom_fg_color(player_list.item_count - 1, Color.CYAN)
 
 func _on_player_selected(index: int) -> void:
 	var player = player_list.get_item_metadata(index)
@@ -297,6 +321,8 @@ func _update_detail_panel() -> void:
 		relation_label.text = ""
 		attitude_label.text = ""
 		breakdown_label.text = ""
+		religion_label.text = ""
+		civics_label.text = ""
 		info_label.text = "Select a civilization to view details and diplomatic options."
 		_hide_action_buttons()
 		return
@@ -355,6 +381,33 @@ func _update_detail_panel() -> void:
 		var sign = "+" if item["value"] > 0 else ""
 		breakdown_text += "  %s%d: %s\n" % [sign, item["value"], item["reason"]]
 	breakdown_label.text = breakdown_text
+
+	# State religion
+	var sr = selected_player.state_religion
+	if sr != "" and sr != null:
+		var religion_data = DataManager.get_religion(sr)
+		religion_label.text = "State Religion: %s" % religion_data.get("name", sr.capitalize())
+		religion_label.add_theme_color_override("font_color", Color(0.9, 0.85, 0.4))
+	else:
+		religion_label.text = "No State Religion"
+		religion_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+
+	# Civics
+	var player_civics = selected_player.civics
+	if player_civics != null and not player_civics.is_empty():
+		var civic_names = []
+		for category in player_civics:
+			var civic_id = player_civics[category]
+			if civic_id != "" and civic_id != null:
+				civic_names.append(DataManager.get_civic_name(civic_id))
+		if civic_names.size() > 0:
+			civics_label.text = "Civics: %s" % ", ".join(civic_names)
+		else:
+			civics_label.text = "Civics: None"
+		civics_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
+	else:
+		civics_label.text = "Civics: None"
+		civics_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 
 	# Update info panel
 	info_label.text = "[b]%s[/b]\nRelationship: %s | Attitude: %s" % [
@@ -419,6 +472,7 @@ func _on_open_borders_pressed() -> void:
 		EventBus.open_borders_signed.emit(human, selected_player)
 
 	_update_detail_panel()
+	_refresh_player_list()
 
 func _on_defensive_pact_pressed() -> void:
 	if selected_player == null:
@@ -435,6 +489,7 @@ func _on_defensive_pact_pressed() -> void:
 		EventBus.defensive_pact_signed.emit(human, selected_player)
 
 	_update_detail_panel()
+	_refresh_player_list()
 
 func _on_trade_pressed() -> void:
 	if selected_player == null:

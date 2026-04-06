@@ -89,42 +89,96 @@ func _ready() -> void:
 	update_visual()
 
 func _draw() -> void:
-	# City background circle
-	var bg_color = player_owner.color if player_owner else Color.GRAY
-	draw_circle(Vector2.ZERO, 28, bg_color)
-
-	# Border
-	if is_selected:
-		draw_arc(Vector2.ZERO, 30, 0, TAU, 32, Color.WHITE, 3.0)
-	else:
-		draw_arc(Vector2.ZERO, 28, 0, TAU, 32, Color.BLACK, 2.0)
-
-	# Population number
 	var font = ThemeDB.fallback_font
-	var font_size = 20
+	var bg_color = player_owner.color if player_owner else Color.GRAY
+	var is_own = player_owner == GameManager.human_player
+
+	# Determine visibility for enemy cities
+	var show_details = is_own
+	if not is_own and GameManager.human_player != null:
+		var tile = GameManager.hex_grid.get_tile(grid_position) if GameManager.hex_grid else null
+		if tile != null:
+			show_details = tile.is_visible_to(GameManager.human_player.player_id)
+
+	# --- City Bar (above the circle) ---
+	var bar_width = 90
+	var bar_x = -bar_width / 2
+	var bar_y = -72  # Above city circle
+
+	# Name bar background
+	var name_bg_color = bg_color
+	name_bg_color.a = 0.85
+	draw_rect(Rect2(bar_x - 2, bar_y - 2, bar_width + 4, 18), Color(0, 0, 0, 0.6))
+	draw_rect(Rect2(bar_x, bar_y, bar_width, 16), name_bg_color)
+
+	# Population number (left side of bar)
 	var pop_text = str(population)
-	var text_size = font.get_string_size(pop_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
-	var text_pos = Vector2(-text_size.x / 2, text_size.y / 4)
-	draw_string(font, text_pos, pop_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)
+	draw_string(font, Vector2(bar_x + 2, bar_y + 12), pop_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.WHITE)
 
-	# City name below
-	var name_size = 12
-	var name_text_size = font.get_string_size(city_name, HORIZONTAL_ALIGNMENT_CENTER, -1, name_size)
-	var name_pos = Vector2(-name_text_size.x / 2, 40)
-	draw_string(font, name_pos, city_name, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size, Color.WHITE)
+	# City name (centered in bar)
+	var name_width = font.get_string_size(city_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+	var name_x = bar_x + (bar_width - name_width) / 2
+	draw_string(font, Vector2(max(name_x, bar_x + 16), bar_y + 12), city_name, HORIZONTAL_ALIGNMENT_LEFT, bar_width - 16, 10, Color.WHITE)
 
-	# Production icon if producing
-	if current_production != "":
-		var prod_symbol = "⚙"
-		draw_string(font, Vector2(-30, -10), prod_symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.YELLOW)
+	# Growth progress bar (food)
+	var growth_y = bar_y + 17
+	var food_needed = food_needed_for_growth()
+	var growth_ratio = clampf(food_stockpile / max(food_needed, 1), 0.0, 1.0)
+	draw_rect(Rect2(bar_x, growth_y, bar_width, 4), Color(0.15, 0.15, 0.15))
+	if growth_ratio > 0:
+		draw_rect(Rect2(bar_x, growth_y, bar_width * growth_ratio, 4), Color(0.2, 0.8, 0.2))
 
-	# Religion icons
-	var religion_x = 20
-	for rel in religions:
-		var rel_data = DataManager.get_religion(rel)
-		var symbol = rel_data.get("symbol", "?")
-		draw_string(font, Vector2(religion_x, -20), symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
-		religion_x += 12
+	# Production progress bar (only if producing and details visible)
+	var prod_y = growth_y + 5
+	if current_production != "" and (is_own or show_details):
+		var prod_cost = get_production_cost()
+		var prod_ratio = clampf(float(production_progress) / max(prod_cost, 1), 0.0, 1.0)
+		draw_rect(Rect2(bar_x, prod_y, bar_width, 4), Color(0.15, 0.15, 0.15))
+		if prod_ratio > 0:
+			draw_rect(Rect2(bar_x, prod_y, bar_width * prod_ratio, 4), Color(0.9, 0.7, 0.1))
+		prod_y += 5
+
+	# Culture progress bar (thin)
+	var culture_y = prod_y
+	var next_threshold = CULTURE_THRESHOLDS[min(culture_level + 1, CULTURE_THRESHOLDS.size() - 1)]
+	if next_threshold > 0:
+		var culture_ratio = clampf(float(culture) / next_threshold, 0.0, 1.0)
+		draw_rect(Rect2(bar_x, culture_y, bar_width, 3), Color(0.1, 0.1, 0.1))
+		if culture_ratio > 0:
+			draw_rect(Rect2(bar_x, culture_y, bar_width * culture_ratio, 3), Color(0.6, 0.3, 0.8))
+
+	# Religion icons row (below bars)
+	var icon_y = culture_y + 5
+	if not religions.is_empty():
+		var rx = bar_x
+		for rel in religions:
+			var rel_data = DataManager.get_religion(rel)
+			var symbol = rel_data.get("symbol", "?")
+			var rel_color = Color.WHITE
+			if player_owner and player_owner.state_religion == rel:
+				rel_color = Color(1.0, 0.9, 0.4)  # Gold for state religion
+			draw_string(font, Vector2(rx, icon_y + 10), symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, rel_color)
+			rx += 11
+
+	# Health/Happiness indicators (right side of religion row)
+	if is_own:
+		var indicator_x = bar_x + bar_width - 16
+		if happiness >= unhappiness:
+			draw_circle(Vector2(indicator_x, icon_y + 6), 4, Color(0.2, 0.8, 0.2))
+		else:
+			draw_circle(Vector2(indicator_x, icon_y + 6), 4, Color(0.9, 0.2, 0.2))
+
+	# --- City Circle (center) ---
+	draw_circle(Vector2.ZERO, 20, bg_color)
+	if is_selected:
+		draw_arc(Vector2.ZERO, 22, 0, TAU, 32, Color.WHITE, 3.0)
+	else:
+		draw_arc(Vector2.ZERO, 20, 0, TAU, 32, Color.BLACK, 1.5)
+
+	# Population number in circle
+	var pop_circle_text = str(population)
+	var ptsize = font.get_string_size(pop_circle_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 16)
+	draw_string(font, Vector2(-ptsize.x / 2, ptsize.y / 4), pop_circle_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
 
 func update_visual() -> void:
 	# Check if this city should be visible to the human player

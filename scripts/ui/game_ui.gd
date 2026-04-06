@@ -46,6 +46,30 @@ var promote_button: Button = null
 var promotion_popup: PanelContainer = null
 var promotion_list_container: VBoxContainer = null
 
+# Enhanced unit panel elements
+var xp_bar: ProgressBar = null
+var xp_label: Label = null
+var promotions_container: HFlowContainer = null
+var unit_stack_container: VBoxContainer = null
+var combat_preview_panel: PanelContainer = null
+var combat_preview_labels: Dictionary = {}
+var last_combat_preview_pos: Vector2i = Vector2i(-1, -1)
+
+# Top bar extras
+var resource_label: Label = null
+var gp_label: Label = null
+
+# Scoreboard
+var scoreboard_panel: PanelContainer = null
+var scoreboard_container: VBoxContainer = null
+
+# Tile tooltip
+var tile_tooltip: PanelContainer = null
+var tooltip_labels: Dictionary = {}  # key -> Label
+var hover_grid_pos: Vector2i = Vector2i(-1, -1)
+var hover_time: float = 0.0
+const TOOLTIP_DELAY = 0.3
+
 # Notification system
 var notifications: Array = []
 var notification_container: VBoxContainer
@@ -91,6 +115,21 @@ func _ready() -> void:
 	# Initial state
 	unit_panel.visible = false
 
+	# Setup top bar extras (resource icons, GP progress)
+	_setup_top_bar_extras()
+
+	# Setup scoreboard
+	_setup_scoreboard()
+
+	# Setup enhanced unit panel elements
+	_setup_unit_panel_extras()
+
+	# Setup combat preview
+	_setup_combat_preview()
+
+	# Setup tile tooltip
+	_setup_tile_tooltip()
+
 	# Setup promotion UI
 	_setup_promotion_ui()
 
@@ -104,6 +143,12 @@ func _process(delta: float) -> void:
 	# Update unit panel if a unit is selected
 	if selected_unit:
 		_update_unit_panel()
+
+	# Update combat preview
+	_process_combat_preview()
+
+	# Update tile tooltip
+	_process_tile_tooltip(delta)
 
 	# Update notifications
 	_update_notifications(delta)
@@ -157,6 +202,7 @@ func _input(event: InputEvent) -> void:
 func _on_turn_started(turn: int, player) -> void:
 	if player == GameManager.human_player:
 		_update_top_bar()
+		_update_scoreboard()
 		# Clear skipped units list at start of turn
 		skipped_units_this_turn.clear()
 		# Auto-select first unit needing orders
@@ -171,6 +217,7 @@ func _on_unit_selected(unit) -> void:
 		unit_panel.visible = true
 		worker_actions_dirty = true  # Force refresh of worker buttons
 		_update_unit_panel()
+		_update_unit_stack()
 
 func _on_unit_deselected(_unit) -> void:
 	selected_unit = null
@@ -371,6 +418,9 @@ func _update_top_bar() -> void:
 		var civ_data = DataManager.get_civ(player.civilization_id)
 		civ_label.text = civ_data.get("name", "Unknown")
 
+	# Resource icons and GP progress
+	_update_top_bar_extras()
+
 func _update_unit_panel() -> void:
 	if selected_unit == null:
 		return
@@ -408,6 +458,9 @@ func _update_unit_panel() -> void:
 		skip_button.disabled = selected_unit.has_acted
 	if promote_button:
 		promote_button.visible = selected_unit.can_promote()
+
+	# XP bar, promotions, and stack (only update when unit state changes)
+	_update_unit_xp_and_promotions()
 
 	# Only update worker actions when state changes
 	var current_order = selected_unit.current_order
@@ -692,6 +745,540 @@ func _try_automate_worker() -> void:
 		selected_unit.automate()
 		_add_notification("Worker automated", "system")
 	_update_unit_panel()
+
+# Scoreboard
+func _setup_scoreboard() -> void:
+	scoreboard_panel = PanelContainer.new()
+	scoreboard_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	scoreboard_panel.position = Vector2(-155, 45)
+	scoreboard_panel.custom_minimum_size = Vector2(145, 0)
+	scoreboard_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.7)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(6)
+	scoreboard_panel.add_theme_stylebox_override("panel", style)
+
+	scoreboard_container = VBoxContainer.new()
+	scoreboard_container.add_theme_constant_override("separation", 2)
+	scoreboard_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scoreboard_panel.add_child(scoreboard_container)
+	add_child(scoreboard_panel)
+
+func _update_scoreboard() -> void:
+	if scoreboard_container == null or GameManager.human_player == null:
+		return
+
+	for child in scoreboard_container.get_children():
+		child.queue_free()
+
+	# Collect met players + self, sorted by score
+	var entries = []
+	for player in GameManager.players:
+		if player == GameManager.human_player or player.player_id in GameManager.human_player.met_players:
+			player.calculate_score()
+			entries.append(player)
+		elif not player.cities.is_empty():
+			entries.append(null)  # Placeholder for unmet civ
+
+	# Sort known entries by score descending
+	entries.sort_custom(func(a, b):
+		if a == null: return false
+		if b == null: return true
+		return a.score > b.score
+	)
+
+	for player in entries:
+		var hbox = HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 4)
+		hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		if player == null:
+			var unknown = Label.new()
+			unknown.text = "??? — ???"
+			unknown.add_theme_font_size_override("font_size", 11)
+			unknown.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+			unknown.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hbox.add_child(unknown)
+		else:
+			# Color dot
+			var dot = Label.new()
+			dot.text = "●"
+			dot.add_theme_font_size_override("font_size", 11)
+			dot.add_theme_color_override("font_color", player.color)
+			dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hbox.add_child(dot)
+
+			# Civ name
+			var civ_data = DataManager.get_civ(player.civilization_id)
+			var name_label = Label.new()
+			var short_name = civ_data.get("adjective", civ_data.get("name", "???"))
+			name_label.text = short_name
+			name_label.add_theme_font_size_override("font_size", 11)
+			name_label.custom_minimum_size = Vector2(70, 0)
+			name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+			# Color based on relationship
+			if player == GameManager.human_player:
+				name_label.add_theme_color_override("font_color", Color.WHITE)
+			elif player.player_id in GameManager.human_player.at_war_with:
+				name_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
+			else:
+				name_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+			hbox.add_child(name_label)
+
+			# Score
+			var score_label = Label.new()
+			score_label.text = str(player.score)
+			score_label.add_theme_font_size_override("font_size", 11)
+			score_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.6))
+			score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			score_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hbox.add_child(score_label)
+
+		scoreboard_container.add_child(hbox)
+
+# Top bar extras
+func _setup_top_bar_extras() -> void:
+	var hbox = $TopBar/HBoxContainer
+	if hbox == null:
+		return
+
+	# Resource label (after gold/science)
+	resource_label = Label.new()
+	resource_label.add_theme_font_size_override("font_size", 12)
+	resource_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.7))
+	hbox.add_child(resource_label)
+	hbox.move_child(resource_label, 3)  # After gold and science labels
+
+	# GP progress label
+	gp_label = Label.new()
+	gp_label.add_theme_font_size_override("font_size", 12)
+	gp_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.4))
+	hbox.add_child(gp_label)
+	hbox.move_child(gp_label, 4)  # After resource label
+
+func _update_top_bar_extras() -> void:
+	var player = GameManager.human_player
+	if player == null:
+		return
+
+	# Resource icons
+	if resource_label:
+		var resources = player.get_available_resources()
+		if resources.is_empty():
+			resource_label.text = ""
+		else:
+			var strategic = []
+			var luxury = []
+			for res_id in resources:
+				var res_data = DataManager.get_resource(res_id)
+				var symbol = res_data.get("symbol", "?")
+				var name = res_data.get("name", res_id)
+				if res_data.get("type", "") == "strategic":
+					strategic.append(symbol)
+				elif res_data.get("type", "") == "luxury":
+					luxury.append(symbol)
+			var parts = []
+			if not strategic.is_empty():
+				parts.append(" ".join(strategic))
+			if not luxury.is_empty():
+				parts.append(" ".join(luxury))
+			resource_label.text = " | ".join(parts)
+
+	# GP progress (closest city to GP birth)
+	if gp_label:
+		var best_city_name = ""
+		var best_progress = 0
+		var best_threshold = 100
+		for city in player.cities:
+			var gp_progress = city.get_meta("gp_progress", 0)
+			var gp_points = city.get_great_people_points()
+			var total_pts = 0
+			for gp_type in gp_points:
+				total_pts += gp_points[gp_type]
+			if total_pts > 0:
+				var threshold = 100 + (GreatPeopleSystem.great_people_born.get(player.player_id, 0) * 50)
+				var remaining = threshold - gp_progress
+				if best_city_name == "" or remaining < (best_threshold - best_progress):
+					best_city_name = city.city_name
+					best_progress = gp_progress
+					best_threshold = threshold
+
+		if best_city_name != "":
+			gp_label.text = "GP: %d/%d" % [best_progress, best_threshold]
+		else:
+			gp_label.text = ""
+
+# Enhanced unit panel
+func _setup_unit_panel_extras() -> void:
+	var vbox = $UnitPanel/VBoxContainer
+	if vbox == null:
+		return
+
+	# XP bar and label (after health bar)
+	xp_label = Label.new()
+	xp_label.add_theme_font_size_override("font_size", 11)
+	xp_label.visible = false
+	vbox.add_child(xp_label)
+	vbox.move_child(xp_label, vbox.get_child_count() - 1)
+
+	xp_bar = ProgressBar.new()
+	xp_bar.custom_minimum_size = Vector2(0, 8)
+	xp_bar.show_percentage = false
+	xp_bar.visible = false
+	vbox.add_child(xp_bar)
+	vbox.move_child(xp_bar, vbox.get_child_count() - 1)
+
+	# Promotions display
+	promotions_container = HFlowContainer.new()
+	promotions_container.custom_minimum_size = Vector2(0, 0)
+	promotions_container.visible = false
+	vbox.add_child(promotions_container)
+	vbox.move_child(promotions_container, vbox.get_child_count() - 1)
+
+	# Unit stack list (at the bottom of unit panel)
+	unit_stack_container = VBoxContainer.new()
+	unit_stack_container.add_theme_constant_override("separation", 2)
+	unit_stack_container.visible = false
+	vbox.add_child(unit_stack_container)
+
+func _setup_combat_preview() -> void:
+	combat_preview_panel = PanelContainer.new()
+	combat_preview_panel.visible = false
+	combat_preview_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.05, 0.05, 0.92)
+	style.border_color = Color(0.6, 0.3, 0.2)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(8)
+	combat_preview_panel.add_theme_stylebox_override("panel", style)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 2)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	for key in ["title", "odds", "attacker", "defender", "modifiers"]:
+		var label = Label.new()
+		label.add_theme_font_size_override("font_size", 12)
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		vbox.add_child(label)
+		combat_preview_labels[key] = label
+
+	combat_preview_labels["title"].add_theme_font_size_override("font_size", 13)
+	combat_preview_labels["title"].add_theme_color_override("font_color", Color(1.0, 0.8, 0.5))
+
+	combat_preview_panel.add_child(vbox)
+	add_child(combat_preview_panel)
+
+func _update_unit_xp_and_promotions() -> void:
+	if selected_unit == null:
+		if xp_bar: xp_bar.visible = false
+		if xp_label: xp_label.visible = false
+		if promotions_container: promotions_container.visible = false
+		return
+
+	var strength = selected_unit.get_strength()
+	var is_military = strength > 0
+
+	# XP bar
+	if xp_bar and xp_label and is_military:
+		var xp = selected_unit.experience
+		var xp_needed = selected_unit._xp_for_next_level()
+		xp_bar.max_value = xp_needed
+		xp_bar.value = min(xp, xp_needed)
+		xp_label.text = "Level %d — XP: %d/%d" % [selected_unit.level, xp, xp_needed]
+		xp_bar.visible = true
+		xp_label.visible = true
+	elif xp_bar:
+		xp_bar.visible = false
+		xp_label.visible = false
+
+	# Promotion badges
+	if promotions_container:
+		for child in promotions_container.get_children():
+			child.queue_free()
+
+		if not selected_unit.promotions.is_empty():
+			for promo_id in selected_unit.promotions:
+				var promo_data = DataManager.promotions.get(promo_id, {})
+				var badge = Label.new()
+				badge.text = promo_data.get("name", promo_id)
+				badge.add_theme_font_size_override("font_size", 10)
+				badge.add_theme_color_override("font_color", Color(0.7, 0.9, 0.7))
+				badge.tooltip_text = promo_data.get("description", "")
+				promotions_container.add_child(badge)
+			promotions_container.visible = true
+		else:
+			promotions_container.visible = false
+
+func _update_unit_stack() -> void:
+	if unit_stack_container == null:
+		return
+
+	for child in unit_stack_container.get_children():
+		child.queue_free()
+
+	if selected_unit == null:
+		unit_stack_container.visible = false
+		return
+
+	var units_at = GameManager.get_units_at(selected_unit.grid_position)
+	# Filter to own units only, exclude selected
+	var stack = []
+	for u in units_at:
+		if u != selected_unit and u.player_owner == GameManager.human_player:
+			stack.append(u)
+
+	if stack.is_empty():
+		unit_stack_container.visible = false
+		return
+
+	var header = Label.new()
+	header.text = "Stack (%d):" % (stack.size() + 1)
+	header.add_theme_font_size_override("font_size", 11)
+	header.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
+	unit_stack_container.add_child(header)
+
+	for u in stack.slice(0, 5):  # Show max 5 stacked units
+		var udata = DataManager.get_unit(u.unit_id)
+		var btn = Button.new()
+		var hp_pct = int(u.health / u.max_health * 100)
+		btn.text = "%s (HP:%d%%)" % [udata.get("name", u.unit_id), hp_pct]
+		btn.custom_minimum_size = Vector2(0, 22)
+		btn.add_theme_font_size_override("font_size", 10)
+		btn.pressed.connect(func(): _select_unit_from_stack(u))
+		unit_stack_container.add_child(btn)
+
+	if stack.size() > 5:
+		var more = Label.new()
+		more.text = "...+%d more" % (stack.size() - 5)
+		more.add_theme_font_size_override("font_size", 10)
+		unit_stack_container.add_child(more)
+
+	unit_stack_container.visible = true
+
+func _select_unit_from_stack(unit) -> void:
+	if unit and is_instance_valid(unit):
+		EventBus.unit_selected.emit(unit)
+
+func _process_combat_preview() -> void:
+	if selected_unit == null or combat_preview_panel == null:
+		if combat_preview_panel: combat_preview_panel.visible = false
+		last_combat_preview_pos = Vector2i(-1, -1)
+		return
+
+	if selected_unit.get_strength() <= 0:
+		combat_preview_panel.visible = false
+		return
+
+	var raycast = GameManager.get_meta("input_raycast") if GameManager.has_meta("input_raycast") else null
+	if raycast == null:
+		return
+
+	var mouse_pos = get_viewport().get_mouse_position()
+	var grid_pos = raycast.screen_to_grid(mouse_pos)
+
+	if grid_pos == Vector2i(-1, -1) or grid_pos == selected_unit.grid_position:
+		combat_preview_panel.visible = false
+		last_combat_preview_pos = Vector2i(-1, -1)
+		return
+
+	# Check for enemy unit at position
+	var enemy_units = GameManager.get_units_at(grid_pos)
+	var target = null
+	for u in enemy_units:
+		if u.player_owner != GameManager.human_player and u.get_strength() > 0:
+			target = u
+			break
+
+	if target == null:
+		combat_preview_panel.visible = false
+		last_combat_preview_pos = Vector2i(-1, -1)
+		return
+
+	# Only recalculate if position changed
+	if grid_pos != last_combat_preview_pos:
+		last_combat_preview_pos = grid_pos
+		var odds = CombatSystem.calculate_odds(selected_unit, target)
+		var modifiers = CombatSystem.get_combat_modifiers(selected_unit, true, target)
+
+		var att_data = DataManager.get_unit(selected_unit.unit_id)
+		var def_data = DataManager.get_unit(target.unit_id)
+
+		combat_preview_labels["title"].text = "Combat Odds"
+		combat_preview_labels["odds"].text = "Win: %d%%" % int(odds.get("win_chance", 0.5) * 100)
+		var win_chance = odds.get("win_chance", 0.5)
+		if win_chance >= 0.7:
+			combat_preview_labels["odds"].add_theme_color_override("font_color", Color(0.3, 0.9, 0.3))
+		elif win_chance >= 0.4:
+			combat_preview_labels["odds"].add_theme_color_override("font_color", Color(0.9, 0.9, 0.3))
+		else:
+			combat_preview_labels["odds"].add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
+
+		combat_preview_labels["attacker"].text = "%s: %.1f str" % [att_data.get("name", "Attacker"), odds.get("attacker_strength", 0)]
+		combat_preview_labels["defender"].text = "%s: %.1f str" % [def_data.get("name", "Defender"), odds.get("defender_strength", 0)]
+
+		var mod_text = ""
+		for mod in modifiers.slice(0, 5):
+			mod_text += mod + "\n"
+		combat_preview_labels["modifiers"].text = mod_text.strip_edges()
+
+	combat_preview_panel.visible = true
+	# Position near cursor
+	var tooltip_pos = mouse_pos + Vector2(16, -80)
+	var viewport_size = get_viewport_rect().size
+	if tooltip_pos.x + 200 > viewport_size.x:
+		tooltip_pos.x = mouse_pos.x - 200
+	if tooltip_pos.y < 50:
+		tooltip_pos.y = mouse_pos.y + 16
+	combat_preview_panel.position = tooltip_pos
+
+# Tile tooltip system
+func _setup_tile_tooltip() -> void:
+	tile_tooltip = PanelContainer.new()
+	tile_tooltip.visible = false
+	tile_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.9)
+	style.border_color = Color(0.4, 0.4, 0.5)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(8)
+	tile_tooltip.add_theme_stylebox_override("panel", style)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 2)
+
+	for key in ["terrain", "yields", "resource", "improvement", "defense", "owner"]:
+		var label = Label.new()
+		label.add_theme_font_size_override("font_size", 12)
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		vbox.add_child(label)
+		tooltip_labels[key] = label
+
+	tooltip_labels["terrain"].add_theme_font_size_override("font_size", 13)
+
+	tile_tooltip.add_child(vbox)
+	add_child(tile_tooltip)
+
+func _process_tile_tooltip(delta: float) -> void:
+	var raycast = GameManager.get_meta("input_raycast") if GameManager.has_meta("input_raycast") else null
+	if raycast == null:
+		return
+
+	var mouse_pos = get_viewport().get_mouse_position()
+	var grid_pos = raycast.screen_to_grid(mouse_pos)
+
+	if grid_pos != hover_grid_pos:
+		hover_grid_pos = grid_pos
+		hover_time = 0.0
+		if tile_tooltip:
+			tile_tooltip.visible = false
+		return
+
+	if grid_pos == Vector2i(-1, -1):
+		return
+
+	hover_time += delta
+	if hover_time >= TOOLTIP_DELAY and tile_tooltip and not tile_tooltip.visible:
+		_show_tile_tooltip(grid_pos, mouse_pos)
+
+	# Reposition with cursor
+	if tile_tooltip and tile_tooltip.visible:
+		_position_tooltip(mouse_pos)
+
+func _show_tile_tooltip(grid_pos: Vector2i, mouse_pos: Vector2) -> void:
+	if GameManager.hex_grid == null or GameManager.human_player == null:
+		return
+
+	var tile = GameManager.hex_grid.get_tile(grid_pos)
+	if tile == null:
+		return
+
+	var GameTileClass = preload("res://scripts/map/game_tile.gd")
+	var vis = tile.get_visibility_for_player(GameManager.human_player.player_id)
+
+	if vis == GameTileClass.VisibilityState.UNEXPLORED:
+		return
+
+	# Terrain + feature
+	var terrain_data = DataManager.get_terrain(tile.terrain_id)
+	var terrain_name = terrain_data.get("name", tile.terrain_id.capitalize())
+	if tile.feature_id != "":
+		var feature_data = DataManager.get_feature(tile.feature_id)
+		terrain_name += " - " + feature_data.get("name", tile.feature_id.capitalize())
+	tooltip_labels["terrain"].text = terrain_name
+	tooltip_labels["terrain"].visible = true
+
+	# Yields
+	var yields = tile.get_yields()
+	tooltip_labels["yields"].text = "Food: %d  Prod: %d  Com: %d" % [yields.get("food", 0), yields.get("production", 0), yields.get("commerce", 0)]
+	tooltip_labels["yields"].visible = true
+
+	# Resource (only visible tiles)
+	if vis == GameTileClass.VisibilityState.VISIBLE and tile.resource_id != "":
+		var res_data = DataManager.get_resource(tile.resource_id)
+		tooltip_labels["resource"].text = "Resource: %s" % res_data.get("name", tile.resource_id.capitalize())
+		tooltip_labels["resource"].visible = true
+	else:
+		tooltip_labels["resource"].visible = false
+
+	# Improvement
+	if vis == GameTileClass.VisibilityState.VISIBLE and tile.improvement_id != "":
+		var imp_data = DataManager.get_improvement(tile.improvement_id)
+		var imp_name = imp_data.get("name", tile.improvement_id.replace("_", " ").capitalize())
+		var road_text = ""
+		if tile.road_level == 1:
+			road_text = " + Road"
+		elif tile.road_level == 2:
+			road_text = " + Railroad"
+		tooltip_labels["improvement"].text = "Improvement: %s%s" % [imp_name, road_text]
+		tooltip_labels["improvement"].visible = true
+	elif vis == GameTileClass.VisibilityState.VISIBLE and tile.road_level > 0:
+		tooltip_labels["improvement"].text = "Road" if tile.road_level == 1 else "Railroad"
+		tooltip_labels["improvement"].visible = true
+	else:
+		tooltip_labels["improvement"].visible = false
+
+	# Defense
+	var defense = tile.get_defense_bonus()
+	if defense > 0:
+		tooltip_labels["defense"].text = "Defense: +%d%%" % int(defense * 100)
+		tooltip_labels["defense"].add_theme_color_override("font_color", Color(0.5, 0.8, 0.5))
+		tooltip_labels["defense"].visible = true
+	else:
+		tooltip_labels["defense"].visible = false
+
+	# Owner
+	if tile.tile_owner != null:
+		var civ_data = DataManager.get_civ(tile.tile_owner.civilization_id)
+		var owner_name = civ_data.get("name", tile.tile_owner.player_name)
+		tooltip_labels["owner"].text = "Owner: %s" % owner_name
+		tooltip_labels["owner"].add_theme_color_override("font_color", tile.tile_owner.color)
+		tooltip_labels["owner"].visible = true
+	else:
+		tooltip_labels["owner"].visible = false
+
+	tile_tooltip.visible = true
+	_position_tooltip(mouse_pos)
+
+func _position_tooltip(mouse_pos: Vector2) -> void:
+	if tile_tooltip == null:
+		return
+	var viewport_size = get_viewport_rect().size
+	var tooltip_size = tile_tooltip.size
+	var pos = mouse_pos + Vector2(16, 16)
+	if pos.x + tooltip_size.x > viewport_size.x:
+		pos.x = mouse_pos.x - tooltip_size.x - 8
+	if pos.y + tooltip_size.y > viewport_size.y:
+		pos.y = mouse_pos.y - tooltip_size.y - 8
+	tile_tooltip.position = pos
 
 # Promotion system
 func _setup_promotion_ui() -> void:
