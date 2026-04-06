@@ -2,6 +2,19 @@
 
 A Civilization IV: Beyond the Sword clone built in Godot 4.5.1.
 
+## Commands
+
+```bash
+# Open project in Godot editor
+godot --editor project.godot
+
+# Run the game directly
+godot project.godot
+
+# Export (presets defined in export_presets.cfg)
+godot --headless --export-debug "Linux" build/kulturiv.x86_64
+```
+
 ## Project Overview
 
 **Goal**: Recreate the core gameplay of Civilization IV: Beyond the Sword as a standalone game using the Godot engine.
@@ -57,13 +70,16 @@ KULTURIV/
 │   ├── core/
 │   │   ├── game_state.gd   # Serializable game state
 │   │   ├── player.gd       # Player data and resources
-│   │   ├── game_camera.gd  # Camera controls
+│   │   ├── game_camera.gd  # Camera controls (2D)
+│   │   ├── game_camera_3d.gd # Camera controls (3D)
 │   │   └── game_world.gd   # World container
 │   ├── map/
 │   │   ├── grid_utils.gd   # Grid math utilities
 │   │   ├── game_tile.gd    # Individual tile data
 │   │   ├── game_grid.gd    # Map generation and management
-│   │   └── pathfinding.gd  # A* pathfinding with border checks
+│   │   ├── pathfinding.gd  # A* pathfinding with border checks
+│   │   ├── cylinder_map.gd # Cylindrical map projection
+│   │   └── input_raycast.gd # Mouse/input raycasting on map
 │   ├── entities/
 │   │   ├── unit.gd         # Unit class (movement, combat, automation)
 │   │   └── city.gd         # City class (production, growth, specialists)
@@ -92,7 +108,8 @@ KULTURIV/
 │       ├── trade_system.gd       # Trade agreements
 │       ├── save_system.gd        # Save/load
 │       ├── goody_huts_system.gd  # Tribal villages with rewards
-│       └── barbarian_system.gd   # Barbarian camps and spawning
+│       ├── barbarian_system.gd   # Barbarian camps and spawning
+│       └── visibility_system.gd  # Fog of war and tile visibility
 └── project.godot           # Godot project config
 ```
 
@@ -120,79 +137,11 @@ KULTURIV/
 
 ## Implemented Systems
 
-### Core (100%)
-- [x] Map generation with terrain, features, resources
-- [x] Unit movement with pathfinding and border checks
-- [x] City founding, growth, production
-- [x] Technology research with prerequisites
-- [x] Save/load system
+**Complete (100%):** Core (map, units, cities, tech, save/load), Combat (ground, air, nuclear, collateral, terrain bonuses), Religion (founding, spread, holy cities, shrines, inquisitors, "No State Religion"), Civics (25 civics, 5 categories, anarchy, Spiritual trait), Victory (Domination, Conquest, Cultural, Space Race, Diplomatic, Time, Religious), Great People, Corporations, Espionage (15 missions), Random Events (20 events), UN/Apostolic Palace voting (22 resolutions), Projects, Goody Huts, Barbarians, Visibility/Fog of War
 
-### Combat (100%)
-- [x] Ground combat with strength, first strikes, withdraw
-- [x] Terrain and fortification bonuses
-- [x] Collateral damage (siege units)
-- [x] Air combat (bombing, interception, air superiority)
-- [x] Nuclear weapons (fallout, population kill, SDI)
+**Near-complete (95%):** Diplomacy (war/peace, trade, borders, attitudes, memory — minor gaps), AI (research, production, combat, naval ops, city specialization, civics, espionage, difficulty-scaled visibility bonuses)
 
-### Diplomacy (95%)
-- [x] War/peace declarations
-- [x] Open borders, defensive pacts
-- [x] Trade agreements (gold, resources, techs)
-- [x] Attitude calculation with modifiers
-- [x] Memory system for events
-- [x] Border crossing restrictions
-
-### Religion (100%)
-- [x] Religion founding via technology
-- [x] Religion spread via missionaries
-- [x] Holy cities and shrines
-- [x] State religion and happiness
-- [x] "No State Religion" option (religious freedom)
-- [x] Religion-specific buildings (21 total)
-- [x] Inquisitor unit (removes non-state religions)
-
-### Civics (100%)
-- [x] 25 civics in 5 categories
-- [x] Civic effects (happiness, production, etc.)
-- [x] Anarchy during changes
-- [x] Spiritual trait
-
-### Victory Conditions (100%)
-- [x] Domination, Conquest, Cultural, Space Race
-- [x] Diplomatic, Time, Religious
-
-### AI (95%)
-- [x] Research, production, movement decisions
-- [x] War/peace evaluation
-- [x] Trade and diplomacy
-- [x] Worker management
-- [x] Espionage operations
-- [x] Random event handling (evaluates choices by flavor)
-- [x] City specialization (production, science, gold, military, culture, food)
-- [x] Naval operations (transports, combat ships, blockades, coastal patrol)
-- [x] Civics adoption based on favorite civics per leader
-- [x] Visibility bonuses at higher difficulties (Emperor 25%, Immortal 50%, Deity 100%)
-
-### Other Systems
-- [x] Great People (birth, abilities, golden ages)
-- [x] Great General attachment to units (+20% combat, +50% XP)
-- [x] Corporations (founding, spreading, effects, HQ buildings)
-- [x] Espionage (15 missions, spy mechanics)
-- [x] Random Events (20 events with choices, AI handling)
-- [x] UN/Apostolic Palace voting (22 resolutions)
-- [x] Projects (Manhattan, Apollo, spaceship)
-- [x] Tech diffusion (cost reduction if others know tech)
-- [x] Conscription (draft units with Nationalism + Nationhood)
-- [x] Emancipation civic anger
-- [x] Unique units per civilization (16 total, with civ restrictions)
-- [x] Unique buildings per civilization (9 total, with civ restrictions)
-- [x] Worker border restrictions (improvements only in own territory, except roads/forts)
-- [x] City founding places road on tile automatically
-- [x] Pasture improvement (cattle, sheep, horses, pig)
-- [x] Camp improvement (deer, furs, ivory)
-- [x] Goody huts (tribal villages with 8 reward types: gold, tech, map, XP, unit, settler, population, barbarians)
-- [x] Barbarian system (camps, spawning, pillaging AI, unit scaling by era)
-- [x] Unit focus cycling (auto-cycle to next unit after action, TAB/PERIOD keys)
+**Notable mechanics:** Tech diffusion, conscription, emancipation anger, Great General attachment (+20% combat, +50% XP), worker border restrictions, unit focus cycling (TAB/PERIOD), 16 unique units, 9 unique buildings
 
 ## Game Settings
 
@@ -293,7 +242,8 @@ var abilities = DataManager.get_unit_abilities("warrior")
 - Target resolution: 1920x1080, windowed mode
 - All game data externalized to JSON for easy modding
 - Following Civ4's mechanics closely for authenticity
+- Make sure that features from other Civilization games (Civ V, VI, VII) do NOT leak into this project — stay faithful to Civ4 BTS mechanics.
 
 ---
 
-*Last updated: January 28, 2026*
+*Last updated: April 6, 2026*
