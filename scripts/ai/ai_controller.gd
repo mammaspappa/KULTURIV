@@ -1182,7 +1182,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if bld in city.buildings:
 			has_basic_infra = true
 			break
-	if not has_basic_infra and city.population >= 2:
+	if not has_basic_infra:
 		var building_to_build = _get_best_building_for_specialization(city, player, flavor, specialization)
 		if building_to_build != "":
 			city.set_production(building_to_build)
@@ -2105,23 +2105,37 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 			var mod = spec_mods.get("culture", 1.0)
 			score += effects.culture * culture_flavor * mod
 
-		# Military
+		# Military (barracks use "free_experience", also check "experience")
+		if effects.has("free_experience"):
+			var mod = spec_mods.get("experience", 1.0)
+			score += effects.free_experience * military_flavor * mod
 		if effects.has("experience"):
 			var mod = spec_mods.get("experience", 1.0)
 			score += effects.experience * military_flavor * 2 * mod
 		if effects.has("happiness"):
 			var mod = spec_mods.get("happiness", 1.0)
 			score += effects.happiness * 5 * mod
+		# Happiness from religion (temples) — valuable if city has state religion
+		if effects.has("happiness_from_religion"):
+			if city.player_owner and city.player_owner.state_religion in city.religions:
+				score += effects.happiness_from_religion * 4
+		# Happiness from resources (market)
+		if effects.has("happiness_from_resource"):
+			score += effects.happiness_from_resource * 3
 
 		# Defense bonus (for military cities)
 		if effects.has("defense"):
 			var mod = spec_mods.get("defense", 1.0)
 			score += effects.defense * military_flavor * mod
 
-		# Growth
+		# Growth — granary's food_stored_on_growth is critical
 		if effects.has("food"):
 			var mod = spec_mods.get("food", 1.0)
 			score += effects.food * growth_flavor * 2 * mod
+		if effects.has("food_stored_on_growth"):
+			# Granary is one of the best early buildings — high base score
+			var mod = spec_mods.get("food", 1.0)
+			score += effects.food_stored_on_growth * 20 * growth_flavor / 5 * mod
 		if effects.has("health"):
 			var mod = spec_mods.get("health", 1.0)
 			score += effects.health * growth_flavor * mod
@@ -2133,6 +2147,11 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 		if effects.has("production_percent"):
 			var mod = spec_mods.get("production_percent", 1.0)
 			score += effects.production_percent * production_flavor / 5 * mod
+
+		# Culture percent (broadcast tower etc.)
+		if effects.has("culture_percent"):
+			var mod = spec_mods.get("culture", 1.0)
+			score += effects.culture_percent * culture_flavor / 5 * mod
 
 		# Great person points (valuable for culture/science cities)
 		if effects.has("great_person_points"):
