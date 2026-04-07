@@ -69,6 +69,9 @@ func _on_turn_ended(_turn_number: int, player) -> void:
 	# Process unit spawning from existing camps
 	_process_camp_spawning()
 
+	# BTS: spontaneous barbarian spawning in fog of war (no camp needed)
+	_try_spontaneous_spawn()
+
 	# Process barbarian unit AI
 	_process_barbarian_ai()
 
@@ -221,6 +224,63 @@ func _process_camp_spawning() -> void:
 
 		# Spawn a unit
 		_spawn_barbarian_unit(camp_pos)
+
+## BTS: Barbarians spawn spontaneously in fog of war areas (no camp needed)
+func _try_spontaneous_spawn() -> void:
+	if barbarian_player == null or GameManager.hex_grid == null:
+		return
+
+	# Limit total barbarian units to prevent runaway spawning
+	if barbarian_player.units.size() >= 20:
+		return
+
+	# Scale spawn frequency with game speed and map size
+	var speed = GameManager.get_speed_multiplier()
+	var spawn_interval = max(2, int(4 * speed))
+	if TurnManager.current_turn % spawn_interval != 0:
+		return
+
+	# Try to find a valid fog-of-war tile
+	var grid = GameManager.hex_grid
+	var attempts = 0
+	while attempts < 50:
+		attempts += 1
+		var x = randi() % grid.width
+		var y_margin = min(5, grid.height / 4)
+		var y_range = max(1, grid.height - y_margin * 2)
+		var y = y_margin + randi() % y_range
+
+		var pos = Vector2i(x, y)
+		var tile = grid.get_tile(pos)
+		if tile == null or not tile.is_passable() or tile.is_water():
+			continue
+		if tile.tile_owner != null:
+			continue  # Not in civilized territory
+
+		# Must be in fog of war — no civ units within 3 tiles
+		var civ_nearby = false
+		var tiles_nearby = GridUtils.get_tiles_in_range(pos, 3)
+		for near_pos in tiles_nearby:
+			var units_here = GameManager.get_units_at(near_pos)
+			for u in units_here:
+				if u.player_owner != null and u.player_owner.civilization_id != "barbarian":
+					civ_nearby = true
+					break
+			if civ_nearby:
+				break
+		if civ_nearby:
+			continue
+
+		# Don't stack barbarians
+		var existing = GameManager.get_units_at(pos)
+		if not existing.is_empty():
+			continue
+
+		# Spawn the unit
+		var unit_type = _get_barbarian_unit_type()
+		if GameManager.game_world:
+			GameManager.game_world.spawn_unit(unit_type, pos, barbarian_player)
+		return
 
 ## Count barbarian units near a position
 func _count_nearby_barbarian_units(pos: Vector2i, radius: int) -> int:
