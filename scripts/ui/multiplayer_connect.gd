@@ -31,13 +31,17 @@ var host_transport: OptionButton
 var host_button: Button
 var start_button: Button
 
-# Join controls
+# Join controls — phase 1: connect
 var join_address_input: LineEdit
 var join_port_input: SpinBox
 var join_name_input: LineEdit
-var join_civ_option: OptionButton
 var join_transport: OptionButton
 var join_button: Button
+
+# Join controls — phase 2: pick civ (shown after connecting)
+var join_civ_container: VBoxContainer
+var join_civ_option: OptionButton
+var join_register_button: Button
 
 # Player list
 var player_list: VBoxContainer
@@ -62,6 +66,7 @@ func _connect_signals() -> void:
 	EventBus.mp_connected_to_server.connect(_on_connected)
 	EventBus.mp_connection_failed.connect(_on_connection_failed)
 	EventBus.mp_server_disconnected.connect(_on_server_disconnected)
+	EventBus.mp_server_info_received.connect(_on_server_info_received)
 	EventBus.mp_registration_rejected.connect(_on_registration_rejected)
 	EventBus.mp_game_starting.connect(_on_game_starting)
 
@@ -211,6 +216,7 @@ func _build_join_panel() -> void:
 	join_panel.add_theme_constant_override("separation", 10)
 	tab_container.add_child(join_panel)
 
+	# Phase 1: connection details
 	_add_label(join_panel, "Server Address:")
 	join_address_input = LineEdit.new()
 	join_address_input.placeholder_text = "localhost"
@@ -230,19 +236,6 @@ func _build_join_panel() -> void:
 	join_name_input.text = "Player"
 	join_panel.add_child(join_name_input)
 
-	_add_label(join_panel, "Civilization:")
-	join_civ_option = OptionButton.new()
-	var civs = DataManager.get_all_civs()
-	var civ_index = 0
-	for civ_id in civs:
-		if civ_id == "barbarian":
-			continue
-		var civ_data = civs[civ_id]
-		join_civ_option.add_item(civ_data.get("name", civ_id), civ_index)
-		join_civ_option.set_item_metadata(civ_index, civ_id)
-		civ_index += 1
-	join_panel.add_child(join_civ_option)
-
 	_add_label(join_panel, "Transport:")
 	join_transport = OptionButton.new()
 	join_transport.add_item("WebSocket (firewall-friendly)", 0)
@@ -253,6 +246,23 @@ func _build_join_panel() -> void:
 	join_button = _create_button("Connect")
 	join_button.pressed.connect(_on_join_pressed)
 	join_panel.add_child(join_button)
+
+	# Phase 2: civ selection (hidden until connected and server info received)
+	join_civ_container = VBoxContainer.new()
+	join_civ_container.visible = false
+	join_civ_container.add_theme_constant_override("separation", 10)
+	join_panel.add_child(join_civ_container)
+
+	var sep = HSeparator.new()
+	join_civ_container.add_child(sep)
+
+	_add_label(join_civ_container, "Choose Civilization:")
+	join_civ_option = OptionButton.new()
+	join_civ_container.add_child(join_civ_option)
+
+	join_register_button = _create_button("Join")
+	join_register_button.pressed.connect(_on_register_pressed)
+	join_civ_container.add_child(join_register_button)
 
 # --- BUTTON HANDLERS ---
 
@@ -280,22 +290,28 @@ func _on_join_pressed() -> void:
 	var port = int(join_port_input.value)
 	var transport_str = "websocket" if join_transport.selected == 0 else "enet"
 
-	var selected_civ = "rome"
-	if join_civ_option.selected >= 0:
-		selected_civ = join_civ_option.get_item_metadata(join_civ_option.selected)
+	var err = NetworkManager.join_game(address, port, transport_str)
+	if err == OK:
+		status_label.text = "Connecting to %s:%d..." % [address, port]
+		join_button.disabled = true
+	else:
+		status_label.text = "Failed to connect: %s" % error_string(err)
 
+func _on_register_pressed() -> void:
+	if join_civ_option.selected < 0:
+		status_label.text = "Please select a civilization"
+		return
+
+	var selected_civ = join_civ_option.get_item_metadata(join_civ_option.selected)
 	var info = {
 		"name": join_name_input.text if join_name_input.text != "" else "Player",
 		"civ": selected_civ,
 		"leader": DataManager.get_civ(selected_civ).get("leaders", [""])[0],
 	}
 
-	var err = NetworkManager.join_game(address, port, info, transport_str)
-	if err == OK:
-		status_label.text = "Connecting to %s:%d..." % [address, port]
-		join_button.disabled = true
-	else:
-		status_label.text = "Failed to connect: %s" % error_string(err)
+	NetworkManager.register_with_server(info)
+	join_register_button.disabled = true
+	status_label.text = "Registering as %s..." % DataManager.get_civ(selected_civ).get("name", selected_civ)
 
 func _on_start_game_pressed() -> void:
 	NetworkManager.server_start_game()
@@ -322,19 +338,48 @@ func _on_player_list_updated(players: Array) -> void:
 	status_label.text = "%d player(s) connected" % players.size()
 
 func _on_connected() -> void:
-	status_label.text = "Connected to server"
+	status_label.text = "Connected — waiting for server info..."
 	join_button.disabled = true
+
+func _on_server_info_received(info: Dictionary) -> void:
+	var taken_civs: Array = info.get("taken_civs", [])
+
+	# Populate civ dropdown with only available civs
+	join_civ_option.clear()
+	var civs = DataManager.get_all_civs()
+	var civ_index = 0
+	for civ_id in civs:
+		if civ_id == "barbarian":
+			continue
+		if civ_id in taken_civs:
+			continue
+		var civ_data = civs[civ_id]
+		join_civ_option.add_item(civ_data.get("name", civ_id), civ_index)
+		join_civ_option.set_item_metadata(civ_index, civ_id)
+		civ_index += 1
+
+	if civ_index == 0:
+		status_label.text = "No civilizations available"
+		join_civ_container.visible = false
+		return
+
+	join_civ_container.visible = true
+	join_register_button.disabled = false
+	status_label.text = "Connected — choose your civilization"
 
 func _on_connection_failed() -> void:
 	status_label.text = "Connection failed"
 	join_button.disabled = false
+	join_civ_container.visible = false
 
 func _on_server_disconnected() -> void:
 	status_label.text = "Server disconnected"
 	join_button.disabled = false
+	join_civ_container.visible = false
 
 func _on_registration_rejected(reason: String) -> void:
 	status_label.text = "Rejected: %s" % reason
+	join_register_button.disabled = false
 
 func _on_game_starting(settings: Dictionary) -> void:
 	# Transition to game scene

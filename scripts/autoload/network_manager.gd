@@ -91,7 +91,7 @@ func host_game(port: int, settings: Dictionary, use_transport: String = "websock
 	EventBus.notification_added.emit("Server started on port %d (%s)" % [port, transport], "")
 	return OK
 
-func join_game(address: String, port: int, player_info_dict: Dictionary, use_transport: String = "websocket") -> Error:
+func join_game(address: String, port: int, use_transport: String = "websocket") -> Error:
 	transport = use_transport
 	server_port = port
 
@@ -115,11 +115,12 @@ func join_game(address: String, port: int, player_info_dict: Dictionary, use_tra
 	multiplayer.multiplayer_peer = peer
 	is_multiplayer = true
 
-	# Store our info to send after connection
-	set_meta("pending_player_info", player_info_dict)
-
 	print("NetworkManager: Connecting to %s:%d (%s)..." % [address, port, transport])
 	return OK
+
+## Client: register with the server after picking a civilization
+func register_with_server(player_info_dict: Dictionary) -> void:
+	_register_player.rpc_id(1, player_info_dict)
 
 func disconnect_from_game() -> void:
 	if multiplayer.multiplayer_peer:
@@ -143,12 +144,20 @@ func disconnect_from_game() -> void:
 func _on_peer_connected(peer_id: int) -> void:
 	print("NetworkManager: Peer %d connected" % peer_id)
 	if is_server:
+		# Collect civs already taken by connected players
+		var taken_civs: Array[String] = []
+		for pid in peer_info:
+			var civ_id = peer_info[pid].get("civ", "")
+			if civ_id != "":
+				taken_civs.append(civ_id)
+
 		# Server: send current game info to new peer
 		_send_server_info.rpc_id(peer_id, {
 			"max_players": max_players,
 			"settings": server_settings,
 			"connected_players": peer_info,
 			"game_started": game_started,
+			"taken_civs": taken_civs,
 		})
 	EventBus.mp_player_connected.emit(peer_id)
 
@@ -174,10 +183,6 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func _on_connected_to_server() -> void:
 	print("NetworkManager: Connected to server")
 	is_connected = true
-
-	# Send our player info
-	var info = get_meta("pending_player_info") if has_meta("pending_player_info") else {}
-	_register_player.rpc_id(1, info)
 	EventBus.mp_connected_to_server.emit()
 
 func _on_connection_failed() -> void:
@@ -229,6 +234,14 @@ func _register_player(info: Dictionary) -> void:
 	if peer_info.size() >= max_players:
 		_registration_rejected.rpc_id(peer_id, "Server full")
 		return
+
+	# Check if the chosen civ is already taken
+	var chosen_civ = info.get("civ", "")
+	if chosen_civ != "":
+		for pid in peer_info:
+			if peer_info[pid].get("civ", "") == chosen_civ:
+				_registration_rejected.rpc_id(peer_id, "Civilization already taken")
+				return
 
 	peer_info[peer_id] = info
 	print("NetworkManager: Player registered: peer=%d name=%s civ=%s" % [peer_id, info.get("name", "?"), info.get("civ", "?")])
