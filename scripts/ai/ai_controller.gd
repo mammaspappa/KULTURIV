@@ -95,6 +95,9 @@ func execute_turn(player) -> void:
 	if _has_coastal_cities(player):
 		_process_naval_strategy(player, flavor)
 
+	# Process Great People — use them strategically
+	_process_great_people(player, flavor)
+
 ## Get leader flavor values (cached per turn)
 func _get_leader_flavor(player) -> Dictionary:
 	if not _cached_flavor.is_empty() and _cached_player_id == player.player_id:
@@ -524,6 +527,9 @@ func _process_unit_ai(unit, player, flavor: Dictionary) -> void:
 	if unit.has_acted or unit.movement_remaining <= 0:
 		return
 
+	# Auto-promote units with available promotions
+	_auto_promote(unit, player)
+
 	# Skip if currently building
 	if unit.current_order == UnitClass.UnitOrder.BUILD:
 		return
@@ -540,6 +546,54 @@ func _process_unit_ai(unit, player, flavor: Dictionary) -> void:
 
 	# Combat unit: attack or explore
 	_combat_unit_ai(unit, player, flavor)
+
+## Auto-promote units with tactically appropriate promotions based on role
+func _auto_promote(unit, player) -> void:
+	if not unit.can_promote():
+		return
+
+	var available = unit._get_available_promotions()
+	if available.is_empty():
+		return
+
+	var unit_class = unit.get_unit_class()
+	var at_war = not player.at_war_with.is_empty()
+
+	# Determine desired promotions based on unit role
+	var priority_promos: Array = []
+
+	match unit_class:
+		"siege":
+			# Siege wants collateral damage (barrage) and accuracy
+			priority_promos = ["barrage1", "barrage2", "barrage3", "accuracy"]
+		"mounted":
+			# Mounted wants flanking (kills enemy siege) then combat
+			priority_promos = ["flanking1", "flanking2", "combat1", "combat2", "combat3"]
+		"melee", "gunpowder":
+			if at_war:
+				# Attackers want City Raider for assaulting cities
+				priority_promos = ["city_raider1", "city_raider2", "city_raider3", "combat1", "combat2", "shock"]
+			else:
+				# Peacetime: general combat readiness
+				priority_promos = ["combat1", "combat2", "combat3", "city_garrison1", "city_garrison2", "shock", "cover"]
+		"archery":
+			# Archers are excellent city defenders
+			priority_promos = ["city_garrison1", "city_garrison2", "city_garrison3", "drill1", "drill2", "combat1"]
+		_:
+			priority_promos = ["combat1", "combat2", "combat3"]
+
+	# Pick highest priority available promotion
+	for promo_id in priority_promos:
+		if promo_id in available:
+			unit.add_promotion(promo_id)
+			if sim_logger:
+				sim_logger.log_decision(player.player_name, "promotion", "promote_unit",
+					"%s -> %s" % [unit.unit_id, promo_id], unit_class)
+			return
+
+	# Fallback: pick first available
+	if not available.is_empty():
+		unit.add_promotion(available[0])
 
 func _settler_ai(unit, player, flavor: Dictionary) -> void:
 	if GameManager.hex_grid == null or GameManager.game_world == null:
@@ -697,6 +751,39 @@ func _choose_improvement(tile, improvements: Array, prod_flavor: int, growth_fla
 
 func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
+	var unit_data = DataManager.get_unit(unit.unit_id)
+	var unit_class = unit_data.get("unit_class", "")
+
+	# 0. Siege units: prefer bombarding cities over direct combat (siege-first warfare)
+	if unit_class == "siege" and not player.at_war_with.is_empty():
+		var bombard_target = _find_bombard_target(unit, player)
+		if bombard_target != Vector2i(-1, -1):
+			if CombatSystem.can_bombard(unit, bombard_target):
+				CombatSystem.bombard_city(unit, bombard_target)
+				if sim_logger:
+					sim_logger.log_decision(player.player_name, "combat", "bombard_city",
+						"(%d,%d)" % [bombard_target.x, bombard_target.y], unit.unit_id)
+				return
+			else:
+				# Move adjacent to target city to bombard next turn
+				_move_toward(unit, bombard_target)
+				# Try bombarding after moving
+				if CombatSystem.can_bombard(unit, bombard_target):
+					CombatSystem.bombard_city(unit, bombard_target)
+				return
+
+	# 0b. Non-siege near enemy city: wait for siege to soften defenses before assaulting
+	if unit_class != "siege" and not player.at_war_with.is_empty():
+		var nearby_enemy_city = _find_nearby_enemy_city(unit, player, 3)
+		if nearby_enemy_city != null:
+			var has_siege_nearby = _has_siege_units_near(unit.grid_position, player, 4)
+			if has_siege_nearby:
+				var city_defense = nearby_enemy_city.get_defense_strength()
+				if city_defense > unit.get_strength() * 1.5:
+					# Siege is nearby and city is still well defended — hold position, let siege bombard
+					if not GridUtils.are_adjacent(unit.grid_position, nearby_enemy_city.grid_position):
+						_move_toward(unit, nearby_enemy_city.grid_position)
+					return  # Wait for bombardment to soften
 
 	# 1. Immediate tactical: attack nearby enemies
 	var enemies = _find_nearby_enemies(unit, player, 3)
@@ -776,7 +863,9 @@ func _pick_best_target(unit, enemies: Array, military_flavor: int):
 	return best_target
 
 func _process_city_ai(city, player, flavor: Dictionary) -> void:
+	# Consider whipping current production to completion (Slavery civic)
 	if city.current_production != "":
+		_consider_whipping(city, player)
 		return
 
 	# Check strategic production advice first
@@ -834,8 +923,17 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		max_military = military_units  # Don't add more when bankrupt
 	var need_military = military_units < desired_military and military_units < max_military
 
+	# Calculate army composition — ensure 30% siege when at war
+	var siege_count = 0
+	for u in player.units:
+		var udata = DataManager.get_unit(u.unit_id)
+		if udata.get("unit_class", "") == "siege":
+			siege_count += 1
+	var siege_ratio = float(siege_count) / max(military_units, 1)
+	var needs_siege = not player.at_war_with.is_empty() and siege_ratio < 0.3 and military_units >= 3
+
 	if need_military:
-		var unit_to_build = _get_best_military_unit(city, player, military_flavor)
+		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
 			return
@@ -870,6 +968,53 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
+
+## Consider using Slavery whip to rush critical production
+func _consider_whipping(city, player) -> void:
+	# Only whip with Slavery civic active
+	if player.civics.get("labor", "") != "slavery":
+		return
+
+	if not city.can_whip():
+		return
+
+	# Never whip below population 3 (preserves growth)
+	if city.population <= 2:
+		return
+
+	# Don't whip if already suffering whip anger
+	if city.has_meta("whip_anger_turns") and city.get_meta("whip_anger_turns") > 0:
+		return
+
+	var should_whip = false
+	var at_war = not player.at_war_with.is_empty()
+	var prod = city.current_production
+	var cost = city.get_production_cost()
+	var progress_ratio = float(city.production_progress) / max(cost, 1)
+
+	# At war + building military unit + over 50% complete → whip
+	if at_war and prod != "":
+		var unit_data = DataManager.get_unit(prod)
+		if not unit_data.is_empty() and unit_data.get("strength", 0) > 0:
+			if progress_ratio > 0.5:
+				should_whip = true
+
+	# Building settler + over 50% complete → whip
+	if prod == "settler" and progress_ratio > 0.5:
+		should_whip = true
+
+	# Building critical early building with pop >= 4 → whip
+	if city.population >= 4:
+		if prod in ["granary", "library"]:
+			should_whip = true
+		elif prod == "barracks" and at_war:
+			should_whip = true
+
+	if should_whip:
+		city.whip()
+		if sim_logger:
+			sim_logger.log_decision(player.player_name, "production", "whip",
+				"%s in %s (pop %d->%d)" % [prod, city.city_name, city.population + 1, city.population], "")
 
 func _process_research(player, flavor: Dictionary) -> void:
 	# Manage science rate based on gold situation
@@ -1015,6 +1160,53 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	var cost = DataManager.get_tech_cost(tech_id)
 	score += max(0, 50 - cost / 20)
 
+	# === Strategic beelining bonuses (Civ4 BTS key tech paths) ===
+	var num_techs = player.researched_techs.size()
+
+	# Early game priorities (< 10 techs researched)
+	if num_techs < 10:
+		match tech_id:
+			"bronze_working": score += 40  # Slavery civic + chopping + copper reveal
+			"pottery": score += 25  # Cottages for economy
+			"writing": score += 20  # Libraries for research
+			"animal_husbandry": score += 15  # Horse reveal
+
+	# Economy critical path — always valuable, scaled by flavor
+	match tech_id:
+		"mathematics": score += 30 * (science_flavor / 5.0)  # Chop bonus, catapults
+		"currency": score += 35 * (gold_flavor / 5.0)  # Trade routes, gold
+		"code_of_laws": score += 25 * (gold_flavor / 5.0)  # Courthouses for expansion
+
+	# Military beeline (aggressive leaders)
+	if military_flavor >= HIGH_FLAVOR:
+		match tech_id:
+			"construction": score += 30  # Catapults — siege!
+			"machinery": score += 25  # Macemen, crossbowmen
+			"civil_service": score += 20  # Macemen, Bureaucracy civic
+
+	# Science beeline (research-focused leaders)
+	if science_flavor >= HIGH_FLAVOR:
+		match tech_id:
+			"philosophy": score += 20  # Pacifism civic
+			"education": score += 25  # Universities
+			"liberalism": score += 40  # Free tech!
+
+	# Religion founding (devout leaders without a religion)
+	if religion_flavor >= HIGH_FLAVOR and player.state_religion == "":
+		match tech_id:
+			"meditation", "polytheism": score += 30
+			"monotheism", "theology": score += 20
+
+	# Bonus for techs that reveal strategic resources on tiles we own
+	var reveals = tech.get("reveals_resource", "")
+	if reveals != "" and GameManager.hex_grid:
+		for city in player.cities:
+			for tile_pos in city.territory:
+				var r_tile = GameManager.hex_grid.get_tile(tile_pos)
+				if r_tile and r_tile.resource_id == reveals:
+					score += 20
+					break
+
 	return score
 
 # Helper functions
@@ -1135,21 +1327,53 @@ func _find_unimproved_tile(unit, player) -> Vector2i:
 		return Vector2i(-1, -1)
 
 	var best_pos = Vector2i(-1, -1)
-	var best_dist = INF
+	var best_score = -INF
 
-	# Check owned tiles
+	# Check owned tiles with scoring (not just distance)
 	for city in player.cities:
+		var city_needs_prod = _city_needs_production_rush(city)
 		for tile_pos in city.territory:
 			var tile = GameManager.hex_grid.get_tile(tile_pos)
 			if tile == null:
 				continue
 			if tile.improvement_id == "" and tile.road_level == 0 and not tile.is_water():
 				var dist = GridUtils.chebyshev_distance(unit.grid_position, tile_pos)
-				if dist < best_dist:
-					best_dist = dist
+				var score = 100.0 - dist * 5.0  # Base: closer is better
+
+				# Forest chopping priority: boost forest tiles near cities needing production
+				if tile.feature_id == "forest":
+					if city_needs_prod:
+						score += 30  # High priority: city is building settler/wonder/military
+					# Tiles where forest should be cleared for better improvements
+					if tile.has_fresh_water() or tile.terrain_id == "hills":
+						score += 15  # River farms or hill mines are better without forest
+
+				# Resource tiles are always high priority
+				if tile.resource_id != "":
+					score += 25
+
+				if score > best_score:
+					best_score = score
 					best_pos = tile_pos
 
 	return best_pos
+
+## Check if a city has urgent production needs (settler, wonder, military at war)
+func _city_needs_production_rush(city) -> bool:
+	if city.current_production == "":
+		return false
+	if city.current_production == "settler":
+		return true
+	# Check if building a wonder
+	var building = DataManager.get_building(city.current_production)
+	if not building.is_empty() and building.get("wonder_type", "") != "":
+		return true
+	# Check if building military while at war
+	if city.player_owner and not city.player_owner.at_war_with.is_empty():
+		var unit_data = DataManager.get_unit(city.current_production)
+		if not unit_data.is_empty() and unit_data.get("strength", 0) > 0:
+			return true
+	return false
 
 func _find_nearby_enemies(unit, player, range_val: int) -> Array:
 	var enemies = []
@@ -1203,7 +1427,53 @@ func _find_nearest_unexplored(unit, player) -> Vector2i:
 
 	return best_pos
 
-func _get_best_military_unit(city, player, military_flavor: int) -> String:
+## Find nearest enemy city that a siege unit can bombard
+func _find_bombard_target(unit, player) -> Vector2i:
+	var best_pos = Vector2i(-1, -1)
+	var best_dist = INF
+
+	for enemy_id in player.at_war_with:
+		var enemy = GameManager.get_player(enemy_id)
+		if enemy == null:
+			continue
+		for city in enemy.cities:
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, city.grid_position)
+			if dist < best_dist:
+				best_dist = dist
+				best_pos = city.grid_position
+
+	# Only return targets within reasonable range (siege is slow)
+	if best_dist <= 8:
+		return best_pos
+	return Vector2i(-1, -1)
+
+## Find nearby enemy city within given range
+func _find_nearby_enemy_city(unit, player, search_range: int):
+	var best_city = null
+	var best_dist = INF
+
+	for enemy_id in player.at_war_with:
+		var enemy = GameManager.get_player(enemy_id)
+		if enemy == null:
+			continue
+		for city in enemy.cities:
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, city.grid_position)
+			if dist <= search_range and dist < best_dist:
+				best_dist = dist
+				best_city = city
+
+	return best_city
+
+## Check if player has siege units near a position
+func _has_siege_units_near(pos: Vector2i, player, search_range: int) -> bool:
+	for unit in player.units:
+		var udata = DataManager.get_unit(unit.unit_id)
+		if udata.get("unit_class", "") == "siege":
+			if GridUtils.chebyshev_distance(pos, unit.grid_position) <= search_range:
+				return true
+	return false
+
+func _get_best_military_unit(city, player, military_flavor: int, needs_siege: bool = false) -> String:
 	# Analyze enemy army composition to build counters
 	var enemy_classes = {}
 	for other in GameManager.players:
@@ -1242,6 +1512,13 @@ func _get_best_military_unit(city, player, military_flavor: int) -> String:
 			# Siege is always valuable when at war
 			if unit_class == "siege":
 				score *= 1.2
+
+		# Army composition: strong preference for siege when ratio is low
+		if needs_siege and unit_class == "siege":
+			score *= 2.0
+		# Boost mounted to counter enemy siege (flanking kills siege)
+		if not enemy_classes.is_empty() and enemy_classes.get("siege", 0) > 0 and unit_class == "mounted":
+			score *= 1.4
 
 		if score > best_score:
 			best_score = score
@@ -1984,3 +2261,135 @@ func _load_unit(unit, pos: Vector2i) -> void:
 
 	unit.cargo.append(land_unit)
 	land_unit.visible = false  # Hide loaded unit
+
+# ============ GREAT PERSON STRATEGY ============
+
+## Use Great People intelligently based on type and game state
+func _process_great_people(player, flavor: Dictionary) -> void:
+	for unit in player.units.duplicate():
+		if unit == null or not is_instance_valid(unit):
+			continue
+		var unit_data = DataManager.get_unit(unit.unit_id)
+		if unit_data.get("unit_class", "") != "great_person":
+			continue
+		# Skip Great Generals (handled by existing attachment logic)
+		if unit.unit_id == "great_general":
+			continue
+
+		match unit.unit_id:
+			"great_scientist":
+				_use_great_scientist(unit, player)
+			"great_engineer":
+				_use_great_engineer(unit, player)
+			"great_merchant":
+				_use_great_merchant(unit, player)
+			"great_artist":
+				_use_great_artist(unit, player)
+			"great_prophet":
+				_use_great_prophet(unit, player)
+			_:
+				# Default: settle in best city
+				GreatPeopleSystem.use_great_person(unit, "settle")
+
+func _use_great_scientist(unit, player) -> void:
+	var capital = _get_capital(player)
+	if capital and "academy" not in capital.buildings:
+		# Build academy in capital (massive research boost — best early use)
+		if unit.grid_position == capital.grid_position:
+			GreatPeopleSystem.use_great_person(unit, "build_academy")
+			if sim_logger:
+				sim_logger.log_decision(player.player_name, "great_person", "build_academy",
+					capital.city_name, "")
+		else:
+			_move_toward(unit, capital.grid_position)
+	else:
+		# Capital already has academy — bulb a tech
+		GreatPeopleSystem.use_great_person(unit, "discover_tech")
+		if sim_logger:
+			sim_logger.log_decision(player.player_name, "great_person", "discover_tech", "", "")
+
+func _use_great_engineer(unit, player) -> void:
+	# Rush production in the city with the most valuable item being built
+	var best_city = _get_highest_production_city(player)
+	if best_city and best_city.current_production != "":
+		if unit.grid_position == best_city.grid_position:
+			GreatPeopleSystem.use_great_person(unit, "hurry_production")
+			if sim_logger:
+				sim_logger.log_decision(player.player_name, "great_person", "hurry_production",
+					best_city.city_name, best_city.current_production)
+		else:
+			_move_toward(unit, best_city.grid_position)
+	else:
+		GreatPeopleSystem.use_great_person(unit, "settle")
+
+func _use_great_merchant(unit, player) -> void:
+	if player.gold < 100:
+		# Trade mission for gold when treasury is low
+		GreatPeopleSystem.use_great_person(unit, "trade_mission")
+		if sim_logger:
+			sim_logger.log_decision(player.player_name, "great_person", "trade_mission", "", "gold=%d" % player.gold)
+	else:
+		GreatPeopleSystem.use_great_person(unit, "settle")
+
+func _use_great_artist(unit, player) -> void:
+	# Culture bomb in border cities, otherwise settle
+	var border_city = _get_border_city(player)
+	if border_city:
+		if unit.grid_position == border_city.grid_position:
+			GreatPeopleSystem.use_great_person(unit, "culture_bomb")
+			if sim_logger:
+				sim_logger.log_decision(player.player_name, "great_person", "culture_bomb",
+					border_city.city_name, "")
+		else:
+			_move_toward(unit, border_city.grid_position)
+	else:
+		GreatPeopleSystem.use_great_person(unit, "settle")
+
+func _use_great_prophet(unit, player) -> void:
+	# Build shrine in holy city if we have one
+	var holy_city = _get_holy_city(player)
+	if holy_city:
+		if unit.grid_position == holy_city.grid_position:
+			GreatPeopleSystem.use_great_person(unit, "build_shrine")
+			if sim_logger:
+				sim_logger.log_decision(player.player_name, "great_person", "build_shrine",
+					holy_city.city_name, "")
+		else:
+			_move_toward(unit, holy_city.grid_position)
+	else:
+		GreatPeopleSystem.use_great_person(unit, "settle")
+
+# ============ GREAT PERSON HELPERS ============
+
+func _get_capital(player):
+	for city in player.cities:
+		if "palace" in city.buildings:
+			return city
+	return player.cities[0] if not player.cities.is_empty() else null
+
+func _get_highest_production_city(player):
+	var best_city = null
+	var best_prod = -1
+	for city in player.cities:
+		if city.current_production != "" and city.production_yield > best_prod:
+			best_prod = city.production_yield
+			best_city = city
+	return best_city
+
+func _get_border_city(player):
+	# Find a city near foreign borders (benefits most from culture bomb)
+	for city in player.cities:
+		for other in GameManager.players:
+			if other == player:
+				continue
+			for other_city in other.cities:
+				if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) <= 6:
+					return city
+	return null
+
+func _get_holy_city(player):
+	# Find a city that is a holy city for a religion
+	for city in player.cities:
+		if city.holy_city_of != "":
+			return city
+	return null

@@ -242,6 +242,13 @@ static func clear_assignment(player, unit) -> void:
 static func _evaluate_war_targets(player, flavor: Dictionary) -> void:
 	var targets: Array = []
 
+	# Count our siege units for viability assessment
+	var our_siege = 0
+	for u in player.units:
+		var udata = DataManager.get_unit(u.unit_id)
+		if udata.get("unit_class", "") == "siege":
+			our_siege += 1
+
 	for enemy_id in player.at_war_with:
 		var enemy = GameManager.get_player(enemy_id)
 		if enemy == null:
@@ -270,11 +277,41 @@ static func _evaluate_war_targets(player, flavor: Dictionary) -> void:
 			if min_dist <= 6:
 				priority += 15
 
+			# === Stack awareness: evaluate defender strength ===
+			# Count defenders at city
+			var defenders = 0
+			var units_at_city = GameManager.get_units_at(city.grid_position)
+			for u in units_at_city:
+				if u.player_owner == enemy and u.get_strength() > 0:
+					defenders += 1
+
+			# Fewer defenders = higher priority
+			if defenders <= 1:
+				priority += 15  # Lightly defended — easy target
+			elif defenders >= 4:
+				priority -= 15  # Heavily garrisoned — costly assault
+
+			# Check for defensive buildings (walls, castle)
+			for building_id in city.buildings:
+				var effects = DataManager.get_building_effects(building_id)
+				if effects.get("defense", 0.0) > 0:
+					priority -= 10
+					break
+
+			# Having siege units makes all targets more viable
+			if our_siege > 0:
+				priority += 10
+
+			# Calculate desired force size based on defenders
+			var desired_size = max(3, 3 + (defenders - 1) * 2)
+			desired_size = min(desired_size, 10)
+
 			targets.append({
 				"city_position": city.grid_position,
 				"city_name": city.city_name,
 				"owner_id": enemy_id,
 				"priority": priority,
+				"desired_size": desired_size,
 				"assigned_units": []
 			})
 
@@ -284,7 +321,7 @@ static func _evaluate_war_targets(player, flavor: Dictionary) -> void:
 static func get_war_target_for_unit(player, unit) -> Dictionary:
 	for target in player.ai_strategy.get("war_targets", []):
 		var assigned = target.get("assigned_units", [])
-		var desired_size = 5 if target.get("priority", 0) > 60 else 3
+		var desired_size = target.get("desired_size", 5 if target.get("priority", 0) > 60 else 3)
 		if assigned.size() < desired_size:
 			# Assign this unit
 			assigned.append(unit.get_instance_id())
