@@ -1365,17 +1365,23 @@ func _manage_science_rate(player) -> void:
 			est_gpt = _estimate_gold_per_turn(player)
 			if est_gpt >= 0 or player.science_rate <= 0.01:
 				break
-	elif player.gold > 100 and est_gpt >= 5 and player.science_rate < max_science:
-		# Can afford more science — try increasing
-		var old_rate = player.science_rate
-		player.science_rate = min(max_science, player.science_rate + 0.1)
-		for city in player.cities:
-			city.calculate_yields()
-		# Verify it's still affordable
-		if _estimate_gold_per_turn(player) < 0:
-			player.science_rate = old_rate
+	elif player.science_rate < max_science:
+		# Try to maximize science while staying solvent
+		# Be aggressive: increase until gpt would go negative or we hit a reasonable reserve
+		var target_gold_reserve = 50 + player.cities.size() * 10
+		while player.science_rate < max_science:
+			var old_rate = player.science_rate
+			player.science_rate = min(max_science, player.science_rate + 0.1)
 			for city in player.cities:
 				city.calculate_yields()
+			est_gpt = _estimate_gold_per_turn(player)
+			# Allow slightly negative gpt if we have gold reserves
+			var min_gpt = -2 if player.gold > target_gold_reserve else 0
+			if est_gpt < min_gpt:
+				player.science_rate = old_rate
+				for city in player.cities:
+					city.calculate_yields()
+				break
 
 ## Estimate gold per turn based on current city yields and known costs
 func _estimate_gold_per_turn(player) -> int:
