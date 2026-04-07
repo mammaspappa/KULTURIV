@@ -19,8 +19,7 @@ func _on_building_constructed(city, building_id: String) -> void:
 	if player == null:
 		return
 
-	# Emit wonder_built signal
-	EventBus.wonder_built.emit(building_id, player.player_id, wonder_type)
+	# Note: wonder_built signal is already emitted by GameManager.register_world/national_wonder()
 
 	# One-time effects on construction
 	_apply_free_tech(player, effects)

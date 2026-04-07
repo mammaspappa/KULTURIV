@@ -985,11 +985,21 @@ func _produce_unit(unit_type: String) -> void:
 
 func _produce_building(building_type: String) -> void:
 	if building_type not in buildings:
+		# Check wonder availability at completion time (race condition guard)
+		var building = DataManager.get_building(building_type)
+		var wonder_type = building.get("wonder_type", "")
+		if wonder_type == "world" and not GameManager.is_world_wonder_available(building_type):
+			# Another civ completed this wonder first — refund some production as gold
+			if player_owner:
+				var cost = building.get("cost", 100)
+				player_owner.gold += cost / 2
+			return
+		if wonder_type == "national" and player_owner and not GameManager.is_national_wonder_available(building_type, player_owner.player_id):
+			return
+
 		buildings.append(building_type)
 
 		# Register wonders with GameManager
-		var building = DataManager.get_building(building_type)
-		var wonder_type = building.get("wonder_type", "")
 		if wonder_type == "world" and player_owner != null:
 			GameManager.register_world_wonder(building_type, player_owner.player_id)
 		elif wonder_type == "national" and player_owner != null:

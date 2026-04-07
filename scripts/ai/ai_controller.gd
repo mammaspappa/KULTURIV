@@ -960,7 +960,7 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 				in_own_territory = true
 				min_odds *= 0.6  # Fight harder to defend homeland
 
-			if odds.win_chance > min_odds:
+			if odds.win_chance >= min_odds:
 				if GridUtils.are_adjacent(unit.grid_position, target.grid_position):
 					if sim_logger:
 						sim_logger.log_decision(player.player_name, "combat", "attack",
@@ -1785,7 +1785,9 @@ func _get_best_military_unit(city, player, military_flavor: int, needs_siege: bo
 		if unit_class not in ["melee", "mounted", "gunpowder", "archery", "armor", "siege"]:
 			continue
 
-		var score = float(strength)
+		# Strongly prefer higher-strength units (strength^1.5 makes axeman 5.0 >> warrior 2.0)
+		var cost = unit_data.get("cost", 30)
+		var score = pow(strength, 1.5) * 10.0 / max(cost, 10)
 
 		# Counter bonuses: prefer units that counter enemy composition
 		if not enemy_classes.is_empty():
