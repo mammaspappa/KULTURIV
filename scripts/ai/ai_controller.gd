@@ -2022,13 +2022,13 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 				continue
 
 			# Leaders with low wonder_construct_rand skip wonders sometimes
-			# But all leaders should consider wonders (BTS: even warmongers build some)
 			var personality = _get_leader_personality(player)
 			var wonder_rand = max(personality.get("wonder_construct_rand", 30), 50)
 			if randi() % 100 >= wonder_rand:
-				continue  # Skip this wonder based on personality
+				continue
 
 		var effects = building.get("effects", {})
+		var wonder_type = building.get("wonder_type", "")
 		var score = 0.0
 
 		# Science
@@ -2085,6 +2085,12 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 		if effects.has("great_person_points"):
 			var mod = spec_mods.get("great_person", 1.0)
 			score += effects.great_person_points * mod * 3
+
+		# Wonders get a bonus — they're unique and provide lasting advantages
+		if wonder_type == "world":
+			score += 15  # Significant bonus for world wonders
+		elif wonder_type == "national":
+			score += 8
 
 		# Reduce score by cost (prefer cheaper when scores are similar)
 		var cost = building.get("cost", 100)
