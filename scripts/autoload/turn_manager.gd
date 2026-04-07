@@ -300,6 +300,12 @@ func _process_gold(player) -> void:
 			if effects.get("second_palace", false):
 				palace_positions.append(city.grid_position)
 
+	# BTS: maintenance scales inversely with map size (larger maps = lower per-tile cost)
+	# Reference map is 80x50 = 4000 tiles. Scale maintenance so it's proportional.
+	var map_tiles = float(GameManager.map_width * GameManager.map_height)
+	var reference_tiles = 4000.0  # Standard map size
+	var map_scale = sqrt(reference_tiles / max(map_tiles, 100.0))  # Smaller maps = higher maintenance
+
 	var city_maintenance = 0
 	for city in player.cities:
 		# Distance maintenance: use nearest capital/palace (BTS mechanic)
@@ -308,7 +314,8 @@ func _process_gold(player) -> void:
 			var d = GridUtils.chebyshev_distance(city.grid_position, palace_pos)
 			if d < min_dist:
 				min_dist = d
-		var dist_cost = int(min_dist * 0.5)
+		# Scale by map size: 0.5 gold per tile, adjusted for map proportions
+		var dist_cost = int(min_dist * 0.5 * map_scale)
 
 		# Check for civic that removes distance maintenance (State Property)
 		if CivicsSystem and CivicsSystem.has_civic_effect(player, "no_distance_maintenance"):
@@ -321,8 +328,10 @@ func _process_gold(player) -> void:
 			if reduction > 0:
 				dist_cost = int(dist_cost * (1.0 - reduction))
 
-		# City count maintenance: 0.5 gold per total city
-		var count_cost = int((num_cities - 1) * 0.5)
+		# City count maintenance: scales with num_cities AND map size
+		# On larger maps, more cities are expected, so per-city cost is lower
+		var expected_cities = max(3, int(map_tiles / 400))  # ~1 city per 400 tiles
+		var count_cost = int(max(0, num_cities - 1) * 0.5 * map_scale)
 
 		city_maintenance += dist_cost + count_cost
 
@@ -365,6 +374,17 @@ func _process_gold(player) -> void:
 	var corp_maintenance = 0
 	if CorporationSystem:
 		corp_maintenance = CorporationSystem.calculate_player_maintenance(player)
+
+	# --- Difficulty Handicap Modifiers (from handicaps.json) ---
+	var handicap = DataManager.get_handicap_by_level(GameManager.difficulty)
+	if not handicap.is_empty():
+		var bonuses = handicap.get("human_bonuses", {}) if player.is_human else handicap.get("ai_bonuses", {})
+		var dist_pct = bonuses.get("distance_maintenance_percent", 100) / 100.0
+		var city_pct = bonuses.get("city_maintenance_percent", 100) / 100.0
+		var civic_pct = bonuses.get("civic_upkeep_percent", 100) / 100.0
+		var inflation_pct = bonuses.get("inflation_percent", 100) / 100.0
+		city_maintenance = int(city_maintenance * dist_pct * inflation_pct)
+		civic_upkeep = int(civic_upkeep * civic_pct)
 
 	# --- Total ---
 	var total_costs = city_maintenance + unit_supply_cost + civic_upkeep + corp_maintenance
