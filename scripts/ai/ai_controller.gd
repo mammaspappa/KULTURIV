@@ -370,10 +370,11 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 
 	var attitude = DiplomacySystem.calculate_attitude(player, other)
 
-	# Attitude threshold: aggressive leaders attack at cautious, peaceful need hostility
-	# Gandhi (peace=10): need attitude < 0. Alexander (peace=2): need attitude < 3.
-	# BTS uses base_peace_weight to scale threshold, but we shift up so wars actually happen
-	var war_attitude_threshold = 3 - personality.base_peace_weight / 3
+	# Attitude threshold: most leaders can declare at neutral, peaceful need hostility
+	# peace_weight 0 (Montezuma): threshold 5, declares on anyone not a close friend
+	# peace_weight 4 (Caesar): threshold 3, declares on neutral-cautious
+	# peace_weight 8 (Gandhi): threshold 1, only declares on hostile
+	var war_attitude_threshold = 5 - personality.base_peace_weight / 2
 	if attitude > war_attitude_threshold:
 		return
 
