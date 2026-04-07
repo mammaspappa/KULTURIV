@@ -2028,7 +2028,6 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 				continue
 
 		var effects = building.get("effects", {})
-		var wonder_type = building.get("wonder_type", "")
 		var score = 0.0
 
 		# Science
