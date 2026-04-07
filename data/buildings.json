@@ -8,9 +8,9 @@
     "is_capital": true,
     "effects": {
       "commerce": 8,
-      "culture": 1,
       "espionage": 4,
-      "great_person_points": 2
+      "great_person_points": 2,
+      "happiness": 1
     },
     "description": "Marks your capital city"
   },
@@ -33,7 +33,8 @@
     "maintenance": 1,
     "required_tech": "",
     "effects": {
-      "free_experience": 4
+      "free_experience": 3,
+      "great_general_points": 1
     },
     "description": "New units start with 4 XP"
   },
@@ -48,7 +49,8 @@
     },
     "obsolete_tech": "calendar",
     "replaced_by": "obelisk",
-    "description": "+1 Culture per turn"
+    "description": "+1 Culture per turn",
+    "_note": "In BTS this is the Obelisk. KulturIV keeps both for compatibility."
   },
   "obelisk": {
     "name": "Obelisk",
@@ -57,9 +59,10 @@
     "maintenance": 1,
     "required_tech": "mysticism",
     "effects": {
-      "culture": 2
+      "culture": 1
     },
-    "description": "+2 Culture per turn"
+    "description": "+2 Culture per turn",
+    "obsolete_tech": "astronomy"
   },
   "walls": {
     "name": "Walls",
@@ -70,7 +73,7 @@
     "effects": {
       "defense": 0.5
     },
-    "obsolete_tech": "dynamite",
+    "obsolete_tech": "rifling",
     "description": "+50% city defense"
   },
   "lighthouse": {
@@ -118,7 +121,8 @@
     "maintenance": 2,
     "required_tech": "metal_casting",
     "effects": {
-      "production_percent": 0.25
+      "production_percent": 0.25,
+      "happiness_from_resource": 1
     },
     "description": "+25% Production"
   },
@@ -168,10 +172,9 @@
     "era": "classical",
     "cost": 100,
     "maintenance": 2,
-    "required_tech": "construction",
+    "required_tech": "mathematics",
     "effects": {
-      "health": 2,
-      "food_storage_bonus": 0.5
+      "health": 2
     },
     "description": "+2 Health, +50% food stored"
   },
@@ -183,10 +186,10 @@
     "required_tech": "horseback_riding",
     "requires_resource": "horses",
     "effects": {
-      "mounted_experience": 4,
-      "mounted_production": 0.25
+      "mounted_experience": 2
     },
-    "description": "Mounted units get +4 XP, +25% production"
+    "description": "Mounted units get +4 XP, +25% production",
+    "obsolete_tech": "advanced_flight"
   },
   "monastery": {
     "name": "Monastery",
@@ -211,7 +214,9 @@
     "requires_building": "walls",
     "effects": {
       "defense": 0.5,
-      "siege_defense": 0.25
+      "trade_route_yield": 1,
+      "espionage_percent": 0.25,
+      "great_merchant_points": 1
     },
     "obsolete_tech": "economics",
     "description": "+50% defense, +25% vs siege"
@@ -276,8 +281,9 @@
     "required_tech": "guilds",
     "requires_building": "granary",
     "effects": {
-      "health": 2,
-      "happiness_from_resource": 1
+      "gold_percent": 0.25,
+      "health_from_resource": 1,
+      "great_merchant_points": 1
     },
     "happiness_resources": [
       "spices",
@@ -306,8 +312,8 @@
     "maintenance": 3,
     "required_tech": "assembly_line",
     "effects": {
-      "production_percent": 0.5,
-      "great_engineer_points": 2,
+      "production_percent": 0.25,
+      "power_production_percent": 0.25,
       "unhealthiness": 2
     },
     "description": "+50% Production, +2 Unhealthiness"
@@ -317,10 +323,10 @@
     "era": "industrial",
     "cost": 150,
     "maintenance": 2,
-    "required_tech": "steam_power",
+    "required_tech": "assembly_line",
     "requires_building": "factory",
     "effects": {
-      "production_percent": 0.25,
+      "provides_power": true,
       "unhealthiness": 2
     },
     "exclusive_with": [
@@ -338,7 +344,8 @@
     "requires_building": "factory",
     "requires_river": true,
     "effects": {
-      "production_percent": 0.25
+      "provides_power": true,
+      "clean_power": true
     },
     "exclusive_with": [
       "coal_plant",
@@ -354,8 +361,8 @@
     "required_tech": "fission",
     "requires_building": "factory",
     "effects": {
-      "production_percent": 0.5,
-      "meltdown_chance": 0.01
+      "provides_power": true,
+      "clean_power": true
     },
     "exclusive_with": [
       "coal_plant",
@@ -416,15 +423,19 @@
   "research_lab": {
     "name": "Research Lab",
     "era": "modern",
-    "cost": 300,
+    "cost": 250,
     "maintenance": 4,
-    "required_tech": "computers",
+    "required_tech": "superconductors",
     "requires_building": "university",
     "effects": {
       "science_percent": 0.25,
-      "great_scientist_points": 3
+      "great_scientist_points": 3,
+      "space_production_percent": 0.5
     },
-    "description": "+25% Science"
+    "description": "+25% Science",
+    "required_buildings": [
+      "observatory"
+    ]
   },
   "stock_exchange": {
     "name": "Stock Exchange",
@@ -1095,7 +1106,7 @@
     "era": "ancient",
     "cost": 80,
     "maintenance": 1,
-    "required_tech": "meditation",
+    "required_tech": "",
     "requires_religion": "buddhism",
     "effects": {
       "culture": 1,
@@ -1109,7 +1120,7 @@
     "era": "medieval",
     "cost": 60,
     "maintenance": 1,
-    "required_tech": "meditation",
+    "required_tech": "",
     "requires_religion": "buddhism",
     "effects": {
       "science_percent": 0.1,
@@ -1124,13 +1135,13 @@
     "era": "medieval",
     "cost": 300,
     "maintenance": 2,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "buddhism",
     "requires_building": "buddhist_temple",
     "effects": {
-      "culture": 4,
+      "culture_percent": 0.5,
       "happiness_from_religion": 2,
-      "great_prophet_points": 2
+      "great_prophet_points": 1
     },
     "description": "+4 Culture, +2 Happiness from Buddhism"
   },
@@ -1139,7 +1150,7 @@
     "era": "ancient",
     "cost": 80,
     "maintenance": 1,
-    "required_tech": "polytheism",
+    "required_tech": "",
     "requires_religion": "hinduism",
     "effects": {
       "culture": 1,
@@ -1153,7 +1164,7 @@
     "era": "medieval",
     "cost": 60,
     "maintenance": 1,
-    "required_tech": "polytheism",
+    "required_tech": "",
     "requires_religion": "hinduism",
     "effects": {
       "science_percent": 0.1,
@@ -1168,13 +1179,13 @@
     "era": "medieval",
     "cost": 300,
     "maintenance": 2,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "hinduism",
     "requires_building": "hindu_temple",
     "effects": {
-      "culture": 4,
+      "culture_percent": 0.5,
       "happiness_from_religion": 2,
-      "great_prophet_points": 2
+      "great_prophet_points": 1
     },
     "description": "+4 Culture, +2 Happiness from Hinduism"
   },
@@ -1183,7 +1194,7 @@
     "era": "ancient",
     "cost": 80,
     "maintenance": 1,
-    "required_tech": "monotheism",
+    "required_tech": "",
     "requires_religion": "judaism",
     "effects": {
       "culture": 1,
@@ -1197,7 +1208,7 @@
     "era": "medieval",
     "cost": 60,
     "maintenance": 1,
-    "required_tech": "monotheism",
+    "required_tech": "",
     "requires_religion": "judaism",
     "effects": {
       "science_percent": 0.1,
@@ -1212,13 +1223,13 @@
     "era": "medieval",
     "cost": 300,
     "maintenance": 2,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "judaism",
     "requires_building": "jewish_temple",
     "effects": {
-      "culture": 4,
+      "culture_percent": 0.5,
       "happiness_from_religion": 2,
-      "great_prophet_points": 2
+      "great_prophet_points": 1
     },
     "description": "+4 Culture, +2 Happiness from Judaism"
   },
@@ -1227,7 +1238,7 @@
     "era": "medieval",
     "cost": 80,
     "maintenance": 1,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "christianity",
     "effects": {
       "culture": 1,
@@ -1241,7 +1252,7 @@
     "era": "medieval",
     "cost": 60,
     "maintenance": 1,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "christianity",
     "effects": {
       "science_percent": 0.1,
@@ -1256,13 +1267,13 @@
     "era": "medieval",
     "cost": 300,
     "maintenance": 2,
-    "required_tech": "music",
+    "required_tech": "",
     "requires_religion": "christianity",
     "requires_building": "christian_temple",
     "effects": {
-      "culture": 4,
+      "culture_percent": 0.5,
       "happiness_from_religion": 2,
-      "great_prophet_points": 2
+      "great_prophet_points": 1
     },
     "description": "+4 Culture, +2 Happiness from Christianity"
   },
@@ -1271,7 +1282,7 @@
     "era": "ancient",
     "cost": 80,
     "maintenance": 1,
-    "required_tech": "code_of_laws",
+    "required_tech": "",
     "requires_religion": "confucianism",
     "effects": {
       "culture": 1,
@@ -1285,7 +1296,7 @@
     "era": "medieval",
     "cost": 60,
     "maintenance": 1,
-    "required_tech": "code_of_laws",
+    "required_tech": "",
     "requires_religion": "confucianism",
     "effects": {
       "science_percent": 0.1,
@@ -1300,13 +1311,13 @@
     "era": "medieval",
     "cost": 300,
     "maintenance": 2,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "confucianism",
     "requires_building": "confucian_temple",
     "effects": {
-      "culture": 4,
+      "culture_percent": 0.5,
       "happiness_from_religion": 2,
-      "great_prophet_points": 2
+      "great_prophet_points": 1
     },
     "description": "+4 Culture, +2 Happiness from Confucianism"
   },
@@ -1315,7 +1326,7 @@
     "era": "ancient",
     "cost": 80,
     "maintenance": 1,
-    "required_tech": "philosophy",
+    "required_tech": "",
     "requires_religion": "taoism",
     "effects": {
       "culture": 1,
@@ -1329,7 +1340,7 @@
     "era": "medieval",
     "cost": 60,
     "maintenance": 1,
-    "required_tech": "philosophy",
+    "required_tech": "",
     "requires_religion": "taoism",
     "effects": {
       "science_percent": 0.1,
@@ -1344,13 +1355,13 @@
     "era": "medieval",
     "cost": 300,
     "maintenance": 2,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "taoism",
     "requires_building": "taoist_temple",
     "effects": {
-      "culture": 4,
+      "culture_percent": 0.5,
       "happiness_from_religion": 2,
-      "great_prophet_points": 2
+      "great_prophet_points": 1
     },
     "description": "+4 Culture, +2 Happiness from Taoism"
   },
@@ -1359,7 +1370,7 @@
     "era": "medieval",
     "cost": 80,
     "maintenance": 1,
-    "required_tech": "divine_right",
+    "required_tech": "",
     "requires_religion": "islam",
     "effects": {
       "culture": 1,
@@ -1373,7 +1384,7 @@
     "era": "medieval",
     "cost": 60,
     "maintenance": 1,
-    "required_tech": "divine_right",
+    "required_tech": "",
     "requires_religion": "islam",
     "effects": {
       "science_percent": 0.1,
@@ -1388,13 +1399,13 @@
     "era": "medieval",
     "cost": 300,
     "maintenance": 2,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_religion": "islam",
     "requires_building": "islamic_temple",
     "effects": {
-      "culture": 4,
+      "culture_percent": 0.5,
       "happiness_from_religion": 2,
-      "great_prophet_points": 2
+      "great_prophet_points": 1
     },
     "description": "+4 Culture, +2 Happiness from Islam"
   },
@@ -1561,15 +1572,17 @@
     "maintenance": 0,
     "not_buildable": true,
     "effects": {
-      "free_experience": 2
+      "military_production_percent": 0.5,
+      "great_general_points": 2
     },
-    "description": "+2 XP to new military units (built by Great General)"
+    "description": "+2 XP to new military units (built by Great General)",
+    "required_tech": "military_science"
   },
   "_comment_unique_buildings": "=== UNIQUE BUILDINGS ===",
   "forum": {
     "name": "Forum",
     "era": "classical",
-    "cost": 100,
+    "cost": 150,
     "maintenance": 1,
     "required_tech": "currency",
     "replaces": "market",
@@ -1613,7 +1626,7 @@
   "pavilion": {
     "name": "Pavilion",
     "era": "renaissance",
-    "cost": 100,
+    "cost": 50,
     "maintenance": 2,
     "required_tech": "drama",
     "replaces": "theatre",
@@ -1628,7 +1641,7 @@
   "apothecary": {
     "name": "Apothecary",
     "era": "renaissance",
-    "cost": 120,
+    "cost": 150,
     "maintenance": 2,
     "required_tech": "guilds",
     "requires_building": "granary",
@@ -1643,23 +1656,21 @@
   "ger": {
     "name": "Ger",
     "era": "classical",
-    "cost": 70,
+    "cost": 60,
     "maintenance": 1,
     "required_tech": "horseback_riding",
     "requires_resource": "horses",
     "replaces": "stable",
     "civilization": "mongolia",
     "effects": {
-      "mounted_experience": 4,
-      "mounted_production": 0.25,
-      "experience_all_units": 2
+      "mounted_experience": 4
     },
     "description": "Mongolian unique building. +2 XP for all units."
   },
   "sacrificial_altar": {
     "name": "Sacrificial Altar",
     "era": "classical",
-    "cost": 120,
+    "cost": 90,
     "maintenance": 2,
     "required_tech": "code_of_laws",
     "replaces": "courthouse",
@@ -1697,8 +1708,8 @@
     "civilization": "spain",
     "effects": {
       "defense": 0.5,
-      "siege_defense": 0.25,
-      "free_experience": 5
+      "siege_experience": 5,
+      "great_general_points": 1
     },
     "description": "Spanish unique building. +5 XP for units built."
   },
@@ -1810,6 +1821,75 @@
     "effects": {
       "clean_power_continent": true,
       "great_engineer_points": 2
+    }
+  },
+  "jail": {
+    "name": "Jail",
+    "cost": 120,
+    "required_tech": "constitution",
+    "effects": {
+      "war_weariness_reduction": 0.25,
+      "espionage": 4,
+      "espionage_percent": 0.5
+    }
+  },
+  "levee": {
+    "name": "Levee",
+    "cost": 180,
+    "required_tech": "steam_power",
+    "requires_river": true,
+    "effects": {
+      "river_tile_production": 1
+    }
+  },
+  "custom_house": {
+    "name": "Custom House",
+    "cost": 180,
+    "required_tech": "economics",
+    "required_buildings": [
+      "harbor"
+    ],
+    "effects": {
+      "foreign_trade_modifier": 1.0,
+      "great_merchant_points": 1
+    }
+  },
+  "drydock": {
+    "name": "Drydock",
+    "cost": 120,
+    "required_tech": "steel",
+    "required_buildings": [
+      "harbor"
+    ],
+    "effects": {
+      "naval_experience": 4,
+      "naval_production_percent": 0.5
+    }
+  },
+  "bomb_shelter": {
+    "name": "Bomb Shelter",
+    "cost": 100,
+    "required_tech": "electricity",
+    "effects": {
+      "nuke_damage_reduction": 0.5
+    }
+  },
+  "bunker": {
+    "name": "Bunker",
+    "cost": 100,
+    "required_tech": "electricity",
+    "effects": {
+      "air_damage_reduction": 0.5
+    }
+  },
+  "industrial_park": {
+    "name": "Industrial Park",
+    "cost": 200,
+    "required_tech": "industrialism",
+    "effects": {
+      "engineer_slots": 2,
+      "free_engineers": 1,
+      "unhealthiness": 2
     }
   }
 }
