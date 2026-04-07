@@ -553,8 +553,8 @@ func found_city(settler: Unit) -> City:
 	# Reveal visibility around the new city
 	VisibilitySystem.reveal_for_city(city)
 
-	# Remove settler
-	settler.die()
+	# Remove settler (consumed, not killed)
+	settler.consume()
 
 	EventBus.city_founded.emit(city, settler)
 	return city

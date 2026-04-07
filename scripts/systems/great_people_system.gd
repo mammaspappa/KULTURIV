@@ -226,7 +226,7 @@ func _settle_great_person(unit, city) -> bool:
 	city.set_meta("settled_great_people", settled)
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 func _start_golden_age(unit, player) -> bool:
@@ -238,7 +238,7 @@ func _start_golden_age(unit, player) -> bool:
 	player.start_golden_age(turns)
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 func _discover_tech(unit, player) -> bool:
@@ -257,7 +257,7 @@ func _discover_tech(unit, player) -> bool:
 	EventBus.research_completed.emit(player, tech)
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 func _trade_mission(unit, player, city) -> bool:
@@ -276,7 +276,7 @@ func _trade_mission(unit, player, city) -> bool:
 	player.gold += gold
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 func _hurry_production(unit, city) -> bool:
@@ -291,7 +291,7 @@ func _hurry_production(unit, city) -> bool:
 	city.production_progress = cost
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 func _spread_religion(unit, city) -> bool:
@@ -324,7 +324,7 @@ func _spread_religion(unit, city) -> bool:
 		ReligionSystem.spread_religion(city, founder_religion)
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 func _culture_bomb(unit, tile) -> bool:
@@ -356,7 +356,7 @@ func _culture_bomb(unit, tile) -> bool:
 				t.update_visuals()
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 func _build_shrine(unit, city) -> bool:
@@ -382,7 +382,7 @@ func _build_shrine(unit, city) -> bool:
 	EventBus.city_production_completed.emit(city, shrine_building)
 
 	# Remove unit
-	unit.die()
+	unit.consume()
 	return true
 
 ## Check if Great Prophet can build a shrine in this city
@@ -412,7 +412,7 @@ func _build_academy(unit, city) -> bool:
 	city.calculate_yields()
 	EventBus.city_building_constructed.emit(city, "academy")
 	EventBus.notification_added.emit("Academy built in %s! +50%% Science" % city.city_name)
-	unit.die()
+	unit.consume()
 	return true
 
 ## Build a Military Academy in a city (+2 XP to new units)
@@ -426,7 +426,7 @@ func _build_military_academy(unit, city) -> bool:
 	city.calculate_yields()
 	EventBus.city_building_constructed.emit(city, "military_academy")
 	EventBus.notification_added.emit("Military Academy built in %s! +2 XP to new units" % city.city_name)
-	unit.die()
+	unit.consume()
 	return true
 
 ## Get available abilities for a great person unit

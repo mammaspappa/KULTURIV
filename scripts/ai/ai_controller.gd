@@ -1378,28 +1378,47 @@ func _manage_science_rate(player) -> void:
 			if est_gpt >= 0 or player.science_rate <= 0.01:
 				break
 
-## Estimate gold per turn based on current city yields and known costs
+## Estimate gold per turn based on current city yields and known costs.
+## Uses the same calculation as turn_manager._process_gold for accuracy.
 func _estimate_gold_per_turn(player) -> int:
 	var total_gold = 0
 	for city in player.cities:
 		total_gold += city.gold_yield
 
-	# Estimate maintenance (mirrors turn_manager logic)
+	# === City Maintenance (mirrors turn_manager._process_gold) ===
 	var num_cities = player.cities.size()
 	var capital_pos = Vector2i.ZERO
+	var palace_positions = []
 	for city in player.cities:
 		if "palace" in city.buildings:
 			capital_pos = city.grid_position
-			break
+		for building_id in city.buildings:
+			var effects = DataManager.get_building_effects(building_id)
+			if effects.get("second_palace", false):
+				palace_positions.append(city.grid_position)
+	if palace_positions.is_empty():
+		palace_positions.append(capital_pos)
 
-	var maintenance = 0
+	# Map scale factor (same as turn_manager)
+	var map_tiles = float(GameManager.map_width * GameManager.map_height)
+	var map_scale = sqrt(4000.0 / max(map_tiles, 100.0))
+
+	var city_maintenance = 0
 	for city in player.cities:
-		var dist = GridUtils.chebyshev_distance(city.grid_position, capital_pos)
-		var dist_cost = int(dist * 0.5)
-		if "courthouse" in city.buildings:
-			dist_cost = dist_cost / 2
-		var count_cost = int((num_cities - 1) * 0.5)
-		maintenance += dist_cost + count_cost
+		var min_dist = 999
+		for palace_pos in palace_positions:
+			var d = GridUtils.chebyshev_distance(city.grid_position, palace_pos)
+			if d < min_dist:
+				min_dist = d
+		var dist_cost = int(min_dist * 0.5 * map_scale)
+		# Courthouse reduces maintenance
+		for building_id in city.buildings:
+			var effects = DataManager.get_building_effects(building_id)
+			var reduction = effects.get("maintenance_reduction", 0.0)
+			if reduction > 0:
+				dist_cost = int(dist_cost * (1.0 - reduction))
+		var count_cost = int(max(0, num_cities - 1) * 0.5 * map_scale)
+		city_maintenance += dist_cost + count_cost
 
 	# Unit supply
 	var military_count = 0
@@ -1407,14 +1426,22 @@ func _estimate_gold_per_turn(player) -> int:
 		if DataManager.get_unit_strength(unit.unit_id) > 0:
 			military_count += 1
 	var free_units = num_cities + 2
-	var excess = max(0, military_count - free_units)
+	var unit_supply = max(0, military_count - free_units)
 
-	# Inflation
-	var inflation = min(1.0 + TurnManager.current_turn * 0.001, 1.5)
-	maintenance = int(maintenance * inflation)
-	excess = int(excess * inflation)
+	# Inflation (normalized by game speed, same as turn_manager)
+	var normalized_turn = TurnManager.current_turn / GameManager.get_speed_multiplier()
+	var inflation = min(1.0 + normalized_turn * 0.001, 1.5)
+	city_maintenance = int(city_maintenance * inflation)
+	unit_supply = int(unit_supply * inflation)
 
-	return total_gold - maintenance - excess
+	# Civic upkeep
+	var civic_upkeep = 0
+	if CivicsSystem:
+		civic_upkeep = CivicsSystem.get_civic_upkeep(player)
+		if player.has_trait("organized"):
+			civic_upkeep = civic_upkeep / 2
+
+	return total_gold - city_maintenance - unit_supply - civic_upkeep
 
 func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	var score = 0.0
@@ -2146,10 +2173,39 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 		if effects.has("happiness_from_resource"):
 			score += effects.happiness_from_resource * 3
 
+		# Maintenance reduction (courthouse) — scales with city count
+		if effects.has("maintenance_reduction"):
+			var num_cities = player.cities.size()
+			score += effects.maintenance_reduction * num_cities * 3
+
+		# Domain experience (barracks: land_experience, stable: mounted_experience)
+		if effects.has("land_experience"):
+			score += effects.land_experience * military_flavor
+		if effects.has("mounted_experience"):
+			score += effects.mounted_experience * military_flavor * 0.5
+
+		# Sea food bonus (lighthouse)
+		if effects.has("sea_food"):
+			# Only valuable for coastal cities
+			var has_water = false
+			for tile_pos in city.worked_tiles:
+				var tile = GameManager.hex_grid.get_tile(tile_pos) if GameManager.hex_grid else null
+				if tile and tile.is_water():
+					has_water = true
+					break
+			if has_water:
+				score += effects.sea_food * growth_flavor * 3
+
+		# Trade routes
+		if effects.has("trade_routes"):
+			score += effects.trade_routes * gold_flavor * 2
+
 		# Defense bonus (for military cities)
 		if effects.has("defense"):
 			var mod = spec_mods.get("defense", 1.0)
 			score += effects.defense * military_flavor * mod
+		if effects.has("bombard_defense"):
+			score += effects.bombard_defense * military_flavor * 0.5
 
 		# Growth — granary's food_stored_on_growth is critical
 		if effects.has("food"):

@@ -676,6 +676,14 @@ func heal(amount: int) -> void:
 	EventBus.unit_healed.emit(self, amount)
 	update_visual()
 
+## Whether this unit is being consumed (e.g., settler founding city), not killed in combat
+var _consumed: bool = false
+
+func consume() -> void:
+	"""Remove unit without emitting unit_destroyed (used for settlers founding cities, etc.)."""
+	_consumed = true
+	die()
+
 func die() -> void:
 	# Destroy cargo when transport dies
 	for cargo_unit in cargo:
@@ -688,7 +696,8 @@ func die() -> void:
 		transport.cargo.erase(self)
 		transport = null
 
-	EventBus.unit_destroyed.emit(self)
+	if not _consumed:
+		EventBus.unit_destroyed.emit(self)
 	if player_owner:
 		player_owner.remove_unit(self)
 	queue_free()
