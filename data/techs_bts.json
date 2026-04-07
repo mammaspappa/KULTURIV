@@ -1,0 +1,1180 @@
+{
+  "mysticism": {
+    "name": "TXT_KEY_TECH_MYSTICISM",
+    "bts_type": "TECH_MYSTICISM",
+    "cost": 50,
+    "era": "ancient",
+    "grid_x": 1,
+    "grid_y": 11
+  },
+  "meditation": {
+    "name": "TXT_KEY_TECH_MEDITATION",
+    "bts_type": "TECH_MEDITATION",
+    "cost": 80,
+    "era": "ancient",
+    "grid_x": 2,
+    "grid_y": 9,
+    "or_prerequisites": [
+      "mysticism"
+    ]
+  },
+  "polytheism": {
+    "name": "TXT_KEY_TECH_POLYTHEISM",
+    "bts_type": "TECH_POLYTHEISM",
+    "cost": 100,
+    "era": "ancient",
+    "grid_x": 2,
+    "grid_y": 11,
+    "or_prerequisites": [
+      "mysticism"
+    ]
+  },
+  "priesthood": {
+    "name": "TXT_KEY_TECH_PRIESTHOOD",
+    "bts_type": "TECH_PRIESTHOOD",
+    "cost": 60,
+    "era": "ancient",
+    "grid_x": 3,
+    "grid_y": 9,
+    "or_prerequisites": [
+      "meditation",
+      "polytheism"
+    ]
+  },
+  "monotheism": {
+    "name": "TXT_KEY_TECH_MONOTHEISM",
+    "bts_type": "TECH_MONOTHEISM",
+    "cost": 120,
+    "era": "ancient",
+    "grid_x": 3,
+    "grid_y": 11,
+    "prerequisites": [
+      "masonry"
+    ],
+    "or_prerequisites": [
+      "polytheism"
+    ]
+  },
+  "monarchy": {
+    "name": "TXT_KEY_TECH_MONARCHY",
+    "bts_type": "TECH_MONARCHY",
+    "cost": 300,
+    "era": "classical",
+    "grid_x": 5,
+    "grid_y": 10,
+    "or_prerequisites": [
+      "priesthood",
+      "monotheism"
+    ]
+  },
+  "literature": {
+    "name": "TXT_KEY_TECH_LITERATURE",
+    "bts_type": "TECH_LITERATURE",
+    "cost": 200,
+    "era": "classical",
+    "grid_x": 6,
+    "grid_y": 1,
+    "prerequisites": [
+      "polytheism"
+    ],
+    "or_prerequisites": [
+      "aesthetics"
+    ]
+  },
+  "code_of_laws": {
+    "name": "TXT_KEY_TECH_CODE_OF_LAWS",
+    "bts_type": "TECH_CODE_OF_LAWS",
+    "cost": 350,
+    "era": "classical",
+    "grid_x": 7,
+    "grid_y": 8,
+    "prerequisites": [
+      "writing"
+    ],
+    "or_prerequisites": [
+      "priesthood",
+      "currency"
+    ]
+  },
+  "drama": {
+    "name": "TXT_KEY_TECH_DRAMA",
+    "bts_type": "TECH_DRAMA",
+    "cost": 300,
+    "era": "classical",
+    "grid_x": 7,
+    "grid_y": 2,
+    "or_prerequisites": [
+      "aesthetics"
+    ]
+  },
+  "feudalism": {
+    "name": "TXT_KEY_TECH_FEUDALISM",
+    "bts_type": "TECH_FEUDALISM",
+    "cost": 700,
+    "era": "medieval",
+    "grid_x": 7,
+    "grid_y": 10,
+    "prerequisites": [
+      "writing"
+    ],
+    "or_prerequisites": [
+      "monarchy"
+    ]
+  },
+  "theology": {
+    "name": "TXT_KEY_TECH_THEOLOGY",
+    "bts_type": "TECH_THEOLOGY",
+    "cost": 500,
+    "era": "medieval",
+    "grid_x": 8,
+    "grid_y": 11,
+    "prerequisites": [
+      "writing"
+    ],
+    "or_prerequisites": [
+      "monotheism"
+    ]
+  },
+  "music": {
+    "name": "TXT_KEY_TECH_MUSIC",
+    "bts_type": "TECH_MUSIC",
+    "cost": 600,
+    "era": "medieval",
+    "grid_x": 8,
+    "grid_y": 1,
+    "prerequisites": [
+      "mathematics"
+    ],
+    "or_prerequisites": [
+      "literature",
+      "drama"
+    ]
+  },
+  "civil_service": {
+    "name": "TXT_KEY_TECH_CIVIL_SERVICE",
+    "bts_type": "TECH_CIVIL_SERVICE",
+    "cost": 800,
+    "era": "medieval",
+    "grid_x": 8,
+    "grid_y": 8,
+    "prerequisites": [
+      "mathematics"
+    ],
+    "or_prerequisites": [
+      "code_of_laws",
+      "feudalism"
+    ]
+  },
+  "guilds": {
+    "name": "TXT_KEY_TECH_GUILDS",
+    "bts_type": "TECH_GUILDS",
+    "cost": 1000,
+    "era": "medieval",
+    "grid_x": 9,
+    "grid_y": 12,
+    "prerequisites": [
+      "feudalism"
+    ],
+    "or_prerequisites": [
+      "machinery"
+    ]
+  },
+  "divine_right": {
+    "name": "TXT_KEY_TECH_DIVINE_RIGHT",
+    "bts_type": "TECH_DIVINE_RIGHT",
+    "cost": 1200,
+    "era": "medieval",
+    "grid_x": 9,
+    "grid_y": 5,
+    "prerequisites": [
+      "theology",
+      "monarchy"
+    ]
+  },
+  "nationalism": {
+    "name": "TXT_KEY_TECH_NATIONALISM",
+    "bts_type": "TECH_NATIONALISM",
+    "cost": 1800,
+    "era": "renaissance",
+    "grid_x": 10,
+    "grid_y": 3,
+    "prerequisites": [
+      "civil_service"
+    ],
+    "or_prerequisites": [
+      "divine_right",
+      "philosophy"
+    ]
+  },
+  "military_tradition": {
+    "name": "TXT_KEY_TECH_MILITARY_TRADITION",
+    "bts_type": "TECH_MILITARY_TRADITION",
+    "cost": 2000,
+    "era": "renaissance",
+    "grid_x": 11,
+    "grid_y": 3,
+    "prerequisites": [
+      "music"
+    ],
+    "or_prerequisites": [
+      "nationalism"
+    ]
+  },
+  "constitution": {
+    "name": "TXT_KEY_TECH_CONSTITUTION",
+    "bts_type": "TECH_CONSTITUTION",
+    "cost": 2000,
+    "era": "renaissance",
+    "grid_x": 11,
+    "grid_y": 1,
+    "prerequisites": [
+      "code_of_laws"
+    ],
+    "or_prerequisites": [
+      "nationalism"
+    ]
+  },
+  "liberalism": {
+    "name": "TXT_KEY_TECH_LIBERALISM",
+    "bts_type": "TECH_LIBERALISM",
+    "cost": 1400,
+    "era": "renaissance",
+    "grid_x": 11,
+    "grid_y": 8,
+    "prerequisites": [
+      "philosophy"
+    ],
+    "or_prerequisites": [
+      "education"
+    ]
+  },
+  "democracy": {
+    "name": "TXT_KEY_TECH_DEMOCRACY",
+    "bts_type": "TECH_DEMOCRACY",
+    "cost": 2800,
+    "era": "renaissance",
+    "grid_x": 12,
+    "grid_y": 1,
+    "prerequisites": [
+      "printing_press"
+    ],
+    "or_prerequisites": [
+      "constitution"
+    ]
+  },
+  "corporation": {
+    "name": "TXT_KEY_TECH_CORPORATION",
+    "bts_type": "TECH_CORPORATION",
+    "cost": 1600,
+    "era": "renaissance",
+    "grid_x": 12,
+    "grid_y": 10,
+    "prerequisites": [
+      "constitution"
+    ],
+    "or_prerequisites": [
+      "economics"
+    ]
+  },
+  "fascism": {
+    "name": "TXT_KEY_TECH_FASCISM",
+    "bts_type": "TECH_FASCISM",
+    "cost": 2400,
+    "era": "industrial",
+    "grid_x": 15,
+    "grid_y": 6,
+    "prerequisites": [
+      "nationalism"
+    ],
+    "or_prerequisites": [
+      "assembly_line"
+    ]
+  },
+  "utopia": {
+    "name": "TXT_KEY_TECH_UTOPIA",
+    "bts_type": "TECH_UTOPIA",
+    "cost": 2800,
+    "era": "industrial",
+    "grid_x": 14,
+    "grid_y": 7,
+    "prerequisites": [
+      "liberalism"
+    ],
+    "or_prerequisites": [
+      "scientific_method"
+    ]
+  },
+  "mass_media": {
+    "name": "TXT_KEY_TECH_MASS_MEDIA",
+    "bts_type": "TECH_MASS_MEDIA",
+    "cost": 3600,
+    "era": "modern",
+    "grid_x": 17,
+    "grid_y": 9,
+    "or_prerequisites": [
+      "radio"
+    ]
+  },
+  "ecology": {
+    "name": "TXT_KEY_TECH_ECOLOGY",
+    "bts_type": "TECH_ECOLOGY",
+    "cost": 5500,
+    "era": "modern",
+    "grid_x": 18,
+    "grid_y": 7,
+    "prerequisites": [
+      "biology"
+    ],
+    "or_prerequisites": [
+      "plastics",
+      "fission"
+    ]
+  },
+  "fishing": {
+    "name": "TXT_KEY_TECH_FISHING",
+    "bts_type": "TECH_FISHING",
+    "cost": 40,
+    "era": "ancient",
+    "grid_x": 1,
+    "grid_y": 1
+  },
+  "the_wheel": {
+    "name": "TXT_KEY_TECH_THE_WHEEL",
+    "bts_type": "TECH_THE_WHEEL",
+    "cost": 60,
+    "era": "ancient",
+    "grid_x": 1,
+    "grid_y": 3
+  },
+  "agriculture": {
+    "name": "TXT_KEY_TECH_AGRICULTURE",
+    "bts_type": "TECH_AGRICULTURE",
+    "cost": 60,
+    "era": "ancient",
+    "grid_x": 1,
+    "grid_y": 5
+  },
+  "pottery": {
+    "name": "TXT_KEY_TECH_POTTERY",
+    "bts_type": "TECH_POTTERY",
+    "cost": 80,
+    "era": "ancient",
+    "grid_x": 2,
+    "grid_y": 3,
+    "prerequisites": [
+      "the_wheel"
+    ],
+    "or_prerequisites": [
+      "agriculture",
+      "fishing"
+    ]
+  },
+  "aesthetics": {
+    "name": "TXT_KEY_TECH_AESTHETICS",
+    "bts_type": "TECH_AESTHETICS",
+    "cost": 300,
+    "era": "classical",
+    "grid_x": 5,
+    "grid_y": 2,
+    "or_prerequisites": [
+      "writing"
+    ]
+  },
+  "sailing": {
+    "name": "TXT_KEY_TECH_SAILING",
+    "bts_type": "TECH_SAILING",
+    "cost": 100,
+    "era": "ancient",
+    "grid_x": 2,
+    "grid_y": 1,
+    "or_prerequisites": [
+      "fishing"
+    ]
+  },
+  "writing": {
+    "name": "TXT_KEY_TECH_WRITING",
+    "bts_type": "TECH_WRITING",
+    "cost": 120,
+    "era": "ancient",
+    "grid_x": 4,
+    "grid_y": 3,
+    "or_prerequisites": [
+      "priesthood",
+      "animal_husbandry",
+      "pottery"
+    ]
+  },
+  "mathematics": {
+    "name": "TXT_KEY_TECH_MATHEMATICS",
+    "bts_type": "TECH_MATHEMATICS",
+    "cost": 250,
+    "era": "classical",
+    "grid_x": 5,
+    "grid_y": 5,
+    "or_prerequisites": [
+      "writing"
+    ]
+  },
+  "alphabet": {
+    "name": "TXT_KEY_TECH_ALPHABET",
+    "bts_type": "TECH_ALPHABET",
+    "cost": 300,
+    "era": "classical",
+    "grid_x": 5,
+    "grid_y": 7,
+    "or_prerequisites": [
+      "writing"
+    ]
+  },
+  "calendar": {
+    "name": "TXT_KEY_TECH_CALENDAR",
+    "bts_type": "TECH_CALENDAR",
+    "cost": 350,
+    "era": "classical",
+    "grid_x": 6,
+    "grid_y": 3,
+    "prerequisites": [
+      "sailing"
+    ],
+    "or_prerequisites": [
+      "mathematics"
+    ]
+  },
+  "currency": {
+    "name": "TXT_KEY_TECH_CURRENCY",
+    "bts_type": "TECH_CURRENCY",
+    "cost": 400,
+    "era": "classical",
+    "grid_x": 6,
+    "grid_y": 7,
+    "or_prerequisites": [
+      "mathematics",
+      "alphabet"
+    ]
+  },
+  "philosophy": {
+    "name": "TXT_KEY_TECH_PHILOSOPHY",
+    "bts_type": "TECH_PHILOSOPHY",
+    "cost": 800,
+    "era": "medieval",
+    "grid_x": 8,
+    "grid_y": 3,
+    "prerequisites": [
+      "meditation"
+    ],
+    "or_prerequisites": [
+      "code_of_laws",
+      "drama"
+    ]
+  },
+  "paper": {
+    "name": "TXT_KEY_TECH_PAPER",
+    "bts_type": "TECH_PAPER",
+    "cost": 600,
+    "era": "medieval",
+    "grid_x": 9,
+    "grid_y": 8,
+    "or_prerequisites": [
+      "theology",
+      "civil_service"
+    ]
+  },
+  "banking": {
+    "name": "TXT_KEY_TECH_BANKING",
+    "bts_type": "TECH_BANKING",
+    "cost": 700,
+    "era": "medieval",
+    "grid_x": 10,
+    "grid_y": 14,
+    "prerequisites": [
+      "currency"
+    ],
+    "or_prerequisites": [
+      "guilds"
+    ]
+  },
+  "education": {
+    "name": "TXT_KEY_TECH_EDUCATION",
+    "bts_type": "TECH_EDUCATION",
+    "cost": 1800,
+    "era": "renaissance",
+    "grid_x": 10,
+    "grid_y": 10,
+    "or_prerequisites": [
+      "paper"
+    ]
+  },
+  "printing_press": {
+    "name": "TXT_KEY_TECH_PRINTING_PRESS",
+    "bts_type": "TECH_PRINTING_PRESS",
+    "cost": 1600,
+    "era": "renaissance",
+    "grid_x": 10,
+    "grid_y": 5,
+    "prerequisites": [
+      "machinery",
+      "alphabet"
+    ],
+    "or_prerequisites": [
+      "paper"
+    ]
+  },
+  "economics": {
+    "name": "TXT_KEY_TECH_ECONOMICS",
+    "bts_type": "TECH_ECONOMICS",
+    "cost": 1400,
+    "era": "renaissance",
+    "grid_x": 11,
+    "grid_y": 10,
+    "prerequisites": [
+      "banking"
+    ],
+    "or_prerequisites": [
+      "education"
+    ]
+  },
+  "astronomy": {
+    "name": "TXT_KEY_TECH_ASTRONOMY",
+    "bts_type": "TECH_ASTRONOMY",
+    "cost": 2000,
+    "era": "renaissance",
+    "grid_x": 12,
+    "grid_y": 7,
+    "prerequisites": [
+      "calendar",
+      "optics"
+    ]
+  },
+  "chemistry": {
+    "name": "TXT_KEY_TECH_CHEMISTRY",
+    "bts_type": "TECH_CHEMISTRY",
+    "cost": 1800,
+    "era": "renaissance",
+    "grid_x": 12,
+    "grid_y": 12,
+    "prerequisites": [
+      "engineering"
+    ],
+    "or_prerequisites": [
+      "gunpowder"
+    ]
+  },
+  "scientific_method": {
+    "name": "TXT_KEY_TECH_SCIENTIFIC_METHOD",
+    "bts_type": "TECH_SCIENTIFIC_METHOD",
+    "cost": 2400,
+    "era": "industrial",
+    "grid_x": 13,
+    "grid_y": 9,
+    "prerequisites": [
+      "printing_press"
+    ],
+    "or_prerequisites": [
+      "chemistry",
+      "astronomy"
+    ]
+  },
+  "physics": {
+    "name": "TXT_KEY_TECH_PHYSICS",
+    "bts_type": "TECH_PHYSICS",
+    "cost": 4000,
+    "era": "industrial",
+    "grid_x": 14,
+    "grid_y": 9,
+    "prerequisites": [
+      "astronomy"
+    ],
+    "or_prerequisites": [
+      "scientific_method"
+    ]
+  },
+  "biology": {
+    "name": "TXT_KEY_TECH_BIOLOGY",
+    "bts_type": "TECH_BIOLOGY",
+    "cost": 3600,
+    "era": "industrial",
+    "grid_x": 14,
+    "grid_y": 11,
+    "prerequisites": [
+      "chemistry"
+    ],
+    "or_prerequisites": [
+      "scientific_method"
+    ]
+  },
+  "medicine": {
+    "name": "TXT_KEY_TECH_MEDICINE",
+    "bts_type": "TECH_MEDICINE",
+    "cost": 4500,
+    "era": "industrial",
+    "grid_x": 15,
+    "grid_y": 11,
+    "prerequisites": [
+      "optics"
+    ],
+    "or_prerequisites": [
+      "biology"
+    ]
+  },
+  "electricity": {
+    "name": "TXT_KEY_TECH_ELECTRICITY",
+    "bts_type": "TECH_ELECTRICITY",
+    "cost": 4500,
+    "era": "industrial",
+    "grid_x": 15,
+    "grid_y": 9,
+    "or_prerequisites": [
+      "physics"
+    ]
+  },
+  "combustion": {
+    "name": "TXT_KEY_TECH_COMBUSTION",
+    "bts_type": "TECH_COMBUSTION",
+    "cost": 3600,
+    "era": "industrial",
+    "grid_x": 15,
+    "grid_y": 14,
+    "or_prerequisites": [
+      "railroad"
+    ]
+  },
+  "fission": {
+    "name": "TXT_KEY_TECH_FISSION",
+    "bts_type": "TECH_FISSION",
+    "cost": 5500,
+    "era": "industrial",
+    "grid_x": 16,
+    "grid_y": 7,
+    "or_prerequisites": [
+      "electricity"
+    ]
+  },
+  "flight": {
+    "name": "TXT_KEY_TECH_FLIGHT",
+    "bts_type": "TECH_FLIGHT",
+    "cost": 5000,
+    "era": "modern",
+    "grid_x": 15,
+    "grid_y": 1,
+    "prerequisites": [
+      "physics",
+      "combustion"
+    ]
+  },
+  "advanced_flight": {
+    "name": "TXT_KEY_TECH_ADVANCED_FLIGHT",
+    "bts_type": "TECH_ADVANCED_FLIGHT",
+    "cost": 5000,
+    "era": "modern",
+    "grid_x": 18,
+    "grid_y": 1,
+    "prerequisites": [
+      "satellites"
+    ],
+    "or_prerequisites": [
+      "flight"
+    ]
+  },
+  "plastics": {
+    "name": "TXT_KEY_TECH_PLASTICS",
+    "bts_type": "TECH_PLASTICS",
+    "cost": 7000,
+    "era": "modern",
+    "grid_x": 17,
+    "grid_y": 5,
+    "prerequisites": [
+      "combustion"
+    ],
+    "or_prerequisites": [
+      "industrialism"
+    ]
+  },
+  "composites": {
+    "name": "TXT_KEY_TECH_COMPOSITES",
+    "bts_type": "TECH_COMPOSITES",
+    "cost": 7500,
+    "era": "modern",
+    "grid_x": 18,
+    "grid_y": 5,
+    "prerequisites": [
+      "satellites"
+    ],
+    "or_prerequisites": [
+      "plastics"
+    ]
+  },
+  "stealth": {
+    "name": "TXT_KEY_TECH_STEALTH",
+    "bts_type": "TECH_STEALTH",
+    "cost": 8000,
+    "era": "future",
+    "grid_x": 19,
+    "grid_y": 1,
+    "prerequisites": [
+      "composites"
+    ],
+    "or_prerequisites": [
+      "advanced_flight"
+    ]
+  },
+  "genetics": {
+    "name": "TXT_KEY_TECH_GENETICS",
+    "bts_type": "TECH_GENETICS",
+    "cost": 7000,
+    "era": "future",
+    "grid_x": 19,
+    "grid_y": 13,
+    "prerequisites": [
+      "medicine"
+    ],
+    "or_prerequisites": [
+      "superconductors"
+    ]
+  },
+  "fiber_optics": {
+    "name": "TXT_KEY_TECH_FIBER_OPTICS",
+    "bts_type": "TECH_FIBER_OPTICS",
+    "cost": 7500,
+    "era": "modern",
+    "grid_x": 19,
+    "grid_y": 8,
+    "or_prerequisites": [
+      "computers",
+      "laser"
+    ]
+  },
+  "fusion": {
+    "name": "TXT_KEY_TECH_FUSION",
+    "bts_type": "TECH_FUSION",
+    "cost": 8000,
+    "era": "future",
+    "grid_x": 20,
+    "grid_y": 8,
+    "prerequisites": [
+      "fission"
+    ],
+    "or_prerequisites": [
+      "fiber_optics"
+    ]
+  },
+  "hunting": {
+    "name": "TXT_KEY_TECH_HUNTING",
+    "bts_type": "TECH_HUNTING",
+    "cost": 40,
+    "era": "ancient",
+    "grid_x": 1,
+    "grid_y": 7
+  },
+  "mining": {
+    "name": "TXT_KEY_TECH_MINING",
+    "bts_type": "TECH_MINING",
+    "cost": 50,
+    "era": "ancient",
+    "grid_x": 1,
+    "grid_y": 14
+  },
+  "archery": {
+    "name": "TXT_KEY_TECH_ARCHERY",
+    "bts_type": "TECH_ARCHERY",
+    "cost": 60,
+    "era": "ancient",
+    "grid_x": 2,
+    "grid_y": 7,
+    "or_prerequisites": [
+      "hunting"
+    ]
+  },
+  "masonry": {
+    "name": "TXT_KEY_TECH_MASONRY",
+    "bts_type": "TECH_MASONRY",
+    "cost": 80,
+    "era": "ancient",
+    "grid_x": 2,
+    "grid_y": 13,
+    "or_prerequisites": [
+      "mining",
+      "mysticism"
+    ]
+  },
+  "animal_husbandry": {
+    "name": "TXT_KEY_TECH_ANIMAL_HUSBANDRY",
+    "bts_type": "TECH_ANIMAL_HUSBANDRY",
+    "cost": 100,
+    "era": "ancient",
+    "grid_x": 2,
+    "grid_y": 5,
+    "or_prerequisites": [
+      "hunting",
+      "agriculture"
+    ]
+  },
+  "bronze_working": {
+    "name": "TXT_KEY_TECH_BRONZE_WORKING",
+    "bts_type": "TECH_BRONZE_WORKING",
+    "cost": 120,
+    "era": "ancient",
+    "grid_x": 3,
+    "grid_y": 14,
+    "or_prerequisites": [
+      "mining"
+    ]
+  },
+  "horseback_riding": {
+    "name": "TXT_KEY_TECH_HORSEBACK_RIDING",
+    "bts_type": "TECH_HORSEBACK_RIDING",
+    "cost": 250,
+    "era": "classical",
+    "grid_x": 3,
+    "grid_y": 6,
+    "or_prerequisites": [
+      "animal_husbandry"
+    ]
+  },
+  "iron_working": {
+    "name": "TXT_KEY_TECH_IRON_WORKING",
+    "bts_type": "TECH_IRON_WORKING",
+    "cost": 200,
+    "era": "classical",
+    "grid_x": 4,
+    "grid_y": 14,
+    "or_prerequisites": [
+      "bronze_working"
+    ]
+  },
+  "metal_casting": {
+    "name": "TXT_KEY_TECH_METAL_CASTING",
+    "bts_type": "TECH_METAL_CASTING",
+    "cost": 450,
+    "era": "classical",
+    "grid_x": 4,
+    "grid_y": 12,
+    "prerequisites": [
+      "pottery"
+    ],
+    "or_prerequisites": [
+      "bronze_working"
+    ]
+  },
+  "compass": {
+    "name": "TXT_KEY_TECH_COMPASS",
+    "bts_type": "TECH_COMPASS",
+    "cost": 400,
+    "era": "classical",
+    "grid_x": 5,
+    "grid_y": 14,
+    "prerequisites": [
+      "sailing"
+    ],
+    "or_prerequisites": [
+      "iron_working"
+    ]
+  },
+  "construction": {
+    "name": "TXT_KEY_TECH_CONSTRUCTION",
+    "bts_type": "TECH_CONSTRUCTION",
+    "cost": 350,
+    "era": "classical",
+    "grid_x": 6,
+    "grid_y": 5,
+    "prerequisites": [
+      "masonry"
+    ],
+    "or_prerequisites": [
+      "mathematics"
+    ]
+  },
+  "machinery": {
+    "name": "TXT_KEY_TECH_MACHINERY",
+    "bts_type": "TECH_MACHINERY",
+    "cost": 700,
+    "era": "medieval",
+    "grid_x": 6,
+    "grid_y": 12,
+    "or_prerequisites": [
+      "metal_casting"
+    ]
+  },
+  "engineering": {
+    "name": "TXT_KEY_TECH_ENGINEERING",
+    "bts_type": "TECH_ENGINEERING",
+    "cost": 1000,
+    "era": "medieval",
+    "grid_x": 7,
+    "grid_y": 5,
+    "prerequisites": [
+      "machinery"
+    ],
+    "or_prerequisites": [
+      "construction"
+    ]
+  },
+  "optics": {
+    "name": "TXT_KEY_TECH_OPTICS",
+    "bts_type": "TECH_OPTICS",
+    "cost": 600,
+    "era": "medieval",
+    "grid_x": 7,
+    "grid_y": 14,
+    "prerequisites": [
+      "machinery"
+    ],
+    "or_prerequisites": [
+      "compass"
+    ]
+  },
+  "gunpowder": {
+    "name": "TXT_KEY_TECH_GUNPOWDER",
+    "bts_type": "TECH_GUNPOWDER",
+    "cost": 1200,
+    "era": "renaissance",
+    "grid_x": 11,
+    "grid_y": 12,
+    "or_prerequisites": [
+      "guilds",
+      "education"
+    ]
+  },
+  "replaceable_parts": {
+    "name": "TXT_KEY_TECH_REPLACEABLE_PARTS",
+    "bts_type": "TECH_REPLACEABLE_PARTS",
+    "cost": 1800,
+    "era": "renaissance",
+    "grid_x": 11,
+    "grid_y": 5,
+    "prerequisites": [
+      "banking"
+    ],
+    "or_prerequisites": [
+      "printing_press"
+    ]
+  },
+  "military_science": {
+    "name": "TXT_KEY_TECH_MILITARY_SCIENCE",
+    "bts_type": "TECH_MILITARY_SCIENCE",
+    "cost": 2000,
+    "era": "renaissance",
+    "grid_x": 13,
+    "grid_y": 12,
+    "or_prerequisites": [
+      "chemistry"
+    ]
+  },
+  "rifling": {
+    "name": "TXT_KEY_TECH_RIFLING",
+    "bts_type": "TECH_RIFLING",
+    "cost": 2400,
+    "era": "renaissance",
+    "grid_x": 12,
+    "grid_y": 4,
+    "prerequisites": [
+      "gunpowder"
+    ],
+    "or_prerequisites": [
+      "replaceable_parts"
+    ]
+  },
+  "steam_power": {
+    "name": "TXT_KEY_TECH_STEAM_POWER",
+    "bts_type": "TECH_STEAM_POWER",
+    "cost": 3200,
+    "era": "industrial",
+    "grid_x": 13,
+    "grid_y": 5,
+    "prerequisites": [
+      "chemistry"
+    ],
+    "or_prerequisites": [
+      "replaceable_parts"
+    ]
+  },
+  "steel": {
+    "name": "TXT_KEY_TECH_STEEL",
+    "bts_type": "TECH_STEEL",
+    "cost": 2800,
+    "era": "industrial",
+    "grid_x": 13,
+    "grid_y": 14,
+    "prerequisites": [
+      "iron_working"
+    ],
+    "or_prerequisites": [
+      "chemistry"
+    ]
+  },
+  "assembly_line": {
+    "name": "TXT_KEY_TECH_ASSEMBLY_LINE",
+    "bts_type": "TECH_ASSEMBLY_LINE",
+    "cost": 5000,
+    "era": "industrial",
+    "grid_x": 14,
+    "grid_y": 5,
+    "prerequisites": [
+      "corporation"
+    ],
+    "or_prerequisites": [
+      "steam_power"
+    ]
+  },
+  "railroad": {
+    "name": "TXT_KEY_TECH_RAILROAD",
+    "bts_type": "TECH_RAILROAD",
+    "cost": 4500,
+    "era": "industrial",
+    "grid_x": 14,
+    "grid_y": 14,
+    "prerequisites": [
+      "steam_power"
+    ],
+    "or_prerequisites": [
+      "steel"
+    ]
+  },
+  "artillery": {
+    "name": "TXT_KEY_TECH_ARTILLERY",
+    "bts_type": "TECH_ARTILLERY",
+    "cost": 4000,
+    "era": "industrial",
+    "grid_x": 15,
+    "grid_y": 3,
+    "prerequisites": [
+      "physics",
+      "steel"
+    ],
+    "or_prerequisites": [
+      "rifling"
+    ]
+  },
+  "industrialism": {
+    "name": "TXT_KEY_TECH_INDUSTRIALISM",
+    "bts_type": "TECH_INDUSTRIALISM",
+    "cost": 6500,
+    "era": "industrial",
+    "grid_x": 16,
+    "grid_y": 5,
+    "prerequisites": [
+      "electricity"
+    ],
+    "or_prerequisites": [
+      "assembly_line"
+    ]
+  },
+  "radio": {
+    "name": "TXT_KEY_TECH_RADIO",
+    "bts_type": "TECH_RADIO",
+    "cost": 6000,
+    "era": "modern",
+    "grid_x": 16,
+    "grid_y": 9,
+    "or_prerequisites": [
+      "electricity"
+    ]
+  },
+  "refrigeration": {
+    "name": "TXT_KEY_TECH_REFRIGERATION",
+    "bts_type": "TECH_REFRIGERATION",
+    "cost": 4000,
+    "era": "modern",
+    "grid_x": 16,
+    "grid_y": 13,
+    "prerequisites": [
+      "biology"
+    ],
+    "or_prerequisites": [
+      "electricity"
+    ]
+  },
+  "superconductors": {
+    "name": "TXT_KEY_TECH_SUPERCONDUCTORS",
+    "bts_type": "TECH_SUPERCONDUCTORS",
+    "cost": 6500,
+    "era": "modern",
+    "grid_x": 18,
+    "grid_y": 13,
+    "or_prerequisites": [
+      "refrigeration",
+      "computers"
+    ]
+  },
+  "computers": {
+    "name": "TXT_KEY_TECH_COMPUTERS",
+    "bts_type": "TECH_COMPUTERS",
+    "cost": 6500,
+    "era": "modern",
+    "grid_x": 17,
+    "grid_y": 11,
+    "prerequisites": [
+      "plastics"
+    ],
+    "or_prerequisites": [
+      "radio"
+    ]
+  },
+  "laser": {
+    "name": "TXT_KEY_TECH_LASER",
+    "bts_type": "TECH_LASER",
+    "cost": 7000,
+    "era": "modern",
+    "grid_x": 18,
+    "grid_y": 3,
+    "prerequisites": [
+      "plastics"
+    ],
+    "or_prerequisites": [
+      "satellites"
+    ]
+  },
+  "rocketry": {
+    "name": "TXT_KEY_TECH_ROCKETRY",
+    "bts_type": "TECH_ROCKETRY",
+    "cost": 5000,
+    "era": "modern",
+    "grid_x": 16,
+    "grid_y": 3,
+    "prerequisites": [
+      "rifling"
+    ],
+    "or_prerequisites": [
+      "flight",
+      "artillery"
+    ]
+  },
+  "satellites": {
+    "name": "TXT_KEY_TECH_SATELLITES",
+    "bts_type": "TECH_SATELLITES",
+    "cost": 6000,
+    "era": "modern",
+    "grid_x": 17,
+    "grid_y": 3,
+    "prerequisites": [
+      "radio"
+    ],
+    "or_prerequisites": [
+      "rocketry"
+    ]
+  },
+  "robotics": {
+    "name": "TXT_KEY_TECH_ROBOTICS",
+    "bts_type": "TECH_ROBOTICS",
+    "cost": 8000,
+    "era": "modern",
+    "grid_x": 19,
+    "grid_y": 11,
+    "or_prerequisites": [
+      "computers"
+    ]
+  },
+  "future_tech": {
+    "name": "TXT_KEY_TECH_FUTURE_TECH",
+    "bts_type": "TECH_FUTURE_TECH",
+    "cost": 10000,
+    "era": "future",
+    "grid_x": 20,
+    "grid_y": 13,
+    "prerequisites": [
+      "stealth"
+    ],
+    "or_prerequisites": [
+      "genetics"
+    ]
+  }
+}

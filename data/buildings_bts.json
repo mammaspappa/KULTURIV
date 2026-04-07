@@ -1,0 +1,1603 @@
+{
+  "palace": {
+    "name": "TXT_KEY_BUILDING_PALACE",
+    "bts_type": "BUILDING_PALACE",
+    "cost": 160,
+    "required_tech": "",
+    "wonder_type": "national",
+    "effects": {
+      "happiness": 1,
+      "second_palace": true
+    }
+  },
+  "great_palace": {
+    "name": "TXT_KEY_BUILDING_GREAT_PALACE",
+    "bts_type": "BUILDING_GREAT_PALACE",
+    "cost": 200,
+    "required_tech": "",
+    "wonder_type": "national",
+    "required_buildings": [
+      "courthouse"
+    ],
+    "effects": {
+      "great_spy_points": 1,
+      "second_palace": true
+    }
+  },
+  "versailles": {
+    "name": "TXT_KEY_BUILDING_VERSAILLES",
+    "bts_type": "BUILDING_VERSAILLES",
+    "cost": 800,
+    "required_tech": "divine_right",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 2,
+      "second_palace": true
+    }
+  },
+  "walls": {
+    "name": "TXT_KEY_BUILDING_WALLS",
+    "bts_type": "BUILDING_WALLS",
+    "cost": 50,
+    "required_tech": "masonry",
+    "obsolete_tech": "rifling"
+  },
+  "celtic_dun": {
+    "name": "TXT_KEY_BUILDING_CELTIC_DUN",
+    "bts_type": "BUILDING_CELTIC_DUN",
+    "cost": 50,
+    "required_tech": "masonry",
+    "obsolete_tech": "rifling",
+    "civilization": "celt"
+  },
+  "castle": {
+    "name": "TXT_KEY_BUILDING_CASTLE",
+    "bts_type": "BUILDING_CASTLE",
+    "cost": 100,
+    "required_tech": "engineering",
+    "obsolete_tech": "economics",
+    "required_buildings": [
+      "walls"
+    ],
+    "effects": {
+      "trade_routes": 1
+    }
+  },
+  "spanish_citadel": {
+    "name": "TXT_KEY_BUILDING_SPANISH_CITADEL",
+    "bts_type": "BUILDING_SPANISH_CITADEL",
+    "cost": 100,
+    "required_tech": "engineering",
+    "obsolete_tech": "economics",
+    "required_buildings": [
+      "walls"
+    ],
+    "civilization": "spain",
+    "effects": {
+      "trade_routes": 1
+    }
+  },
+  "barracks": {
+    "name": "TXT_KEY_BUILDING_BARRACKS",
+    "bts_type": "BUILDING_BARRACKS",
+    "cost": 50,
+    "required_tech": ""
+  },
+  "zulu_ikhanda": {
+    "name": "TXT_KEY_BUILDING_ZULU_IKHANDA",
+    "bts_type": "BUILDING_ZULU_IKHANDA",
+    "cost": 60,
+    "required_tech": "",
+    "civilization": "zulu",
+    "effects": {
+      "maintenance_reduction": 0.2
+    }
+  },
+  "stable": {
+    "name": "TXT_KEY_BUILDING_STABLE",
+    "bts_type": "BUILDING_STABLE",
+    "cost": 60,
+    "required_tech": "horseback_riding",
+    "obsolete_tech": "advanced_flight"
+  },
+  "mongol_ger": {
+    "name": "TXT_KEY_BUILDING_MONGOL_GER",
+    "bts_type": "BUILDING_MONGOL_GER",
+    "cost": 60,
+    "required_tech": "horseback_riding",
+    "obsolete_tech": "advanced_flight",
+    "civilization": "mongol"
+  },
+  "bunker": {
+    "name": "TXT_KEY_BUILDING_BUNKER",
+    "bts_type": "BUILDING_BUNKER",
+    "cost": 100,
+    "required_tech": "electricity"
+  },
+  "bomb_shelter": {
+    "name": "TXT_KEY_BUILDING_BOMB_SHELTER",
+    "bts_type": "BUILDING_BOMB_SHELTER",
+    "cost": 100,
+    "required_tech": "electricity"
+  },
+  "granary": {
+    "name": "TXT_KEY_BUILDING_GRANARY",
+    "bts_type": "BUILDING_GRANARY",
+    "cost": 60,
+    "required_tech": "pottery",
+    "effects": {
+      "food_stored_on_growth": 0.5
+    }
+  },
+  "incan_terrace": {
+    "name": "TXT_KEY_BUILDING_INCAN_TERRACE",
+    "bts_type": "BUILDING_INCAN_TERRACE",
+    "cost": 60,
+    "required_tech": "pottery",
+    "civilization": "inca",
+    "effects": {
+      "food_stored_on_growth": 0.5
+    }
+  },
+  "aqueduct": {
+    "name": "TXT_KEY_BUILDING_AQUEDUCT",
+    "bts_type": "BUILDING_AQUEDUCT",
+    "cost": 100,
+    "required_tech": "mathematics",
+    "effects": {
+      "health": 2
+    }
+  },
+  "ottoman_hammam": {
+    "name": "TXT_KEY_BUILDING_OTTOMAN_HAMMAM",
+    "bts_type": "BUILDING_OTTOMAN_HAMMAM",
+    "cost": 100,
+    "required_tech": "mathematics",
+    "civilization": "ottoman",
+    "effects": {
+      "happiness": 2,
+      "health": 2
+    }
+  },
+  "khmer_baray": {
+    "name": "TXT_KEY_BUILDING_KHMER_BARAY",
+    "bts_type": "BUILDING_KHMER_BARAY",
+    "cost": 100,
+    "required_tech": "mathematics",
+    "civilization": "khmer",
+    "effects": {
+      "health": 2
+    }
+  },
+  "hospital": {
+    "name": "TXT_KEY_BUILDING_HOSPITAL",
+    "bts_type": "BUILDING_HOSPITAL",
+    "cost": 200,
+    "required_tech": "medicine",
+    "effects": {
+      "health": 3
+    }
+  },
+  "recycling_center": {
+    "name": "TXT_KEY_BUILDING_RECYCLING_CENTER",
+    "bts_type": "BUILDING_RECYCLING_CENTER",
+    "cost": 300,
+    "required_tech": "ecology"
+  },
+  "lighthouse": {
+    "name": "TXT_KEY_BUILDING_LIGHTHOUSE",
+    "bts_type": "BUILDING_LIGHTHOUSE",
+    "cost": 60,
+    "required_tech": "sailing"
+  },
+  "viking_trading_post": {
+    "name": "TXT_KEY_BUILDING_VIKING_TRADING_POST",
+    "bts_type": "BUILDING_VIKING_TRADING_POST",
+    "cost": 60,
+    "required_tech": "sailing",
+    "civilization": "viking"
+  },
+  "harbor": {
+    "name": "TXT_KEY_BUILDING_HARBOR",
+    "bts_type": "BUILDING_HARBOR",
+    "cost": 80,
+    "required_tech": "compass"
+  },
+  "carthage_cothon": {
+    "name": "TXT_KEY_BUILDING_CARTHAGE_COTHON",
+    "bts_type": "BUILDING_CARTHAGE_COTHON",
+    "cost": 100,
+    "required_tech": "compass",
+    "civilization": "carthage",
+    "effects": {
+      "trade_routes": 1
+    }
+  },
+  "custom_house": {
+    "name": "TXT_KEY_BUILDING_CUSTOM_HOUSE",
+    "bts_type": "BUILDING_CUSTOM_HOUSE",
+    "cost": 180,
+    "required_tech": "economics",
+    "required_buildings": [
+      "harbor"
+    ]
+  },
+  "portugal_feitoria": {
+    "name": "TXT_KEY_BUILDING_PORTUGAL_FEITORIA",
+    "bts_type": "BUILDING_PORTUGAL_FEITORIA",
+    "cost": 180,
+    "required_tech": "economics",
+    "required_buildings": [
+      "harbor"
+    ],
+    "civilization": "portugal"
+  },
+  "drydock": {
+    "name": "TXT_KEY_BUILDING_DRYDOCK",
+    "bts_type": "BUILDING_DRYDOCK",
+    "cost": 120,
+    "required_tech": "steel",
+    "effects": {
+      "health": -1
+    }
+  },
+  "airport": {
+    "name": "TXT_KEY_BUILDING_AIRPORT",
+    "bts_type": "BUILDING_AIRPORT",
+    "cost": 250,
+    "required_tech": "flight",
+    "effects": {
+      "health": -1,
+      "trade_routes": 1
+    }
+  },
+  "forge": {
+    "name": "TXT_KEY_BUILDING_FORGE",
+    "bts_type": "BUILDING_FORGE",
+    "cost": 120,
+    "required_tech": "metal_casting",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 1
+    }
+  },
+  "mali_mint": {
+    "name": "TXT_KEY_BUILDING_MALI_MINT",
+    "bts_type": "BUILDING_MALI_MINT",
+    "cost": 120,
+    "required_tech": "metal_casting",
+    "civilization": "mali",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 1
+    }
+  },
+  "factory": {
+    "name": "TXT_KEY_BUILDING_FACTORY",
+    "bts_type": "BUILDING_FACTORY",
+    "cost": 250,
+    "required_tech": "assembly_line",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 2
+    }
+  },
+  "german_assembly_plant": {
+    "name": "TXT_KEY_BUILDING_GERMAN_ASSEMBLY_PLANT",
+    "bts_type": "BUILDING_GERMAN_ASSEMBLY_PLANT",
+    "cost": 250,
+    "required_tech": "assembly_line",
+    "civilization": "germany",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 4
+    }
+  },
+  "coal_plant": {
+    "name": "TXT_KEY_BUILDING_COAL_PLANT",
+    "bts_type": "BUILDING_COAL_PLANT",
+    "cost": 150,
+    "required_tech": "assembly_line",
+    "required_buildings": [
+      "factory"
+    ]
+  },
+  "japanese_shale_plant": {
+    "name": "TXT_KEY_BUILDING_JAPANESE_SHALE_PLANT",
+    "bts_type": "BUILDING_JAPANESE_SHALE_PLANT",
+    "cost": 150,
+    "required_tech": "assembly_line",
+    "required_buildings": [
+      "factory"
+    ],
+    "civilization": "japan",
+    "effects": {
+      "provides_power": true
+    }
+  },
+  "hydro_plant": {
+    "name": "TXT_KEY_BUILDING_HYDRO_PLANT",
+    "bts_type": "BUILDING_HYDRO_PLANT",
+    "cost": 200,
+    "required_tech": "plastics",
+    "required_buildings": [
+      "factory"
+    ],
+    "effects": {
+      "provides_power": true
+    }
+  },
+  "nuclear_plant": {
+    "name": "TXT_KEY_BUILDING_NUCLEAR_PLANT",
+    "bts_type": "BUILDING_NUCLEAR_PLANT",
+    "cost": 250,
+    "required_tech": "fission",
+    "required_buildings": [
+      "factory"
+    ]
+  },
+  "industrial_park": {
+    "name": "TXT_KEY_BUILDING_INDUSTRIAL_PARK",
+    "bts_type": "BUILDING_INDUSTRIAL_PARK",
+    "cost": 200,
+    "required_tech": "industrialism",
+    "required_buildings": [
+      "factory"
+    ],
+    "effects": {
+      "health": -2,
+      "engineer_slots": 2
+    }
+  },
+  "obelisk": {
+    "name": "TXT_KEY_BUILDING_MONUMENT",
+    "bts_type": "BUILDING_OBELISK",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy"
+  },
+  "egyptian_obelisk": {
+    "name": "TXT_KEY_BUILDING_OBELISK",
+    "bts_type": "BUILDING_EGYPTIAN_OBELISK",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy",
+    "civilization": "egypt",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "ethiopian_stele": {
+    "name": "TXT_KEY_BUILDING_ETHIOPIAN_STELE",
+    "bts_type": "BUILDING_ETHIOPIAN_STELE",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy",
+    "civilization": "ethiopia"
+  },
+  "native_america_totem": {
+    "name": "TXT_KEY_BUILDING_NATIVE_AMERICA_TOTEM",
+    "bts_type": "BUILDING_NATIVE_AMERICA_TOTEM",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy",
+    "civilization": "native_america"
+  },
+  "public_transportation": {
+    "name": "TXT_KEY_BUILDING_PUBLIC_TRANSPORTATION",
+    "bts_type": "BUILDING_PUBLIC_TRANSPORTATION",
+    "cost": 150,
+    "required_tech": "combustion",
+    "effects": {
+      "health": 1
+    }
+  },
+  "academy": {
+    "name": "TXT_KEY_BUILDING_ACADEMY",
+    "bts_type": "BUILDING_ACADEMY",
+    "cost": -1,
+    "required_tech": ""
+  },
+  "library": {
+    "name": "TXT_KEY_BUILDING_LIBRARY",
+    "bts_type": "BUILDING_LIBRARY",
+    "cost": 90,
+    "required_tech": "writing",
+    "effects": {
+      "scientist_slots": 2
+    }
+  },
+  "arabian_madrassa": {
+    "name": "TXT_KEY_BUILDING_ARABIAN_MADRASSA",
+    "bts_type": "BUILDING_ARABIAN_MADRASSA",
+    "cost": 90,
+    "required_tech": "writing",
+    "civilization": "arabia",
+    "effects": {
+      "scientist_slots": 2,
+      "priest_slots": 2
+    }
+  },
+  "university": {
+    "name": "TXT_KEY_BUILDING_UNIVERSITY",
+    "bts_type": "BUILDING_UNIVERSITY",
+    "cost": 200,
+    "required_tech": "education",
+    "required_buildings": [
+      "library"
+    ]
+  },
+  "korean_seowon": {
+    "name": "TXT_KEY_BUILDING_KOREAN_SEOWON",
+    "bts_type": "BUILDING_KOREAN_SEOWON",
+    "cost": 200,
+    "required_tech": "education",
+    "required_buildings": [
+      "library"
+    ],
+    "civilization": "korea"
+  },
+  "observatory": {
+    "name": "TXT_KEY_BUILDING_OBSERVATORY",
+    "bts_type": "BUILDING_OBSERVATORY",
+    "cost": 150,
+    "required_tech": "astronomy",
+    "effects": {
+      "scientist_slots": 1
+    }
+  },
+  "french_salon": {
+    "name": "TXT_KEY_BUILDING_FRENCH_SALON",
+    "bts_type": "BUILDING_FRENCH_SALON",
+    "cost": 150,
+    "required_tech": "astronomy",
+    "civilization": "france",
+    "effects": {
+      "scientist_slots": 1
+    }
+  },
+  "laboratory": {
+    "name": "TXT_KEY_BUILDING_LABORATORY",
+    "bts_type": "BUILDING_LABORATORY",
+    "cost": 250,
+    "required_tech": "superconductors",
+    "required_buildings": [
+      "observatory"
+    ],
+    "effects": {
+      "health": -1,
+      "space_production_percent": 0.5,
+      "scientist_slots": 1
+    }
+  },
+  "russian_research_institute": {
+    "name": "TXT_KEY_BUILDING_RUSSIAN_RESEARCH_INSTITUTE",
+    "bts_type": "BUILDING_RUSSIAN_RESEARCH_INSTITUTE",
+    "cost": 250,
+    "required_tech": "superconductors",
+    "required_buildings": [
+      "observatory"
+    ],
+    "civilization": "russia",
+    "effects": {
+      "health": -1,
+      "space_production_percent": 0.5,
+      "scientist_slots": 1
+    }
+  },
+  "theatre": {
+    "name": "TXT_KEY_BUILDING_THEATRE",
+    "bts_type": "BUILDING_THEATRE",
+    "cost": 50,
+    "required_tech": "drama",
+    "effects": {
+      "artist_slots": 2
+    }
+  },
+  "chinese_pavillion": {
+    "name": "TXT_KEY_BUILDING_CHINESE_PAVILLION",
+    "bts_type": "BUILDING_CHINESE_PAVILLION",
+    "cost": 50,
+    "required_tech": "drama",
+    "civilization": "china",
+    "effects": {
+      "artist_slots": 2
+    }
+  },
+  "byzantine_hippodrome": {
+    "name": "TXT_KEY_BUILDING_BYZANTINE_HIPPODROME",
+    "bts_type": "BUILDING_BYZANTINE_HIPPODROME",
+    "cost": 50,
+    "required_tech": "drama",
+    "civilization": "byzantium",
+    "effects": {
+      "happiness": 1
+    }
+  },
+  "colosseum": {
+    "name": "TXT_KEY_BUILDING_COLOSSEUM",
+    "bts_type": "BUILDING_COLOSSEUM",
+    "cost": 80,
+    "required_tech": "construction",
+    "effects": {
+      "happiness": 1
+    }
+  },
+  "greek_odeon": {
+    "name": "TXT_KEY_BUILDING_GREEK_ODEON",
+    "bts_type": "BUILDING_GREEK_ODEON",
+    "cost": 80,
+    "required_tech": "construction",
+    "civilization": "greece",
+    "effects": {
+      "happiness": 2,
+      "artist_slots": 2
+    }
+  },
+  "maya_ball_court": {
+    "name": "TXT_KEY_BUILDING_MAYA_BALL_COURT",
+    "bts_type": "BUILDING_MAYA_BALL_COURT",
+    "cost": 80,
+    "required_tech": "construction",
+    "civilization": "maya",
+    "effects": {
+      "happiness": 3
+    }
+  },
+  "babylon_garden": {
+    "name": "TXT_KEY_BUILDING_BABYLON_GARDEN",
+    "bts_type": "BUILDING_BABYLON_GARDEN",
+    "cost": 80,
+    "required_tech": "construction",
+    "civilization": "babylon",
+    "effects": {
+      "happiness": 1,
+      "health": 2
+    }
+  },
+  "broadcast_tower": {
+    "name": "TXT_KEY_BUILDING_BROADCAST_TOWER",
+    "bts_type": "BUILDING_BROADCAST_TOWER",
+    "cost": 175,
+    "required_tech": "mass_media",
+    "effects": {
+      "artist_slots": 2
+    }
+  },
+  "market": {
+    "name": "TXT_KEY_BUILDING_MARKET",
+    "bts_type": "BUILDING_MARKET",
+    "cost": 150,
+    "required_tech": "currency",
+    "effects": {
+      "merchant_slots": 2
+    }
+  },
+  "roman_forum": {
+    "name": "TXT_KEY_BUILDING_ROMAN_FORUM",
+    "bts_type": "BUILDING_ROMAN_FORUM",
+    "cost": 150,
+    "required_tech": "currency",
+    "civilization": "rome",
+    "effects": {
+      "merchant_slots": 2
+    }
+  },
+  "grocer": {
+    "name": "TXT_KEY_BUILDING_GROCER",
+    "bts_type": "BUILDING_GROCER",
+    "cost": 150,
+    "required_tech": "guilds",
+    "effects": {
+      "merchant_slots": 2
+    }
+  },
+  "persian_apothecary": {
+    "name": "TXT_KEY_BUILDING_PERSIAN_APOTHECARY",
+    "bts_type": "BUILDING_PERSIAN_APOTHECARY",
+    "cost": 150,
+    "required_tech": "guilds",
+    "civilization": "persia",
+    "effects": {
+      "health": 2,
+      "merchant_slots": 2
+    }
+  },
+  "bank": {
+    "name": "TXT_KEY_BUILDING_BANK",
+    "bts_type": "BUILDING_BANK",
+    "cost": 200,
+    "required_tech": "banking"
+  },
+  "english_stock_exchange": {
+    "name": "TXT_KEY_BUILDING_ENGLISH_STOCK_EXCHANGE",
+    "bts_type": "BUILDING_ENGLISH_STOCK_EXCHANGE",
+    "cost": 200,
+    "required_tech": "banking",
+    "civilization": "england"
+  },
+  "supermarket": {
+    "name": "TXT_KEY_BUILDING_SUPERMARKET",
+    "bts_type": "BUILDING_SUPERMARKET",
+    "cost": 150,
+    "required_tech": "refrigeration",
+    "required_buildings": [
+      "grocer"
+    ]
+  },
+  "american_mall": {
+    "name": "TXT_KEY_BUILDING_AMERICAN_MALL",
+    "bts_type": "BUILDING_AMERICAN_MALL",
+    "cost": 150,
+    "required_tech": "refrigeration",
+    "required_buildings": [
+      "grocer"
+    ],
+    "civilization": "america"
+  },
+  "courthouse": {
+    "name": "TXT_KEY_BUILDING_COURTHOUSE",
+    "bts_type": "BUILDING_COURTHOUSE",
+    "cost": 120,
+    "required_tech": "code_of_laws",
+    "effects": {
+      "maintenance_reduction": 0.5,
+      "spy_slots": 1
+    }
+  },
+  "aztec_sacrificial_altar": {
+    "name": "TXT_KEY_BUILDING_AZTEC_SACRIFICIAL_ALTAR",
+    "bts_type": "BUILDING_AZTEC_SACRIFICIAL_ALTAR",
+    "cost": 90,
+    "required_tech": "code_of_laws",
+    "civilization": "aztec",
+    "effects": {
+      "maintenance_reduction": 0.5,
+      "spy_slots": 1
+    }
+  },
+  "holy_roman_rathaus": {
+    "name": "TXT_KEY_BUILDING_HOLY_ROMAN_RATHAUS",
+    "bts_type": "BUILDING_HOLY_ROMAN_RATHAUS",
+    "cost": 120,
+    "required_tech": "code_of_laws",
+    "civilization": "holy_roman",
+    "effects": {
+      "maintenance_reduction": 0.75,
+      "spy_slots": 1
+    }
+  },
+  "sumerian_ziggurat": {
+    "name": "TXT_KEY_BUILDING_SUMERIAN_ZIGGURAT",
+    "bts_type": "BUILDING_SUMERIAN_ZIGGURAT",
+    "cost": 90,
+    "required_tech": "priesthood",
+    "civilization": "sumeria",
+    "effects": {
+      "maintenance_reduction": 0.5,
+      "spy_slots": 1
+    }
+  },
+  "jail": {
+    "name": "TXT_KEY_BUILDING_JAIL",
+    "bts_type": "BUILDING_JAIL",
+    "cost": 120,
+    "required_tech": "constitution",
+    "effects": {
+      "spy_slots": 2
+    }
+  },
+  "indian_mausoleum": {
+    "name": "TXT_KEY_BUILDING_INDIAN_MAUSOLEUM",
+    "bts_type": "BUILDING_INDIAN_MAUSOLEUM",
+    "cost": 120,
+    "required_tech": "constitution",
+    "civilization": "india",
+    "effects": {
+      "happiness": 2,
+      "spy_slots": 2
+    }
+  },
+  "levee": {
+    "name": "TXT_KEY_BUILDING_LEVEE",
+    "bts_type": "BUILDING_LEVEE",
+    "cost": 180,
+    "required_tech": "steam_power"
+  },
+  "netherlands_dike": {
+    "name": "TXT_KEY_BUILDING_NETHERLANDS_DIKE",
+    "bts_type": "BUILDING_NETHERLANDS_DIKE",
+    "cost": 180,
+    "required_tech": "steam_power",
+    "civilization": "netherlands"
+  },
+  "intelligence_agency": {
+    "name": "TXT_KEY_BUILDING_INTELLIGENCE_AGENCY",
+    "bts_type": "BUILDING_INTELLIGENCE_AGENCY",
+    "cost": 180,
+    "required_tech": "utopia",
+    "effects": {
+      "spy_slots": 2
+    }
+  },
+  "national_security": {
+    "name": "TXT_KEY_BUILDING_NATIONAL_SECURITY",
+    "bts_type": "BUILDING_NATIONAL_SECURITY",
+    "cost": 220,
+    "required_tech": "democracy",
+    "effects": {
+      "spy_slots": 2
+    }
+  },
+  "jewish_temple": {
+    "name": "TXT_KEY_BUILDING_JEWISH_TEMPLE",
+    "bts_type": "BUILDING_JEWISH_TEMPLE",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "judaism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "jewish_cathedral": {
+    "name": "TXT_KEY_BUILDING_JEWISH_CATHEDRAL",
+    "bts_type": "BUILDING_JEWISH_CATHEDRAL",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "judaism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "jewish_monastery": {
+    "name": "TXT_KEY_BUILDING_JEWISH_MONASTERY",
+    "bts_type": "BUILDING_JEWISH_MONASTERY",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "judaism"
+  },
+  "jewish_shrine": {
+    "name": "TXT_KEY_BUILDING_JEWISH_SHRINE",
+    "bts_type": "BUILDING_JEWISH_SHRINE",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "christian_temple": {
+    "name": "TXT_KEY_BUILDING_CHRISTIAN_TEMPLE",
+    "bts_type": "BUILDING_CHRISTIAN_TEMPLE",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "christianity",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "christian_cathedral": {
+    "name": "TXT_KEY_BUILDING_CHRISTIAN_CATHEDRAL",
+    "bts_type": "BUILDING_CHRISTIAN_CATHEDRAL",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "christianity",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "christian_monastery": {
+    "name": "TXT_KEY_BUILDING_CHRISTIAN_MONASTERY",
+    "bts_type": "BUILDING_CHRISTIAN_MONASTERY",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "christianity"
+  },
+  "christian_shrine": {
+    "name": "TXT_KEY_BUILDING_CHRISTIAN_SHRINE",
+    "bts_type": "BUILDING_CHRISTIAN_SHRINE",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "islamic_temple": {
+    "name": "TXT_KEY_BUILDING_ISLAMIC_TEMPLE",
+    "bts_type": "BUILDING_ISLAMIC_TEMPLE",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "islam",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "islamic_cathedral": {
+    "name": "TXT_KEY_BUILDING_ISLAMIC_CATHEDRAL",
+    "bts_type": "BUILDING_ISLAMIC_CATHEDRAL",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "islam",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "islamic_monastery": {
+    "name": "TXT_KEY_BUILDING_ISLAMIC_MONASTERY",
+    "bts_type": "BUILDING_ISLAMIC_MONASTERY",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "islam"
+  },
+  "islamic_shrine": {
+    "name": "TXT_KEY_BUILDING_ISLAMIC_SHRINE",
+    "bts_type": "BUILDING_ISLAMIC_SHRINE",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "hindu_temple": {
+    "name": "TXT_KEY_BUILDING_HINDU_TEMPLE",
+    "bts_type": "BUILDING_HINDU_TEMPLE",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "hinduism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "hindu_cathedral": {
+    "name": "TXT_KEY_BUILDING_HINDU_CATHEDRAL",
+    "bts_type": "BUILDING_HINDU_CATHEDRAL",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "hinduism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "hindu_monastery": {
+    "name": "TXT_KEY_BUILDING_HINDU_MONASTERY",
+    "bts_type": "BUILDING_HINDU_MONASTERY",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "hinduism"
+  },
+  "hindu_shrine": {
+    "name": "TXT_KEY_BUILDING_HINDU_SHRINE",
+    "bts_type": "BUILDING_HINDU_SHRINE",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "buddhist_temple": {
+    "name": "TXT_KEY_BUILDING_BUDDHIST_TEMPLE",
+    "bts_type": "BUILDING_BUDDHIST_TEMPLE",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "buddhism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "buddhist_cathedral": {
+    "name": "TXT_KEY_BUILDING_BUDDHIST_CATHEDRAL",
+    "bts_type": "BUILDING_BUDDHIST_CATHEDRAL",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "buddhism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "buddhist_monastery": {
+    "name": "TXT_KEY_BUILDING_BUDDHIST_MONASTERY",
+    "bts_type": "BUILDING_BUDDHIST_MONASTERY",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "buddhism"
+  },
+  "buddhist_shrine": {
+    "name": "TXT_KEY_BUILDING_BUDDHIST_SHRINE",
+    "bts_type": "BUILDING_BUDDHIST_SHRINE",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "confucian_temple": {
+    "name": "TXT_KEY_BUILDING_CONFUCIAN_TEMPLE",
+    "bts_type": "BUILDING_CONFUCIAN_TEMPLE",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "confucianism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "confucian_cathedral": {
+    "name": "TXT_KEY_BUILDING_CONFUCIAN_CATHEDRAL",
+    "bts_type": "BUILDING_CONFUCIAN_CATHEDRAL",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "confucianism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "confucian_monastery": {
+    "name": "TXT_KEY_BUILDING_CONFUCIAN_MONASTERY",
+    "bts_type": "BUILDING_CONFUCIAN_MONASTERY",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "confucianism"
+  },
+  "confucian_shrine": {
+    "name": "TXT_KEY_BUILDING_CONFUCIAN_SHRINE",
+    "bts_type": "BUILDING_CONFUCIAN_SHRINE",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "taoist_temple": {
+    "name": "TXT_KEY_BUILDING_TAOIST_TEMPLE",
+    "bts_type": "BUILDING_TAOIST_TEMPLE",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "taoism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "taoist_cathedral": {
+    "name": "TXT_KEY_BUILDING_TAOIST_CATHEDRAL",
+    "bts_type": "BUILDING_TAOIST_CATHEDRAL",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "taoism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "taoist_monastery": {
+    "name": "TXT_KEY_BUILDING_TAOIST_MONASTERY",
+    "bts_type": "BUILDING_TAOIST_MONASTERY",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "taoism"
+  },
+  "taoist_shrine": {
+    "name": "TXT_KEY_BUILDING_TAOIST_SHRINE",
+    "bts_type": "BUILDING_TAOIST_SHRINE",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "heroic_epic": {
+    "name": "TXT_KEY_BUILDING_HEROIC_EPIC",
+    "bts_type": "BUILDING_HEROIC_EPIC",
+    "cost": 200,
+    "required_tech": "literature",
+    "wonder_type": "national",
+    "required_buildings": [
+      "barracks"
+    ],
+    "effects": {
+      "great_artist_points": 1,
+      "military_production_percent": 1.0
+    }
+  },
+  "national_epic": {
+    "name": "TXT_KEY_BUILDING_NATIONAL_EPIC",
+    "bts_type": "BUILDING_NATIONAL_EPIC",
+    "cost": 250,
+    "required_tech": "literature",
+    "wonder_type": "national",
+    "required_buildings": [
+      "library"
+    ],
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "globe_theatre": {
+    "name": "TXT_KEY_BUILDING_GLOBE_THEATRE",
+    "bts_type": "BUILDING_GLOBE_THEATRE",
+    "cost": 300,
+    "required_tech": "drama",
+    "wonder_type": "national",
+    "required_buildings": [
+      "theatre"
+    ],
+    "effects": {
+      "great_artist_points": 1,
+      "artist_slots": 3
+    }
+  },
+  "national_park": {
+    "name": "TXT_KEY_BUILDING_NATIONAL_PARK",
+    "bts_type": "BUILDING_NATIONAL_PARK",
+    "cost": 300,
+    "required_tech": "biology",
+    "wonder_type": "national",
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "hermitage": {
+    "name": "TXT_KEY_BUILDING_HERMITAGE",
+    "bts_type": "BUILDING_HERMITAGE",
+    "cost": 300,
+    "required_tech": "nationalism",
+    "wonder_type": "national",
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "oxford_university": {
+    "name": "TXT_KEY_BUILDING_OXFORD_UNIVERSITY",
+    "bts_type": "BUILDING_OXFORD_UNIVERSITY",
+    "cost": 400,
+    "required_tech": "education",
+    "wonder_type": "national",
+    "required_buildings": [
+      "university"
+    ],
+    "effects": {
+      "great_scientist_points": 1,
+      "scientist_slots": 3
+    }
+  },
+  "wall_street": {
+    "name": "TXT_KEY_BUILDING_WALL_STREET",
+    "bts_type": "BUILDING_WALL_STREET",
+    "cost": 600,
+    "required_tech": "corporation",
+    "wonder_type": "national",
+    "required_buildings": [
+      "bank"
+    ],
+    "effects": {
+      "great_merchant_points": 1,
+      "merchant_slots": 3
+    }
+  },
+  "iron_works": {
+    "name": "TXT_KEY_BUILDING_IRONWORKS",
+    "bts_type": "BUILDING_IRON_WORKS",
+    "cost": 700,
+    "required_tech": "steel",
+    "wonder_type": "national",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "health": -2,
+      "great_engineer_points": 1,
+      "engineer_slots": 3
+    }
+  },
+  "west_point": {
+    "name": "TXT_KEY_BUILDING_WEST_POINT",
+    "bts_type": "BUILDING_WEST_POINT",
+    "cost": 800,
+    "required_tech": "military_tradition",
+    "wonder_type": "national",
+    "effects": {
+      "great_spy_points": 1
+    }
+  },
+  "mt_rushmore": {
+    "name": "TXT_KEY_BUILDING_MT_RUSHMORE",
+    "bts_type": "BUILDING_MT_RUSHMORE",
+    "cost": 500,
+    "required_tech": "fascism",
+    "wonder_type": "national",
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "red_cross": {
+    "name": "TXT_KEY_BUILDING_RED_CROSS",
+    "bts_type": "BUILDING_RED_CROSS",
+    "cost": 600,
+    "required_tech": "medicine",
+    "wonder_type": "national",
+    "required_buildings": [
+      "hospital"
+    ],
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "scotland_yard": {
+    "name": "TXT_KEY_BUILDING_SCOTLAND_YARD",
+    "bts_type": "BUILDING_SCOTLAND_YARD",
+    "cost": -1,
+    "required_tech": ""
+  },
+  "pyramid": {
+    "name": "TXT_KEY_BUILDING_PYRAMID",
+    "bts_type": "BUILDING_PYRAMID",
+    "cost": 500,
+    "required_tech": "masonry",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "stonehenge": {
+    "name": "TXT_KEY_BUILDING_STONEHENGE",
+    "bts_type": "BUILDING_STONEHENGE",
+    "cost": 120,
+    "required_tech": "mysticism",
+    "wonder_type": "world",
+    "obsolete_tech": "astronomy",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "great_library": {
+    "name": "TXT_KEY_BUILDING_GREAT_LIBRARY",
+    "bts_type": "BUILDING_GREAT_LIBRARY",
+    "cost": 350,
+    "required_tech": "literature",
+    "wonder_type": "world",
+    "obsolete_tech": "scientific_method",
+    "required_buildings": [
+      "library"
+    ],
+    "effects": {
+      "great_scientist_points": 2
+    }
+  },
+  "great_lighthouse": {
+    "name": "TXT_KEY_BUILDING_GREAT_LIGHTHOUSE",
+    "bts_type": "BUILDING_GREAT_LIGHTHOUSE",
+    "cost": 200,
+    "required_tech": "sailing",
+    "wonder_type": "world",
+    "obsolete_tech": "corporation",
+    "required_buildings": [
+      "lighthouse"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "hanging_garden": {
+    "name": "TXT_KEY_BUILDING_HANGING_GARDEN",
+    "bts_type": "BUILDING_HANGING_GARDEN",
+    "cost": 300,
+    "required_tech": "mathematics",
+    "wonder_type": "world",
+    "required_buildings": [
+      "aqueduct"
+    ],
+    "effects": {
+      "health_all_cities": 1,
+      "great_engineer_points": 2
+    }
+  },
+  "colossus": {
+    "name": "TXT_KEY_BUILDING_COLOSSUS",
+    "bts_type": "BUILDING_COLOSSUS",
+    "cost": 250,
+    "required_tech": "metal_casting",
+    "wonder_type": "world",
+    "obsolete_tech": "astronomy",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "oracle": {
+    "name": "TXT_KEY_BUILDING_ORACLE",
+    "bts_type": "BUILDING_ORACLE",
+    "cost": 150,
+    "required_tech": "priesthood",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "parthenon": {
+    "name": "TXT_KEY_BUILDING_PARTHENON",
+    "bts_type": "BUILDING_PARTHENON",
+    "cost": 400,
+    "required_tech": "aesthetics",
+    "wonder_type": "world",
+    "obsolete_tech": "scientific_method",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "angkor_wat": {
+    "name": "TXT_KEY_BUILDING_ANGKOR_WAT",
+    "bts_type": "BUILDING_ANGKOR_WAT",
+    "cost": 500,
+    "required_tech": "philosophy",
+    "wonder_type": "world",
+    "obsolete_tech": "computers",
+    "effects": {
+      "great_prophet_points": 2,
+      "priest_slots": 3
+    }
+  },
+  "hagia_sophia": {
+    "name": "TXT_KEY_BUILDING_HAGIA_SOPHIA",
+    "bts_type": "BUILDING_HAGIA_SOPHIA",
+    "cost": 500,
+    "required_tech": "theology",
+    "wonder_type": "world",
+    "obsolete_tech": "steam_power",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "chichen_itza": {
+    "name": "TXT_KEY_BUILDING_CHICHEN_ITZA",
+    "bts_type": "BUILDING_CHICHEN_ITZA",
+    "cost": 500,
+    "required_tech": "code_of_laws",
+    "wonder_type": "world",
+    "obsolete_tech": "rifling",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "sistine_chapel": {
+    "name": "TXT_KEY_BUILDING_SISTINE_CHAPEL",
+    "bts_type": "BUILDING_SISTINE_CHAPEL",
+    "cost": 600,
+    "required_tech": "music",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "spiral_minaret": {
+    "name": "TXT_KEY_BUILDING_SPIRAL_MINARET",
+    "bts_type": "BUILDING_SPIRAL_MINARET",
+    "cost": 550,
+    "required_tech": "divine_right",
+    "wonder_type": "world",
+    "obsolete_tech": "computers",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "notre_dame": {
+    "name": "TXT_KEY_BUILDING_NOTRE_DAME",
+    "bts_type": "BUILDING_NOTRE_DAME",
+    "cost": 550,
+    "required_tech": "engineering",
+    "wonder_type": "world",
+    "effects": {
+      "happiness_area": 2,
+      "great_artist_points": 2
+    }
+  },
+  "taj_mahal": {
+    "name": "TXT_KEY_BUILDING_TAJ_MAHAL",
+    "bts_type": "BUILDING_TAJ_MAHAL",
+    "cost": 700,
+    "required_tech": "nationalism",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2,
+      "golden_age": true
+    }
+  },
+  "kremlin": {
+    "name": "TXT_KEY_BUILDING_KREMLIN",
+    "bts_type": "BUILDING_KREMLIN",
+    "cost": 800,
+    "required_tech": "utopia",
+    "wonder_type": "world",
+    "obsolete_tech": "fiber_optics",
+    "effects": {
+      "great_spy_points": 2,
+      "spy_slots": 2
+    }
+  },
+  "eiffel_tower": {
+    "name": "TXT_KEY_BUILDING_EIFFEL_TOWER",
+    "bts_type": "BUILDING_EIFFEL_TOWER",
+    "cost": 1250,
+    "required_tech": "radio",
+    "wonder_type": "world",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "statue_of_liberty": {
+    "name": "TXT_KEY_BUILDING_STATUE_OF_LIBERTY",
+    "bts_type": "BUILDING_STATUE_OF_LIBERTY",
+    "cost": 1500,
+    "required_tech": "democracy",
+    "wonder_type": "world",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "broadway": {
+    "name": "TXT_KEY_BUILDING_BROADWAY",
+    "bts_type": "BUILDING_BROADWAY",
+    "cost": 800,
+    "required_tech": "electricity",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "rocknroll": {
+    "name": "TXT_KEY_BUILDING_ROCKNROLL",
+    "bts_type": "BUILDING_ROCKNROLL",
+    "cost": 800,
+    "required_tech": "radio",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "hollywood": {
+    "name": "TXT_KEY_BUILDING_HOLLYWOOD",
+    "bts_type": "BUILDING_HOLLYWOOD",
+    "cost": 1000,
+    "required_tech": "mass_media",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "great_dam": {
+    "name": "TXT_KEY_BUILDING_GREAT_DAM",
+    "bts_type": "BUILDING_GREAT_DAM",
+    "cost": 1750,
+    "required_tech": "plastics",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "pentagon": {
+    "name": "TXT_KEY_BUILDING_PENTAGON",
+    "bts_type": "BUILDING_PENTAGON",
+    "cost": 1250,
+    "required_tech": "assembly_line",
+    "wonder_type": "world",
+    "effects": {
+      "great_spy_points": 2
+    }
+  },
+  "united_nations": {
+    "name": "TXT_KEY_BUILDING_UNITED_NATIONS",
+    "bts_type": "BUILDING_UNITED_NATIONS",
+    "cost": 1000,
+    "required_tech": "mass_media",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "space_elevator": {
+    "name": "TXT_KEY_BUILDING_SPACE_ELEVATOR",
+    "bts_type": "BUILDING_SPACE_ELEVATOR",
+    "cost": 2000,
+    "required_tech": "robotics",
+    "wonder_type": "world",
+    "effects": {
+      "great_scientist_points": 2
+    }
+  },
+  "military_academy": {
+    "name": "TXT_KEY_BUILDING_MILITARY_ACADEMY",
+    "bts_type": "BUILDING_MILITARY_ACADEMY",
+    "cost": -1,
+    "required_tech": "military_science",
+    "effects": {
+      "military_production_percent": 0.5
+    }
+  },
+  "artemis": {
+    "name": "TXT_KEY_BUILDING_ARTEMIS",
+    "bts_type": "BUILDING_ARTEMIS",
+    "cost": 350,
+    "required_tech": "polytheism",
+    "wonder_type": "world",
+    "obsolete_tech": "scientific_method",
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "sankore": {
+    "name": "TXT_KEY_BUILDING_SANKORE",
+    "bts_type": "BUILDING_SANKORE",
+    "cost": 550,
+    "required_tech": "paper",
+    "wonder_type": "world",
+    "obsolete_tech": "computers",
+    "effects": {
+      "great_scientist_points": 2
+    }
+  },
+  "great_wall": {
+    "name": "TXT_KEY_BUILDING_GREAT_WALL",
+    "bts_type": "BUILDING_GREAT_WALL",
+    "cost": 150,
+    "required_tech": "masonry",
+    "wonder_type": "world",
+    "effects": {
+      "great_spy_points": 2
+    }
+  },
+  "statue_of_zeus": {
+    "name": "TXT_KEY_BUILDING_STATUE_OF_ZEUS",
+    "bts_type": "BUILDING_STATUE_OF_ZEUS",
+    "cost": 300,
+    "required_tech": "aesthetics",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "mausoleum_of_maussollos": {
+    "name": "TXT_KEY_BUILDING_MAUSOLEUM_OF_MAUSSOLLOS",
+    "bts_type": "BUILDING_MAUSOLEUM_OF_MAUSSOLLOS",
+    "cost": 450,
+    "required_tech": "calendar",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "cristo_redentor": {
+    "name": "TXT_KEY_BUILDING_CRISTO_REDENTOR",
+    "bts_type": "BUILDING_CRISTO_REDENTOR",
+    "cost": 1000,
+    "required_tech": "radio",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "shwedagon_paya": {
+    "name": "TXT_KEY_BUILDING_SHWEDAGON_PAYA",
+    "bts_type": "BUILDING_SHWEDAGON_PAYA",
+    "cost": 450,
+    "required_tech": "aesthetics",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "moai_statues": {
+    "name": "TXT_KEY_BUILDING_MOAI_STATUES",
+    "bts_type": "BUILDING_MOAI_STATUES",
+    "cost": 250,
+    "required_tech": "sailing",
+    "wonder_type": "national",
+    "effects": {
+      "great_prophet_points": 1
+    }
+  },
+  "corporation_1": {
+    "name": "TXT_KEY_CORPORATION_1",
+    "bts_type": "BUILDING_CORPORATION_1",
+    "cost": -1,
+    "required_tech": "refrigeration",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 1
+    }
+  },
+  "corporation_2": {
+    "name": "CHANGED_TXT_KEY_CORPORATION_2",
+    "bts_type": "BUILDING_CORPORATION_2",
+    "cost": -1,
+    "required_tech": "medicine",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 1
+    }
+  },
+  "corporation_3": {
+    "name": "TXT_KEY_CORPORATION_3",
+    "bts_type": "BUILDING_CORPORATION_3",
+    "cost": -1,
+    "required_tech": "plastics",
+    "wonder_type": "world",
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "corporation_4": {
+    "name": "TXT_KEY_CORPORATION_4",
+    "bts_type": "BUILDING_CORPORATION_4",
+    "cost": -1,
+    "required_tech": "combustion",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 1
+    }
+  },
+  "corporation_5": {
+    "name": "TXT_KEY_CORPORATION_5",
+    "bts_type": "BUILDING_CORPORATION_5",
+    "cost": -1,
+    "required_tech": "railroad",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 1
+    }
+  },
+  "corporation_6": {
+    "name": "TXT_KEY_CORPORATION_6",
+    "bts_type": "BUILDING_CORPORATION_6",
+    "cost": -1,
+    "required_tech": "rocketry",
+    "wonder_type": "world",
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "corporation_7": {
+    "name": "TXT_KEY_CORPORATION_7",
+    "bts_type": "BUILDING_CORPORATION_7",
+    "cost": -1,
+    "required_tech": "mass_media",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "apostolic_palace": {
+    "name": "TXT_KEY_BUILDING_APOSTOLIC_PALACE",
+    "bts_type": "BUILDING_APOSTOLIC_PALACE",
+    "cost": 400,
+    "required_tech": "theology",
+    "wonder_type": "world",
+    "obsolete_tech": "mass_media",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  }
+}

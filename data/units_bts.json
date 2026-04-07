@@ -1,0 +1,1517 @@
+{
+  "lion": {
+    "name": "TXT_KEY_UNIT_LION",
+    "bts_type": "UNIT_LION",
+    "cost": -1,
+    "strength": 2.0,
+    "movement": 1,
+    "domain": "land",
+    "required_resource": "",
+    "no_defense_bonus": true
+  },
+  "bear": {
+    "name": "TXT_KEY_UNIT_BEAR",
+    "bts_type": "UNIT_BEAR",
+    "cost": -1,
+    "strength": 3.0,
+    "movement": 1,
+    "domain": "land",
+    "required_resource": "",
+    "no_defense_bonus": true
+  },
+  "panther": {
+    "name": "TXT_KEY_UNIT_PANTHER",
+    "bts_type": "UNIT_PANTHER",
+    "cost": -1,
+    "strength": 2.0,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": "",
+    "no_defense_bonus": true
+  },
+  "wolf": {
+    "name": "TXT_KEY_UNIT_WOLF",
+    "bts_type": "UNIT_WOLF",
+    "cost": -1,
+    "strength": 1.0,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": "",
+    "no_defense_bonus": true
+  },
+  "settler": {
+    "name": "TXT_KEY_UNIT_SETTLER",
+    "bts_type": "UNIT_SETTLER",
+    "movement": 2,
+    "domain": "land",
+    "required_resource": "",
+    "can_found_city": true
+  },
+  "worker": {
+    "name": "TXT_KEY_UNIT_WORKER",
+    "bts_type": "UNIT_WORKER",
+    "cost": 60,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "indian_fast_worker": {
+    "name": "TXT_KEY_UNIT_INDIAN_FAST_WORKER",
+    "bts_type": "UNIT_INDIAN_FAST_WORKER",
+    "cost": 60,
+    "movement": 3,
+    "domain": "land",
+    "required_resource": "",
+    "civilization": "india"
+  },
+  "scout": {
+    "name": "TXT_KEY_UNIT_SCOUT",
+    "bts_type": "UNIT_SCOUT",
+    "cost": 15,
+    "strength": 1.0,
+    "movement": 2,
+    "required_tech": "hunting",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "explorer": {
+    "name": "TXT_KEY_UNIT_EXPLORER",
+    "bts_type": "UNIT_EXPLORER",
+    "cost": 40,
+    "strength": 4.0,
+    "movement": 2,
+    "required_tech": "compass",
+    "domain": "land",
+    "required_resource": "",
+    "free_promotions": [
+      "guerilla1",
+      "woodsman1"
+    ]
+  },
+  "spy": {
+    "name": "TXT_KEY_UNIT_SPY",
+    "bts_type": "UNIT_SPY",
+    "cost": 40,
+    "movement": 1,
+    "required_tech": "alphabet",
+    "domain": "land",
+    "required_resource": "",
+    "free_promotions": [
+      "commando"
+    ]
+  },
+  "executive_1": {
+    "name": "TXT_KEY_UNIT_EXECUTIVE_1",
+    "bts_type": "UNIT_EXECUTIVE_1",
+    "cost": 100,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "executive_2": {
+    "name": "TXT_KEY_UNIT_EXECUTIVE_2",
+    "bts_type": "UNIT_EXECUTIVE_2",
+    "cost": 100,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "executive_3": {
+    "name": "TXT_KEY_UNIT_EXECUTIVE_3",
+    "bts_type": "UNIT_EXECUTIVE_3",
+    "cost": 100,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "executive_4": {
+    "name": "TXT_KEY_UNIT_EXECUTIVE_4",
+    "bts_type": "UNIT_EXECUTIVE_4",
+    "cost": 100,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "executive_5": {
+    "name": "TXT_KEY_UNIT_EXECUTIVE_5",
+    "bts_type": "UNIT_EXECUTIVE_5",
+    "cost": 100,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "executive_6": {
+    "name": "TXT_KEY_UNIT_EXECUTIVE_6",
+    "bts_type": "UNIT_EXECUTIVE_6",
+    "cost": 100,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "executive_7": {
+    "name": "TXT_KEY_UNIT_EXECUTIVE_7",
+    "bts_type": "UNIT_EXECUTIVE_7",
+    "cost": 100,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "jewish_missionary": {
+    "name": "TXT_KEY_UNIT_JEWISH_MISSIONARY",
+    "bts_type": "UNIT_JEWISH_MISSIONARY",
+    "cost": 40,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "christian_missionary": {
+    "name": "TXT_KEY_UNIT_CHRISTIAN_MISSIONARY",
+    "bts_type": "UNIT_CHRISTIAN_MISSIONARY",
+    "cost": 40,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "islamic_missionary": {
+    "name": "TXT_KEY_UNIT_ISLAMIC_MISSIONARY",
+    "bts_type": "UNIT_ISLAMIC_MISSIONARY",
+    "cost": 40,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "hindu_missionary": {
+    "name": "TXT_KEY_UNIT_HINDU_MISSIONARY",
+    "bts_type": "UNIT_HINDU_MISSIONARY",
+    "cost": 40,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "buddhist_missionary": {
+    "name": "TXT_KEY_UNIT_BUDDHIST_MISSIONARY",
+    "bts_type": "UNIT_BUDDHIST_MISSIONARY",
+    "cost": 40,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "confucian_missionary": {
+    "name": "TXT_KEY_UNIT_CONFUCIAN_MISSIONARY",
+    "bts_type": "UNIT_CONFUCIAN_MISSIONARY",
+    "cost": 40,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "taoist_missionary": {
+    "name": "TXT_KEY_UNIT_TAOIST_MISSIONARY",
+    "bts_type": "UNIT_TAOIST_MISSIONARY",
+    "cost": 40,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "warrior": {
+    "name": "TXT_KEY_UNIT_WARRIOR",
+    "bts_type": "UNIT_WARRIOR",
+    "cost": 15,
+    "strength": 2.0,
+    "movement": 1,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "incan_quechua": {
+    "name": "TXT_KEY_UNIT_INCAN_QUECHUA",
+    "bts_type": "UNIT_INCAN_QUECHUA",
+    "cost": 15,
+    "strength": 2.0,
+    "movement": 1,
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "archer": 1.0
+    },
+    "free_promotions": [
+      "combat1"
+    ],
+    "civilization": "inca"
+  },
+  "swordsman": {
+    "name": "TXT_KEY_UNIT_SWORDSMAN",
+    "bts_type": "UNIT_SWORDSMAN",
+    "cost": 40,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "iron_working",
+    "domain": "land",
+    "required_resource": "iron"
+  },
+  "aztec_jaguar": {
+    "name": "TXT_KEY_UNIT_AZTEC_JAGUAR",
+    "bts_type": "UNIT_AZTEC_JAGUAR",
+    "cost": 35,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "iron_working",
+    "domain": "land",
+    "required_resource": "",
+    "free_promotions": [
+      "woodsman1"
+    ],
+    "civilization": "aztec"
+  },
+  "celtic_gallic_warrior": {
+    "name": "TXT_KEY_UNIT_CELTIC_GALLIC_WARRIOR",
+    "bts_type": "UNIT_CELTIC_GALLIC_WARRIOR",
+    "cost": 40,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "iron_working",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "free_promotions": [
+      "guerilla1"
+    ],
+    "civilization": "celt"
+  },
+  "rome_praetorian": {
+    "name": "TXT_KEY_UNIT_ROME_PRAETORIAN",
+    "bts_type": "UNIT_ROME_PRAETORIAN",
+    "cost": 45,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "iron_working",
+    "domain": "land",
+    "required_resource": "iron",
+    "civilization": "rome"
+  },
+  "axeman": {
+    "name": "TXT_KEY_UNIT_AXEMAN",
+    "bts_type": "UNIT_AXEMAN",
+    "cost": 35,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "bronze_working",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    }
+  },
+  "greek_phalanx": {
+    "name": "TXT_KEY_UNIT_GREEK_PHALANX",
+    "bts_type": "UNIT_GREEK_PHALANX",
+    "cost": 35,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "bronze_working",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "bonus_vs_defense": {
+      "chariot": 1.0
+    },
+    "civilization": "greece"
+  },
+  "sumerian_vulture": {
+    "name": "TXT_KEY_UNIT_SUMERIAN_VULTURE",
+    "bts_type": "UNIT_SUMERIAN_VULTURE",
+    "cost": 35,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "bronze_working",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.25
+    },
+    "civilization": "sumeria"
+  },
+  "native_america_dog_soldier": {
+    "name": "TXT_KEY_UNIT_NATIVE_AMERICA_DOG_SOLDIER",
+    "bts_type": "UNIT_NATIVE_AMERICA_DOG_SOLDIER",
+    "cost": 35,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "bronze_working",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 1.0
+    },
+    "civilization": "native_america"
+  },
+  "maceman": {
+    "name": "TXT_KEY_UNIT_MACEMAN",
+    "bts_type": "UNIT_MACEMAN",
+    "cost": 70,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "civil_service",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    }
+  },
+  "japan_samurai": {
+    "name": "TXT_KEY_UNIT_JAPAN_SAMURAI",
+    "bts_type": "UNIT_JAPAN_SAMURAI",
+    "cost": 70,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "civil_service",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "first_strikes": 2,
+    "free_promotions": [
+      "drill1"
+    ],
+    "civilization": "japan"
+  },
+  "viking_beserker": {
+    "name": "TXT_KEY_UNIT_VIKING_BESERKER",
+    "bts_type": "UNIT_VIKING_BESERKER",
+    "cost": 70,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "civil_service",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "free_promotions": [
+      "amphibious"
+    ],
+    "civilization": "viking"
+  },
+  "spearman": {
+    "name": "TXT_KEY_UNIT_SPEARMAN",
+    "bts_type": "UNIT_SPEARMAN",
+    "cost": 35,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "hunting",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "mounted": 1.0
+    }
+  },
+  "zulu_impi": {
+    "name": "TXT_KEY_UNIT_ZULU_IMPI",
+    "bts_type": "UNIT_ZULU_IMPI",
+    "cost": 35,
+    "strength": 4.0,
+    "movement": 2,
+    "required_tech": "hunting",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "mounted": 1.0
+    },
+    "free_promotions": [
+      "mobility"
+    ],
+    "civilization": "zulu"
+  },
+  "maya_holkan": {
+    "name": "TXT_KEY_UNIT_MAYA_HOLKAN",
+    "bts_type": "UNIT_MAYA_HOLKAN",
+    "cost": 35,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "hunting",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "mounted": 1.0
+    },
+    "civilization": "maya"
+  },
+  "pikeman": {
+    "name": "TXT_KEY_UNIT_PIKEMAN",
+    "bts_type": "UNIT_PIKEMAN",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "engineering",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "mounted": 1.0
+    }
+  },
+  "holy_roman_landsknecht": {
+    "name": "TXT_KEY_UNIT_HOLY_ROMAN_LANDSKNECHT",
+    "bts_type": "UNIT_HOLY_ROMAN_LANDSKNECHT",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "engineering",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "mounted": 1.0,
+      "melee": 1.0
+    },
+    "civilization": "holy_roman"
+  },
+  "musketman": {
+    "name": "TXT_KEY_UNIT_MUSKETMAN",
+    "bts_type": "UNIT_MUSKETMAN",
+    "cost": 80,
+    "strength": 9.0,
+    "movement": 1,
+    "required_tech": "gunpowder",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "french_musketeer": {
+    "name": "TXT_KEY_UNIT_FRENCH_MUSKETEER",
+    "bts_type": "UNIT_FRENCH_MUSKETEER",
+    "cost": 80,
+    "strength": 9.0,
+    "movement": 2,
+    "required_tech": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "civilization": "france"
+  },
+  "ottoman_janissary": {
+    "name": "TXT_KEY_UNIT_OTTOMAN_JANISSARY",
+    "bts_type": "UNIT_OTTOMAN_JANISSARY",
+    "cost": 80,
+    "strength": 9.0,
+    "movement": 1,
+    "required_tech": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 0.25,
+      "archer": 0.25,
+      "mounted": 0.25
+    },
+    "civilization": "ottoman"
+  },
+  "ethiopian_oromo_warrior": {
+    "name": "TXT_KEY_UNIT_ETHIOPIAN_OROMO_WARRIOR",
+    "bts_type": "UNIT_ETHIOPIAN_OROMO_WARRIOR",
+    "cost": 80,
+    "strength": 9.0,
+    "movement": 1,
+    "required_tech": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1,
+    "free_promotions": [
+      "drill1",
+      "drill2"
+    ],
+    "civilization": "ethiopia"
+  },
+  "rifleman": {
+    "name": "TXT_KEY_UNIT_RIFLEMAN",
+    "bts_type": "UNIT_RIFLEMAN",
+    "cost": 110,
+    "strength": 14.0,
+    "movement": 1,
+    "required_tech": "rifling",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "mounted": 0.25
+    }
+  },
+  "english_redcoat": {
+    "name": "TXT_KEY_UNIT_ENGLISH_REDCOAT",
+    "bts_type": "UNIT_ENGLISH_REDCOAT",
+    "cost": 110,
+    "strength": 14.0,
+    "movement": 1,
+    "required_tech": "rifling",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "mounted": 0.25,
+      "gunpowder": 0.25
+    },
+    "civilization": "england"
+  },
+  "grenadier": {
+    "name": "TXT_KEY_UNIT_GRENADIER",
+    "bts_type": "UNIT_GRENADIER",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 1,
+    "required_tech": "military_science",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "at_infantry": {
+    "name": "TXT_KEY_UNIT_AT_INFANTRY",
+    "bts_type": "UNIT_AT_INFANTRY",
+    "cost": 120,
+    "strength": 14.0,
+    "movement": 1,
+    "required_tech": "artillery",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "armor": 1.0
+    },
+    "intercept_chance": 0.2,
+    "free_promotions": [
+      "ambush"
+    ]
+  },
+  "infantry": {
+    "name": "TXT_KEY_UNIT_INFANTRY",
+    "bts_type": "UNIT_INFANTRY",
+    "cost": 140,
+    "strength": 20.0,
+    "movement": 1,
+    "required_tech": "assembly_line",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "gunpowder": 0.25
+    }
+  },
+  "sam_infantry": {
+    "name": "TXT_KEY_UNIT_SAM_INFANTRY",
+    "bts_type": "UNIT_SAM_INFANTRY",
+    "cost": 150,
+    "strength": 18.0,
+    "movement": 1,
+    "required_tech": "rocketry",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "helicopter": 0.75
+    },
+    "intercept_chance": 0.4,
+    "air_range": 1
+  },
+  "mobile_sam": {
+    "name": "TXT_KEY_UNIT_MOBILE_SAM",
+    "bts_type": "UNIT_MOBILE_SAM",
+    "cost": 220,
+    "strength": 22.0,
+    "movement": 2,
+    "required_tech": "laser",
+    "domain": "land",
+    "required_resource": "oil",
+    "bonus_vs": {
+      "helicopter": 0.5
+    },
+    "intercept_chance": 0.5,
+    "air_range": 1
+  },
+  "marine": {
+    "name": "TXT_KEY_UNIT_MARINE",
+    "bts_type": "UNIT_MARINE",
+    "cost": 160,
+    "strength": 24.0,
+    "movement": 1,
+    "required_tech": "industrialism",
+    "domain": "land",
+    "required_resource": "",
+    "free_promotions": [
+      "amphibious"
+    ]
+  },
+  "american_navy_seal": {
+    "name": "TXT_KEY_UNIT_AMERICAN_NAVY_SEAL",
+    "bts_type": "UNIT_AMERICAN_NAVY_SEAL",
+    "cost": 160,
+    "strength": 24.0,
+    "movement": 1,
+    "required_tech": "industrialism",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1,
+    "free_promotions": [
+      "amphibious",
+      "march"
+    ],
+    "civilization": "america"
+  },
+  "paratrooper": {
+    "name": "TXT_KEY_UNIT_PARATROOPER",
+    "bts_type": "UNIT_PARATROOPER",
+    "cost": 160,
+    "strength": 24.0,
+    "movement": 1,
+    "required_tech": "fascism",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "mechanized_infantry": {
+    "name": "TXT_KEY_UNIT_MECHANIZED_INFANTRY",
+    "bts_type": "UNIT_MECHANIZED_INFANTRY",
+    "cost": 200,
+    "strength": 32.0,
+    "movement": 2,
+    "required_tech": "robotics",
+    "domain": "land",
+    "required_resource": "",
+    "intercept_chance": 0.2,
+    "free_promotions": [
+      "march"
+    ]
+  },
+  "archer": {
+    "name": "TXT_KEY_UNIT_ARCHER",
+    "bts_type": "UNIT_ARCHER",
+    "cost": 25,
+    "strength": 3.0,
+    "movement": 1,
+    "required_tech": "archery",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1
+  },
+  "mali_skirmisher": {
+    "name": "TXT_KEY_UNIT_MALI_SKIRMISHER",
+    "bts_type": "UNIT_MALI_SKIRMISHER",
+    "cost": 25,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "archery",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1,
+    "civilization": "mali"
+  },
+  "babylon_bowman": {
+    "name": "TXT_KEY_UNIT_BABYLON_BOWMAN",
+    "bts_type": "UNIT_BABYLON_BOWMAN",
+    "cost": 25,
+    "strength": 3.0,
+    "movement": 1,
+    "required_tech": "archery",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "first_strikes": 1,
+    "civilization": "babylon"
+  },
+  "longbowman": {
+    "name": "TXT_KEY_UNIT_LONGBOWMAN",
+    "bts_type": "UNIT_LONGBOWMAN",
+    "cost": 50,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "feudalism",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1
+  },
+  "crossbowman": {
+    "name": "TXT_KEY_UNIT_CROSSBOWMAN",
+    "bts_type": "UNIT_CROSSBOWMAN",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "machinery",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "first_strikes": 1
+  },
+  "china_chokonu": {
+    "name": "TXT_KEY_UNIT_CHINA_CHOKONU",
+    "bts_type": "UNIT_CHINA_CHOKONU",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "machinery",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "first_strikes": 2,
+    "collateral_damage": 60,
+    "civilization": "china"
+  },
+  "chariot": {
+    "name": "TXT_KEY_UNIT_CHARIOT",
+    "bts_type": "UNIT_CHARIOT",
+    "cost": 30,
+    "strength": 4.0,
+    "movement": 2,
+    "required_tech": "the_wheel",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.1,
+    "no_defense_bonus": true
+  },
+  "egypt_warchariot": {
+    "name": "TXT_KEY_UNIT_EGYPT_WARCHARIOT",
+    "bts_type": "UNIT_EGYPT_WARCHARIOT",
+    "cost": 30,
+    "strength": 5.0,
+    "movement": 2,
+    "required_tech": "the_wheel",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.1,
+    "no_defense_bonus": true,
+    "civilization": "egypt"
+  },
+  "persia_immortal": {
+    "name": "TXT_KEY_UNIT_PERIA_IMMORTAL",
+    "bts_type": "UNIT_PERSIA_IMMORTAL",
+    "cost": 30,
+    "strength": 4.0,
+    "movement": 2,
+    "required_tech": "the_wheel",
+    "domain": "land",
+    "required_resource": "horse",
+    "bonus_vs": {
+      "archer": 0.5
+    },
+    "withdrawal_chance": 0.1,
+    "civilization": "persia"
+  },
+  "horse_archer": {
+    "name": "TXT_KEY_UNIT_HORSE_ARCHER",
+    "bts_type": "UNIT_HORSE_ARCHER",
+    "cost": 50,
+    "strength": 6.0,
+    "movement": 2,
+    "required_tech": "horseback_riding",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.2,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "carthage_numidian_cavalry": {
+    "name": "TXT_KEY_UNIT_CARTHAGE_NUMIDIAN_CAVALRY",
+    "bts_type": "UNIT_CARTHAGE_NUMIDIAN_CAVALRY",
+    "cost": 50,
+    "strength": 5.0,
+    "movement": 2,
+    "required_tech": "horseback_riding",
+    "domain": "land",
+    "required_resource": "horse",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "withdrawal_chance": 0.2,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "flanking1"
+    ],
+    "civilization": "carthage"
+  },
+  "mongol_keshik": {
+    "name": "TXT_KEY_UNIT_MONGOL_KESHIK",
+    "bts_type": "UNIT_MONGOL_KESHIK",
+    "cost": 50,
+    "strength": 6.0,
+    "movement": 2,
+    "required_tech": "horseback_riding",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.2,
+    "first_strikes": 1,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "mongol"
+  },
+  "knight": {
+    "name": "TXT_KEY_UNIT_KNIGHT",
+    "bts_type": "UNIT_KNIGHT",
+    "cost": 90,
+    "strength": 10.0,
+    "movement": 2,
+    "required_tech": "guilds",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "arabia_camelarcher": {
+    "name": "TXT_KEY_UNIT_ARABIA_CAMELARCHER",
+    "bts_type": "UNIT_ARABIA_CAMELARCHER",
+    "cost": 90,
+    "strength": 10.0,
+    "movement": 2,
+    "required_tech": "guilds",
+    "domain": "land",
+    "required_resource": "",
+    "withdrawal_chance": 0.15,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "arabia"
+  },
+  "byzantine_cataphract": {
+    "name": "TXT_KEY_UNIT_BYZANTINE_CATAPHRACT",
+    "bts_type": "UNIT_BYZANTINE_CATAPHRACT",
+    "cost": 90,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "guilds",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "byzantium"
+  },
+  "spanish_conquistador": {
+    "name": "TXT_KEY_UNIT_SPANISH_CONQUISTADOR",
+    "bts_type": "UNIT_SPANISH_CONQUISTADOR",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "withdrawal_chance": 0.15,
+    "collateral_damage": 100,
+    "civilization": "spain"
+  },
+  "cuirassier": {
+    "name": "TXT_KEY_UNIT_CUIRASSIER",
+    "bts_type": "UNIT_CUIRASSIER",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "withdrawal_chance": 0.15,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "cavalry": {
+    "name": "TXT_KEY_UNIT_CAVALRY",
+    "bts_type": "UNIT_CAVALRY",
+    "cost": 120,
+    "strength": 15.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.3,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "russia_cossack": {
+    "name": "TXT_KEY_UNIT_RUSSIA_COSSACK",
+    "bts_type": "UNIT_RUSSIA_COSSACK",
+    "cost": 120,
+    "strength": 15.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "domain": "land",
+    "required_resource": "horse",
+    "bonus_vs": {
+      "mounted": 0.5
+    },
+    "withdrawal_chance": 0.3,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "russia"
+  },
+  "war_elephant": {
+    "name": "TXT_KEY_UNIT_WAR_ELEPHANT",
+    "bts_type": "UNIT_WAR_ELEPHANT",
+    "cost": 60,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "domain": "land",
+    "required_resource": "ivory",
+    "bonus_vs": {
+      "mounted": 0.5
+    },
+    "no_defense_bonus": true
+  },
+  "khmer_ballista_elephant": {
+    "name": "TXT_KEY_UNIT_KHMER_BALLISTA_ELEPHANT",
+    "bts_type": "UNIT_KHMER_BALLISTA_ELEPHANT",
+    "cost": 60,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "domain": "land",
+    "required_resource": "ivory",
+    "bonus_vs": {
+      "mounted": 0.5
+    },
+    "no_defense_bonus": true,
+    "civilization": "khmer"
+  },
+  "tank": {
+    "name": "TXT_KEY_UNIT_TANK",
+    "bts_type": "UNIT_TANK",
+    "cost": 180,
+    "strength": 28.0,
+    "movement": 2,
+    "required_tech": "industrialism",
+    "domain": "land",
+    "required_resource": "oil",
+    "collateral_damage": 60,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "blitz"
+    ]
+  },
+  "german_panzer": {
+    "name": "TXT_KEY_UNIT_GERMAN_PANZER",
+    "bts_type": "UNIT_GERMAN_PANZER",
+    "cost": 180,
+    "strength": 28.0,
+    "movement": 2,
+    "required_tech": "industrialism",
+    "domain": "land",
+    "required_resource": "oil",
+    "bonus_vs": {
+      "armor": 0.5
+    },
+    "collateral_damage": 60,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "blitz"
+    ],
+    "civilization": "germany"
+  },
+  "modern_armor": {
+    "name": "TXT_KEY_UNIT_MODERN_ARMOR",
+    "bts_type": "UNIT_MODERN_ARMOR",
+    "cost": 240,
+    "strength": 40.0,
+    "movement": 2,
+    "required_tech": "composites",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_2": "aluminum",
+    "first_strikes": 1,
+    "collateral_damage": 60,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "blitz"
+    ]
+  },
+  "gunship": {
+    "name": "TXT_KEY_UNIT_GUNSHIP",
+    "bts_type": "UNIT_GUNSHIP",
+    "cost": 160,
+    "strength": 24.0,
+    "movement": 4,
+    "required_tech": "advanced_flight",
+    "domain": "land",
+    "required_resource": "oil",
+    "bonus_vs": {
+      "armor": 1.0
+    },
+    "withdrawal_chance": 0.25,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "catapult": {
+    "name": "TXT_KEY_UNIT_CATAPULT",
+    "bts_type": "UNIT_CATAPULT",
+    "cost": 50,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "domain": "land",
+    "required_resource": "",
+    "collateral_damage": 50,
+    "no_defense_bonus": true
+  },
+  "korean_hwacha": {
+    "name": "TXT_KEY_UNIT_KOREAN_HWACHA",
+    "bts_type": "UNIT_KOREAN_HWACHA",
+    "cost": 50,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "collateral_damage": 50,
+    "no_defense_bonus": true,
+    "civilization": "korea"
+  },
+  "trebuchet": {
+    "name": "TXT_KEY_UNIT_TREBUCHET",
+    "bts_type": "UNIT_TREBUCHET",
+    "cost": 80,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "engineering",
+    "domain": "land",
+    "required_resource": "",
+    "collateral_damage": 50,
+    "no_defense_bonus": true
+  },
+  "cannon": {
+    "name": "TXT_KEY_UNIT_CANNON",
+    "bts_type": "UNIT_CANNON",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 1,
+    "required_tech": "steel",
+    "domain": "land",
+    "required_resource": "iron",
+    "collateral_damage": 60,
+    "no_defense_bonus": true
+  },
+  "machine_gun": {
+    "name": "TXT_KEY_UNIT_MACHINE_GUN",
+    "bts_type": "UNIT_MACHINE_GUN",
+    "cost": 125,
+    "strength": 18.0,
+    "movement": 1,
+    "required_tech": "railroad",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "gunpowder": 0.5
+    },
+    "first_strikes": 1,
+    "intercept_chance": 0.2
+  },
+  "artillery": {
+    "name": "TXT_KEY_UNIT_ARTILLERY",
+    "bts_type": "UNIT_ARTILLERY",
+    "cost": 150,
+    "strength": 18.0,
+    "movement": 1,
+    "required_tech": "artillery",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "siege": 0.5
+    },
+    "collateral_damage": 70,
+    "no_defense_bonus": true
+  },
+  "mobile_artillery": {
+    "name": "TXT_KEY_UNIT_MOBILE_ARTILLERY",
+    "bts_type": "UNIT_MOBILE_ARTILLERY",
+    "cost": 200,
+    "strength": 26.0,
+    "movement": 2,
+    "required_tech": "laser",
+    "domain": "land",
+    "required_resource": "oil",
+    "bonus_vs": {
+      "siege": 0.5
+    },
+    "collateral_damage": 70,
+    "no_defense_bonus": true
+  },
+  "workboat": {
+    "name": "TXT_KEY_UNIT_WORK_BOAT",
+    "bts_type": "UNIT_WORKBOAT",
+    "cost": 30,
+    "movement": 2,
+    "required_tech": "fishing",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "galley": {
+    "name": "TXT_KEY_UNIT_GALLEY",
+    "bts_type": "UNIT_GALLEY",
+    "cost": 50,
+    "strength": 2.0,
+    "movement": 2,
+    "required_tech": "sailing",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 2
+  },
+  "trireme": {
+    "name": "TXT_KEY_UNIT_TRIREME",
+    "bts_type": "UNIT_TRIREME",
+    "cost": 50,
+    "strength": 2.0,
+    "movement": 2,
+    "required_tech": "metal_casting",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs_defense": {
+      "galley": 0.5
+    }
+  },
+  "caravel": {
+    "name": "TXT_KEY_UNIT_CARAVEL",
+    "bts_type": "UNIT_CARAVEL",
+    "cost": 60,
+    "strength": 3.0,
+    "movement": 3,
+    "required_tech": "optics",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 1
+  },
+  "portugal_carrack": {
+    "name": "TXT_KEY_UNIT_PORTUGAL_CARRACK",
+    "bts_type": "UNIT_PORTUGAL_CARRACK",
+    "cost": 60,
+    "strength": 3.0,
+    "movement": 3,
+    "required_tech": "optics",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 2,
+    "civilization": "portugal"
+  },
+  "galleon": {
+    "name": "TXT_KEY_UNIT_GALLEON",
+    "bts_type": "UNIT_GALLEON",
+    "cost": 80,
+    "strength": 4.0,
+    "movement": 4,
+    "required_tech": "astronomy",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 3
+  },
+  "netherlands_oostindievaarder": {
+    "name": "TXT_KEY_UNIT_NETHERLANDS_OOSTINDIEVAARDER",
+    "bts_type": "UNIT_NETHERLANDS_OOSTINDIEVAARDER",
+    "cost": 80,
+    "strength": 6.0,
+    "movement": 4,
+    "required_tech": "astronomy",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 4,
+    "civilization": "netherlands"
+  },
+  "privateer": {
+    "name": "TXT_KEY_UNIT_PRIVATEER",
+    "bts_type": "UNIT_PRIVATEER",
+    "cost": 80,
+    "strength": 6.0,
+    "movement": 4,
+    "required_tech": "chemistry",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "free_promotions": [
+      "sentry"
+    ]
+  },
+  "frigate": {
+    "name": "TXT_KEY_UNIT_FRIGATE",
+    "bts_type": "UNIT_FRIGATE",
+    "cost": 90,
+    "strength": 8.0,
+    "movement": 4,
+    "required_tech": "chemistry",
+    "domain": "land",
+    "required_resource": "iron"
+  },
+  "ship_of_the_line": {
+    "name": "TXT_KEY_UNIT_SHIP_OF_THE_LINE",
+    "bts_type": "UNIT_SHIP_OF_THE_LINE",
+    "cost": 120,
+    "strength": 8.0,
+    "movement": 3,
+    "required_tech": "military_science",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs_defense": {
+      "frigate": 0.5
+    }
+  },
+  "ironclad": {
+    "name": "TXT_KEY_UNIT_IRONCLAD",
+    "bts_type": "UNIT_IRONCLAD",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "steel",
+    "domain": "land",
+    "required_resource": "iron",
+    "required_resource_2": "coal"
+  },
+  "transport": {
+    "name": "TXT_KEY_UNIT_TRANSPORT",
+    "bts_type": "UNIT_TRANSPORT",
+    "cost": 125,
+    "strength": 16.0,
+    "movement": 5,
+    "required_tech": "combustion",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "cargo": 4
+  },
+  "destroyer": {
+    "name": "TXT_KEY_UNIT_DESTROYER",
+    "bts_type": "UNIT_DESTROYER",
+    "cost": 200,
+    "strength": 30.0,
+    "movement": 8,
+    "required_tech": "combustion",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "intercept_chance": 0.3
+  },
+  "battleship": {
+    "name": "TXT_KEY_UNIT_BATTLESHIP",
+    "bts_type": "UNIT_BATTLESHIP",
+    "cost": 225,
+    "strength": 40.0,
+    "movement": 6,
+    "required_tech": "industrialism",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "collateral_damage": 60
+  },
+  "missile_cruiser": {
+    "name": "TXT_KEY_UNIT_MISSILE_CRUISER",
+    "bts_type": "UNIT_MISSILE_CRUISER",
+    "cost": 260,
+    "strength": 40.0,
+    "movement": 7,
+    "required_tech": "robotics",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "collateral_damage": 60,
+    "cargo": 4
+  },
+  "stealth_destroyer": {
+    "name": "TXT_KEY_UNIT_STEALTH_DESTROYER",
+    "bts_type": "UNIT_STEALTH_DESTROYER",
+    "cost": 220,
+    "strength": 30.0,
+    "movement": 8,
+    "required_tech": "stealth",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "first_strikes": 2
+  },
+  "submarine": {
+    "name": "TXT_KEY_UNIT_SUBMARINE",
+    "bts_type": "UNIT_SUBMARINE",
+    "cost": 150,
+    "strength": 24.0,
+    "movement": 6,
+    "required_tech": "radio",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "withdrawal_chance": 0.5,
+    "cargo": 3
+  },
+  "attack_submarine": {
+    "name": "TXT_KEY_UNIT_ATTACK_SUBMARINE",
+    "bts_type": "UNIT_ATTACK_SUBMARINE",
+    "cost": 200,
+    "strength": 30.0,
+    "movement": 7,
+    "required_tech": "rocketry",
+    "domain": "land",
+    "required_resource": "uranium",
+    "bonus_vs_defense": {
+      "submarine": 0.5
+    },
+    "withdrawal_chance": 0.5,
+    "cargo": 1
+  },
+  "carrier": {
+    "name": "TXT_KEY_UNIT_CARRIER",
+    "bts_type": "UNIT_CARRIER",
+    "cost": 175,
+    "strength": 16.0,
+    "movement": 5,
+    "required_tech": "flight",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "cargo": 3
+  },
+  "airship": {
+    "name": "TXT_KEY_UNIT_AIRSHIP",
+    "bts_type": "UNIT_AIRSHIP",
+    "cost": 80,
+    "movement": 1,
+    "required_tech": "physics",
+    "domain": "land",
+    "required_resource": "",
+    "air_range": 8
+  },
+  "fighter": {
+    "name": "TXT_KEY_UNIT_FIGHTER",
+    "bts_type": "UNIT_FIGHTER",
+    "cost": 100,
+    "movement": 1,
+    "required_tech": "flight",
+    "domain": "land",
+    "required_resource": "oil",
+    "bombard_rate": 8,
+    "intercept_chance": 1.0,
+    "air_range": 6
+  },
+  "jet_fighter": {
+    "name": "TXT_KEY_UNIT_JET_FIGHTER",
+    "bts_type": "UNIT_JET_FIGHTER",
+    "cost": 150,
+    "movement": 1,
+    "required_tech": "advanced_flight",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_2": "aluminum",
+    "bombard_rate": 12,
+    "intercept_chance": 1.0,
+    "air_range": 10
+  },
+  "bomber": {
+    "name": "TXT_KEY_UNIT_BOMBER",
+    "bts_type": "UNIT_BOMBER",
+    "cost": 140,
+    "movement": 1,
+    "required_tech": "radio",
+    "domain": "land",
+    "required_resource": "oil",
+    "collateral_damage": 50,
+    "bombard_rate": 16,
+    "air_range": 8
+  },
+  "stealth_bomber": {
+    "name": "TXT_KEY_UNIT_STEALTH_BOMBER",
+    "bts_type": "UNIT_STEALTH_BOMBER",
+    "cost": 200,
+    "movement": 1,
+    "required_tech": "stealth",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_2": "aluminum",
+    "collateral_damage": 50,
+    "bombard_rate": 20,
+    "air_range": 12
+  },
+  "guided_missile": {
+    "name": "TXT_KEY_UNIT_GUIDED_MISSILE",
+    "bts_type": "UNIT_GUIDED_MISSILE",
+    "cost": 60,
+    "movement": 1,
+    "required_tech": "rocketry",
+    "domain": "land",
+    "required_resource": "",
+    "bombard_rate": 16,
+    "air_range": 4
+  },
+  "tactical_nuke": {
+    "name": "TXT_KEY_UNIT_TACTICAL_NUKE",
+    "bts_type": "UNIT_TACTICAL_NUKE",
+    "cost": 250,
+    "movement": 1,
+    "required_tech": "fission",
+    "domain": "land",
+    "required_resource": "uranium",
+    "air_range": 4,
+    "nuke_range": 1
+  },
+  "icbm": {
+    "name": "TXT_KEY_UNIT_ICBM",
+    "bts_type": "UNIT_ICBM",
+    "cost": 500,
+    "movement": 1,
+    "required_tech": "fission",
+    "domain": "land",
+    "required_resource": "uranium",
+    "nuke_range": 1
+  },
+  "prophet": {
+    "name": "TXT_KEY_UNIT_GREAT_PROPHET",
+    "bts_type": "UNIT_PROPHET",
+    "cost": -1,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "artist": {
+    "name": "TXT_KEY_UNIT_GREAT_ARTIST",
+    "bts_type": "UNIT_ARTIST",
+    "cost": -1,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "scientist": {
+    "name": "TXT_KEY_UNIT_GREAT_SCIENTIST",
+    "bts_type": "UNIT_SCIENTIST",
+    "cost": -1,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "merchant": {
+    "name": "TXT_KEY_UNIT_GREAT_MERCHANT",
+    "bts_type": "UNIT_MERCHANT",
+    "cost": -1,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "engineer": {
+    "name": "TXT_KEY_UNIT_GREAT_ENGINEER",
+    "bts_type": "UNIT_ENGINEER",
+    "cost": -1,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "great_general": {
+    "name": "TXT_KEY_UNIT_GREAT_GENERAL",
+    "bts_type": "UNIT_GREAT_GENERAL",
+    "cost": -1,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  },
+  "great_spy": {
+    "name": "TXT_KEY_SPECIALIST_GREAT_SPY",
+    "bts_type": "UNIT_GREAT_SPY",
+    "cost": -1,
+    "movement": 2,
+    "domain": "land",
+    "required_resource": ""
+  }
+}
