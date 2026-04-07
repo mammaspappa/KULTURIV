@@ -290,6 +290,18 @@ func _try_spontaneous_spawn() -> void:
 		if not existing.is_empty():
 			continue
 
+		# Fog-bust: no barb unit within 3 tiles of another barb unit
+		var barb_nearby = false
+		for near_pos in tiles_nearby:
+			for u in GameManager.get_units_at(near_pos):
+				if u.player_owner != null and u.player_owner.civilization_id == "barbarian":
+					barb_nearby = true
+					break
+			if barb_nearby:
+				break
+		if barb_nearby:
+			continue
+
 		# Spawn the unit
 		var unit_type = _get_barbarian_unit_type()
 		if GameManager.game_world:
@@ -333,20 +345,31 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 	if spawn_pos == Vector2i(-1, -1):
 		return
 
+	# Fog-bust: don't spawn if another barb unit is within 3 tiles
+	if _barb_unit_within_range(spawn_pos, 3):
+		return
+
 	var unit = GameManager.game_world.spawn_unit(unit_type, spawn_pos, barbarian_player)
 	if unit:
 		unit.refresh_movement()  # Enable movement on spawn turn
 		barbarian_unit_spawned.emit(unit, camp_pos)
 
 ## Get appropriate barbarian unit type based on real civ tech progress.
-## BTS rule: a barbarian unit can only spawn when >= 50% of real civs have
-## the tech that unlocks it. Returns a land unit only (naval handled separately).
+## BTS: first 2000 years are "animal era" — only animals spawn (represented as warriors).
+## After that, military units based on 50% civ tech threshold.
 func _get_barbarian_unit_type() -> String:
+	# Animal era: first 2000 years (4000 BC → 2000 BC) — only animals
+	if _is_animal_era():
+		return "warrior"  # Animals represented as warriors
 	# Build pool of units that barbarians can spawn based on civ tech progress
 	var pool = _get_available_barb_units(false)
 	if pool.is_empty():
 		return "warrior"  # Fallback
 	return pool[randi() % pool.size()]
+
+## Check if we're in the animal era (first 2000 years of the game)
+func _is_animal_era() -> bool:
+	return TurnManager.current_year < -2000  # Before 2000 BC
 
 ## Get a naval unit type if enough civs have the tech, or "" if none available.
 func _get_barbarian_naval_type() -> String:
@@ -414,6 +437,21 @@ func _get_available_barb_units(naval_only: bool) -> Array:
 
 	return pool
 
+## Check if any barbarian unit is within range of a position (for fog-busting)
+func _barb_unit_within_range(pos: Vector2i, radius: int) -> bool:
+	if barbarian_player == null:
+		return false
+	for unit in barbarian_player.units:
+		if is_instance_valid(unit) and GridUtils.chebyshev_distance(pos, unit.grid_position) <= radius:
+			return true
+	# Also check spawned barbarian civ units
+	for p in GameManager.players:
+		if p.civilization_id == "barbarian" and p.player_id != -1:
+			for unit in p.units:
+				if is_instance_valid(unit) and GridUtils.chebyshev_distance(pos, unit.grid_position) <= radius:
+					return true
+	return false
+
 ## Find an adjacent water tile for spawning naval units
 func _find_adjacent_water(pos: Vector2i) -> Vector2i:
 	var grid = GameManager.hex_grid
@@ -463,15 +501,26 @@ func _process_barbarian_ai() -> void:
 
 ## Process AI for a single barbarian unit
 func _process_single_barbarian(unit) -> void:
-	# BTS: Early-game barbarians ("animals") avoid civilized borders
-	var speed = GameManager.get_speed_multiplier()
-	var is_early = TurnManager.current_turn < int(50 * speed)
-	if is_early:
+	# Animal era: animals wander randomly, attack lone units they stumble on,
+	# but avoid cities and don't pillage. They're a nuisance, not a threat.
+	if _is_animal_era():
+		# Attack adjacent non-city units only (animals don't siege cities)
+		var adjacent_target = _find_adjacent_enemy(unit)
+		if adjacent_target:
+			# Don't attack units in cities
+			if GameManager.get_city_at(adjacent_target.grid_position) == null:
+				CombatSystem.resolve_combat(unit, adjacent_target)
+				return
+		# Flee from cities/civ territory
 		var tile = GameManager.hex_grid.get_tile(unit.grid_position) if GameManager.hex_grid else null
 		if tile and tile.tile_owner != null and tile.tile_owner != barbarian_player:
-			# In civ territory during animal era — retreat
 			_random_move(unit)
 			return
+		# Wander randomly
+		_random_move(unit)
+		return
+
+	# === Post-animal era: full barbarian behavior ===
 
 	# Priority 1: Attack adjacent enemies
 	var adjacent_target = _find_adjacent_enemy(unit)
@@ -481,7 +530,7 @@ func _process_single_barbarian(unit) -> void:
 
 	# Priority 2: Move toward nearby enemy units/improvements
 	var nearby_target = _find_nearby_target(unit)
-	if nearby_target:
+	if nearby_target != Vector2i(-1, -1):
 		_move_toward(unit, nearby_target)
 		return
 

@@ -936,6 +936,34 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 	var unit_data = DataManager.get_unit(unit.unit_id)
 	var unit_class = unit_data.get("unit_class", "")
 
+	# Animal era (before 2000 BC): no real threat to cities, so explore aggressively
+	# Kill animals we bump into, but don't need to garrison
+	if TurnManager.current_year < -2000 and player.at_war_with.is_empty():
+		# Attack adjacent animals/enemies
+		var enemies = _find_nearby_enemies(unit, player, 1)
+		for enemy in enemies:
+			if GridUtils.are_adjacent(unit.grid_position, enemy.grid_position):
+				var odds = CombatSystem.calculate_odds(unit, enemy)
+				if odds.win_chance >= 0.5:
+					CombatSystem.resolve_combat(unit, enemy)
+					return
+		# Explore — skip garrison logic entirely
+		var unexplored = _find_nearest_unexplored(unit, player)
+		if unexplored != Vector2i(-1, -1):
+			_move_toward(unit, unexplored)
+			# Attack any animal we end up adjacent to
+			if is_instance_valid(unit) and unit.movement_remaining > 0:
+				var adj = _find_nearby_enemies(unit, player, 1)
+				for e in adj:
+					if is_instance_valid(e) and GridUtils.are_adjacent(unit.grid_position, e.grid_position):
+						var odds = CombatSystem.calculate_odds(unit, e)
+						if odds.win_chance >= 0.5:
+							CombatSystem.resolve_combat(unit, e)
+							break
+			return
+		_random_explore(unit)
+		return
+
 	# 0. Siege units: prefer bombarding cities over direct combat (siege-first warfare)
 	if unit_class == "siege" and not player.at_war_with.is_empty():
 		var bombard_target = _find_bombard_target(unit, player)
@@ -2081,6 +2109,17 @@ func _find_nearest_unexplored(unit, player) -> Vector2i:
 			break
 
 	return best_pos
+
+## Random exploration move (fallback when no unexplored tiles in search range)
+func _random_explore(unit) -> void:
+	if GameManager.hex_grid == null or unit.movement_remaining <= 0:
+		return
+	var neighbors = GridUtils.get_neighbors(unit.grid_position)
+	neighbors.shuffle()
+	for n_pos in neighbors:
+		if unit.can_move_to(n_pos):
+			unit.move_to(n_pos)
+			return
 
 ## Find nearest enemy city that a siege unit can bombard
 func _find_bombard_target(unit, player) -> Vector2i:
