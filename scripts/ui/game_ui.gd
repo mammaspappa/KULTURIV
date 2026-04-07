@@ -1517,7 +1517,7 @@ func _connect_notification_signals() -> void:
 	EventBus.trade_rejected.connect(_on_trade_rejected)
 	EventBus.notification_added.connect(_on_notification_added)
 
-func _on_notification_added(message: String, type: String) -> void:
+func _on_notification_added(message: String, type: String = "info") -> void:
 	_add_notification(message, type)
 
 func _on_research_completed(player, tech: String) -> void:
