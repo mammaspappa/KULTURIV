@@ -190,6 +190,7 @@ func _build_main_menu() -> void:
 
 	_add_menu_button(main_menu_container, "Single Player", _on_single_player_pressed)
 	_add_menu_button(main_menu_container, "Multiplayer", _on_multiplayer_pressed)
+	_add_menu_button(main_menu_container, "Watch Game", _on_watch_game_pressed)
 	_add_menu_button(main_menu_container, "Options", _on_options_pressed)
 	_add_menu_button(main_menu_container, "Exit", _on_quit_pressed)
 
@@ -356,6 +357,20 @@ func _on_submenu_back() -> void:
 	submenu_container.visible = false
 	main_menu_container.visible = true
 
+func _on_watch_game_pressed() -> void:
+	# Start spectator mode with default settings (all AI players)
+	var settings = {
+		"map_width": 64,
+		"map_height": 40,
+		"map_type": "fractal",
+		"num_players": 6,
+		"difficulty": 4,
+		"game_speed": 0,  # Quick
+		"ai_aggressiveness": "normal",
+		"spectator": true,
+	}
+	_on_start_game(settings)
+
 func _on_multiplayer_pressed() -> void:
 	if multiplayer_screen:
 		main_menu_container.visible = false
@@ -408,11 +423,14 @@ func _show_loading_screen(settings: Dictionary) -> void:
 						leader_text = label
 
 	if leader_text:
-		var civ_data = DataManager.get_civ(settings.get("human_civ", "rome"))
-		var leader_data = DataManager.get_leader(settings.get("human_leader", ""))
-		var civ_name = civ_data.get("name", "Unknown")
-		var leader_name = leader_data.get("name", settings.get("player_name", "Player"))
-		leader_text.text = "You are %s of the %s" % [leader_name, civ_name]
+		if settings.get("spectator", false):
+			leader_text.text = "Spectator Mode - Watching %d civilizations" % settings.get("num_players", 6)
+		else:
+			var civ_data = DataManager.get_civ(settings.get("human_civ", "rome"))
+			var leader_data = DataManager.get_leader(settings.get("human_leader", ""))
+			var civ_name = civ_data.get("name", "Unknown")
+			var leader_name = leader_data.get("name", settings.get("player_name", "Player"))
+			leader_text.text = "You are %s of the %s" % [leader_name, civ_name]
 
 	# Random quote
 	var quote_text = null

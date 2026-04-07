@@ -217,7 +217,12 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 
 func _on_turn_started(turn: int, player) -> void:
-	if player == GameManager.human_player:
+	if GameManager.spectator_mode:
+		# In spectator mode, update UI for the first player each round
+		if player == GameManager.players[0]:
+			_update_top_bar()
+			_update_scoreboard()
+	elif player == GameManager.human_player:
 		_update_top_bar()
 		_update_scoreboard()
 		# Clear skipped units list at start of turn
@@ -407,7 +412,10 @@ func _update_top_bar() -> void:
 
 	var player = GameManager.human_player
 	if player == null:
-		return
+		if GameManager.spectator_mode and GameManager.players.size() > 0:
+			player = GameManager.players[0]
+		else:
+			return
 
 	# Gold
 	if gold_label:
@@ -808,18 +816,24 @@ func _setup_scoreboard() -> void:
 	add_child(scoreboard_panel)
 
 func _update_scoreboard() -> void:
-	if scoreboard_container == null or GameManager.human_player == null:
+	if scoreboard_container == null:
+		return
+	if GameManager.human_player == null and not GameManager.spectator_mode:
 		return
 
 	for child in scoreboard_container.get_children():
 		child.queue_free()
 
-	# Collect met players + self, sorted by score (exclude barbarians)
+	# Collect players for scoreboard (exclude barbarians)
 	var entries = []
 	for player in GameManager.players:
 		if player.civilization_id == "barbarian":
 			continue
-		if player == GameManager.human_player or player.player_id in GameManager.human_player.met_players:
+		if GameManager.spectator_mode:
+			# Spectator sees all players
+			player.calculate_score()
+			entries.append(player)
+		elif player == GameManager.human_player or player.player_id in GameManager.human_player.met_players:
 			player.calculate_score()
 			entries.append(player)
 		elif not player.cities.is_empty():

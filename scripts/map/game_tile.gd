@@ -71,10 +71,10 @@ func _init(pos: Vector2i = Vector2i.ZERO) -> void:
 func _draw() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
-	# Check visibility for human player
+	# Check visibility for human player (spectator mode sees everything)
 	var human_player = GameManager.human_player
 	var vis_state = VisibilityState.VISIBLE  # Default to visible if no human player
-	if human_player != null:
+	if human_player != null and not GameManager.spectator_mode:
 		vis_state = get_visibility_for_player(human_player.player_id)
 
 	# Don't render unexplored tiles

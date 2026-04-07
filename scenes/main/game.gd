@@ -98,8 +98,14 @@ func _ready() -> void:
 	# Setup additional UI screens
 	_setup_ui_screens()
 
-	# Center camera on human player's starting unit
-	if GameManager.human_player and GameManager.human_player.units.size() > 0:
+	# Center camera
+	if GameManager.spectator_mode:
+		# Spectator: center on map middle
+		game_camera_3d.center_on_grid(Vector2i(map_width / 2, map_height / 2))
+		game_camera_3d.orbit_angle = game_camera_3d.target_orbit_angle
+		game_camera_3d.orbit_elevation = game_camera_3d.target_orbit_elevation
+		_build_spectator_ui()
+	elif GameManager.human_player and GameManager.human_player.units.size() > 0:
 		var start_unit = GameManager.human_player.units[0]
 		game_camera_3d.center_on_grid(start_unit.grid_position)
 		# Snap immediately (no interpolation on first frame)
@@ -107,6 +113,56 @@ func _ready() -> void:
 		game_camera_3d.orbit_elevation = game_camera_3d.target_orbit_elevation
 
 	print("[Game] 3D cylinder map setup complete")
+
+var spectator_speed_label: Label = null
+
+func _build_spectator_ui() -> void:
+	var panel = PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.offset_left = 10
+	panel.offset_top = 50
+	screen_ui_layer.add_child(panel)
+
+	var hbox = HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 8)
+	panel.add_child(hbox)
+
+	var title = Label.new()
+	title.text = "SPECTATOR"
+	title.add_theme_color_override("font_color", Color(1, 0.9, 0.5))
+	hbox.add_child(title)
+
+	var sep = VSeparator.new()
+	hbox.add_child(sep)
+
+	# Speed buttons
+	var speeds = {"Pause": 0.0, "Slow": 1.0, "Normal": 0.5, "Fast": 0.15, "Max": 0.0}
+	# Max uses 0 but we need to distinguish from Pause
+	for speed_name in ["Pause", "Slow", "Normal", "Fast", "Max"]:
+		var btn = Button.new()
+		btn.text = speed_name
+		btn.custom_minimum_size = Vector2(60, 30)
+		btn.pressed.connect(_on_spectator_speed.bind(speed_name))
+		hbox.add_child(btn)
+
+	spectator_speed_label = Label.new()
+	spectator_speed_label.text = "Speed: Normal"
+	hbox.add_child(spectator_speed_label)
+
+func _on_spectator_speed(speed_name: String) -> void:
+	match speed_name:
+		"Pause":
+			GameManager.spectator_speed = -1.0  # Negative = paused
+		"Slow":
+			GameManager.spectator_speed = 1.0
+		"Normal":
+			GameManager.spectator_speed = 0.5
+		"Fast":
+			GameManager.spectator_speed = 0.15
+		"Max":
+			GameManager.spectator_speed = 0.0
+	if spectator_speed_label:
+		spectator_speed_label.text = "Speed: %s" % speed_name
 
 func _unhandled_input(event: InputEvent) -> void:
 	# GameWorld is inside the SubViewport, which has handle_input_locally=false,

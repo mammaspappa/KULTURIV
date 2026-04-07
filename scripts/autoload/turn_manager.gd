@@ -150,7 +150,23 @@ func _start_turn_for_player(player) -> void:
 	if not player.is_human:
 		_execute_ai_turn(player)
 		# Auto-advance to next player after AI turn
-		call_deferred("end_turn")
+		if GameManager.spectator_mode:
+			if GameManager.spectator_speed < 0:
+				# Paused — wait until unpaused, then advance
+				while GameManager.spectator_speed < 0 and not game_ended:
+					await get_tree().create_timer(0.1).timeout
+				if not game_ended:
+					call_deferred("end_turn")
+			elif GameManager.spectator_speed > 0:
+				# Delayed — wait then advance
+				await get_tree().create_timer(GameManager.spectator_speed).timeout
+				if not game_ended:
+					end_turn()
+			else:
+				# Max speed — no delay
+				call_deferred("end_turn")
+		else:
+			call_deferred("end_turn")
 
 func _end_turn_for_player(player) -> void:
 	if player == null:

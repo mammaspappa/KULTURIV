@@ -35,6 +35,10 @@ var national_wonders_built: Dictionary = {}  # player_id -> Array of wonder_ids
 # First to discover tracking
 var first_to_discover: Dictionary = {}  # tech_id -> player_id who discovered first
 
+# Spectator mode (all AI, free camera, no fog of war)
+var spectator_mode: bool = false
+var spectator_speed: float = 0.5  # Seconds between turns (0 = max speed)
+
 # Options/Settings
 var edge_pan_enabled: bool = true
 var auto_end_turn: bool = false
@@ -82,7 +86,11 @@ func _create_players(settings: Dictionary) -> void:
 	var is_mp = settings.get("multiplayer", false)
 	var num_players = settings.get("num_players", 2)
 
-	if is_mp:
+	spectator_mode = settings.get("spectator", false)
+
+	if spectator_mode:
+		_create_spectator_players(settings, num_players)
+	elif is_mp:
 		_create_multiplayer_players(settings, num_players)
 	else:
 		_create_singleplayer_players(settings, num_players)
@@ -111,6 +119,24 @@ func _create_singleplayer_players(settings: Dictionary, num_players: int) -> voi
 		var ai_player = PlayerClass.new()
 		ai_player.player_id = i
 		ai_player.civilization_id = ai_civs[i - 1] if i - 1 < ai_civs.size() else "barbarian"
+		ai_player.leader_id = _get_leader_for_civ(ai_player.civilization_id)
+		ai_player.player_name = DataManager.get_civ(ai_player.civilization_id).get("name", "Unknown")
+		ai_player.is_human = false
+		ai_player.team = i
+		ai_player.color = _get_player_color(i)
+		_initialize_player_techs(ai_player)
+		_initialize_player_civics(ai_player)
+		_initialize_player_traits(ai_player)
+		players.append(ai_player)
+
+func _create_spectator_players(settings: Dictionary, num_players: int) -> void:
+	# All players are AI — no human player
+	human_player = null
+	var ai_civs = _get_available_civs([])
+	for i in range(num_players):
+		var ai_player = PlayerClass.new()
+		ai_player.player_id = i
+		ai_player.civilization_id = ai_civs[i] if i < ai_civs.size() else "barbarian"
 		ai_player.leader_id = _get_leader_for_civ(ai_player.civilization_id)
 		ai_player.player_name = DataManager.get_civ(ai_player.civilization_id).get("name", "Unknown")
 		ai_player.is_human = false
