@@ -13,7 +13,9 @@ var wrap_y: bool = false
 # Game state
 var current_game_state = null  # GameState
 var players: Array = []
-var human_player = null  # Player
+var human_player = null  # Player (singleplayer or first human)
+var local_player = null  # Player controlled by THIS client (multiplayer)
+var human_players: Array = []  # All human players (multiplayer)
 var current_player_index: int = 0
 
 # References
@@ -65,13 +67,27 @@ func start_new_game(settings: Dictionary) -> void:
 	# Create players
 	_create_players(settings)
 
+	# Enable simultaneous turns for multiplayer
+	if settings.get("multiplayer", false):
+		TurnManager.simultaneous_mode = true
+
 	# Notify systems
 	EventBus.game_started.emit()
 
 func _create_players(settings: Dictionary) -> void:
 	players.clear()
+	human_players.clear()
+	local_player = null
 
+	var is_mp = settings.get("multiplayer", false)
 	var num_players = settings.get("num_players", 2)
+
+	if is_mp:
+		_create_multiplayer_players(settings, num_players)
+	else:
+		_create_singleplayer_players(settings, num_players)
+
+func _create_singleplayer_players(settings: Dictionary, num_players: int) -> void:
 	var human_civ = settings.get("human_civ", "rome")
 	var human_leader = settings.get("human_leader", "julius_caesar")
 
@@ -104,6 +120,63 @@ func _create_players(settings: Dictionary) -> void:
 		_initialize_player_civics(ai_player)
 		_initialize_player_traits(ai_player)
 		players.append(ai_player)
+
+func _create_multiplayer_players(settings: Dictionary, num_players: int) -> void:
+	var human_player_ids: Array = settings.get("human_player_ids", [])
+	var peer_info: Dictionary = settings.get("peer_info", {})
+	var peer_to_player: Dictionary = settings.get("peer_to_player", {})
+	var used_civs: Array = []
+
+	# Create human players from peer info
+	for peer_id in peer_to_player:
+		var player_id = peer_to_player[peer_id]
+		var info = peer_info.get(peer_id, {})
+
+		var player = PlayerClass.new()
+		player.player_id = player_id
+		player.player_name = info.get("name", "Player %d" % player_id)
+		player.civilization_id = info.get("civ", "rome")
+		player.leader_id = info.get("leader", _get_leader_for_civ(player.civilization_id))
+		player.is_human = true
+		player.team = player_id
+		player.peer_id = peer_id
+		player.color = _get_player_color(player_id)
+		_initialize_player_techs(player)
+		_initialize_player_civics(player)
+		_initialize_player_traits(player)
+		players.append(player)
+		human_players.append(player)
+		used_civs.append(player.civilization_id)
+
+	# Set local_player for this client
+	var my_peer_id = NetworkManager.multiplayer.get_unique_id() if NetworkManager.is_multiplayer else 1
+	var my_player_id = peer_to_player.get(my_peer_id, -1)
+	for p in players:
+		if p.player_id == my_player_id:
+			local_player = p
+			human_player = p  # Backward compat
+			break
+
+	# Fill remaining slots with AI
+	var ai_civs = _get_available_civs(used_civs)
+	var next_id = players.size()
+	for i in range(players.size(), num_players):
+		var ai_player = PlayerClass.new()
+		ai_player.player_id = next_id
+		ai_player.civilization_id = ai_civs[i - players.size()] if (i - players.size()) < ai_civs.size() else "barbarian"
+		ai_player.leader_id = _get_leader_for_civ(ai_player.civilization_id)
+		ai_player.player_name = DataManager.get_civ(ai_player.civilization_id).get("name", "Unknown")
+		ai_player.is_human = false
+		ai_player.team = next_id
+		ai_player.color = _get_player_color(next_id)
+		_initialize_player_techs(ai_player)
+		_initialize_player_civics(ai_player)
+		_initialize_player_traits(ai_player)
+		players.append(ai_player)
+		next_id += 1
+
+	# Sort players by player_id for consistent ordering
+	players.sort_custom(func(a, b): return a.player_id < b.player_id)
 
 func _initialize_player_techs(player) -> void:
 	var starting_techs = DataManager.get_civ_starting_techs(player.civilization_id)
@@ -151,6 +224,16 @@ func get_current_player():
 	if current_player_index < players.size():
 		return players[current_player_index]
 	return null
+
+## Returns the player controlled by this client (works for both SP and MP)
+func get_local_player():
+	if local_player != null:
+		return local_player
+	return human_player
+
+## Check if we're in a multiplayer game
+func is_multiplayer() -> bool:
+	return NetworkManager != null and NetworkManager.is_multiplayer
 
 func get_player(player_id: int):
 	for player in players:

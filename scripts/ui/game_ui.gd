@@ -144,6 +144,9 @@ func _ready() -> void:
 	# Setup notification system
 	_setup_notifications()
 
+	# Setup multiplayer HUD (turn timer, player status)
+	_setup_multiplayer_hud()
+
 	# Initial UI update
 	call_deferred("_update_top_bar")
 
@@ -1776,3 +1779,101 @@ func _rebuild_notification_display() -> void:
 		panel.add_child(label)
 
 		notification_container.add_child(panel)
+
+# =============================================================================
+# MULTIPLAYER HUD
+# =============================================================================
+
+var mp_turn_timer_label: Label = null
+var mp_player_status_container: VBoxContainer = null
+var mp_waiting_label: Label = null
+
+func _setup_multiplayer_hud() -> void:
+	if not GameManager.is_multiplayer():
+		return
+
+	# Turn timer display (top-right area)
+	mp_turn_timer_label = Label.new()
+	mp_turn_timer_label.name = "MPTurnTimer"
+	mp_turn_timer_label.set_anchors_preset(PRESET_TOP_RIGHT)
+	mp_turn_timer_label.offset_right = -20
+	mp_turn_timer_label.offset_top = 45
+	mp_turn_timer_label.add_theme_font_size_override("font_size", 20)
+	mp_turn_timer_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.5))
+	mp_turn_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	mp_turn_timer_label.text = ""
+	add_child(mp_turn_timer_label)
+
+	# Player status panel (below turn timer)
+	mp_player_status_container = VBoxContainer.new()
+	mp_player_status_container.name = "MPPlayerStatus"
+	mp_player_status_container.set_anchors_preset(PRESET_TOP_RIGHT)
+	mp_player_status_container.offset_right = -20
+	mp_player_status_container.offset_top = 75
+	mp_player_status_container.offset_left = -200
+	mp_player_status_container.add_theme_constant_override("separation", 3)
+	add_child(mp_player_status_container)
+
+	# Waiting label (shown after ending turn)
+	mp_waiting_label = Label.new()
+	mp_waiting_label.name = "MPWaiting"
+	mp_waiting_label.set_anchors_preset(PRESET_CENTER)
+	mp_waiting_label.offset_top = -100
+	mp_waiting_label.add_theme_font_size_override("font_size", 24)
+	mp_waiting_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.5))
+	mp_waiting_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	mp_waiting_label.text = ""
+	mp_waiting_label.visible = false
+	add_child(mp_waiting_label)
+
+	# Connect MP signals
+	EventBus.mp_turn_timer_updated.connect(_on_mp_timer_updated)
+	EventBus.mp_turn_status_updated.connect(_on_mp_turn_status_updated)
+
+func _on_mp_timer_updated(remaining: float) -> void:
+	if mp_turn_timer_label == null:
+		return
+	if remaining <= 0:
+		mp_turn_timer_label.text = ""
+	else:
+		var minutes = int(remaining) / 60
+		var seconds = int(remaining) % 60
+		mp_turn_timer_label.text = "%d:%02d" % [minutes, seconds]
+		# Turn red when under 30 seconds
+		if remaining < 30:
+			mp_turn_timer_label.add_theme_color_override("font_color", Color.RED)
+		else:
+			mp_turn_timer_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.5))
+
+func _on_mp_turn_status_updated(ended_players: Array) -> void:
+	if mp_player_status_container == null:
+		return
+
+	# Clear old entries
+	for child in mp_player_status_container.get_children():
+		child.queue_free()
+
+	# Show status for each human player
+	for player in GameManager.human_players:
+		var label = Label.new()
+		var done = player.player_id in ended_players
+		label.text = "%s: %s" % [player.player_name, "Done" if done else "Playing"]
+		label.add_theme_font_size_override("font_size", 13)
+		label.add_theme_color_override("font_color", Color.GREEN if done else Color(0.8, 0.8, 0.6))
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		mp_player_status_container.add_child(label)
+
+	# Show waiting message if local player has ended turn
+	var local_id = NetworkManager.get_local_player_id()
+	if local_id in ended_players and mp_waiting_label:
+		var waiting_for = []
+		for player in GameManager.human_players:
+			if player.player_id not in ended_players:
+				waiting_for.append(player.player_name)
+		if not waiting_for.is_empty():
+			mp_waiting_label.text = "Waiting for: %s" % ", ".join(waiting_for)
+			mp_waiting_label.visible = true
+		else:
+			mp_waiting_label.visible = false
+	elif mp_waiting_label:
+		mp_waiting_label.visible = false

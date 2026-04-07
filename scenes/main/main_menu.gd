@@ -33,6 +33,7 @@ var loading_screen: ColorRect
 var new_game_screen: Control
 var load_game_screen: Control
 var options_screen: Control
+var multiplayer_screen: Control
 
 func _ready() -> void:
 	_build_background()
@@ -188,6 +189,7 @@ func _build_main_menu() -> void:
 	main_menu_container.add_theme_constant_override("separation", 12)
 
 	_add_menu_button(main_menu_container, "Single Player", _on_single_player_pressed)
+	_add_menu_button(main_menu_container, "Multiplayer", _on_multiplayer_pressed)
 	_add_menu_button(main_menu_container, "Options", _on_options_pressed)
 	_add_menu_button(main_menu_container, "Exit", _on_quit_pressed)
 
@@ -337,6 +339,14 @@ func _create_screens() -> void:
 		options_screen.back_pressed.connect(_on_subscreen_back)
 		add_child(options_screen)
 
+	var MultiplayerScreenClass = load("res://scripts/ui/multiplayer_connect.gd")
+	if MultiplayerScreenClass:
+		multiplayer_screen = Control.new()
+		multiplayer_screen.set_script(MultiplayerScreenClass)
+		multiplayer_screen.name = "MultiplayerScreen"
+		multiplayer_screen.back_pressed.connect(_on_subscreen_back)
+		add_child(multiplayer_screen)
+
 # --- BUTTON HANDLERS ---
 func _on_single_player_pressed() -> void:
 	main_menu_container.visible = false
@@ -345,6 +355,11 @@ func _on_single_player_pressed() -> void:
 func _on_submenu_back() -> void:
 	submenu_container.visible = false
 	main_menu_container.visible = true
+
+func _on_multiplayer_pressed() -> void:
+	if multiplayer_screen:
+		main_menu_container.visible = false
+		multiplayer_screen.show_screen()
 
 func _on_new_game_pressed() -> void:
 	if new_game_screen:
