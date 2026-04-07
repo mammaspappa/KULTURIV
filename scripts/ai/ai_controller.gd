@@ -407,9 +407,11 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 
 		if our_power > (their_power + pact_allies_power) * required_ratio:
 			GameManager.declare_war(player, other)
-			# Track war start turn for minimum war duration
+			# Track war start turn for minimum war duration (both directions)
 			var war_key = "%d:%d" % [player.player_id, other.player_id]
+			var war_key_rev = "%d:%d" % [other.player_id, player.player_id]
 			peace_cooldown["war_start_" + war_key] = TurnManager.current_turn
+			peace_cooldown["war_start_" + war_key_rev] = TurnManager.current_turn
 			if sim_logger:
 				sim_logger.log_decision(player.player_name, "war", "declare_war", other.player_name,
 					"power=%.0f vs %.0f, ratio=%.1f, peace_weight=%d, dogpile=%s" % [
