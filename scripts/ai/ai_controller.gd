@@ -876,6 +876,10 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 
 			if odds.win_chance > min_odds:
 				if GridUtils.are_adjacent(unit.grid_position, target.grid_position):
+					if sim_logger:
+						sim_logger.log_decision(player.player_name, "combat", "attack",
+							"%s vs %s at (%d,%d)" % [unit.unit_id, target.unit_id, target.grid_position.x, target.grid_position.y],
+							"odds=%.0f%%" % (odds.win_chance * 100))
 					CombatSystem.resolve_combat(unit, target)
 					return
 				else:
@@ -883,8 +887,16 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 					# After moving, check if we're now adjacent and can attack
 					if is_instance_valid(unit) and is_instance_valid(target) and unit.movement_remaining > 0:
 						if GridUtils.are_adjacent(unit.grid_position, target.grid_position):
+							if sim_logger:
+								sim_logger.log_decision(player.player_name, "combat", "attack_after_move",
+									"%s vs %s" % [unit.unit_id, target.unit_id],
+									"odds=%.0f%%" % (odds.win_chance * 100))
 							CombatSystem.resolve_combat(unit, target)
 					return
+			elif sim_logger:
+				sim_logger.log_decision(player.player_name, "combat", "skip_bad_odds",
+					"%s vs %s" % [unit.unit_id, target.unit_id],
+					"odds=%.0f%% < min %.0f%%" % [odds.win_chance * 100, min_odds * 100])
 
 	# 2. Strategic: move toward assigned war target
 	if not player.at_war_with.is_empty():
@@ -1491,10 +1503,11 @@ func _find_nearby_enemies(unit, player, range_val: int) -> Array:
 		var tile = GameManager.hex_grid.get_tile(tile_pos)
 		if tile == null:
 			continue
-		var enemy = GameManager.get_unit_at(tile_pos)
-		if enemy != null and enemy.player_owner != player:
-			if GameManager.is_at_war(player, enemy.player_owner):
-				enemies.append(enemy)
+		var units_here = GameManager.get_units_at(tile_pos)
+		for other_unit in units_here:
+			if other_unit.player_owner != player and other_unit.get_strength() > 0:
+				if GameManager.is_at_war(player, other_unit.player_owner):
+					enemies.append(other_unit)
 
 	return enemies
 
