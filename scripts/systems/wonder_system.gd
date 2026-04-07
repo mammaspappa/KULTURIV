@@ -91,6 +91,8 @@ func _apply_population_all_cities(player, effects: Dictionary) -> void:
 func _apply_free_building_all_cities(player, effects: Dictionary) -> void:
 	if effects.get("free_monument_all_cities", false):
 		_grant_building_all_cities(player, "monument")
+	if effects.get("free_obelisk_all_cities", false):
+		_grant_building_all_cities(player, "obelisk")
 	if effects.get("free_broadcast_tower_all_cities", false):
 		_grant_building_all_cities(player, "broadcast_tower")
 
