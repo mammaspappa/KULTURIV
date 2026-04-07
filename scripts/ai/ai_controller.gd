@@ -734,19 +734,27 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 			has_escort = true
 			break
 
+	# Check for nearby barbarians/enemies (within 3 tiles)
+	var nearby_danger = false
+	for barb_check_pos in GridUtils.get_tiles_in_range(unit.grid_position, 3):
+		var enemy = GameManager.get_unit_at(barb_check_pos)
+		if enemy and enemy.player_owner != player and enemy.get_strength() > 0:
+			nearby_danger = true
+			break
+
 	# Check if we're close to a friendly city (safe zone)
 	var near_own_city = false
 	for city in player.cities:
-		if GridUtils.chebyshev_distance(unit.grid_position, city.grid_position) <= 3:
+		if GridUtils.chebyshev_distance(unit.grid_position, city.grid_position) <= 2:
 			near_own_city = true
 			break
 
-	# If no escort and not in safe zone, retreat or wait
-	if not has_escort and not near_own_city:
+	# If danger nearby and no escort: retreat to city and WAIT there
+	if nearby_danger and not has_escort:
 		var in_city = GameManager.get_city_at(unit.grid_position) != null
 		if in_city:
-			return  # Stay in city, wait for escort
-		# Out in the wild without escort — retreat toward nearest city
+			return  # Stay in city — wait for escort to be built/arrive
+		# Retreat to nearest city
 		var nearest_city_pos = Vector2i(-1, -1)
 		var best_dist = 999
 		for city in player.cities:
@@ -757,6 +765,12 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 		if nearest_city_pos != Vector2i(-1, -1) and best_dist > 0:
 			_move_toward(unit, nearest_city_pos)
 		return
+
+	# No danger, or has escort — safe to proceed
+	# But if far from cities with no escort and NOT near danger, still move carefully
+	if not has_escort and not near_own_city and not nearby_danger:
+		# No immediate danger but unescorted in the wild — proceed cautiously
+		pass  # Allow movement below (no barbs visible, safe to continue)
 
 	# Check if unit has a strategic assignment
 	var assigned_site = _get_assigned_site(unit, player)
@@ -1108,14 +1122,75 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 				unit.fortify()
 			return
 
-	# 5. Explore unexplored tiles
+	# 5. Hunt barbarians near borders (peacetime priority — clear threats for settlers/workers)
+	if player.at_war_with.is_empty():
+		var barb_target = _find_nearby_barbarian(unit, player)
+		if barb_target != null:
+			if GridUtils.are_adjacent(unit.grid_position, barb_target.grid_position):
+				var odds = CombatSystem.calculate_odds(unit, barb_target)
+				if odds.win_chance >= 0.4:
+					CombatSystem.resolve_combat(unit, barb_target)
+					return
+			else:
+				_move_toward(unit, barb_target.grid_position)
+				# Attack after moving if adjacent
+				if is_instance_valid(unit) and is_instance_valid(barb_target) and unit.movement_remaining > 0:
+					if GridUtils.are_adjacent(unit.grid_position, barb_target.grid_position):
+						var odds = CombatSystem.calculate_odds(unit, barb_target)
+						if odds.win_chance >= 0.4:
+							CombatSystem.resolve_combat(unit, barb_target)
+				return
+
+	# 6. Explore unexplored tiles
 	var unexplored = _find_nearest_unexplored(unit, player)
 	if unexplored != Vector2i(-1, -1):
 		_move_toward(unit, unexplored)
 		return
 
-	# 6. Nothing to do
+	# 7. Nothing to do
 	unit.fortify()
+
+## Find a barbarian unit near owned territory (within 8 tiles of any city)
+func _find_nearby_barbarian(unit, player):
+	var best_barb = null
+	var best_dist = 999
+
+	# Check all barbarian players' units
+	for other_player in GameManager.players:
+		if other_player.civilization_id != "barbarian":
+			continue
+		for barb_unit in other_player.units:
+			if not is_instance_valid(barb_unit) or barb_unit.get_strength() <= 0:
+				continue
+			# Must be near one of our cities (within 8 tiles)
+			var near_our_city = false
+			for city in player.cities:
+				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= 8:
+					near_our_city = true
+					break
+			if not near_our_city:
+				continue
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, barb_unit.grid_position)
+			if dist < best_dist:
+				best_dist = dist
+				best_barb = barb_unit
+
+	return best_barb
+
+## Count barbarian units within 8 tiles of any owned city
+func _count_barbs_near_cities(player) -> int:
+	var count = 0
+	for other_player in GameManager.players:
+		if other_player.civilization_id != "barbarian":
+			continue
+		for barb_unit in other_player.units:
+			if not is_instance_valid(barb_unit) or barb_unit.get_strength() <= 0:
+				continue
+			for city in player.cities:
+				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= 8:
+					count += 1
+					break  # Count each barb once
+	return count
 
 ## Pick best target from enemies
 func _pick_best_target(unit, enemies: Array, military_flavor: int):
@@ -1225,6 +1300,26 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	if workers == 0 and num_cities >= 1:
 		if city.can_build_unit("worker"):
 			city.set_production("worker")
+			return
+
+	# URGENT: settler waiting in city for escort — build military immediately
+	var settler_waiting = false
+	for u in player.units:
+		if u.can_found_city() and GameManager.get_city_at(u.grid_position) != null:
+			settler_waiting = true
+			break
+	if settler_waiting and military_units < num_cities + settlers_out:
+		var escort_unit = _get_best_military_unit(city, player, military_flavor, false)
+		if escort_unit != "":
+			city.set_production(escort_unit)
+			return
+
+	# Barbarians near borders — build military to clear them
+	var barbs_near_borders = _count_barbs_near_cities(player)
+	if barbs_near_borders > 0 and military_units < num_cities + barbs_near_borders:
+		var hunter_unit = _get_best_military_unit(city, player, military_flavor, false)
+		if hunter_unit != "":
+			city.set_production(hunter_unit)
 			return
 
 	# Urgent military: if below minimum garrison (1 per city), build military first
