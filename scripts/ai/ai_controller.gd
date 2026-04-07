@@ -1210,8 +1210,8 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 				city.set_production("settler")
 				return
 
-	# Need more workers? (1 per 2 cities)
-	var desired_workers = max(1, (num_cities + 1) / 2)
+	# Need more workers? (1 per city, more when expanding)
+	var desired_workers = max(1, num_cities)
 	if workers < desired_workers:
 		if city.can_build_unit("worker"):
 			city.set_production("worker")
@@ -1236,7 +1236,12 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 			return
 
-	# Fallback: build ANY available unit or building so city is never idle
+	# Fallback: build wealth (convert production to gold) if nothing useful to build
+	if city.can_build_unit("wealth"):
+		city.set_production("wealth")
+		return
+
+	# Last resort: build ANY available unit or building so city is never idle
 	for unit_id in DataManager.units:
 		if city.can_build_unit(unit_id):
 			var udata = DataManager.get_unit(unit_id)
