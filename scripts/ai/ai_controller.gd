@@ -34,9 +34,18 @@ var _cached_player_id: int = -1
 var _cached_has_coastal: int = -1  # -1=unchecked, 0=no, 1=yes
 var _cached_has_spies: int = -1
 
+# War/peace cooldown: "player_id:other_id" -> turn when peace was last made
+# Prevents rapid war cycling (declare → peace → declare loop)
+var peace_cooldown: Dictionary = {}  # String -> int (turn number)
+const PEACE_COOLDOWN_TURNS = 20  # Must wait 20 turns after peace before redeclaring war
+
 ## Execute a full turn for an AI player
 func execute_turn(player) -> void:
 	if player.is_human:
+		return
+	# The base barbarian player (id=-1) uses its own simple AI (BarbarianSystem)
+	# Spawned barbarian civilizations (id >= 0) use the full civ AI
+	if player.civilization_id == "barbarian" and player.player_id == -1:
 		return
 
 	# Clear per-turn caches
@@ -90,6 +99,14 @@ func _get_leader_flavor(player) -> Dictionary:
 	if not _cached_flavor.is_empty() and _cached_player_id == player.player_id:
 		return _cached_flavor
 
+	# Spawned barbarian civs: hardcoded aggressive flavor (no leader)
+	if player.civilization_id == "barbarian" and player.player_id >= 0:
+		_cached_flavor = {
+			"military": 9, "gold": 2, "science": 2, "culture": 1,
+			"religion": 0, "expansion": 3, "growth": 3, "production": 7
+		}
+		return _cached_flavor
+
 	var leader_data = DataManager.get_leader(player.leader_id)
 	var flavor = leader_data.get("flavor", {
 		"military": 5, "gold": 5, "science": 5, "culture": 5,
@@ -108,6 +125,11 @@ func _get_leader_flavor(player) -> Dictionary:
 ## Get full leader personality data (cached per turn)
 func _get_leader_personality(player) -> Dictionary:
 	if not _cached_personality.is_empty() and _cached_player_id == player.player_id:
+		return _cached_personality
+
+	# Spawned barbarian civs: use the personality stored on player object
+	if player.civilization_id == "barbarian" and player.player_id >= 0 and not player.ai_personality.is_empty():
+		_cached_personality = player.ai_personality
 		return _cached_personality
 
 	var leader_data = DataManager.get_leader(player.leader_id)
@@ -166,12 +188,21 @@ func _has_coastal_cities(player) -> bool:
 ## Process AI diplomacy decisions
 func _process_diplomacy(player, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
+	var is_barb_civ = player.civilization_id == "barbarian" and player.player_id >= 0
 	var met_count = 0
 
 	for other in GameManager.players:
 		if other == player or other.player_id not in player.met_players:
 			continue
+		if other.player_id == -1:
+			continue  # Skip base barbarian player
 		met_count += 1
+
+		# Barbarian civs: always at war, never make peace, never trade
+		if is_barb_civ:
+			if not GameManager.is_at_war(player, other):
+				GameManager.declare_war(player, other)
+			continue
 
 		# Skip if at war
 		if GameManager.is_at_war(player, other):
@@ -213,7 +244,13 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 		if our_power < their_power * 0.5:
 			# Badly losing — even warmongers consider peace
 			if not other.is_human:
-				GameManager.make_peace(player, other)
+				_make_peace_with_cooldown(player, other)
+		return
+
+	# Don't consider peace in the first 10 turns of war (give wars time to develop)
+	var war_key = "%d:%d" % [player.player_id, other.player_id]
+	var war_start = peace_cooldown.get("war_start_" + war_key, 0)
+	if TurnManager.current_turn - war_start < 10:
 		return
 
 	var our_power = DiplomacySystem._calculate_power(player)
@@ -224,12 +261,12 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 	if our_power < their_power * peace_threshold:
 		if other.is_human:
 			return  # Wait for human to propose
-		GameManager.make_peace(player, other)
+		_make_peace_with_cooldown(player, other)
 	elif personality.base_peace_weight > 6 and our_power < their_power * 1.2:
 		# Very peaceful leaders seek peace even when roughly equal
 		if randf() < 0.3:
 			if not other.is_human:
-				GameManager.make_peace(player, other)
+				_make_peace_with_cooldown(player, other)
 
 ## Consider treaties (open borders, defensive pact)
 func _consider_treaties(player, other, flavor: Dictionary) -> void:
@@ -291,10 +328,27 @@ func _consider_trade(player, other, flavor: Dictionary) -> void:
 				# Propose to human player
 				EventBus.trade_proposed.emit(player, other, proposal)
 
+## Record peace and start cooldown timer
+func _make_peace_with_cooldown(player, other) -> void:
+	GameManager.make_peace(player, other)
+	var key = "%d:%d" % [player.player_id, other.player_id]
+	var key_rev = "%d:%d" % [other.player_id, player.player_id]
+	peace_cooldown[key] = TurnManager.current_turn
+	peace_cooldown[key_rev] = TurnManager.current_turn
+	if sim_logger:
+		sim_logger.log_decision(player.player_name, "peace", "make_peace", other.player_name,
+			"cooldown until turn %d" % (TurnManager.current_turn + PEACE_COOLDOWN_TURNS))
+
 ## Consider declaring war (BTS personality-driven)
 func _consider_war(player, other, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
 	var personality = _get_leader_personality(player)
+
+	# Check peace cooldown — cannot redeclare war too soon after making peace
+	var cooldown_key = "%d:%d" % [player.player_id, other.player_id]
+	var last_peace_turn = peace_cooldown.get(cooldown_key, -999)
+	if TurnManager.current_turn - last_peace_turn < PEACE_COOLDOWN_TURNS:
+		return  # Still in cooldown period
 
 	# BTS max_war_rand: lower = more warlike. Chance = 100/max_war_rand per turn.
 	# Alexander (50) = 2%, Gandhi (400) = 0.25%, Montezuma (40) = 2.5%
@@ -339,6 +393,9 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 
 		if our_power > (their_power + pact_allies_power) * required_ratio:
 			GameManager.declare_war(player, other)
+			# Track war start turn for minimum war duration
+			var war_key = "%d:%d" % [player.player_id, other.player_id]
+			peace_cooldown["war_start_" + war_key] = TurnManager.current_turn
 			if sim_logger:
 				sim_logger.log_decision(player.player_name, "war", "declare_war", other.player_name,
 					"power=%.0f vs %.0f, ratio=%.1f, peace_weight=%d, dogpile=%s" % [
@@ -766,8 +823,12 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	if specialization == CitySpecialization.MILITARY:
 		desired_military *= 1.5
 
-	# Hard cap: never exceed cities*6+10 military units
-	var max_military = num_cities * 6 + 10
+	# Hard cap: never exceed cities*4+6 military units
+	var max_military = num_cities * 4 + 6
+	# Economic cap: don't build more military if going broke
+	var free_supply = num_cities + 2
+	if player.gold <= 0 and military_units > free_supply:
+		max_military = military_units  # Don't add more when bankrupt
 	var need_military = military_units < desired_military and military_units < max_military
 
 	if need_military:
@@ -808,6 +869,9 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 
 func _process_research(player, flavor: Dictionary) -> void:
+	# Manage science rate based on gold situation
+	_manage_science_rate(player)
+
 	if player.current_research != "":
 		return
 
@@ -835,6 +899,70 @@ func _process_research(player, flavor: Dictionary) -> void:
 		var tech_name = DataManager.get_tech(best_tech).get("name", best_tech)
 		sim_logger.log_decision(player.player_name, "research", "start_research", tech_name,
 			"score=%.0f, available=%d" % [best_score, available_techs.size()])
+
+## Manage science vs gold slider based on economic situation
+func _manage_science_rate(player) -> void:
+	# Estimate current gold per turn at current science rate
+	var est_gpt = _estimate_gold_per_turn(player)
+
+	if player.gold <= 10 or est_gpt < -5:
+		# Need more gold — find break-even science rate
+		while player.science_rate > 0.0:
+			player.science_rate = max(0.0, player.science_rate - 0.1)
+			for city in player.cities:
+				city.calculate_yields()
+			est_gpt = _estimate_gold_per_turn(player)
+			if est_gpt >= 0 or player.science_rate <= 0.01:
+				break
+	elif player.gold > 100 and est_gpt >= 5 and player.science_rate < 1.0:
+		# Can afford more science — try increasing
+		var old_rate = player.science_rate
+		player.science_rate = min(1.0, player.science_rate + 0.1)
+		for city in player.cities:
+			city.calculate_yields()
+		# Verify it's still affordable
+		if _estimate_gold_per_turn(player) < 0:
+			player.science_rate = old_rate
+			for city in player.cities:
+				city.calculate_yields()
+
+## Estimate gold per turn based on current city yields and known costs
+func _estimate_gold_per_turn(player) -> int:
+	var total_gold = 0
+	for city in player.cities:
+		total_gold += city.gold_yield
+
+	# Estimate maintenance (mirrors turn_manager logic)
+	var num_cities = player.cities.size()
+	var capital_pos = Vector2i.ZERO
+	for city in player.cities:
+		if "palace" in city.buildings:
+			capital_pos = city.grid_position
+			break
+
+	var maintenance = 0
+	for city in player.cities:
+		var dist = GridUtils.chebyshev_distance(city.grid_position, capital_pos)
+		var dist_cost = int(dist * 0.5)
+		if "courthouse" in city.buildings:
+			dist_cost = dist_cost / 2
+		var count_cost = int((num_cities - 1) * 0.5)
+		maintenance += dist_cost + count_cost
+
+	# Unit supply
+	var military_count = 0
+	for unit in player.units:
+		if DataManager.get_unit_strength(unit.unit_id) > 0:
+			military_count += 1
+	var free_units = num_cities + 2
+	var excess = max(0, military_count - free_units)
+
+	# Inflation
+	var inflation = min(1.0 + TurnManager.current_turn * 0.001, 1.5)
+	maintenance = int(maintenance * inflation)
+	excess = int(excess * inflation)
+
+	return total_gold - maintenance - excess
 
 func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	var score = 0.0

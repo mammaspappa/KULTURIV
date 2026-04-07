@@ -55,6 +55,17 @@ func _start_turn_for_player(player) -> void:
 	if player == null:
 		return
 
+	# Base barbarian player (id=-1): only refresh movement, skip all civ systems
+	# Spawned barbarian civs (id >= 0) get full turn processing like normal AI
+	if player.civilization_id == "barbarian" and player.player_id == -1:
+		for unit in player.units:
+			unit.refresh_movement()
+			unit.has_acted = false
+		# Process barbarian unit AI directly (simple attack/pillage logic)
+		BarbarianSystem._process_barbarian_ai()
+		call_deferred("end_turn")
+		return
+
 	# Process worker builds first (before refreshing movement)
 	for unit in player.units:
 		if unit.current_order == UnitClass.UnitOrder.BUILD:
@@ -256,8 +267,8 @@ func _process_gold(player) -> void:
 	var excess_units = max(0, military_count - free_units)
 	var unit_supply_cost = excess_units  # 1 gold per excess unit
 
-	# --- Inflation (0.3% per turn, cap at 3x) ---
-	var inflation_rate = min(1.0 + current_turn * 0.003, 3.0)
+	# --- Inflation (BTS-style: very gradual, 0.1% per turn, cap at 1.5x) ---
+	var inflation_rate = min(1.0 + current_turn * 0.001, 1.5)
 	city_maintenance = int(city_maintenance * inflation_rate)
 	unit_supply_cost = int(unit_supply_cost * inflation_rate)
 
@@ -274,8 +285,21 @@ func _process_gold(player) -> void:
 	# Add to player's gold treasury
 	player.gold += player.gold_per_turn
 
-	# Ensure gold doesn't go below 0
+	# Gold deficit handling: disband excess military units if bankrupt
 	if player.gold < 0:
+		# Disband cheapest military unit to recover
+		var weakest_unit = null
+		var weakest_strength = 999
+		for unit in player.units:
+			var strength = DataManager.get_unit_strength(unit.unit_id)
+			if strength > 0 and strength < weakest_strength:
+				# Don't disband units in cities (garrison)
+				if GameManager.get_city_at(unit.grid_position) == null:
+					weakest_strength = strength
+					weakest_unit = unit
+		if weakest_unit:
+			weakest_unit.die()
+			EventBus.notification_added.emit("%s disbanded a unit due to bankruptcy!" % player.player_name)
 		player.gold = 0
 
 func _process_research(player) -> void:

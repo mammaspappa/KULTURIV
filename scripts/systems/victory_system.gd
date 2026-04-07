@@ -1,9 +1,9 @@
 extends Node
 ## Handles victory condition checking.
 
-const MAX_TURNS = 500
-const DOMINATION_LAND_PERCENT = 0.64  # 64% of total land mass
-const DOMINATION_POP_PERCENT = 0.64   # 64% of total population
+const MAX_TURNS = 400
+const DOMINATION_LAND_PERCENT = 0.55  # 55% of total land mass (BTS-adjusted for smaller maps)
+const DOMINATION_POP_PERCENT = 0.55   # 55% of total population
 const CULTURAL_THRESHOLD = 50000
 const CULTURAL_CITIES_NEEDED = 3
 
@@ -15,6 +15,8 @@ var _land_tiles_dirty: bool = true
 ## Returns {achieved: bool, player: Player, type: String} or empty dict
 func check_victory() -> Dictionary:
 	for player in GameManager.players:
+		if player.player_id == -1:
+			continue  # Base barbarian player can't win
 		if player.cities.is_empty():
 			continue
 
@@ -42,13 +44,12 @@ func check_victory() -> Dictionary:
 	return {}
 
 func _check_conquest(player) -> bool:
-	# All other civs must be eliminated
-	# A player is eliminated if they have no cities AND either:
-	# - They had a city before (it was destroyed), OR
-	# - They have no settlers (can't found a new city)
+	# All other civs must be eliminated (base barbarian player id=-1 doesn't count)
 	for other_player in GameManager.players:
 		if other_player == player:
 			continue
+		if other_player.player_id == -1:
+			continue  # Skip base barbarian player
 		if not other_player.is_eliminated():
 			return false
 	return true
@@ -149,14 +150,19 @@ func invalidate_land_cache() -> void:
 	_land_tiles_dirty = true
 
 func _get_highest_score_player():
-	var best_player = GameManager.players[0]
+	var best_player = null
 	var best_score = -1
 
 	for player in GameManager.players:
+		if player.player_id == -1:
+			continue  # Skip base barbarian player
 		player.calculate_score()
 		if player.score > best_score:
 			best_score = player.score
 			best_player = player
+
+	if best_player == null and not GameManager.players.is_empty():
+		best_player = GameManager.players[0]
 
 	return best_player
 

@@ -1,5 +1,9 @@
 extends Node
 ## Handles barbarian spawning and behavior.
+## BTS mechanic: camps spawn in fog of war, and after ~1000 BC camps may
+## evolve into aggressive barbarian civilizations.
+
+const PlayerClass = preload("res://scripts/core/player.gd")
 
 # Barbarian camp properties
 const CAMP_SPAWN_INTERVAL = 10  # Turns between new camp spawn attempts
@@ -8,14 +12,38 @@ const CAMP_CITY_DISTANCE = 6   # Minimum distance from any city
 const MAX_CAMPS = 15           # Maximum number of barbarian camps on map
 const UNIT_SPAWN_INTERVAL = 5  # Turns between unit spawns per camp
 
+# Barbarian city founding
+const CITY_FOUNDING_MIN_TURN = 75       # ~1000 BC: earliest barbarian cities
+const CITY_FOUNDING_CHECK_INTERVAL = 5  # Check every 5 turns
+const CITY_FOUNDING_BASE_CHANCE = 0.08  # 8% base chance per eligible camp
+const CITY_FOUNDING_SCORE_BONUS = 0.005 # Extra chance per city site score point
+const MAX_BARBARIAN_CIVS = 3            # Max barbarian civilizations that can spawn
+
 # Barbarian camp data
 var barbarian_camps: Array = []  # Array of Vector2i positions
 
 # Reference to barbarian player
 var barbarian_player = null
 
+# Track spawned barbarian civs
+var barbarian_civ_count: int = 0
+
+# City names for barbarian civilizations
+const BARBARIAN_CITY_NAMES = [
+	"Skull Keep", "Bloodfang", "Iron Maw", "Dreadfort", "Bonecrusher",
+	"Ashfall", "Grimhold", "Wolfsbane", "Darkspire", "Ravencrest",
+	"Thornwall", "Viperhold", "Wargoth", "Ironfist", "Blackthorn"
+]
+
+# Barbarian civ names
+const BARBARIAN_CIV_NAMES = [
+	"Horde of the Wastes", "Raiders of the North", "Marauders",
+	"Iron Horde", "Warlords of the Steppe", "Pillagers"
+]
+
 signal barbarian_camp_spawned(position)
 signal barbarian_unit_spawned(unit, camp_position)
+signal barbarian_civ_spawned(player, city)
 
 func _ready() -> void:
 	EventBus.turn_ended.connect(_on_turn_ended)
@@ -42,6 +70,10 @@ func _on_turn_ended(_turn_number: int, player) -> void:
 
 	# Process barbarian unit AI
 	_process_barbarian_ai()
+
+	# Check for barbarian city founding (BTS: camps evolve into aggressive civs)
+	if TurnManager.current_turn >= CITY_FOUNDING_MIN_TURN and TurnManager.current_turn % CITY_FOUNDING_CHECK_INTERVAL == 0:
+		_try_found_barbarian_city()
 
 ## Ensure barbarian player exists
 func _ensure_barbarian_player() -> void:
@@ -130,17 +162,12 @@ func _is_valid_camp_position(pos: Vector2i) -> bool:
 			if GridUtils.chebyshev_distance(pos, city.grid_position) < CAMP_CITY_DISTANCE:
 				return false
 
-	# Check visibility - prefer fog/unexplored areas
-	var visible_count = 0
+	# BTS: camps ONLY spawn in fog of war (not visible to any player)
 	for player in GameManager.players:
 		if player == barbarian_player:
 			continue
 		if tile.is_visible_to(player.player_id):
-			visible_count += 1
-
-	# Less likely to spawn in visible areas
-	if visible_count > 0 and randf() < 0.7:
-		return false
+			return false
 
 	return true
 
@@ -428,6 +455,247 @@ func has_camp_at(pos: Vector2i) -> bool:
 func get_camp_positions() -> Array:
 	return barbarian_camps.duplicate()
 
+# ============ BARBARIAN CITY FOUNDING ============
+# BTS mechanic: camps in fog of war can evolve into aggressive barbarian civs.
+# Better locations have higher chance. The new civ is permanently hostile.
+
+## Try to found a barbarian city from an eligible camp
+func _try_found_barbarian_city() -> void:
+	if barbarian_civ_count >= MAX_BARBARIAN_CIVS:
+		return
+
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return
+
+	# Score each camp and check eligibility
+	var eligible_camps: Array = []
+
+	for camp_pos in barbarian_camps:
+		# Camp must still be in fog of war (not visible to any player)
+		var tile = grid.get_tile(camp_pos)
+		if tile == null:
+			continue
+
+		var in_fog = true
+		for player in GameManager.players:
+			if player == barbarian_player:
+				continue
+			if tile.is_visible_to(player.player_id):
+				in_fog = false
+				break
+
+		if not in_fog:
+			continue
+
+		# Must be far enough from existing cities
+		var too_close = false
+		for player in GameManager.players:
+			for city in player.cities:
+				if GridUtils.chebyshev_distance(camp_pos, city.grid_position) < CAMP_CITY_DISTANCE:
+					too_close = true
+					break
+			if too_close:
+				break
+		if too_close:
+			continue
+
+		# Score the site (reuse logic similar to ai_strategy)
+		var site_score = _score_barbarian_city_site(camp_pos)
+		if site_score < 30:
+			continue  # Not a good enough location
+
+		# Higher score = higher chance of spawning
+		var spawn_chance = CITY_FOUNDING_BASE_CHANCE + site_score * CITY_FOUNDING_SCORE_BONUS
+		spawn_chance = clamp(spawn_chance, 0.0, 0.5)
+
+		eligible_camps.append({"position": camp_pos, "score": site_score, "chance": spawn_chance})
+
+	if eligible_camps.is_empty():
+		return
+
+	# Sort by score descending — best camps try first
+	eligible_camps.sort_custom(func(a, b): return a.score > b.score)
+
+	# Try to spawn from the best camp
+	for camp_data in eligible_camps:
+		if randf() < camp_data.chance:
+			_create_barbarian_civilization(camp_data.position, camp_data.score)
+			return  # Only one per check interval
+
+## Score a position for barbarian city founding (simplified version of ai_strategy scoring)
+func _score_barbarian_city_site(pos: Vector2i) -> int:
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return 0
+
+	var score = 0
+	var food_count = 0
+
+	# Evaluate tiles in radius 2 (city working radius)
+	var tiles = GridUtils.get_tiles_in_range(pos, 2)
+	for tile_pos in tiles:
+		var tile = grid.get_tile(tile_pos)
+		if tile == null:
+			continue
+		score += tile.get_food() * 4
+		score += tile.get_production() * 3
+		score += tile.get_commerce() * 2
+		if tile.get_food() >= 1:
+			food_count += 1
+		if tile.resource_id != "":
+			score += 15
+
+	# Need minimum food
+	if food_count < 2:
+		return 0
+
+	# Fresh water bonus
+	var center_tile = grid.get_tile(pos)
+	if center_tile and center_tile.has_fresh_water():
+		score += 10
+
+	# Coastal bonus
+	var neighbors = GridUtils.get_neighbors(pos)
+	for n_pos in neighbors:
+		var n_tile = grid.get_tile(n_pos)
+		if n_tile and n_tile.is_water():
+			score += 8
+			break
+
+	return max(0, score)
+
+## Create a new aggressive barbarian civilization from a camp
+func _create_barbarian_civilization(camp_pos: Vector2i, site_score: int) -> void:
+	# Remove camp
+	barbarian_camps.erase(camp_pos)
+
+	var tile = GameManager.hex_grid.get_tile(camp_pos)
+	if tile:
+		tile.improvement_id = ""
+
+	# Create new player
+	var new_player = PlayerClass.new()
+	new_player.player_id = GameManager.players.size()
+	new_player.civilization_id = "barbarian"
+	new_player.is_human = false
+	new_player.team = new_player.player_id  # Own team (hostile to all)
+	new_player.color = _get_barbarian_color()
+
+	# Give them a barbarian civ identity
+	var civ_name = BARBARIAN_CIV_NAMES[barbarian_civ_count % BARBARIAN_CIV_NAMES.size()]
+	new_player.player_name = civ_name
+
+	# Aggressive personality — warlike, refuses peace, no trade
+	new_player.ai_personality = {
+		"base_peace_weight": 0,     # Never wants peace
+		"warmonger_respect": 0,     # Doesn't respect strength
+		"max_war_rand": 10,         # Very high war chance (10% per turn)
+		"make_peace_rand": 200,     # Almost never considers peace
+		"dogpile_war_rand": 5,      # Loves dogpiling
+		"raze_city_prob": 80,       # Razes most captured cities
+		"build_unit_prob": 60,      # Heavy military production
+		"wonder_construct_rand": 0, # Never builds wonders
+		"espionage_weight": 0,      # No espionage
+		"base_attitude": -5,        # Hostile to everyone
+	}
+
+	# Give era-appropriate techs
+	_grant_era_techs(new_player)
+
+	# Starting gold scales with game progress
+	new_player.gold = 50 + TurnManager.current_turn
+
+	# Set aggressive civics (if available)
+	new_player.civics = CivicsSystem.get_default_civics()
+
+	GameManager.players.append(new_player)
+
+	# Create the city
+	var city_name = BARBARIAN_CITY_NAMES[(barbarian_civ_count * 3 + randi() % 3) % BARBARIAN_CITY_NAMES.size()]
+	var city = City.new(camp_pos, city_name)
+	city.original_owner_id = new_player.player_id
+	city.founder_civ_id = "barbarian"
+	new_player.add_city(city)
+
+	# Add to scene tree
+	if GameManager.game_world and GameManager.game_world.entity_layer:
+		GameManager.game_world.entity_layer.add_child(city)
+
+	# Give starting population based on era
+	var bonus_pop = TurnManager.current_turn / 50  # 1-2 extra pop at later turns
+	for _i in range(bonus_pop):
+		city.population += 1
+
+	# Give palace and basic buildings
+	city.buildings.append("palace")
+	city.buildings.append("barracks")
+	city.calculate_yields()
+
+	# Set tile ownership
+	for tile_pos in city.territory:
+		var t = GameManager.hex_grid.get_tile(tile_pos)
+		if t:
+			t.tile_owner = new_player
+			t.city_owner = city
+			t.update_visuals()
+
+	# Spawn garrison units
+	var num_units = 2 + randi() % 2  # 2-3 starting units
+	var unit_type = _get_barbarian_unit_type()
+	for _i in range(num_units):
+		var spawn_pos = _find_spawn_position(camp_pos)
+		if spawn_pos != Vector2i(-1, -1) and GameManager.game_world:
+			GameManager.game_world.spawn_unit(unit_type, spawn_pos, new_player)
+
+	# Declare war on all known players (permanently hostile)
+	for player in GameManager.players:
+		if player == new_player or player == barbarian_player:
+			continue
+		GameManager.declare_war(new_player, player)
+		new_player.met_players.append(player.player_id)
+		if new_player.player_id not in player.met_players:
+			player.met_players.append(new_player.player_id)
+
+	barbarian_civ_count += 1
+	barbarian_civ_spawned.emit(new_player, city)
+	EventBus.notification_added.emit("The %s have risen from the wilderness!" % civ_name, "warning")
+
+## Grant era-appropriate techs to a barbarian civ
+func _grant_era_techs(player) -> void:
+	var turn = TurnManager.current_turn
+
+	# Always start with ancient techs
+	var basic_techs = ["agriculture", "hunting", "mining", "the_wheel", "archery", "bronze_working", "warrior_code"]
+	for tech_id in basic_techs:
+		if tech_id not in player.researched_techs:
+			player.researched_techs.append(tech_id)
+
+	# Add more techs based on game progression
+	if turn >= 100:
+		var classical_techs = ["iron_working", "horseback_riding", "construction", "mathematics"]
+		for tech_id in classical_techs:
+			if tech_id not in player.researched_techs:
+				player.researched_techs.append(tech_id)
+
+	if turn >= 150:
+		var medieval_techs = ["machinery", "engineering", "civil_service", "feudalism"]
+		for tech_id in medieval_techs:
+			if tech_id not in player.researched_techs:
+				player.researched_techs.append(tech_id)
+
+## Get a color for the new barbarian civilization
+func _get_barbarian_color() -> Color:
+	var colors = [
+		Color("#8B0000"),  # Dark red
+		Color("#4B0082"),  # Indigo
+		Color("#556B2F"),  # Dark olive
+		Color("#8B4513"),  # Saddle brown
+		Color("#2F4F4F"),  # Dark slate
+		Color("#800080"),  # Purple
+	]
+	return colors[barbarian_civ_count % colors.size()]
+
 # Serialization
 func to_dict() -> Dictionary:
 	var camps_data = []
@@ -435,7 +703,8 @@ func to_dict() -> Dictionary:
 		camps_data.append({"x": pos.x, "y": pos.y})
 
 	return {
-		"barbarian_camps": camps_data
+		"barbarian_camps": camps_data,
+		"barbarian_civ_count": barbarian_civ_count
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -443,3 +712,4 @@ func from_dict(data: Dictionary) -> void:
 	var camps_data = data.get("barbarian_camps", [])
 	for camp in camps_data:
 		barbarian_camps.append(Vector2i(camp.x, camp.y))
+	barbarian_civ_count = data.get("barbarian_civ_count", 0)
