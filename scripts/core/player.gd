@@ -336,9 +336,22 @@ func can_build_unit(unit_id: String) -> bool:
 	if required_tech != "" and not has_tech(required_tech):
 		return false
 
-	# Check resource requirement
+	# Check resource requirement (supports OR and AND)
 	var required_resource = unit_data.get("required_resource", "")
-	if required_resource != "" and not has_resource(required_resource):
+	var required_resource_or = unit_data.get("required_resource_or", "")
+	var required_resource_2 = unit_data.get("required_resource_2", "")
+
+	if required_resource != "":
+		if required_resource_or != "":
+			# OR: need at least one of the two (e.g., Copper OR Iron for Axeman)
+			if not has_resource(required_resource) and not has_resource(required_resource_or):
+				return false
+		else:
+			if not has_resource(required_resource):
+				return false
+
+	# AND: need BOTH resources (e.g., Horses AND Iron for Knight)
+	if required_resource_2 != "" and not has_resource(required_resource_2):
 		return false
 
 	return true

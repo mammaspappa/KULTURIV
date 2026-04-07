@@ -101,7 +101,7 @@
     "strength": 5.0,
     "movement": 1,
     "required_tech": "bronze_working",
-    "required_resource": "",
+    "required_resource": "copper",
     "abilities": [
       "bonus_vs_melee"
     ],
@@ -109,7 +109,8 @@
     "bonus_vs": {
       "melee": 0.5
     },
-    "upgrades_to": "maceman"
+    "upgrades_to": "maceman",
+    "required_resource_or": "iron"
   },
   "chariot": {
     "name": "Chariot",
@@ -1008,7 +1009,7 @@
     "strength": 5.0,
     "movement": 1,
     "required_tech": "bronze_working",
-    "required_resource": "",
+    "required_resource": "copper",
     "abilities": [
       "bonus_vs_mounted"
     ],
@@ -1023,7 +1024,8 @@
     "bonus_vs_defense": {
       "chariot": 1.0,
       "mounted": 1.0
-    }
+    },
+    "required_resource_or": "iron"
   },
   "war_chariot": {
     "name": "War Chariot",
