@@ -1222,19 +1222,23 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 	# 8. Nothing to do
 	unit.fortify()
 
-## Find a barbarian unit near owned territory (within 8 tiles of any city)
+## Find a barbarian unit near owned territory (within 8 tiles of any city, visible only)
 func _find_nearby_barbarian(unit, player):
 	var best_barb = null
 	var best_dist = 999
 
-	# Check all barbarian players' units
 	for other_player in GameManager.players:
 		if other_player.civilization_id != "barbarian":
 			continue
 		for barb_unit in other_player.units:
 			if not is_instance_valid(barb_unit) or barb_unit.get_strength() <= 0:
 				continue
-			# Must be near one of our cities (within 8 tiles)
+			# Fog of war: only detect visible barb units
+			if GameManager.hex_grid:
+				var btile = GameManager.hex_grid.get_tile(barb_unit.grid_position)
+				if btile and btile.get_visibility_for_player(player.player_id) < 2:
+					continue  # Not currently visible
+			# Must be near one of our cities
 			var near_our_city = false
 			for city in player.cities:
 				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= 8:
@@ -1249,7 +1253,7 @@ func _find_nearby_barbarian(unit, player):
 
 	return best_barb
 
-## Count barbarian units within 8 tiles of any owned city
+## Count barbarian units within 8 tiles of any owned city (visible only)
 func _count_barbs_near_cities(player) -> int:
 	var count = 0
 	for other_player in GameManager.players:
@@ -1258,10 +1262,15 @@ func _count_barbs_near_cities(player) -> int:
 		for barb_unit in other_player.units:
 			if not is_instance_valid(barb_unit) or barb_unit.get_strength() <= 0:
 				continue
+			# Fog of war: only count visible barbs
+			if GameManager.hex_grid:
+				var btile = GameManager.hex_grid.get_tile(barb_unit.grid_position)
+				if btile and btile.get_visibility_for_player(player.player_id) < 2:
+					continue
 			for city in player.cities:
 				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= 8:
 					count += 1
-					break  # Count each barb once
+					break
 	return count
 
 ## Pick best target from enemies
@@ -1862,12 +1871,15 @@ func _find_best_city_location(unit, player, flavor: Dictionary) -> Vector2i:
 	var production_flavor = flavor.get("production", 5)
 	var gold_flavor = flavor.get("gold", 5)
 
-	# Search in expanding rings
+	# Search in expanding rings — only consider explored tiles
 	for radius in range(1, 15):
 		var tiles = GridUtils.get_tiles_at_range(unit.grid_position, radius)
 		for tile_pos in tiles:
 			var tile = GameManager.hex_grid.get_tile(tile_pos)
 			if tile == null or not tile.is_passable() or tile.is_water():
+				continue
+			# Fog of war: only settle on explored tiles
+			if tile.get_visibility_for_player(player.player_id) == 0:
 				continue
 
 			if _is_good_city_location(tile_pos, player):
@@ -2136,6 +2148,9 @@ func _find_nearby_enemies(unit, player, range_val: int) -> Array:
 		var tile = GameManager.hex_grid.get_tile(tile_pos)
 		if tile == null:
 			continue
+		# Fog of war: only detect enemies on visible tiles
+		if tile.get_visibility_for_player(player.player_id) < 2:  # Not currently visible
+			continue
 		var units_here = GameManager.get_units_at(tile_pos)
 		for other_unit in units_here:
 			if other_unit.player_owner != player and other_unit.get_strength() > 0:
@@ -2260,6 +2275,10 @@ func _find_nearby_enemy_city(unit, player, search_range: int):
 		if enemy == null:
 			continue
 		for city in enemy.cities:
+			# Fog of war: only target cities on explored tiles
+			var tile = GameManager.hex_grid.get_tile(city.grid_position) if GameManager.hex_grid else null
+			if tile and tile.get_visibility_for_player(player.player_id) == 0:
+				continue  # Never seen this tile
 			var dist = GridUtils.chebyshev_distance(unit.grid_position, city.grid_position)
 			if dist <= search_range and dist < best_dist:
 				best_dist = dist
@@ -2267,7 +2286,7 @@ func _find_nearby_enemy_city(unit, player, search_range: int):
 
 	return best_city
 
-## Find the nearest enemy city position (global search)
+## Find the nearest known enemy city position
 func _find_nearest_enemy_city(unit, player) -> Vector2i:
 	var best_pos = Vector2i(-1, -1)
 	var best_dist = INF
@@ -2276,6 +2295,10 @@ func _find_nearest_enemy_city(unit, player) -> Vector2i:
 		if enemy == null:
 			continue
 		for city in enemy.cities:
+			# Fog of war: only target cities we've discovered
+			var tile = GameManager.hex_grid.get_tile(city.grid_position) if GameManager.hex_grid else null
+			if tile and tile.get_visibility_for_player(player.player_id) == 0:
+				continue  # Never explored
 			var dist = GridUtils.chebyshev_distance(unit.grid_position, city.grid_position)
 			if dist < best_dist:
 				best_dist = dist

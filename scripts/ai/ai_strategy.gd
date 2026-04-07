@@ -90,6 +90,9 @@ static func _evaluate_city_sites(player, flavor: Dictionary) -> void:
 			var tile = grid.get_tile(pos)
 			if tile == null or tile.is_water() or not tile.is_passable():
 				continue
+			# Fog of war: only consider explored tiles for city sites
+			if tile.get_visibility_for_player(player.player_id) == 0:
+				continue
 
 			# Skip if too close to own cities
 			var too_close_own = false
