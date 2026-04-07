@@ -101,7 +101,7 @@
     "strength": 5.0,
     "movement": 1,
     "required_tech": "bronze_working",
-    "required_resource": "copper",
+    "required_resource": "",
     "abilities": [
       "bonus_vs_melee"
     ],
@@ -1008,7 +1008,7 @@
     "strength": 5.0,
     "movement": 1,
     "required_tech": "bronze_working",
-    "required_resource": "copper",
+    "required_resource": "",
     "abilities": [
       "bonus_vs_mounted"
     ],
@@ -1016,10 +1016,14 @@
     "bonus_vs": {
       "melee": 0.5
     },
-    "upgrades_to": "pikeman",
+    "upgrades_to": "maceman",
     "replaces": "axeman",
     "civilization": "greece",
-    "description": "Greek unique unit. Replaces Axeman. +50% vs Melee units."
+    "description": "Greek unique unit. Replaces Axeman. +50% vs Melee, +100% defense vs Chariots/Mounted.",
+    "bonus_vs_defense": {
+      "chariot": 1.0,
+      "mounted": 1.0
+    }
   },
   "war_chariot": {
     "name": "War Chariot",
