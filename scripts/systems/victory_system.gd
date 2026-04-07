@@ -15,8 +15,8 @@ var _land_tiles_dirty: bool = true
 ## Returns {achieved: bool, player: Player, type: String} or empty dict
 func check_victory() -> Dictionary:
 	for player in GameManager.players:
-		if player.player_id == -1:
-			continue  # Base barbarian player can't win
+		if _is_barbarian_civ(player):
+			continue  # Barbarian civs can't win
 		if player.cities.is_empty():
 			continue
 
@@ -44,13 +44,16 @@ func check_victory() -> Dictionary:
 
 	return {}
 
+func _is_barbarian_civ(p) -> bool:
+	return p.player_id == -1 or p.civilization_id == "barbarian"
+
 func _check_conquest(player) -> bool:
-	# All other civs must be eliminated (base barbarian player id=-1 doesn't count)
+	# All other non-barbarian civs must be eliminated
 	for other_player in GameManager.players:
 		if other_player == player:
 			continue
-		if other_player.player_id == -1:
-			continue  # Skip base barbarian player
+		if _is_barbarian_civ(other_player):
+			continue
 		if not other_player.is_eliminated():
 			return false
 	return true
@@ -59,10 +62,12 @@ func _check_domination(player) -> bool:
 	# Check land percentage (of total map land, not just claimed land)
 	var land_percent = _get_player_land_percent(player)
 
-	# Check population percentage (of total world population)
+	# Check population percentage (of total world population, excluding barbarians)
 	var total_pop = 0
 	var player_pop = 0
 	for p in GameManager.players:
+		if _is_barbarian_civ(p):
+			continue
 		for city in p.cities:
 			total_pop += city.population
 			if p == player:
@@ -155,8 +160,8 @@ func _get_highest_score_player():
 	var best_score = -1
 
 	for player in GameManager.players:
-		if player.player_id == -1:
-			continue  # Skip base barbarian player
+		if _is_barbarian_civ(player):
+			continue
 		player.calculate_score()
 		if player.score > best_score:
 			best_score = player.score
@@ -189,22 +194,29 @@ func check_diplomatic_victory(player_id: int) -> void:
 func get_victory_progress(player) -> Dictionary:
 	var progress = {}
 
-	# Conquest progress
-	var total_civs = GameManager.players.size()
+	# Conquest progress (exclude barbarian civs)
+	var total_civs = 0
 	var eliminated = 0
 	for p in GameManager.players:
-		if p != player and p.cities.is_empty():
+		if _is_barbarian_civ(p):
+			continue
+		if p == player:
+			continue
+		total_civs += 1
+		if p.is_eliminated():
 			eliminated += 1
 	progress["conquest"] = {
 		"eliminated": eliminated,
-		"total_rivals": total_civs - 1,
-		"percent": float(eliminated) / (total_civs - 1) if total_civs > 1 else 0
+		"total_rivals": total_civs,
+		"percent": float(eliminated) / total_civs if total_civs > 0 else 0
 	}
 
-	# Domination progress
+	# Domination progress (exclude barbarian civs)
 	var total_pop = 0
 	var player_pop = 0
 	for p in GameManager.players:
+		if _is_barbarian_civ(p):
+			continue
 		for city in p.cities:
 			total_pop += city.population
 			if p == player:

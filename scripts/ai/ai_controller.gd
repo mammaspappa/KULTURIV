@@ -356,17 +356,18 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	if TurnManager.current_turn - last_peace_turn < scaled_cooldown:
 		return  # Still in cooldown period
 
-	# BTS max_war_rand: lower = more warlike. Chance = 100/max_war_rand per turn.
-	# Alexander (50) = 2%, Gandhi (400) = 0.25%, Montezuma (40) = 2.5%
-	var war_chance = 100.0 / max(personality.max_war_rand, 1)
+	# BTS max_war_rand: lower = more warlike. Chance per turn scales with personality.
+	# Alexander (50) = 8%, Gandhi (400) = 1%, Montezuma (40) = 10%
+	var war_chance = 400.0 / max(personality.max_war_rand, 1)
 	if randf() * 100.0 > war_chance:
 		return  # Didn't roll war this turn
 
 	var attitude = DiplomacySystem.calculate_attitude(player, other)
 
-	# Attitude threshold: aggressive leaders attack at neutral, peaceful need deep hostility
-	# Gandhi (peace=10): need attitude < -3. Alexander (peace=2): need attitude < 0.
-	var war_attitude_threshold = 0 - personality.base_peace_weight / 3
+	# Attitude threshold: aggressive leaders attack at cautious, peaceful need hostility
+	# Gandhi (peace=10): need attitude < 0. Alexander (peace=2): need attitude < 3.
+	# BTS uses base_peace_weight to scale threshold, but we shift up so wars actually happen
+	var war_attitude_threshold = 3 - personality.base_peace_weight / 3
 	if attitude > war_attitude_threshold:
 		return
 
@@ -963,11 +964,24 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		city.set_production(project_to_build)
 		return
 
-	# Default: only build military if under cap, otherwise wealth/research
+	# Default: build military if under cap
 	if military_units < max_military:
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
+			return
+
+	# Fallback: build ANY available unit or building so city is never idle
+	for unit_id in DataManager.units:
+		if city.can_build_unit(unit_id):
+			var udata = DataManager.get_unit(unit_id)
+			if udata.get("combat_strength", 0) > 0 or udata.get("unit_class", "") == "civilian":
+				city.set_production(unit_id)
+				return
+	for bld_id in DataManager.buildings:
+		if city.can_build_building(bld_id):
+			city.set_production(bld_id)
+			return
 
 ## Consider using Slavery whip to rush critical production
 func _consider_whipping(city, player) -> void:
