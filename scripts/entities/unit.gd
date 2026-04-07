@@ -34,6 +34,44 @@ var order_target: Vector2i = Vector2i.ZERO
 var order_target_improvement: String = ""
 var build_progress: int = 0
 
+# AI position history — for detecting oscillation and stuck units
+var _position_history: Array[Vector2i] = []  # Last 6 positions (end-of-turn)
+const MAX_HISTORY = 6
+var _stuck_turns: int = 0  # Consecutive turns at same position
+
+## Record position at end of AI turn. Call after AI processes this unit.
+func record_position() -> void:
+	_position_history.append(grid_position)
+	if _position_history.size() > MAX_HISTORY:
+		_position_history.pop_front()
+	# Track stuck turns
+	if _position_history.size() >= 2 and _position_history[-1] == _position_history[-2]:
+		_stuck_turns += 1
+	else:
+		_stuck_turns = 0
+
+## Detect if unit is oscillating between 2-3 positions
+func is_oscillating() -> bool:
+	if _position_history.size() < 4:
+		return false
+	# Check for A-B-A-B pattern (last 4 positions)
+	var h = _position_history
+	var n = h.size()
+	if h[n-1] == h[n-3] and h[n-2] == h[n-4]:
+		return true
+	# Check for A-B-C-A-B-C pattern
+	if n >= 6 and h[n-1] == h[n-4] and h[n-2] == h[n-5] and h[n-3] == h[n-6]:
+		return true
+	return false
+
+## Check if unit has been stuck (same position) for N turns
+func is_stuck(turns: int = 3) -> bool:
+	return _stuck_turns >= turns
+
+## Get set of recently visited positions (for avoidance)
+func get_recent_positions() -> Array[Vector2i]:
+	return _position_history.duplicate()
+
 # Transport/Cargo
 var cargo: Array = []  # Units being transported
 var transport: Node2D = null  # Reference to transport unit if loaded

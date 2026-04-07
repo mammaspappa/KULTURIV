@@ -646,19 +646,29 @@ func _process_unit_ai(unit, player, flavor: Dictionary, escort_assignments: Dict
 	# Settler: find good city location
 	if unit.can_found_city():
 		_settler_ai(unit, player, flavor)
+		if is_instance_valid(unit):
+			unit.record_position()
 		return
 
 	# Worker: build improvements
 	if unit.can_build_improvements():
 		_worker_ai(unit, player, flavor)
+		if is_instance_valid(unit):
+			unit.record_position()
 		return
 
-	# Check if this military unit is assigned as escort
+	# Check if this military unit is assigned as escort (persistent or transient)
 	var escort_target_id = escort_assignments.get(unit.get_instance_id(), -1)
+	# Also check persistent escort meta
+	if escort_target_id == -1 and unit.has_meta("escort_target"):
+		escort_target_id = unit.get_meta("escort_target")
+
 	if escort_target_id != -1:
 		# Find the civilian we're escorting
+		var found_civilian = false
 		for civ_unit in player.units:
 			if is_instance_valid(civ_unit) and civ_unit.get_instance_id() == escort_target_id:
+				found_civilian = true
 				# Move toward the civilian's position (follow them)
 				if unit.grid_position != civ_unit.grid_position:
 					_move_toward(unit, civ_unit.grid_position)
@@ -669,10 +679,19 @@ func _process_unit_ai(unit, player, flavor: Dictionary, escort_assignments: Dict
 						if is_instance_valid(threat) and GridUtils.are_adjacent(unit.grid_position, threat.grid_position):
 							CombatSystem.resolve_combat(unit, threat)
 							return
+				# Save persistent assignment
+				unit.set_meta("escort_target", escort_target_id)
 				return
+		# Civilian no longer exists — clear escort duty
+		if not found_civilian:
+			unit.remove_meta("escort_target")
 
 	# Combat unit: attack or explore
 	_combat_unit_ai(unit, player, flavor)
+
+	# Record position for oscillation detection (runs after all unit AI)
+	if is_instance_valid(unit):
+		unit.record_position()
 
 ## Auto-promote units with tactically appropriate promotions based on role
 func _auto_promote(unit, player) -> void:
@@ -726,7 +745,32 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 	if GameManager.hex_grid == null or GameManager.game_world == null:
 		return
 
-	# Safety: settlers need escort when far from friendly cities
+	# --- Oscillation/stuck detection: if oscillating or stuck, force a decision ---
+	if unit.is_oscillating() or unit.is_stuck(3):
+		if sim_logger:
+			sim_logger.log_decision(player.player_name, "settler", "stuck_or_oscillating",
+				"pos=(%d,%d)" % [unit.grid_position.x, unit.grid_position.y],
+				"history=%s" % str(unit.get_recent_positions()))
+		# Clear any assignment that's causing the loop
+		AIStrategyClass.clear_assignment(player, unit)
+		# Try to settle HERE or on any adjacent tile
+		if _can_settle_here(unit.grid_position, player):
+			GameManager.game_world.found_city(unit)
+			return
+		var neighbors = GridUtils.get_neighbors(unit.grid_position)
+		neighbors.shuffle()
+		for n_pos in neighbors:
+			if _can_settle_here(n_pos, player):
+				if unit.move_to(n_pos):
+					GameManager.game_world.found_city(unit)
+				return
+		# Can't settle anywhere nearby — pick a fresh site and try to reach it
+		var fresh_site = _find_best_city_location(unit, player, flavor)
+		if fresh_site != Vector2i(-1, -1):
+			_move_toward(unit, fresh_site)
+		return
+
+	# --- Safety check: real danger (actual enemy UNITS, not just borders) ---
 	var has_escort = false
 	var units_here = GameManager.get_units_at(unit.grid_position)
 	for u in units_here:
@@ -734,26 +778,20 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 			has_escort = true
 			break
 
-	# Check for nearby barbarians/enemies (within 3 tiles)
+	# Only check for actual military units nearby — NOT just enemy borders
 	var nearby_danger = false
-	for barb_check_pos in GridUtils.get_tiles_in_range(unit.grid_position, 3):
-		var enemy = GameManager.get_unit_at(barb_check_pos)
+	for check_pos in GridUtils.get_tiles_in_range(unit.grid_position, 2):
+		var enemy = GameManager.get_unit_at(check_pos)
 		if enemy and enemy.player_owner != player and enemy.get_strength() > 0:
-			nearby_danger = true
-			break
+			# Only real danger from non-animal units (during animal era, animals are weak)
+			if TurnManager.current_year >= -2000 or enemy.player_owner.civilization_id != "barbarian":
+				nearby_danger = true
+				break
 
-	# Check if we're close to a friendly city (safe zone)
-	var near_own_city = false
-	for city in player.cities:
-		if GridUtils.chebyshev_distance(unit.grid_position, city.grid_position) <= 2:
-			near_own_city = true
-			break
-
-	# If danger nearby and no escort: retreat to city and WAIT there
 	if nearby_danger and not has_escort:
 		var in_city = GameManager.get_city_at(unit.grid_position) != null
 		if in_city:
-			return  # Stay in city — wait for escort to be built/arrive
+			return  # Stay in city — wait for escort
 		# Retreat to nearest city
 		var nearest_city_pos = Vector2i(-1, -1)
 		var best_dist = 999
@@ -766,82 +804,79 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 			_move_toward(unit, nearest_city_pos)
 		return
 
-	# No danger, or has escort — safe to proceed
-	# But if far from cities with no escort and NOT near danger, still move carefully
-	if not has_escort and not near_own_city and not nearby_danger:
-		# No immediate danger but unescorted in the wild — proceed cautiously
-		pass  # Allow movement below (no barbs visible, safe to continue)
-
-	# Check if unit has a strategic assignment
+	# --- Get or validate assignment ---
 	var assigned_site = _get_assigned_site(unit, player)
 
-	# If no assignment, request one from strategy
+	# Validate existing assignment — it may have become invalid
+	if not assigned_site.is_empty():
+		if not _can_settle_here(assigned_site.position, player):
+			AIStrategyClass.clear_assignment(player, unit)
+			assigned_site = {}
+			if sim_logger:
+				sim_logger.log_decision(player.player_name, "settler", "invalidated_site",
+					"site no longer settleable", "")
+
+	# If no assignment, request one
 	if assigned_site.is_empty():
 		assigned_site = AIStrategyClass.get_best_unassigned_site(player)
 		if not assigned_site.is_empty():
-			AIStrategyClass.assign_settler_to_site(player, unit, assigned_site)
-			if sim_logger:
-				var pos = assigned_site.position
-				sim_logger.log_decision(player.player_name, "settler", "assigned_site",
-					"(%d,%d) score=%d" % [pos.x, pos.y, assigned_site.score], "")
+			# Double-check the site is still valid before assigning
+			if _can_settle_here(assigned_site.position, player):
+				AIStrategyClass.assign_settler_to_site(player, unit, assigned_site)
+				if sim_logger:
+					var pos = assigned_site.position
+					sim_logger.log_decision(player.player_name, "settler", "assigned_site",
+						"(%d,%d) score=%d" % [pos.x, pos.y, assigned_site.score], "")
+			else:
+				assigned_site = {}
+
+	# If still no assignment, find one directly
+	if assigned_site.is_empty():
+		var best_loc = _find_best_city_location(unit, player, flavor)
+		if best_loc != Vector2i(-1, -1) and _can_settle_here(best_loc, player):
+			assigned_site = {"position": best_loc, "score": 0}
 
 	if not assigned_site.is_empty():
 		var target_pos: Vector2i = assigned_site.position
 
-		# At or near target? Found city.
-		var dist_to_target = GridUtils.chebyshev_distance(unit.grid_position, target_pos)
-		if dist_to_target == 0 and _can_settle_here(unit.grid_position, player):
+		# At target? Found city.
+		if unit.grid_position == target_pos and _can_settle_here(target_pos, player):
 			AIStrategyClass.clear_assignment(player, unit)
 			GameManager.game_world.found_city(unit)
 			return
 
-		# Move toward target — try pathfinding first, then greedy movement
+		# Move toward target
 		var pos_before = unit.grid_position
 		_move_toward(unit, target_pos)
 
-		# If pathfinding failed, try greedy neighbor movement
+		# If pathfinding failed, try greedy
 		if unit.grid_position == pos_before and unit.movement_remaining > 0:
 			_greedy_move_toward(unit, target_pos)
 
 		# Check if at target after moving
-		dist_to_target = GridUtils.chebyshev_distance(unit.grid_position, target_pos)
-		if dist_to_target <= 1 and _can_settle_here(unit.grid_position, player):
+		if unit.grid_position == target_pos and _can_settle_here(target_pos, player):
 			AIStrategyClass.clear_assignment(player, unit)
 			GameManager.game_world.found_city(unit)
 			return
 
-		# If couldn't move at all
-		if unit.grid_position == pos_before:
-			# Try to settle here
+		# Adjacent to target and can settle here? Do it.
+		if GridUtils.chebyshev_distance(unit.grid_position, target_pos) <= 1:
 			if _can_settle_here(unit.grid_position, player):
 				AIStrategyClass.clear_assignment(player, unit)
 				GameManager.game_world.found_city(unit)
 				return
-			# Try settling on any adjacent tile we can move to
-			var neighbors = GridUtils.get_neighbors(unit.grid_position)
-			for n_pos in neighbors:
-				var n_tile = GameManager.hex_grid.get_tile(n_pos)
-				if n_tile and n_tile.is_passable() and not n_tile.is_water() and _can_settle_here(n_pos, player):
-					if unit.move_to(n_pos):
-						AIStrategyClass.clear_assignment(player, unit)
-						GameManager.game_world.found_city(unit)
-					return
 		return
 
-	# Fallback: no strategic sites — found on current tile if acceptable
+	# --- Fallback: no viable sites found — settle anywhere acceptable ---
 	if _can_settle_here(unit.grid_position, player):
 		GameManager.game_world.found_city(unit)
 		return
-
-	# Try moving to any adjacent settleable tile
-	if GameManager.hex_grid:
-		var neighbors = GridUtils.get_neighbors(unit.grid_position)
-		for n_pos in neighbors:
-			if _can_settle_here(n_pos, player):
-				_move_toward(unit, n_pos)
-				if unit.grid_position == n_pos:
-					GameManager.game_world.found_city(unit)
-				return
+	var neighbors = GridUtils.get_neighbors(unit.grid_position)
+	neighbors.shuffle()
+	for n_pos in neighbors:
+		if _can_settle_here(n_pos, player) and unit.move_to(n_pos):
+			GameManager.game_world.found_city(unit)
+			return
 
 func _get_assigned_site(unit, player) -> Dictionary:
 	var uid = unit.get_instance_id()
@@ -935,6 +970,11 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
 	var unit_data = DataManager.get_unit(unit.unit_id)
 	var unit_class = unit_data.get("unit_class", "")
+
+	# Oscillation breaker: if bouncing, try random exploration to break the loop
+	if unit.is_oscillating():
+		_random_explore(unit)
+		return
 
 	# Animal era (before 2000 BC): no real threat to cities, so explore aggressively
 	# Kill animals we bump into, but don't need to garrison
@@ -1252,6 +1292,14 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		_consider_whipping(city, player)
 		return
 
+	# If city just finished a settler, build an escort unit immediately
+	if city.has_meta("needs_escort") and city.get_meta("needs_escort"):
+		city.remove_meta("needs_escort")
+		var escort = _get_best_military_unit(city, player, flavor.get("military", 5), false)
+		if escort != "":
+			city.set_production(escort)
+			return
+
 	# Check strategic production advice first
 	var strategic_prod = AIStrategyClass.get_production_advice(player, city, flavor)
 	if strategic_prod != "" and city.can_build_unit(strategic_prod):
@@ -1302,6 +1350,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 1:
 		if city.can_build_unit("settler"):
 			city.set_production("settler")
+			city.set_meta("needs_escort", true)  # Queue escort after settler
 			return
 
 	# Calculate desired military based on flavor, specialization, and personality
@@ -1416,6 +1465,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if city.population >= 3 and military_units >= num_cities:
 			if city.can_build_unit("settler"):
 				city.set_production("settler")
+				city.set_meta("needs_escort", true)  # Queue escort after settler
 				return
 
 	# Need more workers? (1 per city, more when expanding)
@@ -1863,6 +1913,21 @@ func _evaluate_city_location(pos: Vector2i, growth_flavor: int, prod_flavor: int
 	# Penalize locations with too little food (can't grow)
 	if food_count < 2:
 		score -= 50
+
+	# Distance penalty: prefer settling near existing cities (lower maintenance,
+	# easier to defend, road connections). Penalize distance from nearest own city.
+	if player != null and not player.cities.is_empty():
+		var min_dist = 999
+		for city in player.cities:
+			var d = GridUtils.chebyshev_distance(pos, city.grid_position)
+			if d < min_dist:
+				min_dist = d
+		# Sweet spot: 5-8 tiles from nearest city. Closer = overlap, farther = costly
+		if min_dist > 10:
+			score -= (min_dist - 10) * 5  # Heavy penalty for far-flung settlements
+		elif min_dist > 8:
+			score -= (min_dist - 8) * 2   # Mild penalty
+
 	return score
 
 ## Greedy movement toward target — picks closest valid neighbor.
