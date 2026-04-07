@@ -64,6 +64,17 @@ func _ready() -> void:
 	EventBus.game_over.connect(_on_game_over)
 	EventBus.all_turns_completed.connect(_on_round_complete)
 
+	# Auto-introduce all non-barbarian players to each other
+	# (In actual games, exploration handles this; in sims we want diplomacy to work)
+	for p in GameManager.players:
+		if p.civilization_id == "barbarian":
+			continue
+		for other in GameManager.players:
+			if other == p or other.civilization_id == "barbarian":
+				continue
+			if other.player_id not in p.met_players:
+				p.met_players.append(other.player_id)
+
 	# Log initial state
 	print("Players:")
 	for p in GameManager.players:
