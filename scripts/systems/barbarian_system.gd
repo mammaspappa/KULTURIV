@@ -463,12 +463,13 @@ func _find_adjacent_enemy(unit):
 	return null
 
 ## Find nearby target (enemy unit or improvement to pillage)
+## BTS: barbarians have normal sight range (2 tiles), not omniscient vision
 func _find_nearby_target(unit) -> Vector2i:
 	var grid = GameManager.hex_grid
 	if grid == null:
 		return Vector2i(-1, -1)
 
-	var search_radius = 5
+	var search_radius = 2  # Normal unit sight range
 	var best_target = Vector2i(-1, -1)
 	var best_priority = 0
 
