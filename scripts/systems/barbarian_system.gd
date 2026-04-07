@@ -339,14 +339,10 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 					barbarian_unit_spawned.emit(unit, camp_pos)
 				return
 
-	# Spawn a land unit
+	# Spawn a land unit (camp spawns skip fog-bust — camps are meant to cluster units)
 	var unit_type = _get_barbarian_unit_type()
 	var spawn_pos = _find_spawn_position(camp_pos)
 	if spawn_pos == Vector2i(-1, -1):
-		return
-
-	# Fog-bust: don't spawn if another barb unit is within 3 tiles
-	if _barb_unit_within_range(spawn_pos, 3):
 		return
 
 	var unit = GameManager.game_world.spawn_unit(unit_type, spawn_pos, barbarian_player)

@@ -947,19 +947,17 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 				if odds.win_chance >= 0.5:
 					CombatSystem.resolve_combat(unit, enemy)
 					return
-		# Explore — skip garrison logic entirely
+		# Priority: seek goody huts (tribal villages)
+		var goody_pos = _find_nearest_goody_hut(unit, player)
+		if goody_pos != Vector2i(-1, -1):
+			_move_toward(unit, goody_pos)
+			_attack_adjacent_if_good_odds(unit, player)
+			return
+		# Explore unexplored tiles
 		var unexplored = _find_nearest_unexplored(unit, player)
 		if unexplored != Vector2i(-1, -1):
 			_move_toward(unit, unexplored)
-			# Attack any animal we end up adjacent to
-			if is_instance_valid(unit) and unit.movement_remaining > 0:
-				var adj = _find_nearby_enemies(unit, player, 1)
-				for e in adj:
-					if is_instance_valid(e) and GridUtils.are_adjacent(unit.grid_position, e.grid_position):
-						var odds = CombatSystem.calculate_odds(unit, e)
-						if odds.win_chance >= 0.5:
-							CombatSystem.resolve_combat(unit, e)
-							break
+			_attack_adjacent_if_good_odds(unit, player)
 			return
 		_random_explore(unit)
 		return
@@ -1169,13 +1167,19 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 							CombatSystem.resolve_combat(unit, barb_target)
 				return
 
-	# 6. Explore unexplored tiles
+	# 6. Seek goody huts (tribal villages)
+	var goody_pos = _find_nearest_goody_hut(unit, player)
+	if goody_pos != Vector2i(-1, -1):
+		_move_toward(unit, goody_pos)
+		return
+
+	# 7. Explore unexplored tiles
 	var unexplored = _find_nearest_unexplored(unit, player)
 	if unexplored != Vector2i(-1, -1):
 		_move_toward(unit, unexplored)
 		return
 
-	# 7. Nothing to do
+	# 8. Nothing to do
 	unit.fortify()
 
 ## Find a barbarian unit near owned territory (within 8 tiles of any city)
@@ -2109,6 +2113,46 @@ func _find_nearest_unexplored(unit, player) -> Vector2i:
 			break
 
 	return best_pos
+
+## Find nearest visible goody hut (tribal village)
+func _find_nearest_goody_hut(unit, player) -> Vector2i:
+	if GameManager.hex_grid == null:
+		return Vector2i(-1, -1)
+
+	var best_pos = Vector2i(-1, -1)
+	var best_dist = 999
+
+	# Search in expanding rings (up to 15 tiles)
+	for radius in range(1, 16):
+		var tiles = GridUtils.get_tiles_at_range(unit.grid_position, radius)
+		for tile_pos in tiles:
+			var tile = GameManager.hex_grid.get_tile(tile_pos)
+			if tile == null or not tile.has_goody_hut:
+				continue
+			# Must be visible (explored) to the player
+			var visibility = tile.get_visibility_for_player(player.player_id)
+			if visibility == 0:  # UNEXPLORED
+				continue
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, tile_pos)
+			if dist < best_dist:
+				best_dist = dist
+				best_pos = tile_pos
+		if best_pos != Vector2i(-1, -1):
+			break
+
+	return best_pos
+
+## Attack adjacent enemy if odds are good (helper for explore moves)
+func _attack_adjacent_if_good_odds(unit, player) -> void:
+	if not is_instance_valid(unit) or unit.movement_remaining <= 0:
+		return
+	var adj = _find_nearby_enemies(unit, player, 1)
+	for e in adj:
+		if is_instance_valid(e) and GridUtils.are_adjacent(unit.grid_position, e.grid_position):
+			var odds = CombatSystem.calculate_odds(unit, e)
+			if odds.win_chance >= 0.5:
+				CombatSystem.resolve_combat(unit, e)
+				return
 
 ## Random exploration move (fallback when no unexplored tiles in search range)
 func _random_explore(unit) -> void:
