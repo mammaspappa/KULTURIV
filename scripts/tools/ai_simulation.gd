@@ -14,8 +14,17 @@ var game_finished: bool = false
 var start_time: int
 var max_turns: int = 500
 
+func _env_int(key: String, fallback: int) -> int:
+	var val = OS.get_environment(key)
+	return int(val) if val != "" else fallback
+
+func _env_str(key: String, fallback: String) -> String:
+	var val = OS.get_environment(key)
+	return val if val != "" else fallback
+
 func _ready() -> void:
 	start_time = Time.get_ticks_msec()
+	max_turns = _env_int("SIM_MAX_TURNS", max_turns)
 
 	# Create logger
 	logger = SimLoggerClass.new()
@@ -67,18 +76,18 @@ func _ready() -> void:
 	logger.log_state_snapshot()
 
 func _get_settings() -> Dictionary:
-	# Simulation settings
+	# Settings from environment variables, with defaults
 	return {
-		"map_width": 84,
-		"map_height": 52,
-		"map_type": "pangaea",
-		"num_players": 2,
-		"difficulty": 4,  # Prince
-		"game_speed": 0,  # Quick (faster simulation)
+		"map_width": _env_int("SIM_MAP_W", 84),
+		"map_height": _env_int("SIM_MAP_H", 52),
+		"map_type": _env_str("SIM_MAP_TYPE", "pangaea"),
+		"num_players": _env_int("SIM_PLAYERS", 2),
+		"difficulty": _env_int("SIM_DIFFICULTY", 4),
+		"game_speed": _env_int("SIM_SPEED", 0),
 		"human_civ": "rome",
 		"human_leader": "julius_caesar",
 		"player_name": "Rome",
-		"ai_aggressiveness": "normal",
+		"ai_aggressiveness": _env_str("SIM_AGGRESSION", "normal"),
 	}
 
 func _on_round_complete(turn: int) -> void:
