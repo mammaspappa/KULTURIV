@@ -856,27 +856,36 @@ func _worker_ai(unit, player, flavor: Dictionary) -> void:
 	var growth_flavor = flavor.get("growth", 5)
 	var gold_flavor = flavor.get("gold", 5)
 
-	# If on owned tile without improvement, build one
-	if tile.tile_owner == player and tile.improvement_id == "" and tile.road_level == 0:
+	# Priority 1: If on owned tile with a resource but no improvement, build resource improvement
+	if tile.tile_owner == player and tile.resource_id != "" and tile.improvement_id == "":
 		var improvements = ImprovementSystem.get_available_improvements(unit, tile)
-
 		if not improvements.is_empty():
 			var chosen = _choose_improvement(tile, improvements, production_flavor, growth_flavor, gold_flavor)
 			if chosen != "":
 				ImprovementSystem.start_build(unit, chosen)
 				return
 
-		# Build road if no improvement available
-		if ImprovementSystem.can_build_road(unit, tile):
-			ImprovementSystem.start_build_road(unit)
-			return
+	# Priority 2: If on owned tile without improvement, build one
+	if tile.tile_owner == player and tile.improvement_id == "" and not tile.is_water():
+		var improvements = ImprovementSystem.get_available_improvements(unit, tile)
+		if not improvements.is_empty():
+			var chosen = _choose_improvement(tile, improvements, production_flavor, growth_flavor, gold_flavor)
+			if chosen != "":
+				ImprovementSystem.start_build(unit, chosen)
+				return
 
-	# Move to unimproved owned tile
-	var target = _find_unimproved_tile(unit, player)
+	# Priority 3: Build road on current tile if it's on a city-connection path
+	if tile.tile_owner == player and tile.road_level == 0 and not tile.is_water():
+		if _is_on_road_path(unit.grid_position, player):
+			if ImprovementSystem.can_build_road(unit, tile):
+				ImprovementSystem.start_build_road(unit)
+				return
+
+	# Priority 4: Move to best work target (resource tiles first, then improvements, then roads)
+	var target = _find_best_worker_target(unit, player)
 	if target != Vector2i(-1, -1):
 		_move_toward(unit, target)
 	else:
-		# Fortify if nothing to do
 		unit.fortify()
 
 ## Choose improvement based on tile and AI preferences
@@ -1226,8 +1235,23 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 			return
 
+	# New cities MUST get a culture building first to expand borders (BTS priority)
+	# Without culture, the city can't work tiles beyond the center
+	var has_culture_building = false
+	for bld in city.buildings:
+		var effects = DataManager.get_building_effects(bld)
+		if effects.get("culture", 0) > 0:
+			has_culture_building = true
+			break
+	if not has_culture_building:
+		# Try monument first (cheapest culture), then any culture building
+		for culture_bld in ["monument", "obelisk"]:
+			if city.can_build_building(culture_bld):
+				city.set_production(culture_bld)
+				return
+		# Fall through to general building scorer which will pick culture buildings
+
 	# Build infrastructure early — every city should have key buildings before more military
-	# Check if this city has basic infrastructure (granary, library, etc.)
 	var has_basic_infra = false
 	for bld in ["granary", "library", "monument", "barracks"]:
 		if bld in city.buildings:
@@ -1670,7 +1694,7 @@ func _find_best_city_location(unit, player, flavor: Dictionary) -> Vector2i:
 				continue
 
 			if _is_good_city_location(tile_pos, player):
-				var score = _evaluate_city_location(tile_pos, growth_flavor, production_flavor, gold_flavor)
+				var score = _evaluate_city_location(tile_pos, growth_flavor, production_flavor, gold_flavor, player)
 				if score > best_score:
 					best_score = score
 					best_pos = tile_pos
@@ -1680,17 +1704,38 @@ func _find_best_city_location(unit, player, flavor: Dictionary) -> Vector2i:
 
 	return best_pos
 
-func _evaluate_city_location(pos: Vector2i, growth_flavor: int, prod_flavor: int, gold_flavor: int) -> int:
+func _evaluate_city_location(pos: Vector2i, growth_flavor: int, prod_flavor: int, gold_flavor: int, player = null) -> int:
 	var score = 0
+	var food_count = 0
 	var tiles = GridUtils.get_tiles_in_range(pos, 2)
 	for tile_pos in tiles:
 		var tile = GameManager.hex_grid.get_tile(tile_pos)
-		if tile != null:
-			score += tile.get_food() * growth_flavor
-			score += tile.get_production() * prod_flavor
-			score += tile.get_commerce() * gold_flavor
-			if tile.resource_id != "":
-				score += 15  # Resources are always valuable
+		if tile == null:
+			continue
+		var food = tile.get_food()
+		score += food * growth_flavor
+		score += tile.get_production() * prod_flavor
+		score += tile.get_commerce() * gold_flavor
+		if food >= 2:
+			food_count += 1
+		if tile.resource_id != "":
+			var res = DataManager.get_resource(tile.resource_id)
+			var res_type = res.get("type", "")
+			# Strong bonus for resources the player doesn't already have
+			var already_has = player != null and player.has_resource(tile.resource_id)
+			if res_type == "strategic" and not already_has:
+				score += 40  # Very high — settle for iron/horse/copper
+			elif res_type == "luxury" and not already_has:
+				score += 30  # High — new luxury = happiness
+			elif not already_has:
+				score += 15  # Bonus resource
+			else:
+				score += 8   # Already have it but still useful
+		if tile.has_fresh_water():
+			score += 5  # Fresh water for farms
+	# Penalize locations with too little food (can't grow)
+	if food_count < 2:
+		score -= 50
 	return score
 
 ## Greedy movement toward target — picks closest valid neighbor.
@@ -1731,41 +1776,146 @@ func _move_toward(unit, target: Vector2i) -> void:
 			else:
 				break
 
-func _find_unimproved_tile(unit, player) -> Vector2i:
+## Find best target for worker: resource improvement > tile improvement > road connection
+func _find_best_worker_target(unit, player) -> Vector2i:
 	if GameManager.hex_grid == null:
 		return Vector2i(-1, -1)
 
 	var best_pos = Vector2i(-1, -1)
 	var best_score = -INF
 
-	# Check owned tiles with scoring (not just distance)
+	# Check owned tiles for improvements
 	for city in player.cities:
 		var city_needs_prod = _city_needs_production_rush(city)
 		for tile_pos in city.territory:
 			var tile = GameManager.hex_grid.get_tile(tile_pos)
-			if tile == null:
+			if tile == null or tile.is_water():
 				continue
-			if tile.improvement_id == "" and tile.road_level == 0 and not tile.is_water():
-				var dist = GridUtils.chebyshev_distance(unit.grid_position, tile_pos)
-				var score = 100.0 - dist * 5.0  # Base: closer is better
 
-				# Forest chopping priority: boost forest tiles near cities needing production
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, tile_pos)
+			var score = -INF
+
+			# Unimproved resource tile — TOP PRIORITY (connects resource to trade network)
+			if tile.resource_id != "" and tile.improvement_id == "":
+				score = 200.0 - dist * 3.0
+				# Bonus for strategic resources the player needs
+				var res = DataManager.get_resource(tile.resource_id)
+				if res.get("type", "") == "strategic":
+					score += 30
+				elif res.get("type", "") == "luxury":
+					score += 20
+
+			# Unimproved non-resource tile
+			elif tile.improvement_id == "":
+				score = 100.0 - dist * 5.0
 				if tile.feature_id == "forest":
 					if city_needs_prod:
-						score += 30  # High priority: city is building settler/wonder/military
-					# Tiles where forest should be cleared for better improvements
+						score += 30
 					if tile.has_fresh_water() or tile.terrain_id == "hills":
-						score += 15  # River farms or hill mines are better without forest
+						score += 15
 
-				# Resource tiles are always high priority
-				if tile.resource_id != "":
-					score += 25
+			# Road needed on resource tile (to connect it to trade network)
+			elif tile.resource_id != "" and tile.road_level == 0:
+				score = 150.0 - dist * 3.0
 
-				if score > best_score:
-					best_score = score
-					best_pos = tile_pos
+			if score > best_score:
+				best_score = score
+				best_pos = tile_pos
+
+	# Check if any cities need road connections to capital
+	var road_target = _find_road_connection_target(unit, player)
+	if road_target != Vector2i(-1, -1):
+		var dist = GridUtils.chebyshev_distance(unit.grid_position, road_target)
+		var road_score = 120.0 - dist * 4.0  # High priority but below resource improvement
+		if road_score > best_score:
+			best_score = road_score
+			best_pos = road_target
 
 	return best_pos
+
+## Check if a position is on a path between two cities that need road connection
+func _is_on_road_path(pos: Vector2i, player) -> bool:
+	# Simple check: is this tile between any two cities that aren't connected by road?
+	for city_a in player.cities:
+		for city_b in player.cities:
+			if city_a == city_b:
+				continue
+			var dist_ab = GridUtils.chebyshev_distance(city_a.grid_position, city_b.grid_position)
+			var dist_a = GridUtils.chebyshev_distance(pos, city_a.grid_position)
+			var dist_b = GridUtils.chebyshev_distance(pos, city_b.grid_position)
+			# On the path if pos is roughly between the two cities
+			if dist_a + dist_b <= dist_ab + 2:
+				return true
+	return false
+
+## Find next tile along a road connection path between unconnected cities
+func _find_road_connection_target(unit, player) -> Vector2i:
+	if player.cities.size() < 2 or GameManager.hex_grid == null:
+		return Vector2i(-1, -1)
+
+	# Find capital
+	var capital_pos = Vector2i(-1, -1)
+	for city in player.cities:
+		if "palace" in city.buildings:
+			capital_pos = city.grid_position
+			break
+	if capital_pos == Vector2i(-1, -1) and not player.cities.is_empty():
+		capital_pos = player.cities[0].grid_position
+
+	# Find a city not road-connected to capital
+	var target_city_pos = Vector2i(-1, -1)
+	var best_dist = INF
+	for city in player.cities:
+		if city.grid_position == capital_pos:
+			continue
+		# Check if there's a continuous road path to capital
+		if not _has_road_connection(city.grid_position, capital_pos):
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, city.grid_position)
+			if dist < best_dist:
+				best_dist = dist
+				target_city_pos = city.grid_position
+
+	if target_city_pos == Vector2i(-1, -1):
+		return Vector2i(-1, -1)
+
+	# Find the first tile without a road on the path from unit to the unconnected city
+	var pathfinder = PathfindingClass.new(GameManager.hex_grid, unit)
+	var path = pathfinder.find_path(unit.grid_position, target_city_pos)
+	for pos in path:
+		var tile = GameManager.hex_grid.get_tile(pos)
+		if tile and tile.road_level == 0 and not tile.is_water() and tile.is_passable():
+			return pos
+
+	return Vector2i(-1, -1)
+
+## Check if two positions are connected by a continuous road (BFS along roads)
+func _has_road_connection(from_pos: Vector2i, to_pos: Vector2i) -> bool:
+	if from_pos == to_pos:
+		return true
+	if GameManager.hex_grid == null:
+		return false
+
+	var visited = {}
+	var queue = [from_pos]
+	visited[from_pos] = true
+
+	while not queue.is_empty():
+		var current = queue.pop_front()
+		for neighbor in GridUtils.get_neighbors(current):
+			if neighbor in visited:
+				continue
+			var tile = GameManager.hex_grid.get_tile(neighbor)
+			if tile == null or tile.road_level == 0:
+				continue
+			if neighbor == to_pos:
+				return true
+			visited[neighbor] = true
+			# Limit search to reasonable distance
+			if visited.size() > 200:
+				return false
+			queue.append(neighbor)
+
+	return false
 
 ## Check if a city has urgent production needs (settler, wonder, military at war)
 func _city_needs_production_rush(city) -> bool:

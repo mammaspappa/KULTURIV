@@ -293,7 +293,9 @@ func _try_spontaneous_spawn() -> void:
 		# Spawn the unit
 		var unit_type = _get_barbarian_unit_type()
 		if GameManager.game_world:
-			GameManager.game_world.spawn_unit(unit_type, pos, barbarian_player)
+			var unit = GameManager.game_world.spawn_unit(unit_type, pos, barbarian_player)
+			if unit:
+				unit.refresh_movement()  # Enable movement on spawn turn
 		return
 
 ## Count barbarian units near a position
@@ -321,6 +323,7 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 			if naval_type != "":
 				var unit = GameManager.game_world.spawn_unit(naval_type, water_pos, barbarian_player)
 				if unit:
+					unit.refresh_movement()  # Enable movement on spawn turn
 					barbarian_unit_spawned.emit(unit, camp_pos)
 				return
 
@@ -332,6 +335,7 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 
 	var unit = GameManager.game_world.spawn_unit(unit_type, spawn_pos, barbarian_player)
 	if unit:
+		unit.refresh_movement()  # Enable movement on spawn turn
 		barbarian_unit_spawned.emit(unit, camp_pos)
 
 ## Get appropriate barbarian unit type based on real civ tech progress.
@@ -554,8 +558,9 @@ func _move_toward(unit, target_pos: Vector2i) -> void:
 				unit.movement_remaining -= cost
 				unit.position = GridUtils.grid_to_pixel(next_pos)
 
-## Random movement for idle barbarians
+## Random movement for idle barbarians (handles both land and naval units)
 func _random_move(unit) -> void:
+	var is_naval = unit.get_unit_class() == "naval"
 	var neighbors = GridUtils.get_neighbors(unit.grid_position)
 	neighbors.shuffle()
 
@@ -564,7 +569,13 @@ func _random_move(unit) -> void:
 		if tile == null:
 			continue
 
-		if not tile.is_passable() or tile.is_water():
+		if not tile.is_passable():
+			continue
+
+		# Naval units move on water, land units on land
+		if is_naval and not tile.is_water():
+			continue
+		if not is_naval and tile.is_water():
 			continue
 
 		if GameManager.get_unit_at(neighbor_pos) != null:
