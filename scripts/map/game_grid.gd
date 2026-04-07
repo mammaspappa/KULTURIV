@@ -749,6 +749,7 @@ func _apply_terrain_transitions() -> void:
 # =============================================================================
 
 func _compute_flow_directions() -> void:
+	# Rivers flow along tile borders (cardinal directions only: N, E, S, W)
 	for y in range(height):
 		for x in range(width):
 			var idx = _idx(x, y)
@@ -757,7 +758,7 @@ func _compute_flow_directions() -> void:
 				continue
 			var best_dir = -1
 			var best_drop = 0.0
-			for dir in range(8):
+			for dir in [0, 2, 4, 6]:  # Cardinal only: N, E, S, W
 				var nx = _wrap_x(x + DIR_DX[dir])
 				var ny = y + DIR_DY[dir]
 				if ny < 0 or ny >= height:
@@ -888,8 +889,8 @@ func _extract_rivers() -> void:
 			if out_dir >= 0 and out_dir not in tile.river_edges:
 				tile.river_edges.append(out_dir)
 
-			# Incoming edges from river neighbors
-			for dir in range(8):
+			# Incoming edges from river neighbors (cardinal only)
+			for dir in [0, 2, 4, 6]:
 				var nx = _wrap_x(x + DIR_DX[dir])
 				var ny = y + DIR_DY[dir]
 				if ny < 0 or ny >= height:
