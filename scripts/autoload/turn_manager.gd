@@ -250,6 +250,11 @@ func _process_city_turn_start(city) -> void:
 		if is_wonder and city.player_owner and city.player_owner.has_trait("industrious"):
 			production = int(production * 1.5)
 
+		# BTS: Expansive trait gives +50% settler and worker production
+		if is_unit and city.player_owner and city.player_owner.has_trait("expansive"):
+			if city.current_production in ["settler", "worker"]:
+				production = int(production * 1.5)
+
 		# Apply AI difficulty production bonus
 		if city.player_owner and not city.player_owner.is_human:
 			var ai_bonuses = _get_ai_difficulty_bonuses()

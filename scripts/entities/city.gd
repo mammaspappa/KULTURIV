@@ -324,6 +324,13 @@ func calculate_yields() -> void:
 				if tile_yields.get("commerce", 0) > 0:
 					commerce_yield += 1
 
+	# BTS Financial trait: +1 commerce on tiles with 2+ commerce
+	if player_owner and player_owner.has_trait("financial"):
+		for tile_pos in worked_tiles:
+			var tile = _get_tile(tile_pos)
+			if tile != null and tile.get_yields().get("commerce", 0) >= 2:
+				commerce_yield += 1
+
 	# We Love the King Day bonuses
 	if is_wltkd_active():
 		for tile_pos in worked_tiles:
@@ -426,6 +433,10 @@ func _calculate_culture() -> void:
 
 	# Apply percentage modifier (e.g., Broadcast Tower gives +50% culture)
 	culture_yield = int(culture_yield * (1.0 + culture_percent))
+
+	# BTS Creative trait: +2 base culture per city
+	if player_owner and player_owner.has_trait("creative"):
+		culture_yield += 2
 
 ## Calculate trade route income (BTS-style passive commerce from city connections)
 func _calculate_trade_routes() -> void:
@@ -578,6 +589,10 @@ func _calculate_happiness() -> void:
 		happiness += WonderSystem.get_wonder_happiness_bonus(player_owner)
 		if WonderSystem.city_has_no_unhappiness(self):
 			unhappiness = 0
+
+	# BTS Charismatic trait: +1 happiness per city
+	if player_owner and player_owner.has_trait("charismatic"):
+		happiness += 1
 
 	# War weariness unhappiness
 	if player_owner and player_owner.war_weariness > 0:

@@ -578,6 +578,18 @@ func get_combat_strength(is_attacking: bool, target_tile = null, defender = null
 		if defender_class in bonus_vs:
 			strength *= (1.0 + bonus_vs[defender_class])
 
+	# BTS Aggressive trait: +10% combat for melee/gunpowder units
+	if player_owner and player_owner.has_trait("aggressive"):
+		var uc = get_unit_class()
+		if uc in ["melee", "gunpowder", "mounted"]:
+			strength *= 1.1
+
+	# BTS Protective trait: +25% city defense
+	if not is_attacking and player_owner and player_owner.has_trait("protective"):
+		var city_at = GameManager.get_city_at(grid_position)
+		if city_at != null and city_at.player_owner == player_owner:
+			strength *= 1.25
+
 	# Great General attachment bonus
 	if attached_great_general != null:
 		strength *= (1.0 + GREAT_GENERAL_COMBAT_BONUS)

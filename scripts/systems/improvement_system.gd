@@ -163,11 +163,12 @@ func process_build(worker) -> bool:
 	if worker.order_target_improvement == "":
 		return false
 
-	worker.build_progress += 1
+	var build_rate = 1
+	# BTS Organized trait: +50% worker speed (2 progress per turn instead of 1)
+	if worker.player_owner and worker.player_owner.has_trait("organized"):
+		build_rate = 2
+	worker.build_progress += build_rate
 	var time_needed = BUILD_TIMES.get(worker.order_target_improvement, 5)
-
-	# Apply speed bonus from traits/techs if available
-	# (simplified - would check worker's owner for bonuses)
 
 	if worker.build_progress >= time_needed:
 		_complete_build(worker)

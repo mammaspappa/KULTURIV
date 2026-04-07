@@ -74,6 +74,10 @@ func _calculate_gp_points(city) -> int:
 		var settled = city.get_meta("settled_great_people")
 		points += settled.size() * 2
 
+	# BTS Philosophical trait: +100% Great People birth rate
+	if city.player_owner and city.player_owner.has_trait("philosophical"):
+		points = points * 2
+
 	# Civic modifier (Pacifism: +100% GP rate in cities with state religion)
 	if city.player_owner:
 		var civic_effects = CivicsSystem.get_civic_effects(city.player_owner)
