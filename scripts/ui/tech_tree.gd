@@ -154,8 +154,8 @@ func _build_tech_tree() -> void:
 		if tech_id.begins_with("_"):
 			continue
 		var tech = DataManager.get_tech(tech_id)
-		var grid_x = tech.get("gridX", 1)
-		var grid_y = tech.get("gridY", 1)
+		var grid_x = tech.get("grid_x", tech.get("gridX", 1))
+		var grid_y = tech.get("grid_y", tech.get("gridY", 1))
 
 		var node = _create_tech_node(tech_id)
 		var px = (grid_x - 1) * CELL_WIDTH + 20
@@ -319,11 +319,14 @@ func _draw_connections() -> void:
 		researched_techs = current_player.researched_techs
 
 	for tech_id in tech_nodes:
-		var prereqs = DataManager.get_tech_prerequisites(tech_id)
+		var tech = DataManager.get_tech(tech_id)
+		var and_prereqs = tech.get("prerequisites", [])
+		var or_prereqs = tech.get("or_prerequisites", [])
+		var all_prereqs = and_prereqs + or_prereqs
 		var to_node = tech_nodes[tech_id]
 		var to_pos = to_node.position + Vector2(0, TECH_NODE_SIZE.y / 2)  # Left-middle of target
 
-		for prereq in prereqs:
+		for prereq in all_prereqs:
 			if prereq not in tech_nodes:
 				continue
 			var from_node = tech_nodes[prereq]
@@ -421,14 +424,22 @@ func _on_tech_hovered(tech_id: String) -> void:
 				text += "  - Improvement: %s\n" % imp_id.capitalize()
 
 	# Show prerequisites
-	var prereqs = DataManager.get_tech_prerequisites(tech_id)
-	if not prereqs.is_empty():
-		text += "\nRequires: "
-		var prereq_names = []
-		for prereq in prereqs:
-			var prereq_tech = DataManager.get_tech(prereq)
-			prereq_names.append(prereq_tech.get("name", prereq))
-		text += ", ".join(prereq_names)
+	var and_prereqs = tech.get("prerequisites", [])
+	var or_prereqs = tech.get("or_prerequisites", [])
+	if not and_prereqs.is_empty():
+		text += "\nRequires ALL: "
+		var names = []
+		for prereq in and_prereqs:
+			var pt = DataManager.get_tech(prereq)
+			names.append(pt.get("name", prereq))
+		text += ", ".join(names)
+	if not or_prereqs.is_empty():
+		text += "\nRequires ANY: "
+		var names = []
+		for prereq in or_prereqs:
+			var pt = DataManager.get_tech(prereq)
+			names.append(pt.get("name", prereq))
+		text += " or ".join(names)
 
 	info_label.text = text
 
