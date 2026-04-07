@@ -206,10 +206,31 @@ func _process_diplomacy(player, flavor: Dictionary) -> void:
 			continue  # Skip base barbarian player
 		met_count += 1
 
-		# Barbarian civs: always at war, never make peace, never trade
+		# Barbarian civs: aggressive but not suicidal — declare on neighbors only
 		if is_barb_civ:
 			if not GameManager.is_at_war(player, other):
-				GameManager.declare_war(player, other)
+				# Only declare if we have military strength AND they're nearby
+				var barb_power = DiplomacySystem._calculate_power(player)
+				var target_power = DiplomacySystem._calculate_power(other)
+				# Limit active wars to 2 (don't fight everyone at once)
+				if player.at_war_with.size() < 2 and barb_power > target_power * 0.5:
+					# Check proximity — only attack nearby civs
+					var close_enough = false
+					for city in player.cities:
+						for other_city in other.cities:
+							if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) < 15:
+								close_enough = true
+								break
+						if close_enough:
+							break
+					if close_enough:
+						GameManager.declare_war(player, other)
+			else:
+				# Consider peace if losing badly
+				var barb_power = DiplomacySystem._calculate_power(player)
+				var target_power = DiplomacySystem._calculate_power(other)
+				if barb_power < target_power * 0.3 and randi() % 10 == 0:
+					GameManager.make_peace(player, other)
 			continue
 
 		# Skip if at war
@@ -249,29 +270,34 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 
 	var personality = _get_leader_personality(player)
 
-	# BTS make_peace_rand: roll each turn — higher = more willing to consider peace
-	if randi() % max(int(personality.make_peace_rand), 1) != 0:
-		# Didn't trigger peace consideration this turn
-		# But still check if we're losing badly
-		var our_power = DiplomacySystem._calculate_power(player)
-		var their_power = DiplomacySystem._calculate_power(other)
-		if our_power < their_power * 0.5:
-			# Badly losing — even warmongers consider peace
-			if not other.is_human:
-				_make_peace_with_cooldown(player, other)
-		return
-
 	var our_power = DiplomacySystem._calculate_power(player)
 	var their_power = DiplomacySystem._calculate_power(other)
 
+	# Badly losing — always consider peace regardless of personality
+	if our_power < their_power * 0.4:
+		if not other.is_human:
+			_make_peace_with_cooldown(player, other)
+		return
+
+	# BTS make_peace_rand: lower values = more stubborn. Scale to ~5-20% chance per turn.
+	# Original was 1/make_peace_rand chance (~1%). Too low — wars never end.
+	var peace_roll = 10.0 / max(float(personality.make_peace_rand), 1.0)
+	# Boost peace chance based on war duration (wars get stale)
+	var war_duration = TurnManager.current_turn - war_start
+	var fatigue_bonus = min(war_duration * 0.002, 0.15)  # Up to +15% after 75 turns
+	peace_roll += fatigue_bonus
+
+	if randf() > peace_roll:
+		return  # Didn't trigger peace consideration this turn
+
 	# Peaceful leaders (high peace_weight) seek peace more readily
-	var peace_threshold = 0.7 + personality.base_peace_weight * 0.05  # 0.7 to 1.2
+	var peace_threshold = 0.8 + personality.base_peace_weight * 0.06  # 0.8 to 1.28
 	if our_power < their_power * peace_threshold:
 		if other.is_human:
 			return  # Wait for human to propose
 		_make_peace_with_cooldown(player, other)
-	elif personality.base_peace_weight > 6 and our_power < their_power * 1.2:
-		# Very peaceful leaders seek peace even when roughly equal
+	elif personality.base_peace_weight > 4 and our_power < their_power * 1.3:
+		# Moderately peaceful leaders seek peace when roughly equal
 		if randf() < 0.3:
 			if not other.is_human:
 				_make_peace_with_cooldown(player, other)
@@ -352,6 +378,11 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
 	var personality = _get_leader_personality(player)
 
+	# BTS: No wars in the very early game — players need time to settle
+	var min_war_turn = int(40 * GameManager.get_speed_multiplier())
+	if TurnManager.current_turn < min_war_turn:
+		return
+
 	# Check peace cooldown — cannot redeclare war too soon after making peace
 	var cooldown_key = "%d:%d" % [player.player_id, other.player_id]
 	var last_peace_turn = peace_cooldown.get(cooldown_key, -999)
@@ -359,19 +390,26 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	if TurnManager.current_turn - last_peace_turn < scaled_cooldown:
 		return  # Still in cooldown period
 
+	# Limit to max 1 active war for most leaders (aggressive can have 2)
+	var current_wars = player.at_war_with.size()
+	var max_wars = 1 if personality.base_peace_weight >= 3 else 2
+	if current_wars >= max_wars:
+		return
+
 	# BTS max_war_rand: lower = more warlike. Chance per turn scales with personality.
-	# Alexander (50) = 8%, Gandhi (400) = 1%, Montezuma (40) = 10%
-	var war_chance = 400.0 / max(personality.max_war_rand, 1)
+	# Alexander (50) = 4%, Gandhi (400) = 0.5%, Montezuma (40) = 5%
+	# Halved from original to reduce war frequency.
+	var war_chance = 200.0 / max(personality.max_war_rand, 1)
 	if randf() * 100.0 > war_chance:
 		return  # Didn't roll war this turn
 
 	var attitude = DiplomacySystem.calculate_attitude(player, other)
 
-	# Attitude threshold: most leaders can declare at neutral, peaceful need hostility
-	# peace_weight 0 (Montezuma): threshold 5, declares on anyone not a close friend
-	# peace_weight 4 (Caesar): threshold 3, declares on neutral-cautious
-	# peace_weight 8 (Gandhi): threshold 1, only declares on hostile
-	var war_attitude_threshold = 5 - personality.base_peace_weight / 2
+	# Attitude threshold: BTS-style. Pleased/Friendly = almost never declare.
+	# peace_weight 0 (Montezuma): threshold 3, declares on cautious or worse
+	# peace_weight 4 (Caesar): threshold 1, declares on annoyed or hostile
+	# peace_weight 8 (Gandhi): threshold -1, only with extreme provocation
+	var war_attitude_threshold = 3 - personality.base_peace_weight / 2
 	if attitude > war_attitude_threshold:
 		return
 
@@ -379,20 +417,20 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	var our_power = DiplomacySystem._calculate_power(player)
 	var their_power = DiplomacySystem._calculate_power(other)
 
-	# Required power ratio: aggressive need only equal power, peaceful need some advantage
-	var required_ratio = 0.8 + personality.base_peace_weight * 0.06
-	required_ratio = clamp(required_ratio, 0.8, 1.5)
+	# Required power ratio: aggressive need slight advantage, peaceful need clear advantage
+	var required_ratio = 1.0 + personality.base_peace_weight * 0.08
+	required_ratio = clamp(required_ratio, 1.0, 1.8)
 
 	# Dogpile bonus: if target is already at war, we need less advantage
 	var target_at_war = other.at_war_with.size() > 0
 	if target_at_war:
 		var dogpile_chance = int(personality.dogpile_war_rand)
 		if randi() % max(dogpile_chance, 1) == 0:
-			required_ratio *= 0.7  # Much lower bar for dogpiling
+			required_ratio *= 0.8  # Lower bar for dogpiling (but not as extreme)
 
-	# Warmonger respect: leaders who respect strength are less likely (not impossible)
-	if personality.warmonger_respect >= 2 and their_power > our_power * 1.2:
-		return  # Only back off against clearly stronger foes
+	# Warmonger respect: leaders who respect strength avoid stronger foes
+	if personality.warmonger_respect >= 2 and their_power > our_power:
+		return
 
 	if our_power > their_power * required_ratio:
 		# Check defensive pact allies
