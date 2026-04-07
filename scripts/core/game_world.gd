@@ -163,29 +163,53 @@ func initialize_game(settings: Dictionary) -> void:
 	grid_layer.add_child(game_grid)
 	GameManager.game_grid = game_grid
 
-	# Generate map
+	# Generate map (with regeneration if starting positions are insufficient)
 	var map_width = settings.get("map_width", 40)
 	var map_height = settings.get("map_height", 25)
-	game_grid.generate_map(map_width, map_height)
+	var non_barb_players = 0
+	for p in GameManager.players:
+		if p.civilization_id != "barbarian":
+			non_barb_players += 1
+
+	var start_positions: Array[Vector2i] = []
+	var max_regen = 5
+	for attempt in range(max_regen):
+		game_grid.generate_map(map_width, map_height)
+		start_positions = game_grid.find_all_starting_locations(non_barb_players)
+		if not start_positions.is_empty():
+			break
+		if attempt < max_regen - 1:
+			print("Map rejected (not enough good starting spots), regenerating... (attempt %d)" % (attempt + 2))
 
 	# Connect grid signals
 	game_grid.tile_clicked.connect(_on_tile_clicked)
 
 	# Place starting units for players
-	_place_starting_units()
+	_place_starting_units(start_positions)
 
 	# Start the game
 	TurnManager.start_game()
 
 	# Note: Camera centering is handled by game.gd (the 3D camera)
 
-func _place_starting_units() -> void:
-	var start_positions: Array[Vector2i] = []
+func _place_starting_units(start_positions: Array[Vector2i] = []) -> void:
+	var pos_index = 0
 
 	for player in GameManager.players:
-		# Find starting location
-		var start_pos = game_grid.find_starting_location(start_positions)
-		start_positions.append(start_pos)
+		if player.civilization_id == "barbarian":
+			continue  # Barbarians don't get starting units
+
+		# Use pre-computed position or fallback to legacy finder
+		var start_pos: Vector2i
+		if pos_index < start_positions.size():
+			start_pos = start_positions[pos_index]
+		else:
+			var existing: Array[Vector2i] = []
+			for prev_pos in start_positions:
+				existing.append(prev_pos)
+			start_pos = game_grid.find_starting_location(existing)
+			start_positions.append(start_pos)
+		pos_index += 1
 
 		# Create starting settler
 		var settler = Unit.new("settler", start_pos)

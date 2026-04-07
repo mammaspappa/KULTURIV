@@ -563,100 +563,178 @@ func get_tiles_in_range(center: Vector2i, range_val: int) -> Array:
 	return result
 
 # Find suitable starting location — scores candidates for best placement
+## Find optimal starting locations for all players at once.
+## Scores the entire map, picks the best well-spaced spots.
+## Returns array of Vector2i positions (one per player), or empty if map is unsuitable.
+func find_all_starting_locations(num_players: int) -> Array[Vector2i]:
+	# --- Parameters scaled by map size and player density ---
+	var map_tiles = float(width * height)
+	var tiles_per_player = map_tiles / max(num_players, 1)
+
+	# Minimum spacing between starts: larger maps = more space
+	var ideal_spacing = max(8, int(sqrt(tiles_per_player) * 0.7))
+	# Quality threshold: lower on small/crowded maps
+	var min_quality = max(8.0, 20.0 - num_players * 1.0 - (2000.0 / max(map_tiles, 100.0)) * 5.0)
+
+	# --- Phase 1: Score every land tile on the map ---
+	var candidates: Array = []  # [{pos: Vector2i, score: float}]
+	var y_margin = max(2, height / 10)  # Avoid poles
+
+	for x in range(width):
+		for y in range(y_margin, height - y_margin):
+			var pos = Vector2i(x, y)
+			var score = _score_start_location(pos)
+			if score >= min_quality:
+				candidates.append({"pos": pos, "score": score})
+
+	# Sort by score descending (best spots first)
+	candidates.sort_custom(func(a, b): return a.score > b.score)
+
+	# --- Phase 2: Greedy selection with spacing constraint ---
+	var selected: Array[Vector2i] = []
+	var current_spacing = ideal_spacing
+
+	# Try with ideal spacing first, then relax if not enough
+	while current_spacing >= 4:
+		selected.clear()
+		for candidate in candidates:
+			var pos: Vector2i = candidate.pos
+			var too_close = false
+			for existing in selected:
+				if GridUtils.chebyshev_distance(pos, existing) < current_spacing:
+					too_close = true
+					break
+			if not too_close:
+				selected.append(pos)
+				if selected.size() >= num_players:
+					break
+		if selected.size() >= num_players:
+			break
+		current_spacing -= 2
+
+	# Not enough spots even at minimum spacing → signal map regeneration needed
+	if selected.size() < num_players:
+		return []
+
+	# --- Phase 3: Random assignment (shuffle so it's fair) ---
+	# Take only what we need and shuffle
+	var result: Array[Vector2i] = []
+	for i in range(num_players):
+		result.append(selected[i])
+
+	# Fisher-Yates shuffle
+	for i in range(result.size() - 1, 0, -1):
+		var j = randi() % (i + 1)
+		var tmp = result[i]
+		result[i] = result[j]
+		result[j] = tmp
+
+	return result
+
+## Score a tile as a potential city start location (0 = terrible, 30+ = excellent)
+func _score_start_location(pos: Vector2i) -> float:
+	var tile = get_tile(pos)
+	if tile == null or not tile.is_passable() or tile.is_water():
+		return 0.0
+
+	var score = 0.0
+	var nearby = get_tiles_in_range(pos, 2)
+	var food_tiles = 0
+	var prod_tiles = 0
+	var commerce_tiles = 0
+	var has_fresh_water = false
+	var has_coast = false
+	var resource_count = 0
+
+	for nearby_tile in nearby:
+		if nearby_tile == null or not nearby_tile.is_passable():
+			continue
+		if nearby_tile.is_water():
+			has_coast = true
+			continue
+		var yields = nearby_tile.get_yields()
+		var food = yields.get("food", 0)
+		var prod = yields.get("production", 0)
+		var comm = yields.get("commerce", 0)
+		if food >= 2:
+			food_tiles += 1
+		if prod >= 1:
+			prod_tiles += 1
+		if comm >= 1:
+			commerce_tiles += 1
+		if nearby_tile.resource_id != "":
+			resource_count += 1
+		# Fresh water (river or lake)
+		if nearby_tile.has_fresh_water():
+			has_fresh_water = true
+
+	# Must have enough food to sustain a city
+	if food_tiles < 2:
+		return 0.0
+
+	# Score components (BTS-style balanced start priorities)
+	score += food_tiles * 3.0        # Food is king for growth
+	score += prod_tiles * 2.5        # Production for building
+	score += commerce_tiles * 1.5    # Commerce for research
+	score += resource_count * 3.0    # Resources nearby (any type)
+	if has_fresh_water:
+		score += 6.0                 # Fresh water = farms, health
+	if has_coast:
+		score += 3.0                 # Coastal access = trade, naval
+
+	# Extended range (ring 3): check for strategic/luxury resources
+	var extended = get_tiles_in_range(pos, 3)
+	for ext_tile in extended:
+		if ext_tile != null and ext_tile.resource_id != "":
+			var res = DataManager.get_resource(ext_tile.resource_id)
+			var res_type = res.get("type", "")
+			if res_type == "strategic":
+				score += 2.0
+			elif res_type == "luxury":
+				score += 1.5
+
+	return score
+
+## Legacy single-location finder (used when adding players mid-game)
 func find_starting_location(avoid_positions: Array[Vector2i], min_distance: int = -1) -> Vector2i:
-	# Scale minimum distance with map size
 	if min_distance < 0:
 		min_distance = max(8, int(sqrt(width * height) / 4))
 
-	# Try with progressively lower min_distance until we find a valid spot
-	var current_min_dist = min_distance
-	while current_min_dist >= 3:
-		var result = _find_start_with_distance(avoid_positions, current_min_dist)
-		if result != Vector2i(-1, -1):
-			return result
-		current_min_dist -= 2  # Reduce distance and try again
-
-	# Last resort: any passable land tile not already taken
-	for _attempt in range(500):
-		var x = randi() % width
-		var y = randi() % (height - 4) + 2
-		var pos = Vector2i(x, y)
-		var tile = get_tile(pos)
-		if tile and tile.is_passable() and not tile.is_water() and pos not in avoid_positions:
-			return pos
-
-	return Vector2i(width / 2, height / 2)
-
-func _find_start_with_distance(avoid_positions: Array[Vector2i], min_distance: int) -> Vector2i:
+	# Score all tiles and find the best one far enough from existing starts
 	var best_pos = Vector2i(-1, -1)
-	var best_score = -999.0
-	var max_attempts = 1500
+	var best_score = -1.0
+	var y_margin = max(2, height / 10)
 
-	for _attempt in range(max_attempts):
-		var x = randi() % width
-		var y = randi() % (height - 10) + 5  # Avoid poles
-
-		var pos = Vector2i(x, y)
-		var tile = get_tile(pos)
-
-		if tile == null or not tile.is_passable() or tile.is_water():
-			continue
-
-		# Check distance from other starts
-		var too_close = false
-		for avoid_pos in avoid_positions:
-			if GridUtils.chebyshev_distance(pos, avoid_pos) < min_distance:
-				too_close = true
-				break
-		if too_close:
-			continue
-
-		# Score this location
-		var score = 0.0
-		var nearby = get_tiles_in_range(pos, 2)
-		var food_tiles = 0
-		var prod_tiles = 0
-		var has_fresh_water = false
-		var has_resource = false
-
-		for nearby_tile in nearby:
-			if nearby_tile == null or not nearby_tile.is_passable():
+	for x in range(width):
+		for y in range(y_margin, height - y_margin):
+			var pos = Vector2i(x, y)
+			var score = _score_start_location(pos)
+			if score <= best_score:
 				continue
-			if nearby_tile.is_water():
-				has_fresh_water = true  # Coastal access
-				continue
-			var yields = nearby_tile.get_yields()
-			if yields.get("food", 0) >= 2:
-				food_tiles += 1
-			if yields.get("production", 0) >= 1:
-				prod_tiles += 1
-			if nearby_tile.resource_id != "":
-				has_resource = true
+			var too_close = false
+			for avoid_pos in avoid_positions:
+				if GridUtils.chebyshev_distance(pos, avoid_pos) < min_distance:
+					too_close = true
+					break
+			if not too_close:
+				best_score = score
+				best_pos = pos
 
-		# Need minimum food
-		if food_tiles < 3:
-			continue
-
-		score += food_tiles * 3.0
-		score += prod_tiles * 2.0
-		if has_fresh_water:
-			score += 5.0
-		if has_resource:
-			score += 4.0
-
-		# Check range 3 for strategic/luxury resources
-		var extended = get_tiles_in_range(pos, 3)
-		for ext_tile in extended:
-			if ext_tile != null and ext_tile.resource_id != "":
-				var res = DataManager.get_resource(ext_tile.resource_id)
-				if res.get("type", "") == "strategic":
-					score += 3.0
-				elif res.get("type", "") == "luxury":
-					score += 2.0
-
-		if score > best_score:
-			best_score = score
-			best_pos = pos
+	# Fallback: relax distance
+	if best_pos == Vector2i(-1, -1):
+		for x in range(width):
+			for y in range(y_margin, height - y_margin):
+				var pos = Vector2i(x, y)
+				var score = _score_start_location(pos)
+				if score > best_score:
+					var ok = true
+					for avoid_pos in avoid_positions:
+						if GridUtils.chebyshev_distance(pos, avoid_pos) < 4:
+							ok = false
+							break
+					if ok:
+						best_score = score
+						best_pos = pos
 
 	return best_pos
 
