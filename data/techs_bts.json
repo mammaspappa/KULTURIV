@@ -313,10 +313,10 @@
     ]
   },
   "utopia": {
+    "era": "industrial",
     "name": "TXT_KEY_TECH_UTOPIA",
     "bts_type": "TECH_UTOPIA",
     "cost": 2800,
-    "era": "industrial",
     "grid_x": 14,
     "grid_y": 7,
     "prerequisites": [
@@ -619,10 +619,10 @@
     ]
   },
   "physics": {
+    "era": "industrial",
     "name": "TXT_KEY_TECH_PHYSICS",
     "bts_type": "TECH_PHYSICS",
     "cost": 4000,
-    "era": "industrial",
     "grid_x": 14,
     "grid_y": 9,
     "prerequisites": [
@@ -633,10 +633,10 @@
     ]
   },
   "biology": {
+    "era": "industrial",
     "name": "TXT_KEY_TECH_BIOLOGY",
     "bts_type": "TECH_BIOLOGY",
     "cost": 3600,
-    "era": "industrial",
     "grid_x": 14,
     "grid_y": 11,
     "prerequisites": [
@@ -786,10 +786,10 @@
     ]
   },
   "fiber_optics": {
+    "era": "modern",
     "name": "TXT_KEY_TECH_FIBER_OPTICS",
     "bts_type": "TECH_FIBER_OPTICS",
     "cost": 7500,
-    "era": "modern",
     "grid_x": 19,
     "grid_y": 8,
     "or_prerequisites": [
@@ -1107,10 +1107,10 @@
     ]
   },
   "artillery": {
+    "era": "industrial",
     "name": "TXT_KEY_TECH_ARTILLERY",
     "bts_type": "TECH_ARTILLERY",
     "cost": 4000,
-    "era": "industrial",
     "grid_x": 15,
     "grid_y": 3,
     "prerequisites": [
@@ -1164,10 +1164,10 @@
     ]
   },
   "superconductors": {
+    "era": "modern",
     "name": "TXT_KEY_TECH_SUPERCONDUCTORS",
     "bts_type": "TECH_SUPERCONDUCTORS",
     "cost": 6500,
-    "era": "modern",
     "grid_x": 18,
     "grid_y": 13,
     "or_prerequisites": [
@@ -1191,10 +1191,10 @@
     ]
   },
   "laser": {
+    "era": "modern",
     "name": "TXT_KEY_TECH_LASER",
     "bts_type": "TECH_LASER",
     "cost": 7000,
-    "era": "modern",
     "grid_x": 18,
     "grid_y": 3,
     "prerequisites": [

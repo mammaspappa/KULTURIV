@@ -1768,6 +1768,29 @@
       "great_prophet_points": 2
     }
   },
+  "ger": {
+    "name": "Ger",
+    "cost": 60,
+    "required_tech": "horseback_riding",
+    "obsolete_tech": "advanced_flight",
+    "civilization": "mongol",
+    "era": "classical",
+    "description": "Mongolian unique building. +2 XP for all units.",
+    "_kulturiv_only": true
+  },
+  "sacrificial_altar": {
+    "name": "Sacrificial Altar",
+    "cost": 90,
+    "required_tech": "code_of_laws",
+    "civilization": "aztec",
+    "effects": {
+      "maintenance_reduction": 0.5,
+      "spy_slots": 1
+    },
+    "era": "classical",
+    "description": "Aztec unique building. Can sacrifice population for happiness.",
+    "_kulturiv_only": true
+  },
   "monument": {
     "name": "Monument",
     "era": "ancient",
@@ -2274,37 +2297,6 @@
       "happiness_from_resource": 1
     },
     "description": "Persian unique building. +3 Health.",
-    "_kulturiv_only": true
-  },
-  "ger": {
-    "name": "Ger",
-    "era": "classical",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "horseback_riding",
-    "requires_resource": "horses",
-    "replaces": "stable",
-    "civilization": "mongolia",
-    "effects": {
-      "mounted_experience": 4
-    },
-    "description": "Mongolian unique building. +2 XP for all units.",
-    "_kulturiv_only": true
-  },
-  "sacrificial_altar": {
-    "name": "Sacrificial Altar",
-    "era": "classical",
-    "cost": 90,
-    "maintenance": 2,
-    "required_tech": "code_of_laws",
-    "replaces": "courthouse",
-    "civilization": "aztec",
-    "effects": {
-      "maintenance_reduction": 0.5,
-      "espionage": 2,
-      "happy_from_sacrifice": 1
-    },
-    "description": "Aztec unique building. Can sacrifice population for happiness.",
     "_kulturiv_only": true
   },
   "madrassa": {

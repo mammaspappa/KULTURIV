@@ -1,42 +1,1617 @@
 {
   "palace": {
+    "description": "Marks your capital city",
+    "era": "ancient",
     "name": "Palace",
-    "era": "ancient",
     "cost": 160,
-    "maintenance": 0,
     "required_tech": "",
-    "is_capital": true,
+    "wonder_type": "national",
     "effects": {
-      "commerce": 8,
-      "espionage": 4,
-      "great_person_points": 2,
-      "happiness": 1
-    },
-    "description": "Marks your capital city"
+      "happiness": 1,
+      "second_palace": true
+    }
   },
-  "granary": {
-    "name": "Granary",
-    "era": "ancient",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "pottery",
+  "great_palace": {
+    "name": "Great Palace",
+    "cost": 200,
+    "required_tech": "",
+    "wonder_type": "national",
+    "required_buildings": [
+      "courthouse"
+    ],
     "effects": {
-      "food_stored_on_growth": 0.5,
-      "health": 1
-    },
-    "description": "Stores 50% food after growth"
+      "great_spy_points": 1,
+      "second_palace": true
+    }
+  },
+  "versailles": {
+    "description": "Reduces maintenance like a second palace",
+    "era": "renaissance",
+    "name": "Versailles",
+    "cost": 800,
+    "required_tech": "divine_right",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 2,
+      "second_palace": true
+    }
+  },
+  "walls": {
+    "description": "+50% city defense",
+    "era": "ancient",
+    "name": "Walls",
+    "cost": 50,
+    "required_tech": "masonry",
+    "obsolete_tech": "rifling"
+  },
+  "celtic_dun": {
+    "name": "Celtic Dun",
+    "cost": 50,
+    "required_tech": "masonry",
+    "obsolete_tech": "rifling",
+    "civilization": "celt"
+  },
+  "castle": {
+    "description": "+50% defense, +25% vs siege",
+    "era": "medieval",
+    "name": "Castle",
+    "cost": 100,
+    "required_tech": "engineering",
+    "obsolete_tech": "economics",
+    "required_buildings": [
+      "walls"
+    ],
+    "effects": {
+      "trade_routes": 1
+    }
+  },
+  "spanish_citadel": {
+    "name": "Spanish Citadel",
+    "cost": 100,
+    "required_tech": "engineering",
+    "obsolete_tech": "economics",
+    "required_buildings": [
+      "walls"
+    ],
+    "civilization": "spain",
+    "effects": {
+      "trade_routes": 1
+    }
   },
   "barracks": {
-    "name": "Barracks",
+    "description": "New units start with 4 XP",
     "era": "ancient",
+    "name": "Barracks",
     "cost": 50,
-    "maintenance": 1,
+    "required_tech": ""
+  },
+  "zulu_ikhanda": {
+    "name": "Zulu Ikhanda",
+    "cost": 60,
     "required_tech": "",
+    "civilization": "zulu",
     "effects": {
-      "free_experience": 3,
-      "great_general_points": 1
+      "maintenance_reduction": 0.2
+    }
+  },
+  "stable": {
+    "description": "Mounted units get +4 XP, +25% production",
+    "era": "classical",
+    "name": "Stable",
+    "cost": 60,
+    "required_tech": "horseback_riding",
+    "obsolete_tech": "advanced_flight"
+  },
+  "ger": {
+    "name": "Ger",
+    "cost": 60,
+    "required_tech": "horseback_riding",
+    "obsolete_tech": "advanced_flight",
+    "civilization": "mongol",
+    "era": "classical",
+    "description": "Mongolian unique building. +2 XP for all units."
+  },
+  "bunker": {
+    "name": "Bunker",
+    "cost": 100,
+    "required_tech": "electricity"
+  },
+  "bomb_shelter": {
+    "name": "Bomb Shelter",
+    "cost": 100,
+    "required_tech": "electricity"
+  },
+  "granary": {
+    "description": "Stores 50% food after growth",
+    "era": "ancient",
+    "name": "Granary",
+    "cost": 60,
+    "required_tech": "pottery",
+    "effects": {
+      "food_stored_on_growth": 0.5
+    }
+  },
+  "incan_terrace": {
+    "name": "Incan Terrace",
+    "cost": 60,
+    "required_tech": "pottery",
+    "civilization": "inca",
+    "effects": {
+      "food_stored_on_growth": 0.5
+    }
+  },
+  "aqueduct": {
+    "description": "+2 Health, +50% food stored",
+    "era": "classical",
+    "name": "Aqueduct",
+    "cost": 100,
+    "required_tech": "mathematics",
+    "effects": {
+      "health": 2
+    }
+  },
+  "ottoman_hammam": {
+    "name": "Ottoman Hammam",
+    "cost": 100,
+    "required_tech": "mathematics",
+    "civilization": "ottoman",
+    "effects": {
+      "happiness": 2,
+      "health": 2
+    }
+  },
+  "khmer_baray": {
+    "name": "Khmer Baray",
+    "cost": 100,
+    "required_tech": "mathematics",
+    "civilization": "khmer",
+    "effects": {
+      "health": 2
+    }
+  },
+  "hospital": {
+    "description": "+3 Health",
+    "era": "industrial",
+    "name": "Hospital",
+    "cost": 200,
+    "required_tech": "medicine",
+    "effects": {
+      "health": 3
+    }
+  },
+  "recycling_center": {
+    "description": "+2 Health, removes 2 unhealthiness",
+    "era": "modern",
+    "name": "Recycling Center",
+    "cost": 300,
+    "required_tech": "ecology"
+  },
+  "lighthouse": {
+    "description": "+1 Food from water tiles",
+    "era": "ancient",
+    "name": "Lighthouse",
+    "cost": 60,
+    "required_tech": "sailing"
+  },
+  "viking_trading_post": {
+    "name": "Viking Trading Post",
+    "cost": 60,
+    "required_tech": "sailing",
+    "civilization": "viking"
+  },
+  "harbor": {
+    "description": "+1 Trade route yield, +1 Commerce from water",
+    "era": "renaissance",
+    "name": "Harbor",
+    "cost": 80,
+    "required_tech": "compass"
+  },
+  "carthage_cothon": {
+    "name": "Carthage Cothon",
+    "cost": 100,
+    "required_tech": "compass",
+    "civilization": "carthage",
+    "effects": {
+      "trade_routes": 1
+    }
+  },
+  "custom_house": {
+    "name": "Custom House",
+    "cost": 180,
+    "required_tech": "economics",
+    "required_buildings": [
+      "harbor"
+    ]
+  },
+  "portugal_feitoria": {
+    "name": "Portugal Feitoria",
+    "cost": 180,
+    "required_tech": "economics",
+    "required_buildings": [
+      "harbor"
+    ],
+    "civilization": "portugal"
+  },
+  "drydock": {
+    "name": "Drydock",
+    "cost": 120,
+    "required_tech": "steel",
+    "effects": {
+      "health": -1
+    }
+  },
+  "airport": {
+    "description": "Enables airlift, +1 Trade route yield",
+    "era": "modern",
+    "name": "Airport",
+    "cost": 250,
+    "required_tech": "flight",
+    "effects": {
+      "health": -1,
+      "trade_routes": 1
+    }
+  },
+  "forge": {
+    "description": "+25% Production",
+    "era": "ancient",
+    "name": "Forge",
+    "cost": 120,
+    "required_tech": "metal_casting",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 1
+    }
+  },
+  "mali_mint": {
+    "name": "Mali Mint",
+    "cost": 120,
+    "required_tech": "metal_casting",
+    "civilization": "mali",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 1
+    }
+  },
+  "factory": {
+    "description": "+50% Production, +2 Unhealthiness",
+    "era": "industrial",
+    "name": "Factory",
+    "cost": 250,
+    "required_tech": "assembly_line",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 2
+    }
+  },
+  "german_assembly_plant": {
+    "name": "German Assembly Plant",
+    "cost": 250,
+    "required_tech": "assembly_line",
+    "civilization": "germany",
+    "effects": {
+      "health": -1,
+      "engineer_slots": 4
+    }
+  },
+  "coal_plant": {
+    "description": "+25% Production, +2 Unhealthiness",
+    "era": "industrial",
+    "name": "Coal Plant",
+    "cost": 150,
+    "required_tech": "assembly_line",
+    "required_buildings": [
+      "factory"
+    ]
+  },
+  "japanese_shale_plant": {
+    "name": "Japanese Shale Plant",
+    "cost": 150,
+    "required_tech": "assembly_line",
+    "required_buildings": [
+      "factory"
+    ],
+    "civilization": "japan",
+    "effects": {
+      "provides_power": true
+    }
+  },
+  "hydro_plant": {
+    "description": "+25% Production (clean)",
+    "era": "modern",
+    "name": "Hydro Plant",
+    "cost": 200,
+    "required_tech": "plastics",
+    "required_buildings": [
+      "factory"
+    ],
+    "effects": {
+      "provides_power": true
+    }
+  },
+  "nuclear_plant": {
+    "description": "+50% Production, risk of meltdown",
+    "era": "modern",
+    "name": "Nuclear Plant",
+    "cost": 250,
+    "required_tech": "fission",
+    "required_buildings": [
+      "factory"
+    ]
+  },
+  "industrial_park": {
+    "name": "Industrial Park",
+    "cost": 200,
+    "required_tech": "industrialism",
+    "required_buildings": [
+      "factory"
+    ],
+    "effects": {
+      "health": -2,
+      "engineer_slots": 2
+    }
+  },
+  "obelisk": {
+    "description": "+2 Culture per turn",
+    "era": "ancient",
+    "name": "Obelisk",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy"
+  },
+  "egyptian_obelisk": {
+    "name": "Egyptian Obelisk",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy",
+    "civilization": "egypt",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "ethiopian_stele": {
+    "name": "Ethiopian Stele",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy",
+    "civilization": "ethiopia"
+  },
+  "native_america_totem": {
+    "name": "Native America Totem",
+    "cost": 30,
+    "required_tech": "mysticism",
+    "obsolete_tech": "astronomy",
+    "civilization": "native_america"
+  },
+  "public_transportation": {
+    "name": "Public Transportation",
+    "cost": 150,
+    "required_tech": "combustion",
+    "effects": {
+      "health": 1
+    }
+  },
+  "academy": {
+    "description": "+50% Science in this city (built by Great Scientist)",
+    "era": "ancient",
+    "name": "Academy",
+    "cost": -1,
+    "required_tech": ""
+  },
+  "library": {
+    "description": "+25% Science",
+    "era": "ancient",
+    "name": "Library",
+    "cost": 90,
+    "required_tech": "writing",
+    "effects": {
+      "scientist_slots": 2
+    }
+  },
+  "arabian_madrassa": {
+    "name": "Arabian Madrassa",
+    "cost": 90,
+    "required_tech": "writing",
+    "civilization": "arabia",
+    "effects": {
+      "scientist_slots": 2,
+      "priest_slots": 2
+    }
+  },
+  "university": {
+    "description": "+25% Science",
+    "era": "medieval",
+    "name": "University",
+    "cost": 200,
+    "required_tech": "education",
+    "required_buildings": [
+      "library"
+    ]
+  },
+  "korean_seowon": {
+    "name": "Korean Seowon",
+    "cost": 200,
+    "required_tech": "education",
+    "required_buildings": [
+      "library"
+    ],
+    "civilization": "korea"
+  },
+  "observatory": {
+    "description": "+25% Science",
+    "era": "renaissance",
+    "name": "Observatory",
+    "cost": 150,
+    "required_tech": "astronomy",
+    "effects": {
+      "scientist_slots": 1
+    }
+  },
+  "french_salon": {
+    "name": "French Salon",
+    "cost": 150,
+    "required_tech": "astronomy",
+    "civilization": "france",
+    "effects": {
+      "scientist_slots": 1
+    }
+  },
+  "laboratory": {
+    "name": "Laboratory",
+    "cost": 250,
+    "required_tech": "superconductors",
+    "required_buildings": [
+      "observatory"
+    ],
+    "effects": {
+      "health": -1,
+      "space_production_percent": 0.5,
+      "scientist_slots": 1
+    }
+  },
+  "russian_research_institute": {
+    "name": "Russian Research Institute",
+    "cost": 250,
+    "required_tech": "superconductors",
+    "required_buildings": [
+      "observatory"
+    ],
+    "civilization": "russia",
+    "effects": {
+      "health": -1,
+      "space_production_percent": 0.5,
+      "scientist_slots": 1
+    }
+  },
+  "theatre": {
+    "description": "+3 Culture, +1 Happiness",
+    "era": "renaissance",
+    "name": "Theatre",
+    "cost": 50,
+    "required_tech": "drama",
+    "effects": {
+      "artist_slots": 2
+    }
+  },
+  "chinese_pavillion": {
+    "name": "Chinese Pavillion",
+    "cost": 50,
+    "required_tech": "drama",
+    "civilization": "china",
+    "effects": {
+      "artist_slots": 2
+    }
+  },
+  "byzantine_hippodrome": {
+    "name": "Byzantine Hippodrome",
+    "cost": 50,
+    "required_tech": "drama",
+    "civilization": "byzantium",
+    "effects": {
+      "happiness": 1
+    }
+  },
+  "colosseum": {
+    "description": "+1 Happiness",
+    "era": "classical",
+    "name": "Colosseum",
+    "cost": 80,
+    "required_tech": "construction",
+    "effects": {
+      "happiness": 1
+    }
+  },
+  "greek_odeon": {
+    "name": "Greek Odeon",
+    "cost": 80,
+    "required_tech": "construction",
+    "civilization": "greece",
+    "effects": {
+      "happiness": 2,
+      "artist_slots": 2
+    }
+  },
+  "maya_ball_court": {
+    "name": "Maya Ball Court",
+    "cost": 80,
+    "required_tech": "construction",
+    "civilization": "maya",
+    "effects": {
+      "happiness": 3
+    }
+  },
+  "babylon_garden": {
+    "name": "Babylon Garden",
+    "cost": 80,
+    "required_tech": "construction",
+    "civilization": "babylon",
+    "effects": {
+      "happiness": 1,
+      "health": 2
+    }
+  },
+  "broadcast_tower": {
+    "description": "+50% Culture, +1 Happiness",
+    "era": "modern",
+    "name": "Broadcast Tower",
+    "cost": 175,
+    "required_tech": "mass_media",
+    "effects": {
+      "artist_slots": 2
+    }
+  },
+  "market": {
+    "description": "+25% Gold, +1 Happiness from luxury resources",
+    "era": "classical",
+    "name": "Market",
+    "cost": 150,
+    "required_tech": "currency",
+    "effects": {
+      "merchant_slots": 2
+    }
+  },
+  "roman_forum": {
+    "name": "Roman Forum",
+    "cost": 150,
+    "required_tech": "currency",
+    "civilization": "rome",
+    "effects": {
+      "merchant_slots": 2
+    }
+  },
+  "grocer": {
+    "description": "+2 Health, +1 Happiness from resources",
+    "era": "renaissance",
+    "name": "Grocer",
+    "cost": 150,
+    "required_tech": "guilds",
+    "effects": {
+      "merchant_slots": 2
+    }
+  },
+  "persian_apothecary": {
+    "name": "Persian Apothecary",
+    "cost": 150,
+    "required_tech": "guilds",
+    "civilization": "persia",
+    "effects": {
+      "health": 2,
+      "merchant_slots": 2
+    }
+  },
+  "bank": {
+    "description": "+50% Gold",
+    "era": "medieval",
+    "name": "Bank",
+    "cost": 200,
+    "required_tech": "banking"
+  },
+  "english_stock_exchange": {
+    "name": "English Stock Exchange",
+    "cost": 200,
+    "required_tech": "banking",
+    "civilization": "england"
+  },
+  "supermarket": {
+    "description": "+2 Health, +1 Food from farms",
+    "era": "modern",
+    "name": "Supermarket",
+    "cost": 150,
+    "required_tech": "refrigeration",
+    "required_buildings": [
+      "grocer"
+    ]
+  },
+  "american_mall": {
+    "name": "American Mall",
+    "cost": 150,
+    "required_tech": "refrigeration",
+    "required_buildings": [
+      "grocer"
+    ],
+    "civilization": "america"
+  },
+  "courthouse": {
+    "description": "-50% city maintenance",
+    "era": "classical",
+    "name": "Courthouse",
+    "cost": 120,
+    "required_tech": "code_of_laws",
+    "effects": {
+      "maintenance_reduction": 0.5,
+      "spy_slots": 1
+    }
+  },
+  "sacrificial_altar": {
+    "name": "Sacrificial Altar",
+    "cost": 90,
+    "required_tech": "code_of_laws",
+    "civilization": "aztec",
+    "effects": {
+      "maintenance_reduction": 0.5,
+      "spy_slots": 1
     },
-    "description": "New units start with 4 XP"
+    "era": "classical",
+    "description": "Aztec unique building. Can sacrifice population for happiness."
+  },
+  "holy_roman_rathaus": {
+    "name": "Holy Roman Rathaus",
+    "cost": 120,
+    "required_tech": "code_of_laws",
+    "civilization": "holy_roman",
+    "effects": {
+      "maintenance_reduction": 0.75,
+      "spy_slots": 1
+    }
+  },
+  "sumerian_ziggurat": {
+    "name": "Sumerian Ziggurat",
+    "cost": 90,
+    "required_tech": "priesthood",
+    "civilization": "sumeria",
+    "effects": {
+      "maintenance_reduction": 0.5,
+      "spy_slots": 1
+    }
+  },
+  "jail": {
+    "name": "Jail",
+    "cost": 120,
+    "required_tech": "constitution",
+    "effects": {
+      "spy_slots": 2
+    }
+  },
+  "indian_mausoleum": {
+    "name": "Indian Mausoleum",
+    "cost": 120,
+    "required_tech": "constitution",
+    "civilization": "india",
+    "effects": {
+      "happiness": 2,
+      "spy_slots": 2
+    }
+  },
+  "levee": {
+    "name": "Levee",
+    "cost": 180,
+    "required_tech": "steam_power"
+  },
+  "netherlands_dike": {
+    "name": "Netherlands Dike",
+    "cost": 180,
+    "required_tech": "steam_power",
+    "civilization": "netherlands"
+  },
+  "intelligence_agency": {
+    "description": "+100% Espionage, +8 Espionage points",
+    "era": "modern",
+    "name": "Intelligence Agency",
+    "cost": 180,
+    "required_tech": "utopia",
+    "effects": {
+      "spy_slots": 2
+    }
+  },
+  "national_security": {
+    "name": "National Security",
+    "cost": 220,
+    "required_tech": "democracy",
+    "effects": {
+      "spy_slots": 2
+    }
+  },
+  "jewish_temple": {
+    "description": "+1 Culture, +1 Happiness from Judaism",
+    "era": "ancient",
+    "name": "Jewish Temple",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "judaism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "jewish_cathedral": {
+    "description": "+4 Culture, +2 Happiness from Judaism",
+    "era": "medieval",
+    "name": "Jewish Cathedral",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "judaism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "jewish_monastery": {
+    "description": "+10% Science, can build Jewish missionaries faster",
+    "era": "medieval",
+    "name": "Jewish Monastery",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "judaism"
+  },
+  "jewish_shrine": {
+    "description": "+1 Gold per city with Judaism",
+    "era": "ancient",
+    "name": "Jewish Shrine",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "christian_temple": {
+    "description": "+1 Culture, +1 Happiness from Christianity",
+    "era": "medieval",
+    "name": "Christian Temple",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "christianity",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "christian_cathedral": {
+    "description": "+4 Culture, +2 Happiness from Christianity",
+    "era": "medieval",
+    "name": "Christian Cathedral",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "christianity",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "christian_monastery": {
+    "description": "+10% Science, can build Christian missionaries faster",
+    "era": "medieval",
+    "name": "Christian Monastery",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "christianity"
+  },
+  "christian_shrine": {
+    "description": "+1 Gold per city with Christianity",
+    "era": "medieval",
+    "name": "Christian Shrine",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "islamic_temple": {
+    "description": "+1 Culture, +1 Happiness from Islam",
+    "era": "medieval",
+    "name": "Islamic Temple",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "islam",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "islamic_cathedral": {
+    "description": "+4 Culture, +2 Happiness from Islam",
+    "era": "medieval",
+    "name": "Islamic Cathedral",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "islam",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "islamic_monastery": {
+    "description": "+10% Science, can build Islamic missionaries faster",
+    "era": "medieval",
+    "name": "Islamic Monastery",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "islam"
+  },
+  "islamic_shrine": {
+    "description": "+1 Gold per city with Islam",
+    "era": "medieval",
+    "name": "Islamic Shrine",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "hindu_temple": {
+    "description": "+1 Culture, +1 Happiness from Hinduism",
+    "era": "ancient",
+    "name": "Hindu Temple",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "hinduism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "hindu_cathedral": {
+    "description": "+4 Culture, +2 Happiness from Hinduism",
+    "era": "medieval",
+    "name": "Hindu Cathedral",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "hinduism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "hindu_monastery": {
+    "description": "+10% Science, can build Hindu missionaries faster",
+    "era": "medieval",
+    "name": "Hindu Monastery",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "hinduism"
+  },
+  "hindu_shrine": {
+    "description": "+1 Gold per city with Hinduism",
+    "era": "ancient",
+    "name": "Hindu Shrine",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "buddhist_temple": {
+    "description": "+1 Culture, +1 Happiness from Buddhism",
+    "era": "ancient",
+    "name": "Buddhist Temple",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "buddhism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "buddhist_cathedral": {
+    "description": "+4 Culture, +2 Happiness from Buddhism",
+    "era": "medieval",
+    "name": "Buddhist Cathedral",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "buddhism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "buddhist_monastery": {
+    "description": "+10% Science, can build Buddhist missionaries faster",
+    "era": "medieval",
+    "name": "Buddhist Monastery",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "buddhism"
+  },
+  "buddhist_shrine": {
+    "description": "+1 Gold per city with Buddhism",
+    "era": "ancient",
+    "name": "Buddhist Shrine",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "confucian_temple": {
+    "description": "+1 Culture, +1 Happiness from Confucianism",
+    "era": "ancient",
+    "name": "Confucian Temple",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "confucianism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "confucian_cathedral": {
+    "description": "+4 Culture, +2 Happiness from Confucianism",
+    "era": "medieval",
+    "name": "Confucian Cathedral",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "confucianism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "confucian_monastery": {
+    "description": "+10% Science, can build Confucian missionaries faster",
+    "era": "medieval",
+    "name": "Confucian Monastery",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "confucianism"
+  },
+  "confucian_shrine": {
+    "description": "+1 Gold per city with Confucianism",
+    "era": "ancient",
+    "name": "Confucian Shrine",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "taoist_temple": {
+    "description": "+1 Culture, +1 Happiness from Taoism",
+    "era": "ancient",
+    "name": "Taoist Temple",
+    "cost": 80,
+    "required_tech": "",
+    "required_religion": "taoism",
+    "effects": {
+      "happiness": 1,
+      "priest_slots": 1
+    }
+  },
+  "taoist_cathedral": {
+    "description": "+4 Culture, +2 Happiness from Taoism",
+    "era": "medieval",
+    "name": "Taoist Cathedral",
+    "cost": 300,
+    "required_tech": "",
+    "required_religion": "taoism",
+    "effects": {
+      "priest_slots": 2
+    }
+  },
+  "taoist_monastery": {
+    "description": "+10% Science, can build Taoist missionaries faster",
+    "era": "medieval",
+    "name": "Taoist Monastery",
+    "cost": 60,
+    "required_tech": "",
+    "required_religion": "taoism"
+  },
+  "taoist_shrine": {
+    "description": "+1 Gold per city with Taoism",
+    "era": "ancient",
+    "name": "Taoist Shrine",
+    "cost": -1,
+    "required_tech": "",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 1,
+      "priest_slots": 3
+    }
+  },
+  "heroic_epic": {
+    "description": "+100% Military unit production",
+    "era": "classical",
+    "name": "Heroic Epic",
+    "cost": 200,
+    "required_tech": "literature",
+    "wonder_type": "national",
+    "required_buildings": [
+      "barracks"
+    ],
+    "effects": {
+      "great_artist_points": 1,
+      "military_production_percent": 1.0
+    }
+  },
+  "national_epic": {
+    "description": "+100% Great People birth rate",
+    "era": "classical",
+    "name": "National Epic",
+    "cost": 250,
+    "required_tech": "literature",
+    "wonder_type": "national",
+    "required_buildings": [
+      "library"
+    ],
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "globe_theatre": {
+    "description": "No unhappiness in this city",
+    "era": "renaissance",
+    "name": "Globe Theatre",
+    "cost": 300,
+    "required_tech": "drama",
+    "wonder_type": "national",
+    "required_buildings": [
+      "theatre"
+    ],
+    "effects": {
+      "great_artist_points": 1,
+      "artist_slots": 3
+    }
+  },
+  "national_park": {
+    "name": "National Park",
+    "cost": 300,
+    "required_tech": "biology",
+    "wonder_type": "national",
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "hermitage": {
+    "description": "+100% Culture in this city",
+    "era": "renaissance",
+    "name": "Hermitage",
+    "cost": 300,
+    "required_tech": "nationalism",
+    "wonder_type": "national",
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "oxford_university": {
+    "description": "Grants a free tech, +100% Science",
+    "era": "medieval",
+    "name": "Oxford University",
+    "cost": 400,
+    "required_tech": "education",
+    "wonder_type": "national",
+    "required_buildings": [
+      "university"
+    ],
+    "effects": {
+      "great_scientist_points": 1,
+      "scientist_slots": 3
+    }
+  },
+  "wall_street": {
+    "description": "+100% Gold",
+    "era": "modern",
+    "name": "Wall Street",
+    "cost": 600,
+    "required_tech": "corporation",
+    "wonder_type": "national",
+    "required_buildings": [
+      "bank"
+    ],
+    "effects": {
+      "great_merchant_points": 1,
+      "merchant_slots": 3
+    }
+  },
+  "iron_works": {
+    "name": "Iron Works",
+    "cost": 700,
+    "required_tech": "steel",
+    "wonder_type": "national",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "health": -2,
+      "great_engineer_points": 1,
+      "engineer_slots": 3
+    }
+  },
+  "west_point": {
+    "description": "+4 XP for units built here",
+    "era": "industrial",
+    "name": "West Point",
+    "cost": 800,
+    "required_tech": "military_tradition",
+    "wonder_type": "national",
+    "effects": {
+      "great_spy_points": 1
+    }
+  },
+  "mt_rushmore": {
+    "description": "-25% War weariness",
+    "era": "industrial",
+    "name": "Mt Rushmore",
+    "cost": 500,
+    "required_tech": "fascism",
+    "wonder_type": "national",
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "red_cross": {
+    "description": "+10% heal rate for all units",
+    "era": "industrial",
+    "name": "Red Cross",
+    "cost": 600,
+    "required_tech": "medicine",
+    "wonder_type": "national",
+    "required_buildings": [
+      "hospital"
+    ],
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "scotland_yard": {
+    "description": "+4 Espionage in all cities, +25% Spy success",
+    "era": "industrial",
+    "name": "Scotland Yard",
+    "cost": -1,
+    "required_tech": ""
+  },
+  "pyramid": {
+    "name": "Pyramid",
+    "cost": 500,
+    "required_tech": "masonry",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "stonehenge": {
+    "description": "Free Monument in all cities",
+    "era": "ancient",
+    "name": "Stonehenge",
+    "cost": 120,
+    "required_tech": "mysticism",
+    "wonder_type": "world",
+    "obsolete_tech": "astronomy",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "great_library": {
+    "name": "Great Library",
+    "cost": 350,
+    "required_tech": "literature",
+    "wonder_type": "world",
+    "obsolete_tech": "scientific_method",
+    "required_buildings": [
+      "library"
+    ],
+    "effects": {
+      "great_scientist_points": 2
+    }
+  },
+  "great_lighthouse": {
+    "name": "Great Lighthouse",
+    "cost": 200,
+    "required_tech": "sailing",
+    "wonder_type": "world",
+    "obsolete_tech": "corporation",
+    "required_buildings": [
+      "lighthouse"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "hanging_garden": {
+    "name": "Hanging Garden",
+    "cost": 300,
+    "required_tech": "mathematics",
+    "wonder_type": "world",
+    "required_buildings": [
+      "aqueduct"
+    ],
+    "effects": {
+      "health_all_cities": 1,
+      "great_engineer_points": 2
+    }
+  },
+  "colossus": {
+    "name": "Colossus",
+    "cost": 250,
+    "required_tech": "metal_casting",
+    "wonder_type": "world",
+    "obsolete_tech": "astronomy",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "oracle": {
+    "name": "Oracle",
+    "cost": 150,
+    "required_tech": "priesthood",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "parthenon": {
+    "name": "Parthenon",
+    "cost": 400,
+    "required_tech": "aesthetics",
+    "wonder_type": "world",
+    "obsolete_tech": "scientific_method",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "angkor_wat": {
+    "description": "+1 Free Priest in all cities",
+    "era": "medieval",
+    "name": "Angkor Wat",
+    "cost": 500,
+    "required_tech": "philosophy",
+    "wonder_type": "world",
+    "obsolete_tech": "computers",
+    "effects": {
+      "great_prophet_points": 2,
+      "priest_slots": 3
+    }
+  },
+  "hagia_sophia": {
+    "name": "Hagia Sophia",
+    "cost": 500,
+    "required_tech": "theology",
+    "wonder_type": "world",
+    "obsolete_tech": "steam_power",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "chichen_itza": {
+    "description": "+25% Defense in all cities",
+    "era": "medieval",
+    "name": "Chichen Itza",
+    "cost": 500,
+    "required_tech": "code_of_laws",
+    "wonder_type": "world",
+    "obsolete_tech": "rifling",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "sistine_chapel": {
+    "description": "+5 Culture in cities with state religion",
+    "era": "medieval",
+    "name": "Sistine Chapel",
+    "cost": 600,
+    "required_tech": "music",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "spiral_minaret": {
+    "name": "Spiral Minaret",
+    "cost": 550,
+    "required_tech": "divine_right",
+    "wonder_type": "world",
+    "obsolete_tech": "computers",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "notre_dame": {
+    "description": "+1 Happiness in all cities",
+    "era": "medieval",
+    "name": "Notre Dame",
+    "cost": 550,
+    "required_tech": "engineering",
+    "wonder_type": "world",
+    "effects": {
+      "happiness_area": 2,
+      "great_artist_points": 2
+    }
+  },
+  "taj_mahal": {
+    "description": "Starts a Golden Age",
+    "era": "renaissance",
+    "name": "Taj Mahal",
+    "cost": 700,
+    "required_tech": "nationalism",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2,
+      "golden_age": true
+    }
+  },
+  "kremlin": {
+    "name": "Kremlin",
+    "cost": 800,
+    "required_tech": "utopia",
+    "wonder_type": "world",
+    "obsolete_tech": "fiber_optics",
+    "effects": {
+      "great_spy_points": 2,
+      "spy_slots": 2
+    }
+  },
+  "eiffel_tower": {
+    "description": "Free Broadcast Tower in all cities",
+    "era": "industrial",
+    "name": "Eiffel Tower",
+    "cost": 1250,
+    "required_tech": "radio",
+    "wonder_type": "world",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "statue_of_liberty": {
+    "description": "+1 Free Specialist in all cities",
+    "era": "industrial",
+    "name": "Statue Of Liberty",
+    "cost": 1500,
+    "required_tech": "democracy",
+    "wonder_type": "world",
+    "required_buildings": [
+      "forge"
+    ],
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "broadway": {
+    "description": "+3 Free Artist specialist slots",
+    "era": "modern",
+    "name": "Broadway",
+    "cost": 800,
+    "required_tech": "electricity",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "rocknroll": {
+    "name": "Rocknroll",
+    "cost": 800,
+    "required_tech": "radio",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "hollywood": {
+    "description": "+100% Culture in this city",
+    "era": "modern",
+    "name": "Hollywood",
+    "cost": 1000,
+    "required_tech": "mass_media",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "great_dam": {
+    "name": "Great Dam",
+    "cost": 1750,
+    "required_tech": "plastics",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "pentagon": {
+    "name": "Pentagon",
+    "cost": 1250,
+    "required_tech": "assembly_line",
+    "wonder_type": "world",
+    "effects": {
+      "great_spy_points": 2
+    }
+  },
+  "united_nations": {
+    "description": "Enables Diplomatic Victory votes",
+    "era": "modern",
+    "name": "United Nations",
+    "cost": 1000,
+    "required_tech": "mass_media",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "space_elevator": {
+    "description": "+50% Spaceship production in all cities",
+    "era": "future",
+    "name": "Space Elevator",
+    "cost": 2000,
+    "required_tech": "robotics",
+    "wonder_type": "world",
+    "effects": {
+      "great_scientist_points": 2
+    }
+  },
+  "military_academy": {
+    "description": "+2 XP to new military units (built by Great General)",
+    "era": "ancient",
+    "name": "Military Academy",
+    "cost": -1,
+    "required_tech": "military_science",
+    "effects": {
+      "military_production_percent": 0.5
+    }
+  },
+  "artemis": {
+    "name": "Artemis",
+    "cost": 350,
+    "required_tech": "polytheism",
+    "wonder_type": "world",
+    "obsolete_tech": "scientific_method",
+    "effects": {
+      "great_merchant_points": 2
+    }
+  },
+  "sankore": {
+    "name": "Sankore",
+    "cost": 550,
+    "required_tech": "paper",
+    "wonder_type": "world",
+    "obsolete_tech": "computers",
+    "effects": {
+      "great_scientist_points": 2
+    }
+  },
+  "great_wall": {
+    "name": "Great Wall",
+    "cost": 150,
+    "required_tech": "masonry",
+    "wonder_type": "world",
+    "effects": {
+      "great_spy_points": 2
+    }
+  },
+  "statue_of_zeus": {
+    "name": "Statue Of Zeus",
+    "cost": 300,
+    "required_tech": "aesthetics",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "mausoleum_of_maussollos": {
+    "name": "Mausoleum Of Maussollos",
+    "cost": 450,
+    "required_tech": "calendar",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 2
+    }
+  },
+  "cristo_redentor": {
+    "name": "Cristo Redentor",
+    "cost": 1000,
+    "required_tech": "radio",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 2
+    }
+  },
+  "shwedagon_paya": {
+    "name": "Shwedagon Paya",
+    "cost": 450,
+    "required_tech": "aesthetics",
+    "wonder_type": "world",
+    "effects": {
+      "great_prophet_points": 2
+    }
+  },
+  "moai_statues": {
+    "name": "Moai Statues",
+    "cost": 250,
+    "required_tech": "sailing",
+    "wonder_type": "national",
+    "effects": {
+      "great_prophet_points": 1
+    }
+  },
+  "corporation_1": {
+    "name": "Corporation 1",
+    "cost": -1,
+    "required_tech": "refrigeration",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 1
+    }
+  },
+  "corporation_2": {
+    "name": "CHANGED_TXT_KEY_CORPORATION_2",
+    "cost": -1,
+    "required_tech": "medicine",
+    "wonder_type": "world",
+    "effects": {
+      "great_merchant_points": 1
+    }
+  },
+  "corporation_3": {
+    "name": "Corporation 3",
+    "cost": -1,
+    "required_tech": "plastics",
+    "wonder_type": "world",
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "corporation_4": {
+    "name": "Corporation 4",
+    "cost": -1,
+    "required_tech": "combustion",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 1
+    }
+  },
+  "corporation_5": {
+    "name": "Corporation 5",
+    "cost": -1,
+    "required_tech": "railroad",
+    "wonder_type": "world",
+    "effects": {
+      "great_engineer_points": 1
+    }
+  },
+  "corporation_6": {
+    "name": "Corporation 6",
+    "cost": -1,
+    "required_tech": "rocketry",
+    "wonder_type": "world",
+    "effects": {
+      "great_scientist_points": 1
+    }
+  },
+  "corporation_7": {
+    "name": "Corporation 7",
+    "cost": -1,
+    "required_tech": "mass_media",
+    "wonder_type": "world",
+    "effects": {
+      "great_artist_points": 1
+    }
+  },
+  "apostolic_palace": {
+    "description": "Enables Apostolic Palace votes. +2 Production in cities with state religion",
+    "era": "medieval",
+    "name": "Apostolic Palace",
+    "cost": 400,
+    "required_tech": "theology",
+    "wonder_type": "world",
+    "obsolete_tech": "mass_media",
+    "effects": {
+      "great_prophet_points": 2
+    }
   },
   "monument": {
     "name": "Monument",
@@ -52,54 +1627,6 @@
     "description": "+1 Culture per turn",
     "_note": "In BTS this is the Obelisk. KulturIV keeps both for compatibility."
   },
-  "obelisk": {
-    "name": "Obelisk",
-    "era": "ancient",
-    "cost": 30,
-    "maintenance": 1,
-    "required_tech": "mysticism",
-    "effects": {
-      "culture": 1
-    },
-    "description": "+2 Culture per turn",
-    "obsolete_tech": "astronomy"
-  },
-  "walls": {
-    "name": "Walls",
-    "era": "ancient",
-    "cost": 50,
-    "maintenance": 1,
-    "required_tech": "masonry",
-    "effects": {
-      "defense": 0.5
-    },
-    "obsolete_tech": "rifling",
-    "description": "+50% city defense"
-  },
-  "lighthouse": {
-    "name": "Lighthouse",
-    "era": "ancient",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "sailing",
-    "requires_coast": true,
-    "effects": {
-      "water_food": 1
-    },
-    "description": "+1 Food from water tiles"
-  },
-  "library": {
-    "name": "Library",
-    "era": "ancient",
-    "cost": 90,
-    "maintenance": 2,
-    "required_tech": "writing",
-    "effects": {
-      "science_percent": 0.25,
-      "great_scientist_points": 1
-    },
-    "description": "+25% Science"
-  },
   "temple": {
     "name": "Temple",
     "era": "ancient",
@@ -114,83 +1641,6 @@
     },
     "description": "+1 Culture, +1 Happiness with state religion"
   },
-  "forge": {
-    "name": "Forge",
-    "era": "ancient",
-    "cost": 120,
-    "maintenance": 2,
-    "required_tech": "metal_casting",
-    "effects": {
-      "production_percent": 0.25,
-      "happiness_from_resource": 1
-    },
-    "description": "+25% Production"
-  },
-  "courthouse": {
-    "name": "Courthouse",
-    "era": "classical",
-    "cost": 120,
-    "maintenance": 2,
-    "required_tech": "code_of_laws",
-    "effects": {
-      "maintenance_reduction": 0.5,
-      "espionage": 2
-    },
-    "description": "-50% city maintenance"
-  },
-  "market": {
-    "name": "Market",
-    "era": "classical",
-    "cost": 150,
-    "maintenance": 1,
-    "required_tech": "currency",
-    "effects": {
-      "gold_percent": 0.25,
-      "great_merchant_points": 1,
-      "happiness_from_resource": 1
-    },
-    "happiness_resources": [
-      "fur",
-      "ivory",
-      "silk"
-    ],
-    "description": "+25% Gold, +1 Happiness from luxury resources"
-  },
-  "colosseum": {
-    "name": "Colosseum",
-    "era": "classical",
-    "cost": 80,
-    "maintenance": 2,
-    "required_tech": "construction",
-    "effects": {
-      "happiness": 1
-    },
-    "description": "+1 Happiness"
-  },
-  "aqueduct": {
-    "name": "Aqueduct",
-    "era": "classical",
-    "cost": 100,
-    "maintenance": 2,
-    "required_tech": "mathematics",
-    "effects": {
-      "health": 2
-    },
-    "description": "+2 Health, +50% food stored"
-  },
-  "stable": {
-    "name": "Stable",
-    "era": "classical",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "horseback_riding",
-    "requires_resource": "horse",
-    "effects": {
-      "mounted_experience": 2
-    },
-    "description": "Mounted units get +4 XP, +25% production",
-    "obsolete_tech": "advanced_flight"
-  },
   "monastery": {
     "name": "Monastery",
     "era": "medieval",
@@ -204,221 +1654,6 @@
     },
     "obsolete_tech": "scientific_method",
     "description": "+10% Science, +2 Culture"
-  },
-  "castle": {
-    "name": "Castle",
-    "era": "medieval",
-    "cost": 100,
-    "maintenance": 2,
-    "required_tech": "engineering",
-    "requires_building": "walls",
-    "effects": {
-      "defense": 0.5,
-      "trade_route_yield": 1,
-      "espionage_percent": 0.25,
-      "great_merchant_points": 1
-    },
-    "obsolete_tech": "economics",
-    "description": "+50% defense, +25% vs siege"
-  },
-  "university": {
-    "name": "University",
-    "era": "medieval",
-    "cost": 200,
-    "maintenance": 3,
-    "required_tech": "education",
-    "requires_building": "library",
-    "effects": {
-      "science_percent": 0.25,
-      "great_scientist_points": 2
-    },
-    "description": "+25% Science"
-  },
-  "bank": {
-    "name": "Bank",
-    "era": "medieval",
-    "cost": 200,
-    "maintenance": 3,
-    "required_tech": "banking",
-    "requires_building": "market",
-    "effects": {
-      "gold_percent": 0.5,
-      "great_merchant_points": 2
-    },
-    "description": "+50% Gold"
-  },
-  "observatory": {
-    "name": "Observatory",
-    "era": "renaissance",
-    "cost": 150,
-    "maintenance": 2,
-    "required_tech": "astronomy",
-    "requires_building": "university",
-    "effects": {
-      "science_percent": 0.25,
-      "great_scientist_points": 1
-    },
-    "description": "+25% Science"
-  },
-  "theatre": {
-    "name": "Theatre",
-    "era": "renaissance",
-    "cost": 50,
-    "maintenance": 2,
-    "required_tech": "drama",
-    "effects": {
-      "culture": 3,
-      "happiness": 1,
-      "great_artist_points": 2
-    },
-    "description": "+3 Culture, +1 Happiness"
-  },
-  "grocer": {
-    "name": "Grocer",
-    "era": "renaissance",
-    "cost": 150,
-    "maintenance": 2,
-    "required_tech": "guilds",
-    "requires_building": "granary",
-    "effects": {
-      "gold_percent": 0.25,
-      "health_from_resource": 1,
-      "great_merchant_points": 1
-    },
-    "happiness_resources": [
-      "spices",
-      "wine",
-      "dye"
-    ],
-    "description": "+2 Health, +1 Happiness from resources"
-  },
-  "harbor": {
-    "name": "Harbor",
-    "era": "renaissance",
-    "cost": 80,
-    "maintenance": 2,
-    "required_tech": "compass",
-    "requires_coast": true,
-    "effects": {
-      "trade_route_yield": 1,
-      "water_commerce": 1
-    },
-    "description": "+1 Trade route yield, +1 Commerce from water"
-  },
-  "factory": {
-    "name": "Factory",
-    "era": "industrial",
-    "cost": 250,
-    "maintenance": 3,
-    "required_tech": "assembly_line",
-    "effects": {
-      "production_percent": 0.25,
-      "power_production_percent": 0.25,
-      "unhealthiness": 2
-    },
-    "description": "+50% Production, +2 Unhealthiness"
-  },
-  "coal_plant": {
-    "name": "Coal Plant",
-    "era": "industrial",
-    "cost": 150,
-    "maintenance": 2,
-    "required_tech": "assembly_line",
-    "requires_building": "factory",
-    "effects": {
-      "provides_power": true,
-      "unhealthiness": 2
-    },
-    "exclusive_with": [
-      "hydro_plant",
-      "nuclear_plant"
-    ],
-    "description": "+25% Production, +2 Unhealthiness"
-  },
-  "hydro_plant": {
-    "name": "Hydro Plant",
-    "era": "modern",
-    "cost": 200,
-    "maintenance": 3,
-    "required_tech": "plastics",
-    "requires_building": "factory",
-    "requires_river": true,
-    "effects": {
-      "provides_power": true,
-      "clean_power": true
-    },
-    "exclusive_with": [
-      "coal_plant",
-      "nuclear_plant"
-    ],
-    "description": "+25% Production (clean)"
-  },
-  "nuclear_plant": {
-    "name": "Nuclear Plant",
-    "era": "modern",
-    "cost": 250,
-    "maintenance": 4,
-    "required_tech": "fission",
-    "requires_building": "factory",
-    "effects": {
-      "provides_power": true,
-      "clean_power": true
-    },
-    "exclusive_with": [
-      "coal_plant",
-      "hydro_plant"
-    ],
-    "description": "+50% Production, risk of meltdown"
-  },
-  "hospital": {
-    "name": "Hospital",
-    "era": "industrial",
-    "cost": 200,
-    "maintenance": 3,
-    "required_tech": "medicine",
-    "effects": {
-      "health": 3,
-      "food_consumed_on_unhealthiness": -1
-    },
-    "description": "+3 Health"
-  },
-  "supermarket": {
-    "name": "Supermarket",
-    "era": "modern",
-    "cost": 150,
-    "maintenance": 2,
-    "required_tech": "refrigeration",
-    "requires_building": "grocer",
-    "effects": {
-      "health": 2,
-      "farm_food": 1
-    },
-    "description": "+2 Health, +1 Food from farms"
-  },
-  "broadcast_tower": {
-    "name": "Broadcast Tower",
-    "era": "modern",
-    "cost": 175,
-    "maintenance": 3,
-    "required_tech": "mass_media",
-    "requires_building": "theatre",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness": 1
-    },
-    "description": "+50% Culture, +1 Happiness"
-  },
-  "airport": {
-    "name": "Airport",
-    "era": "modern",
-    "cost": 250,
-    "maintenance": 3,
-    "required_tech": "flight",
-    "effects": {
-      "airlift": 1,
-      "trade_route_yield": 1
-    },
-    "description": "Enables airlift, +1 Trade route yield"
   },
   "research_lab": {
     "name": "Research Lab",
@@ -462,18 +1697,6 @@
     },
     "description": "+50% Spaceship production"
   },
-  "recycling_center": {
-    "name": "Recycling Center",
-    "era": "modern",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "ecology",
-    "effects": {
-      "health": 2,
-      "remove_unhealthiness": 2
-    },
-    "description": "+2 Health, removes 2 unhealthiness"
-  },
   "public_transport": {
     "name": "Public Transportation",
     "era": "modern",
@@ -485,21 +1708,6 @@
       "remove_unhealthiness": 1
     },
     "description": "+1 Happiness, removes 1 unhealthiness"
-  },
-  "_comment_wonders": "=== WORLD WONDERS (Only one per game) ===",
-  "stonehenge": {
-    "name": "Stonehenge",
-    "era": "ancient",
-    "cost": 120,
-    "maintenance": 0,
-    "required_tech": "mysticism",
-    "wonder_type": "world",
-    "effects": {
-      "free_obelisk_all_cities": true,
-      "great_prophet_points": 2
-    },
-    "description": "Free Monument in all cities",
-    "obsolete_tech": "astronomy"
   },
   "the_pyramids": {
     "name": "The Pyramids",
@@ -623,76 +1831,6 @@
     "obsolete_tech": "scientific_method",
     "description": "+2 Free Scientist specialist slots"
   },
-  "chichen_itza": {
-    "name": "Chichen Itza",
-    "era": "medieval",
-    "cost": 500,
-    "maintenance": 0,
-    "required_tech": "code_of_laws",
-    "wonder_type": "world",
-    "effects": {
-      "defense_all_cities": 0.25,
-      "great_prophet_points": 2
-    },
-    "description": "+25% Defense in all cities",
-    "obsolete_tech": "rifling"
-  },
-  "notre_dame": {
-    "name": "Notre Dame",
-    "era": "medieval",
-    "cost": 550,
-    "maintenance": 0,
-    "required_tech": "engineering",
-    "wonder_type": "world",
-    "effects": {
-      "happiness_same_continent": 2,
-      "great_artist_points": 2
-    },
-    "description": "+1 Happiness in all cities"
-  },
-  "sistine_chapel": {
-    "name": "Sistine Chapel",
-    "era": "medieval",
-    "cost": 600,
-    "maintenance": 0,
-    "required_tech": "music",
-    "wonder_type": "world",
-    "effects": {
-      "culture_state_religion": 5,
-      "great_artist_points": 2
-    },
-    "description": "+5 Culture in cities with state religion"
-  },
-  "angkor_wat": {
-    "name": "Angkor Wat",
-    "era": "medieval",
-    "cost": 500,
-    "maintenance": 0,
-    "required_tech": "philosophy",
-    "wonder_type": "world",
-    "effects": {
-      "priest_slots": 3,
-      "priest_production_bonus": 1,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Free Priest in all cities",
-    "obsolete_tech": "computers"
-  },
-  "apostolic_palace": {
-    "name": "Apostolic Palace",
-    "era": "medieval",
-    "cost": 400,
-    "maintenance": 0,
-    "required_tech": "theology",
-    "wonder_type": "world",
-    "requires_state_religion": true,
-    "effects": {
-      "enables_apostolic_votes": true,
-      "great_prophet_points": 2
-    },
-    "description": "Enables Apostolic Palace votes. +2 Production in cities with state religion",
-    "obsolete_tech": "mass_media"
-  },
   "university_of_sankore": {
     "name": "University of Sankore",
     "era": "medieval",
@@ -705,92 +1843,6 @@
       "great_scientist_points": 3
     },
     "description": "+2 Research in cities with state religion"
-  },
-  "versailles": {
-    "name": "Versailles",
-    "era": "renaissance",
-    "cost": 800,
-    "maintenance": 0,
-    "required_tech": "divine_right",
-    "wonder_type": "world",
-    "effects": {
-      "second_palace": true,
-      "great_artist_points": 2
-    },
-    "description": "Reduces maintenance like a second palace"
-  },
-  "taj_mahal": {
-    "name": "Taj Mahal",
-    "era": "renaissance",
-    "cost": 700,
-    "maintenance": 0,
-    "required_tech": "nationalism",
-    "wonder_type": "world",
-    "effects": {
-      "golden_age": true,
-      "great_artist_points": 4
-    },
-    "description": "Starts a Golden Age"
-  },
-  "statue_of_liberty": {
-    "name": "Statue of Liberty",
-    "era": "industrial",
-    "cost": 1500,
-    "maintenance": 0,
-    "required_tech": "democracy",
-    "wonder_type": "world",
-    "effects": {
-      "free_specialist_same_continent": 1,
-      "great_merchant_points": 2
-    },
-    "description": "+1 Free Specialist in all cities",
-    "required_buildings": [
-      "forge"
-    ]
-  },
-  "eiffel_tower": {
-    "name": "Eiffel Tower",
-    "era": "industrial",
-    "cost": 1250,
-    "maintenance": 0,
-    "required_tech": "radio",
-    "wonder_type": "world",
-    "effects": {
-      "free_broadcast_tower_all_cities": true,
-      "great_merchant_points": 2
-    },
-    "description": "Free Broadcast Tower in all cities",
-    "required_buildings": [
-      "forge"
-    ]
-  },
-  "broadway": {
-    "name": "Broadway",
-    "era": "modern",
-    "cost": 800,
-    "maintenance": 0,
-    "required_tech": "electricity",
-    "wonder_type": "world",
-    "effects": {
-      "culture_percent": 0.5,
-      "free_resource": "hit_musical",
-      "great_artist_points": 2
-    },
-    "description": "+3 Free Artist specialist slots"
-  },
-  "hollywood": {
-    "name": "Hollywood",
-    "era": "modern",
-    "cost": 1000,
-    "maintenance": 0,
-    "required_tech": "mass_media",
-    "wonder_type": "world",
-    "effects": {
-      "culture_percent": 0.5,
-      "free_resource": "hit_movie",
-      "great_artist_points": 2
-    },
-    "description": "+100% Culture in this city"
   },
   "rock_n_roll": {
     "name": "Rock 'n' Roll",
@@ -805,19 +1857,6 @@
       "great_artist_points": 2
     },
     "description": "+3 Happiness"
-  },
-  "united_nations": {
-    "name": "United Nations",
-    "era": "modern",
-    "cost": 1000,
-    "maintenance": 0,
-    "required_tech": "mass_media",
-    "wonder_type": "world",
-    "effects": {
-      "enables_diplomatic_victory": true,
-      "great_merchant_points": 2
-    },
-    "description": "Enables Diplomatic Victory votes"
   },
   "the_pentagon": {
     "name": "The Pentagon",
@@ -846,77 +1885,6 @@
     },
     "description": "Grants techs known by 2+ civilizations"
   },
-  "space_elevator": {
-    "name": "Space Elevator",
-    "era": "future",
-    "cost": 2000,
-    "maintenance": 0,
-    "required_tech": "robotics",
-    "wonder_type": "world",
-    "effects": {
-      "spaceship_production_all_cities": 0.5,
-      "great_scientist_points": 2
-    },
-    "description": "+50% Spaceship production in all cities"
-  },
-  "_comment_national": "=== NATIONAL WONDERS (One per civilization) ===",
-  "heroic_epic": {
-    "name": "Heroic Epic",
-    "era": "classical",
-    "cost": 200,
-    "maintenance": 0,
-    "required_tech": "literature",
-    "requires_building": "barracks",
-    "requires_great_general": true,
-    "wonder_type": "national",
-    "effects": {
-      "military_production": 1.0,
-      "great_general_points": 2
-    },
-    "description": "+100% Military unit production"
-  },
-  "national_epic": {
-    "name": "National Epic",
-    "era": "classical",
-    "cost": 250,
-    "maintenance": 0,
-    "required_tech": "literature",
-    "requires_building": "library",
-    "wonder_type": "national",
-    "effects": {
-      "great_people_birth_rate": 1.0,
-      "great_artist_points": 3
-    },
-    "description": "+100% Great People birth rate"
-  },
-  "globe_theatre": {
-    "name": "Globe Theatre",
-    "era": "renaissance",
-    "cost": 300,
-    "maintenance": 0,
-    "required_tech": "drama",
-    "requires_building": "theatre",
-    "wonder_type": "national",
-    "effects": {
-      "no_unhappiness": true,
-      "great_artist_points": 4
-    },
-    "description": "No unhappiness in this city"
-  },
-  "hermitage": {
-    "name": "Hermitage",
-    "era": "renaissance",
-    "cost": 300,
-    "maintenance": 0,
-    "required_tech": "nationalism",
-    "requires_building": "theatre",
-    "wonder_type": "national",
-    "effects": {
-      "culture_percent": 1.0,
-      "great_artist_points": 5
-    },
-    "description": "+100% Culture in this city"
-  },
   "ironworks": {
     "name": "Ironworks",
     "era": "industrial",
@@ -931,499 +1899,6 @@
     },
     "description": "+50% Production"
   },
-  "oxford_university": {
-    "name": "Oxford University",
-    "era": "medieval",
-    "cost": 400,
-    "maintenance": 0,
-    "required_tech": "education",
-    "requires_building": "university",
-    "wonder_type": "national",
-    "effects": {
-      "free_tech": true,
-      "science_percent": 1.0,
-      "great_scientist_points": 4
-    },
-    "description": "Grants a free tech, +100% Science"
-  },
-  "wall_street": {
-    "name": "Wall Street",
-    "era": "modern",
-    "cost": 600,
-    "maintenance": 0,
-    "required_tech": "corporation",
-    "requires_building": "bank",
-    "wonder_type": "national",
-    "effects": {
-      "gold_percent": 1.0,
-      "great_merchant_points": 4
-    },
-    "description": "+100% Gold"
-  },
-  "red_cross": {
-    "name": "Red Cross",
-    "era": "industrial",
-    "cost": 600,
-    "maintenance": 0,
-    "required_tech": "medicine",
-    "requires_building": "hospital",
-    "wonder_type": "national",
-    "effects": {
-      "heal_rate_all_units": 0.1,
-      "great_merchant_points": 2
-    },
-    "description": "+10% heal rate for all units"
-  },
-  "west_point": {
-    "name": "West Point",
-    "era": "industrial",
-    "cost": 800,
-    "maintenance": 0,
-    "required_tech": "military_tradition",
-    "requires_building": "barracks",
-    "requires_great_general": true,
-    "wonder_type": "national",
-    "effects": {
-      "free_experience": 4,
-      "great_general_points": 3
-    },
-    "description": "+4 XP for units built here"
-  },
-  "mt_rushmore": {
-    "name": "Mt. Rushmore",
-    "era": "industrial",
-    "cost": 500,
-    "maintenance": 0,
-    "required_tech": "fascism",
-    "wonder_type": "national",
-    "effects": {
-      "war_weariness_reduction": 0.25,
-      "great_artist_points": 2
-    },
-    "description": "-25% War weariness"
-  },
-  "buddhist_shrine": {
-    "name": "Mahabodhi",
-    "era": "ancient",
-    "cost": 0,
-    "maintenance": 0,
-    "required_tech": "",
-    "requires_holy_city": "buddhism",
-    "requires_great_prophet": true,
-    "effects": {
-      "culture": 4,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Gold per city with Buddhism"
-  },
-  "hindu_shrine": {
-    "name": "Kashi Vishwanath",
-    "era": "ancient",
-    "cost": 0,
-    "maintenance": 0,
-    "required_tech": "",
-    "requires_holy_city": "hinduism",
-    "requires_great_prophet": true,
-    "effects": {
-      "culture": 4,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Gold per city with Hinduism"
-  },
-  "jewish_shrine": {
-    "name": "Temple of Solomon",
-    "era": "ancient",
-    "cost": 0,
-    "maintenance": 0,
-    "required_tech": "",
-    "requires_holy_city": "judaism",
-    "requires_great_prophet": true,
-    "effects": {
-      "culture": 4,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Gold per city with Judaism"
-  },
-  "confucian_shrine": {
-    "name": "Kong Miao",
-    "era": "ancient",
-    "cost": 0,
-    "maintenance": 0,
-    "required_tech": "",
-    "requires_holy_city": "confucianism",
-    "requires_great_prophet": true,
-    "effects": {
-      "culture": 4,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Gold per city with Confucianism"
-  },
-  "christian_shrine": {
-    "name": "Church of the Nativity",
-    "era": "medieval",
-    "cost": 0,
-    "maintenance": 0,
-    "required_tech": "",
-    "requires_holy_city": "christianity",
-    "requires_great_prophet": true,
-    "effects": {
-      "culture": 4,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Gold per city with Christianity"
-  },
-  "taoist_shrine": {
-    "name": "Dai Miao",
-    "era": "ancient",
-    "cost": 0,
-    "maintenance": 0,
-    "required_tech": "",
-    "requires_holy_city": "taoism",
-    "requires_great_prophet": true,
-    "effects": {
-      "culture": 4,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Gold per city with Taoism"
-  },
-  "islamic_shrine": {
-    "name": "Masjid Al-Haram",
-    "era": "medieval",
-    "cost": 0,
-    "maintenance": 0,
-    "required_tech": "",
-    "requires_holy_city": "islam",
-    "requires_great_prophet": true,
-    "effects": {
-      "culture": 4,
-      "great_prophet_points": 2
-    },
-    "description": "+1 Gold per city with Islam"
-  },
-  "_comment_religious": "=== RELIGION-SPECIFIC BUILDINGS ===",
-  "buddhist_temple": {
-    "name": "Buddhist Temple",
-    "era": "ancient",
-    "cost": 80,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "buddhism",
-    "effects": {
-      "culture": 1,
-      "happiness_from_religion": 1,
-      "great_prophet_points": 1
-    },
-    "description": "+1 Culture, +1 Happiness from Buddhism"
-  },
-  "buddhist_monastery": {
-    "name": "Buddhist Monastery",
-    "era": "medieval",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "buddhism",
-    "effects": {
-      "science_percent": 0.1,
-      "culture": 2,
-      "missionary_production": 1
-    },
-    "obsolete_tech": "scientific_method",
-    "description": "+10% Science, can build Buddhist missionaries faster"
-  },
-  "buddhist_cathedral": {
-    "name": "Buddhist Stupa",
-    "era": "medieval",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "",
-    "requires_religion": "buddhism",
-    "requires_building": "buddhist_temple",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness_from_religion": 2,
-      "great_prophet_points": 1
-    },
-    "description": "+4 Culture, +2 Happiness from Buddhism"
-  },
-  "hindu_temple": {
-    "name": "Hindu Mandir",
-    "era": "ancient",
-    "cost": 80,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "hinduism",
-    "effects": {
-      "culture": 1,
-      "happiness_from_religion": 1,
-      "great_prophet_points": 1
-    },
-    "description": "+1 Culture, +1 Happiness from Hinduism"
-  },
-  "hindu_monastery": {
-    "name": "Hindu Ashram",
-    "era": "medieval",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "hinduism",
-    "effects": {
-      "science_percent": 0.1,
-      "culture": 2,
-      "missionary_production": 1
-    },
-    "obsolete_tech": "scientific_method",
-    "description": "+10% Science, can build Hindu missionaries faster"
-  },
-  "hindu_cathedral": {
-    "name": "Hindu Temple Complex",
-    "era": "medieval",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "",
-    "requires_religion": "hinduism",
-    "requires_building": "hindu_temple",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness_from_religion": 2,
-      "great_prophet_points": 1
-    },
-    "description": "+4 Culture, +2 Happiness from Hinduism"
-  },
-  "jewish_temple": {
-    "name": "Synagogue",
-    "era": "ancient",
-    "cost": 80,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "judaism",
-    "effects": {
-      "culture": 1,
-      "happiness_from_religion": 1,
-      "great_prophet_points": 1
-    },
-    "description": "+1 Culture, +1 Happiness from Judaism"
-  },
-  "jewish_monastery": {
-    "name": "Jewish Seminary",
-    "era": "medieval",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "judaism",
-    "effects": {
-      "science_percent": 0.1,
-      "culture": 2,
-      "missionary_production": 1
-    },
-    "obsolete_tech": "scientific_method",
-    "description": "+10% Science, can build Jewish missionaries faster"
-  },
-  "jewish_cathedral": {
-    "name": "Great Synagogue",
-    "era": "medieval",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "",
-    "requires_religion": "judaism",
-    "requires_building": "jewish_temple",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness_from_religion": 2,
-      "great_prophet_points": 1
-    },
-    "description": "+4 Culture, +2 Happiness from Judaism"
-  },
-  "christian_temple": {
-    "name": "Christian Church",
-    "era": "medieval",
-    "cost": 80,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "christianity",
-    "effects": {
-      "culture": 1,
-      "happiness_from_religion": 1,
-      "great_prophet_points": 1
-    },
-    "description": "+1 Culture, +1 Happiness from Christianity"
-  },
-  "christian_monastery": {
-    "name": "Christian Monastery",
-    "era": "medieval",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "christianity",
-    "effects": {
-      "science_percent": 0.1,
-      "culture": 2,
-      "missionary_production": 1
-    },
-    "obsolete_tech": "scientific_method",
-    "description": "+10% Science, can build Christian missionaries faster"
-  },
-  "christian_cathedral": {
-    "name": "Cathedral",
-    "era": "medieval",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "",
-    "requires_religion": "christianity",
-    "requires_building": "christian_temple",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness_from_religion": 2,
-      "great_prophet_points": 1
-    },
-    "description": "+4 Culture, +2 Happiness from Christianity"
-  },
-  "confucian_temple": {
-    "name": "Confucian Academy",
-    "era": "ancient",
-    "cost": 80,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "confucianism",
-    "effects": {
-      "culture": 1,
-      "happiness_from_religion": 1,
-      "great_prophet_points": 1
-    },
-    "description": "+1 Culture, +1 Happiness from Confucianism"
-  },
-  "confucian_monastery": {
-    "name": "Confucian Study Hall",
-    "era": "medieval",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "confucianism",
-    "effects": {
-      "science_percent": 0.1,
-      "culture": 2,
-      "missionary_production": 1
-    },
-    "obsolete_tech": "scientific_method",
-    "description": "+10% Science, can build Confucian missionaries faster"
-  },
-  "confucian_cathedral": {
-    "name": "Grand Academy",
-    "era": "medieval",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "",
-    "requires_religion": "confucianism",
-    "requires_building": "confucian_temple",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness_from_religion": 2,
-      "great_prophet_points": 1
-    },
-    "description": "+4 Culture, +2 Happiness from Confucianism"
-  },
-  "taoist_temple": {
-    "name": "Taoist Pagoda",
-    "era": "ancient",
-    "cost": 80,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "taoism",
-    "effects": {
-      "culture": 1,
-      "happiness_from_religion": 1,
-      "great_prophet_points": 1
-    },
-    "description": "+1 Culture, +1 Happiness from Taoism"
-  },
-  "taoist_monastery": {
-    "name": "Taoist Hermitage",
-    "era": "medieval",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "taoism",
-    "effects": {
-      "science_percent": 0.1,
-      "culture": 2,
-      "missionary_production": 1
-    },
-    "obsolete_tech": "scientific_method",
-    "description": "+10% Science, can build Taoist missionaries faster"
-  },
-  "taoist_cathedral": {
-    "name": "Grand Pagoda",
-    "era": "medieval",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "",
-    "requires_religion": "taoism",
-    "requires_building": "taoist_temple",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness_from_religion": 2,
-      "great_prophet_points": 1
-    },
-    "description": "+4 Culture, +2 Happiness from Taoism"
-  },
-  "islamic_temple": {
-    "name": "Islamic Mosque",
-    "era": "medieval",
-    "cost": 80,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "islam",
-    "effects": {
-      "culture": 1,
-      "happiness_from_religion": 1,
-      "great_prophet_points": 1
-    },
-    "description": "+1 Culture, +1 Happiness from Islam"
-  },
-  "islamic_monastery": {
-    "name": "Islamic Madrassa",
-    "era": "medieval",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "",
-    "requires_religion": "islam",
-    "effects": {
-      "science_percent": 0.1,
-      "culture": 2,
-      "missionary_production": 1
-    },
-    "obsolete_tech": "scientific_method",
-    "description": "+10% Science, can build Islamic missionaries faster"
-  },
-  "islamic_cathedral": {
-    "name": "Grand Mosque",
-    "era": "medieval",
-    "cost": 300,
-    "maintenance": 2,
-    "required_tech": "",
-    "requires_religion": "islam",
-    "requires_building": "islamic_temple",
-    "effects": {
-      "culture_percent": 0.5,
-      "happiness_from_religion": 2,
-      "great_prophet_points": 1
-    },
-    "description": "+4 Culture, +2 Happiness from Islam"
-  },
-  "_comment_espionage": "=== ESPIONAGE BUILDINGS ===",
-  "intelligence_agency": {
-    "name": "Intelligence Agency",
-    "era": "modern",
-    "cost": 180,
-    "maintenance": 4,
-    "required_tech": "communism",
-    "effects": {
-      "espionage_percent": 1.0,
-      "espionage": 8,
-      "spy_experience": 2
-    },
-    "wonder_type": "national",
-    "description": "+100% Espionage, +8 Espionage points"
-  },
   "security_bureau": {
     "name": "Security Bureau",
     "era": "modern",
@@ -1437,21 +1912,6 @@
     },
     "description": "+4 Espionage points, +25% Counter-espionage, +50% Spy defense"
   },
-  "scotland_yard": {
-    "name": "Scotland Yard",
-    "era": "industrial",
-    "cost": 400,
-    "maintenance": 0,
-    "required_tech": "nationalism",
-    "wonder_type": "national",
-    "effects": {
-      "espionage_all_cities": 4,
-      "spy_success_chance": 0.25,
-      "see_enemy_spies": true
-    },
-    "description": "+4 Espionage in all cities, +25% Spy success"
-  },
-  "_comment_corporations": "=== CORPORATION HEADQUARTERS ===",
   "mining_inc_hq": {
     "name": "Mining Inc. Headquarters",
     "era": "modern",
@@ -1554,31 +2014,6 @@
     },
     "description": "Aluminum Co. Headquarters. +5 Production, +3 Gold per city."
   },
-  "academy": {
-    "name": "Academy",
-    "era": "ancient",
-    "cost": 0,
-    "maintenance": 0,
-    "not_buildable": true,
-    "effects": {
-      "science_percent": 0.5
-    },
-    "description": "+50% Science in this city (built by Great Scientist)"
-  },
-  "military_academy": {
-    "name": "Military Academy",
-    "era": "ancient",
-    "cost": 0,
-    "maintenance": 0,
-    "not_buildable": true,
-    "effects": {
-      "military_production_percent": 0.5,
-      "great_general_points": 2
-    },
-    "description": "+2 XP to new military units (built by Great General)",
-    "required_tech": "military_science"
-  },
-  "_comment_unique_buildings": "=== UNIQUE BUILDINGS ===",
   "forum": {
     "name": "Forum",
     "era": "classical",
@@ -1653,35 +2088,6 @@
     },
     "description": "Persian unique building. +3 Health."
   },
-  "ger": {
-    "name": "Ger",
-    "era": "classical",
-    "cost": 60,
-    "maintenance": 1,
-    "required_tech": "horseback_riding",
-    "requires_resource": "horse",
-    "replaces": "stable",
-    "civilization": "mongolia",
-    "effects": {
-      "mounted_experience": 4
-    },
-    "description": "Mongolian unique building. +2 XP for all units."
-  },
-  "sacrificial_altar": {
-    "name": "Sacrificial Altar",
-    "era": "classical",
-    "cost": 90,
-    "maintenance": 2,
-    "required_tech": "code_of_laws",
-    "replaces": "courthouse",
-    "civilization": "aztec",
-    "effects": {
-      "maintenance_reduction": 0.5,
-      "espionage": 2,
-      "happy_from_sacrifice": 1
-    },
-    "description": "Aztec unique building. Can sacrifice population for happiness."
-  },
   "madrassa": {
     "name": "Madrassa",
     "era": "ancient",
@@ -1725,51 +2131,6 @@
       "great_prophet_points": 2
     }
   },
-  "statue_of_zeus": {
-    "name": "Statue of Zeus",
-    "cost": 300,
-    "required_tech": "aesthetics",
-    "wonder_type": "world",
-    "required_buildings": [
-      "obelisk"
-    ],
-    "effects": {
-      "enemy_war_weariness": 1.0,
-      "great_artist_points": 2
-    }
-  },
-  "mausoleum_of_maussollos": {
-    "name": "Mausoleum of Maussollos",
-    "cost": 450,
-    "required_tech": "calendar",
-    "wonder_type": "world",
-    "effects": {
-      "golden_age_length_modifier": 0.5,
-      "great_artist_points": 2
-    }
-  },
-  "hagia_sophia": {
-    "name": "Hagia Sophia",
-    "cost": 500,
-    "required_tech": "theology",
-    "wonder_type": "world",
-    "obsolete_tech": "steam_power",
-    "effects": {
-      "worker_speed_modifier": 0.5,
-      "great_engineer_points": 2
-    }
-  },
-  "spiral_minaret": {
-    "name": "Spiral Minaret",
-    "cost": 550,
-    "required_tech": "divine_right",
-    "wonder_type": "world",
-    "obsolete_tech": "computers",
-    "effects": {
-      "gold_state_religion_cities": 2,
-      "great_merchant_points": 2
-    }
-  },
   "the_kremlin": {
     "name": "The Kremlin",
     "cost": 800,
@@ -1781,37 +2142,6 @@
       "great_spy_points": 2
     }
   },
-  "cristo_redentor": {
-    "name": "Cristo Redentor",
-    "cost": 1000,
-    "required_tech": "radio",
-    "wonder_type": "world",
-    "effects": {
-      "no_anarchy": true,
-      "great_prophet_points": 2
-    }
-  },
-  "shwedagon_paya": {
-    "name": "Shwedagon Paya",
-    "cost": 450,
-    "required_tech": "aesthetics",
-    "wonder_type": "world",
-    "effects": {
-      "any_religion_civic": true,
-      "great_prophet_points": 2
-    }
-  },
-  "moai_statues": {
-    "name": "Moai Statues",
-    "cost": 250,
-    "required_tech": "sailing",
-    "wonder_type": "world",
-    "requires_coast": true,
-    "effects": {
-      "sea_tile_production": 1,
-      "great_engineer_points": 2
-    }
-  },
   "three_gorges_dam": {
     "name": "Three Gorges Dam",
     "cost": 1750,
@@ -1821,75 +2151,6 @@
     "effects": {
       "clean_power_continent": true,
       "great_engineer_points": 2
-    }
-  },
-  "jail": {
-    "name": "Jail",
-    "cost": 120,
-    "required_tech": "constitution",
-    "effects": {
-      "war_weariness_reduction": 0.25,
-      "espionage": 4,
-      "espionage_percent": 0.5
-    }
-  },
-  "levee": {
-    "name": "Levee",
-    "cost": 180,
-    "required_tech": "steam_power",
-    "requires_river": true,
-    "effects": {
-      "river_tile_production": 1
-    }
-  },
-  "custom_house": {
-    "name": "Custom House",
-    "cost": 180,
-    "required_tech": "economics",
-    "required_buildings": [
-      "harbor"
-    ],
-    "effects": {
-      "foreign_trade_modifier": 1.0,
-      "great_merchant_points": 1
-    }
-  },
-  "drydock": {
-    "name": "Drydock",
-    "cost": 120,
-    "required_tech": "steel",
-    "required_buildings": [
-      "harbor"
-    ],
-    "effects": {
-      "naval_experience": 4,
-      "naval_production_percent": 0.5
-    }
-  },
-  "bomb_shelter": {
-    "name": "Bomb Shelter",
-    "cost": 100,
-    "required_tech": "electricity",
-    "effects": {
-      "nuke_damage_reduction": 0.5
-    }
-  },
-  "bunker": {
-    "name": "Bunker",
-    "cost": 100,
-    "required_tech": "electricity",
-    "effects": {
-      "air_damage_reduction": 0.5
-    }
-  },
-  "industrial_park": {
-    "name": "Industrial Park",
-    "cost": 200,
-    "required_tech": "industrialism",
-    "effects": {
-      "engineer_slots": 2,
-      "free_engineers": 1,
-      "unhealthiness": 2
     }
   }
 }

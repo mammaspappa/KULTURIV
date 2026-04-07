@@ -198,8 +198,10 @@ def extract_units():
         "UNITCOMBAT_MELEE": "melee",
         "UNITCOMBAT_MOUNTED": "mounted",
         "UNITCOMBAT_ARCHERY": "archery",
+        "UNITCOMBAT_ARCHER": "archery",  # BTS uses both ARCHER and ARCHERY
         "UNITCOMBAT_SIEGE": "siege",
         "UNITCOMBAT_GUN": "gunpowder",
+        "UNITCOMBAT_GUNPOWDER": "gunpowder",
         "UNITCOMBAT_ARMOR": "armor",
         "UNITCOMBAT_HELICOPTER": "helicopter",
         "UNITCOMBAT_NAVAL": "naval",
@@ -238,8 +240,10 @@ def extract_units():
             "required_tech": bts_id_to_key(find_text(info, ns, "PrereqTech"), "TECH_"),
         }
 
-        # Unit class (combat type)
-        combat_type = find_text(info, ns, "UnitCombatType")
+        # Unit class (combat type) — BTS uses "Combat" tag, not "UnitCombatType"
+        combat_type = find_text(info, ns, "Combat")
+        if not combat_type:
+            combat_type = find_text(info, ns, "UnitCombatType")
         unit["unit_class"] = combat_map.get(combat_type, "")
 
         # Domain
@@ -385,15 +389,15 @@ def extract_units():
                 unit["replaces"] = bts_id_to_key(uu_info["replaces_default"], "UNIT_")
 
         # Strip zero/empty/false values to keep JSON clean
+        # But preserve fields the game code expects to always exist
+        always_keep = {"cost", "strength", "movement", "required_tech",
+                       "required_resource", "unit_class", "name"}
         clean = {}
         for k, v in unit.items():
-            if v == 0 and k not in ("cost", "strength", "movement"):
+            if k in always_keep:
+                clean[k] = v
                 continue
-            if v == 0.0 and k not in ("cost", "strength"):
-                continue
-            if v == "" and k not in ("required_resource",):
-                continue
-            if v == False and k != "ocean_travel":
+            if v == 0 or v == 0.0 or v == "" or v == False:
                 continue
             if v == [] or v == {}:
                 continue

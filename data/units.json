@@ -1,729 +1,1689 @@
 {
-  "warrior": {
-    "name": "Warrior",
-    "symbol": "W",
-    "era": "ancient",
-    "cost": 15,
-    "strength": 2.0,
-    "movement": 1,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [],
-    "unit_class": "melee",
-    "upgrades_to": "axeman",
-    "city_defense": 0.25
-  },
   "settler": {
-    "name": "Settler",
     "symbol": "S",
     "era": "ancient",
+    "name": "Settler",
     "cost": 100,
     "strength": 0.0,
     "movement": 2,
     "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
     "required_resource": "",
     "abilities": [
       "found_city"
-    ],
-    "unit_class": "civilian",
-    "food_cost": 2
+    ]
   },
   "worker": {
-    "name": "Worker",
     "symbol": "\u262d",
     "era": "ancient",
+    "name": "Worker",
     "cost": 60,
     "strength": 0.0,
     "movement": 2,
     "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
     "required_resource": "",
     "abilities": [
       "build_improvements"
-    ],
-    "unit_class": "civilian"
+    ]
+  },
+  "fast_worker": {
+    "name": "Fast Worker",
+    "cost": 60,
+    "strength": 0.0,
+    "movement": 3,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": "",
+    "civilization": "india",
+    "symbol": "\u262d",
+    "era": "ancient",
+    "description": "Indian unique unit. +1 Movement.",
+    "abilities": [
+      "build_improvements"
+    ]
   },
   "scout": {
-    "name": "Scout",
     "symbol": "\u25cb",
     "era": "ancient",
+    "name": "Scout",
     "cost": 15,
     "strength": 1.0,
     "movement": 2,
-    "sight_range": 2,
     "required_tech": "hunting",
-    "required_resource": "",
-    "abilities": [
-      "ignore_terrain_cost"
-    ],
     "unit_class": "recon",
-    "upgrades_to": "explorer"
+    "domain": "land",
+    "required_resource": ""
   },
-  "archer": {
-    "name": "Archer",
-    "symbol": "A",
-    "era": "ancient",
-    "cost": 25,
-    "strength": 3.0,
-    "movement": 1,
-    "required_tech": "archery",
-    "required_resource": "",
-    "abilities": [
-      "city_defense_bonus"
-    ],
-    "unit_class": "archery",
-    "first_strikes": 1,
-    "city_defense": 0.5,
-    "upgrades_to": "longbowman"
-  },
-  "spearman": {
-    "name": "Spearman",
-    "symbol": "P",
-    "era": "ancient",
-    "cost": 35,
-    "strength": 4.0,
-    "movement": 1,
-    "required_tech": "hunting",
-    "required_resource": "copper",
-    "abilities": [
-      "bonus_vs_mounted"
-    ],
-    "unit_class": "melee",
-    "bonus_vs": {
-      "mounted": 1.0
-    },
-    "upgrades_to": "pikeman"
-  },
-  "axeman": {
-    "name": "Axeman",
-    "symbol": "X",
-    "era": "ancient",
-    "cost": 35,
-    "strength": 5.0,
-    "movement": 1,
-    "required_tech": "bronze_working",
-    "required_resource": "copper",
-    "abilities": [
-      "bonus_vs_melee"
-    ],
-    "unit_class": "melee",
-    "bonus_vs": {
-      "melee": 0.5
-    },
-    "upgrades_to": "maceman",
-    "required_resource_or": "iron"
-  },
-  "chariot": {
-    "name": "Chariot",
-    "symbol": "C",
-    "era": "ancient",
-    "cost": 30,
+  "explorer": {
+    "symbol": "\u26b2",
+    "era": "renaissance",
+    "name": "Explorer",
+    "cost": 40,
     "strength": 4.0,
     "movement": 2,
-    "required_tech": "the_wheel",
-    "required_resource": "horse",
-    "abilities": [
-      "withdraw"
+    "required_tech": "compass",
+    "unit_class": "recon",
+    "domain": "land",
+    "required_resource": "",
+    "free_promotions": [
+      "guerilla1",
+      "woodsman1"
+    ]
+  },
+  "spy": {
+    "symbol": "?",
+    "era": "medieval",
+    "name": "Spy",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 1,
+    "required_tech": "alphabet",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": "",
+    "free_promotions": [
+      "commando"
+    ]
+  },
+  "jewish_missionary": {
+    "name": "Jewish Missionary",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "christian_missionary": {
+    "name": "Christian Missionary",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "islamic_missionary": {
+    "name": "Islamic Missionary",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "hindu_missionary": {
+    "name": "Hindu Missionary",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "buddhist_missionary": {
+    "name": "Buddhist Missionary",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "confucian_missionary": {
+    "name": "Confucian Missionary",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "taoist_missionary": {
+    "name": "Taoist Missionary",
+    "cost": 40,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "warrior": {
+    "symbol": "W",
+    "era": "ancient",
+    "name": "Warrior",
+    "cost": 15,
+    "strength": 2.0,
+    "movement": 1,
+    "required_tech": "",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "quechua": {
+    "name": "Quechua",
+    "cost": 15,
+    "strength": 2.0,
+    "movement": 1,
+    "required_tech": "",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "archery": 1.0
+    },
+    "free_promotions": [
+      "combat1"
     ],
-    "unit_class": "mounted",
-    "withdraw_chance": 0.2,
-    "no_defense_bonus": true,
-    "upgrades_to": "horse_archer",
-    "withdrawal_chance": 0.1
+    "civilization": "inca",
+    "symbol": "Q",
+    "era": "ancient"
   },
   "swordsman": {
-    "name": "Swordsman",
     "symbol": "\u265f",
     "era": "classical",
+    "name": "Swordsman",
     "cost": 40,
     "strength": 6.0,
     "movement": 1,
     "required_tech": "iron_working",
-    "required_resource": "iron",
-    "abilities": [],
     "unit_class": "melee",
-    "upgrades_to": "maceman"
+    "domain": "land",
+    "required_resource": "iron"
   },
-  "catapult": {
-    "name": "Catapult",
-    "symbol": "\u2302",
-    "era": "classical",
-    "cost": 50,
+  "jaguar": {
+    "name": "Jaguar",
+    "cost": 35,
     "strength": 5.0,
     "movement": 1,
-    "required_tech": "construction",
+    "required_tech": "iron_working",
+    "unit_class": "melee",
+    "domain": "land",
     "required_resource": "",
-    "abilities": [
-      "bombard",
-      "collateral"
+    "free_promotions": [
+      "woodsman1"
     ],
-    "unit_class": "siege",
-    "bombard_strength": 6,
-    "collateral_damage": 50,
-    "collateral_limit": 0.5,
-    "upgrades_to": "cannon",
-    "no_defense_bonus": true
-  },
-  "galley": {
-    "name": "Galley",
-    "symbol": "\u26f5",
-    "era": "ancient",
-    "cost": 50,
-    "strength": 2.0,
-    "movement": 2,
-    "sight_range": 2,
-    "required_tech": "sailing",
-    "required_resource": "",
-    "abilities": [
-      "transport"
-    ],
-    "unit_class": "naval",
-    "transport_capacity": 2,
-    "ocean_travel": false,
-    "upgrades_to": "galleon"
-  },
-  "trireme": {
-    "name": "Trireme",
-    "symbol": "\u2693",
+    "civilization": "aztec",
+    "symbol": "J",
     "era": "classical",
-    "cost": 50,
-    "strength": 2.0,
-    "movement": 2,
-    "sight_range": 2,
-    "required_tech": "metal_casting",
-    "required_resource": "",
-    "abilities": [],
-    "unit_class": "naval",
-    "ocean_travel": false,
-    "upgrades_to": "caravel"
+    "description": "Aztec unique unit. +25% in forests and jungles."
   },
-  "longbowman": {
-    "name": "Longbowman",
-    "symbol": "\u2191",
-    "era": "medieval",
-    "cost": 50,
+  "gallic_warrior": {
+    "name": "Gallic Warrior",
+    "cost": 40,
     "strength": 6.0,
     "movement": 1,
-    "required_tech": "feudalism",
-    "required_resource": "",
-    "abilities": [
-      "city_defense_bonus"
+    "required_tech": "iron_working",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "free_promotions": [
+      "guerilla1"
     ],
-    "unit_class": "archery",
-    "first_strikes": 1,
-    "city_defense": 0.25,
-    "upgrades_to": "rifleman"
+    "civilization": "celt",
+    "symbol": "G",
+    "era": "classical"
   },
-  "crossbowman": {
-    "name": "Crossbowman",
-    "symbol": "\u2020",
-    "era": "medieval",
-    "cost": 60,
-    "strength": 6.0,
+  "praetorian": {
+    "name": "Praetorian",
+    "cost": 45,
+    "strength": 8.0,
     "movement": 1,
-    "required_tech": "machinery",
+    "required_tech": "iron_working",
+    "unit_class": "melee",
+    "domain": "land",
     "required_resource": "iron",
-    "abilities": [],
-    "unit_class": "archery",
-    "first_strikes": 1,
-    "upgrades_to": "rifleman",
+    "civilization": "rome",
+    "symbol": "P",
+    "era": "classical",
+    "description": "Roman unique unit. Stronger than Swordsman."
+  },
+  "axeman": {
+    "symbol": "X",
+    "era": "ancient",
+    "name": "Axeman",
+    "cost": 35,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "bronze_working",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
     "bonus_vs": {
       "melee": 0.5
     }
   },
-  "pikeman": {
-    "name": "Pikeman",
-    "symbol": "\u03a8",
-    "era": "medieval",
-    "cost": 60,
+  "phalanx": {
+    "name": "Phalanx",
+    "cost": 35,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "bronze_working",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "bonus_vs_defense": {
+      "chariot": 1.0
+    },
+    "civilization": "greece",
+    "symbol": "\u03a6",
+    "era": "ancient",
+    "description": "Greek unique unit. Replaces Axeman. +50% vs Melee, +100% defense vs Chariots/Mounted."
+  },
+  "vulture": {
+    "name": "Vulture",
+    "cost": 35,
     "strength": 6.0,
     "movement": 1,
-    "required_tech": "engineering",
-    "required_resource": "",
-    "abilities": [
-      "bonus_vs_mounted"
-    ],
+    "required_tech": "bronze_working",
     "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
     "bonus_vs": {
-      "mounted": 1.0
+      "melee": 0.25
     },
-    "upgrades_to": "musketman"
+    "civilization": "sumeria",
+    "symbol": "V",
+    "era": "ancient"
+  },
+  "dog_soldier": {
+    "name": "Dog Soldier",
+    "cost": 35,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "bronze_working",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 1.0
+    },
+    "civilization": "native_america",
+    "symbol": "D",
+    "era": "ancient"
   },
   "maceman": {
-    "name": "Maceman",
     "symbol": "M",
     "era": "medieval",
+    "name": "Maceman",
     "cost": 70,
     "strength": 8.0,
     "movement": 1,
     "required_tech": "civil_service",
-    "required_resource": "copper",
-    "abilities": [
-      "bonus_vs_melee"
-    ],
     "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    }
+  },
+  "samurai": {
+    "name": "Samurai",
+    "cost": 70,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "civil_service",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "iron",
     "bonus_vs": {
       "melee": 0.5
     },
-    "upgrades_to": "grenadier"
-  },
-  "knight": {
-    "name": "Knight",
-    "symbol": "K",
-    "era": "medieval",
-    "cost": 90,
-    "strength": 10.0,
-    "movement": 2,
-    "required_tech": "guilds",
-    "required_resource": "horse",
-    "abilities": [
-      "flanking"
+    "first_strikes": 2,
+    "free_promotions": [
+      "drill1"
     ],
-    "unit_class": "mounted",
-    "flanking_bonus": 0.1,
-    "no_defense_bonus": true,
-    "upgrades_to": "cavalry",
-    "required_resource_2": "iron"
-  },
-  "trebuchet": {
-    "name": "Trebuchet",
-    "symbol": "\u2690",
+    "civilization": "japan",
+    "symbol": "\u4f8d",
     "era": "medieval",
-    "cost": 80,
+    "description": "Japanese unique unit. 2 First Strikes, +50% vs Melee."
+  },
+  "berserker": {
+    "name": "Berserker",
+    "cost": 70,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "civil_service",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "free_promotions": [
+      "amphibious"
+    ],
+    "civilization": "viking",
+    "symbol": "B",
+    "era": "medieval"
+  },
+  "spearman": {
+    "symbol": "P",
+    "era": "ancient",
+    "name": "Spearman",
+    "cost": 35,
     "strength": 4.0,
     "movement": 1,
-    "required_tech": "engineering",
-    "required_resource": "",
-    "abilities": [
-      "bombard",
-      "collateral"
-    ],
-    "unit_class": "siege",
-    "bombard_strength": 10,
-    "collateral_damage": 50,
-    "collateral_limit": 0.6,
-    "upgrades_to": "cannon",
-    "no_defense_bonus": true
+    "required_tech": "hunting",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "mounted": 1.0
+    }
   },
-  "caravel": {
-    "name": "Caravel",
-    "symbol": "\u26f5",
-    "era": "renaissance",
-    "cost": 60,
-    "strength": 3.0,
-    "movement": 3,
-    "sight_range": 2,
-    "required_tech": "optics",
-    "required_resource": "",
-    "abilities": [
-      "explore"
+  "impi": {
+    "name": "Impi",
+    "cost": 35,
+    "strength": 4.0,
+    "movement": 2,
+    "required_tech": "hunting",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "bonus_vs": {
+      "mounted": 1.0
+    },
+    "free_promotions": [
+      "mobility"
     ],
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "upgrades_to": "frigate"
+    "civilization": "zulu",
+    "symbol": "I",
+    "era": "ancient"
+  },
+  "holkan": {
+    "name": "Holkan",
+    "cost": 35,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "hunting",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "mounted": 1.0
+    },
+    "civilization": "maya",
+    "symbol": "H",
+    "era": "ancient"
+  },
+  "pikeman": {
+    "symbol": "\u03a8",
+    "era": "medieval",
+    "name": "Pikeman",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "engineering",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "mounted": 1.0
+    }
+  },
+  "landsknecht": {
+    "name": "Landsknecht",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "engineering",
+    "unit_class": "melee",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "mounted": 1.0,
+      "melee": 1.0
+    },
+    "civilization": "holy_roman",
+    "symbol": "L",
+    "era": "medieval"
   },
   "musketman": {
-    "name": "Musketman",
     "symbol": "\u2310",
     "era": "renaissance",
+    "name": "Musketman",
     "cost": 80,
     "strength": 9.0,
     "movement": 1,
     "required_tech": "gunpowder",
-    "required_resource": "",
-    "abilities": [],
     "unit_class": "gunpowder",
-    "upgrades_to": "rifleman"
+    "domain": "land",
+    "required_resource": ""
   },
-  "cannon": {
-    "name": "Cannon",
-    "symbol": "\u233e",
+  "musketeer": {
+    "name": "Musketeer",
+    "cost": 80,
+    "strength": 9.0,
+    "movement": 2,
+    "required_tech": "gunpowder",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "civilization": "france",
+    "symbol": "M",
     "era": "renaissance",
-    "cost": 100,
-    "strength": 12.0,
+    "description": "French unique unit. Stronger than Musketman."
+  },
+  "janissary": {
+    "name": "Janissary",
+    "cost": 80,
+    "strength": 9.0,
     "movement": 1,
-    "required_tech": "steel",
-    "required_resource": "iron",
-    "abilities": [
-      "bombard",
-      "collateral"
-    ],
-    "unit_class": "siege",
-    "bombard_strength": 15,
-    "collateral_damage": 60,
-    "collateral_limit": 0.6,
-    "upgrades_to": "artillery",
-    "no_defense_bonus": true
+    "required_tech": "gunpowder",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 0.25,
+      "archery": 0.25,
+      "mounted": 0.25
+    },
+    "civilization": "ottoman",
+    "symbol": "J",
+    "era": "renaissance"
   },
-  "frigate": {
-    "name": "Frigate",
-    "symbol": "\u2693",
-    "era": "renaissance",
-    "cost": 90,
-    "strength": 8.0,
-    "movement": 4,
-    "sight_range": 2,
-    "required_tech": "chemistry",
-    "required_resource": "iron",
-    "abilities": [
-      "bombard"
+  "oromo_warrior": {
+    "name": "Oromo Warrior",
+    "cost": 80,
+    "strength": 9.0,
+    "movement": 1,
+    "required_tech": "gunpowder",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1,
+    "free_promotions": [
+      "drill1",
+      "drill2"
     ],
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "bombard_strength": 8,
-    "upgrades_to": "destroyer"
+    "civilization": "ethiopia",
+    "symbol": "O",
+    "era": "renaissance"
   },
   "rifleman": {
-    "name": "Rifleman",
     "symbol": "R",
     "era": "industrial",
+    "name": "Rifleman",
     "cost": 110,
     "strength": 14.0,
     "movement": 1,
     "required_tech": "rifling",
-    "required_resource": "",
-    "abilities": [],
     "unit_class": "gunpowder",
-    "upgrades_to": "infantry"
-  },
-  "cavalry": {
-    "name": "Cavalry",
-    "symbol": "\u2694",
-    "era": "industrial",
-    "cost": 120,
-    "strength": 15.0,
-    "movement": 2,
-    "required_tech": "military_tradition",
-    "required_resource": "horse",
-    "abilities": [
-      "flanking"
-    ],
-    "unit_class": "mounted",
-    "flanking_bonus": 0.15,
-    "no_defense_bonus": true,
-    "upgrades_to": "gunship",
-    "withdrawal_chance": 0.3
-  },
-  "artillery": {
-    "name": "Artillery",
-    "symbol": "\u2316",
-    "era": "industrial",
-    "cost": 150,
-    "strength": 18.0,
-    "movement": 1,
-    "required_tech": "artillery",
+    "domain": "land",
     "required_resource": "",
-    "abilities": [
-      "bombard",
-      "collateral"
-    ],
-    "unit_class": "siege",
-    "bombard_strength": 20,
-    "collateral_damage": 70,
-    "collateral_limit": 0.75,
-    "no_defense_bonus": true,
     "bonus_vs": {
-      "siege": 0.5
+      "mounted": 0.25
     }
   },
+  "redcoat": {
+    "name": "Redcoat",
+    "cost": 110,
+    "strength": 14.0,
+    "movement": 1,
+    "required_tech": "rifling",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "mounted": 0.25,
+      "gunpowder": 0.25
+    },
+    "civilization": "england",
+    "symbol": "R",
+    "era": "industrial",
+    "description": "English unique unit. +25% vs Gunpowder units."
+  },
+  "grenadier": {
+    "symbol": "G",
+    "era": "renaissance",
+    "name": "Grenadier",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 1,
+    "required_tech": "military_science",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "at_infantry": {
+    "name": "At Infantry",
+    "cost": 120,
+    "strength": 14.0,
+    "movement": 1,
+    "required_tech": "artillery",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "armor": 1.0
+    },
+    "intercept_chance": 0.2,
+    "free_promotions": [
+      "ambush"
+    ]
+  },
   "infantry": {
-    "name": "Infantry",
     "symbol": "I",
     "era": "modern",
+    "name": "Infantry",
     "cost": 140,
     "strength": 20.0,
     "movement": 1,
     "required_tech": "assembly_line",
+    "unit_class": "gunpowder",
+    "domain": "land",
     "required_resource": "",
-    "abilities": [],
-    "unit_class": "gunpowder",
-    "upgrades_to": "mechanized_infantry"
+    "bonus_vs": {
+      "gunpowder": 0.25
+    }
   },
-  "tank": {
-    "name": "Tank",
-    "symbol": "T",
+  "sam_infantry": {
+    "symbol": "S",
     "era": "modern",
-    "cost": 180,
-    "strength": 28.0,
-    "movement": 2,
-    "required_tech": "industrialism",
-    "required_resource": "oil",
-    "abilities": [
-      "blitz"
-    ],
-    "unit_class": "armor",
-    "no_defense_bonus": true,
-    "upgrades_to": "modern_armor"
-  },
-  "fighter": {
-    "name": "Fighter",
-    "symbol": "\u2708",
-    "era": "modern",
-    "cost": 100,
-    "strength": 12.0,
-    "air_strength": 16.0,
-    "movement": 1,
-    "sight_range": 3,
-    "range": 6,
-    "required_tech": "flight",
-    "required_resource": "oil",
-    "abilities": [
-      "intercept",
-      "air_superiority"
-    ],
-    "unit_class": "air",
-    "intercept_chance": 1.0,
-    "upgrades_to": "jet_fighter"
-  },
-  "bomber": {
-    "name": "Bomber",
-    "symbol": "\u2708",
-    "era": "modern",
-    "cost": 140,
-    "strength": 0.0,
-    "air_strength": 16.0,
-    "movement": 1,
-    "sight_range": 3,
-    "range": 8,
-    "required_tech": "radio",
-    "required_resource": "oil",
-    "abilities": [
-      "air_bomb"
-    ],
-    "unit_class": "air",
-    "bomb_damage": 16,
-    "upgrades_to": "stealth_bomber",
-    "collateral_damage": 50,
-    "air_range": 8
-  },
-  "destroyer": {
-    "name": "Destroyer",
-    "symbol": "\u2693",
-    "era": "modern",
-    "cost": 200,
-    "strength": 30.0,
-    "movement": 8,
-    "sight_range": 2,
-    "required_tech": "combustion",
-    "required_resource": "oil",
-    "abilities": [
-      "see_submarines"
-    ],
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "intercept_chance": 0.3
-  },
-  "battleship": {
-    "name": "Battleship",
-    "symbol": "\u2693",
-    "era": "modern",
-    "cost": 225,
-    "strength": 40.0,
-    "movement": 6,
-    "sight_range": 2,
-    "required_tech": "industrialism",
-    "required_resource": "oil",
-    "abilities": [
-      "bombard"
-    ],
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "bombard_strength": 25,
-    "collateral_damage": 60
-  },
-  "submarine": {
-    "name": "Submarine",
-    "symbol": "\u229b",
-    "era": "modern",
+    "name": "Sam Infantry",
     "cost": 150,
-    "strength": 24.0,
-    "movement": 6,
-    "sight_range": 2,
-    "required_tech": "radio",
-    "required_resource": "oil",
-    "abilities": [
-      "invisible",
-      "first_strike"
-    ],
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "withdrawal_chance": 0.5
-  },
-  "mechanized_infantry": {
-    "name": "Mechanized Infantry",
-    "symbol": "\u2162",
-    "era": "modern",
-    "cost": 200,
-    "strength": 32.0,
-    "movement": 2,
-    "required_tech": "robotics",
-    "required_resource": "oil",
-    "abilities": [],
+    "strength": 18.0,
+    "movement": 1,
+    "required_tech": "rocketry",
     "unit_class": "gunpowder",
-    "intercept_chance": 0.2
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "helicopter": 0.75
+    },
+    "intercept_chance": 0.4,
+    "air_range": 1
   },
-  "modern_armor": {
-    "name": "Modern Armor",
-    "symbol": "\u2b22",
-    "era": "future",
-    "cost": 240,
-    "strength": 40.0,
+  "mobile_sam": {
+    "name": "Mobile Sam",
+    "cost": 220,
+    "strength": 22.0,
     "movement": 2,
-    "required_tech": "composites",
+    "required_tech": "laser",
+    "unit_class": "gunpowder",
+    "domain": "land",
     "required_resource": "oil",
-    "abilities": [
-      "blitz"
-    ],
-    "unit_class": "armor",
-    "no_defense_bonus": true,
+    "bonus_vs": {
+      "helicopter": 0.5
+    },
+    "intercept_chance": 0.5,
+    "air_range": 1
+  },
+  "marine": {
+    "symbol": "M",
+    "era": "industrial",
+    "name": "Marine",
+    "cost": 160,
+    "strength": 24.0,
+    "movement": 1,
+    "required_tech": "industrialism",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "free_promotions": [
+      "amphibious"
+    ]
+  },
+  "navy_seal": {
+    "name": "Navy Seal",
+    "cost": 160,
+    "strength": 24.0,
+    "movement": 1,
+    "required_tech": "industrialism",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
     "first_strikes": 1,
-    "required_resource_2": "aluminum"
+    "free_promotions": [
+      "amphibious",
+      "march"
+    ],
+    "civilization": "america",
+    "symbol": "N",
+    "era": "modern",
+    "description": "American unique unit. Amphibious, can use enemy roads."
   },
   "paratrooper": {
-    "name": "Paratrooper",
     "symbol": "\u2602",
     "era": "modern",
+    "name": "Paratrooper",
     "cost": 160,
     "strength": 24.0,
     "movement": 1,
     "required_tech": "fascism",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "mechanized_infantry": {
+    "symbol": "\u2162",
+    "era": "modern",
+    "name": "Mechanized Infantry",
+    "cost": 200,
+    "strength": 32.0,
+    "movement": 2,
+    "required_tech": "robotics",
+    "unit_class": "gunpowder",
+    "domain": "land",
+    "required_resource": "",
+    "intercept_chance": 0.2,
+    "free_promotions": [
+      "march"
+    ]
+  },
+  "archer": {
+    "symbol": "A",
+    "era": "ancient",
+    "name": "Archer",
+    "cost": 25,
+    "strength": 3.0,
+    "movement": 1,
+    "required_tech": "archery",
+    "unit_class": "archery",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1
+  },
+  "skirmisher": {
+    "name": "Skirmisher",
+    "cost": 25,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "archery",
+    "unit_class": "archery",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1,
+    "civilization": "mali",
+    "symbol": "S",
+    "era": "ancient"
+  },
+  "bowman": {
+    "name": "Bowman",
+    "cost": 25,
+    "strength": 3.0,
+    "movement": 1,
+    "required_tech": "archery",
+    "unit_class": "archery",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "first_strikes": 1,
+    "civilization": "babylon",
+    "symbol": "B",
+    "era": "ancient"
+  },
+  "longbowman": {
+    "symbol": "\u2191",
+    "era": "medieval",
+    "name": "Longbowman",
+    "cost": 50,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "feudalism",
+    "unit_class": "archery",
+    "domain": "land",
+    "required_resource": "",
+    "first_strikes": 1
+  },
+  "crossbowman": {
+    "symbol": "\u2020",
+    "era": "medieval",
+    "name": "Crossbowman",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "machinery",
+    "unit_class": "archery",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "first_strikes": 1
+  },
+  "cho_ko_nu": {
+    "name": "Cho Ko Nu",
+    "cost": 60,
+    "strength": 6.0,
+    "movement": 1,
+    "required_tech": "machinery",
+    "unit_class": "archery",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "first_strikes": 2,
+    "collateral_damage": 60,
+    "civilization": "china",
+    "symbol": "\u5f29",
+    "era": "medieval",
+    "description": "Chinese unique unit. 2 first strikes, immune to first strikes."
+  },
+  "chariot": {
+    "symbol": "C",
+    "era": "ancient",
+    "name": "Chariot",
+    "cost": 30,
+    "strength": 4.0,
+    "movement": 2,
+    "required_tech": "the_wheel",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.1,
+    "no_defense_bonus": true
+  },
+  "war_chariot": {
+    "name": "War Chariot",
+    "cost": 30,
+    "strength": 5.0,
+    "movement": 2,
+    "required_tech": "the_wheel",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.1,
+    "no_defense_bonus": true,
+    "civilization": "egypt",
+    "symbol": "C",
+    "era": "ancient",
+    "description": "Egyptian unique unit. Does not require Horses."
+  },
+  "immortal": {
+    "name": "Immortal",
+    "cost": 30,
+    "strength": 4.0,
+    "movement": 2,
+    "required_tech": "the_wheel",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "bonus_vs": {
+      "archery": 0.5
+    },
+    "withdrawal_chance": 0.1,
+    "civilization": "persia",
+    "symbol": "I",
+    "era": "ancient",
+    "description": "Persian unique unit. +50% vs Mounted, does not require Horses."
+  },
+  "horse_archer": {
+    "symbol": "H",
+    "era": "classical",
+    "name": "Horse Archer",
+    "cost": 50,
+    "strength": 6.0,
+    "movement": 2,
+    "required_tech": "horseback_riding",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.2,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "numidian_cavalry": {
+    "name": "Numidian Cavalry",
+    "cost": 50,
+    "strength": 5.0,
+    "movement": 2,
+    "required_tech": "horseback_riding",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "withdrawal_chance": 0.2,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "flanking1"
+    ],
+    "civilization": "carthage"
+  },
+  "keshik": {
+    "name": "Keshik",
+    "cost": 50,
+    "strength": 6.0,
+    "movement": 2,
+    "required_tech": "horseback_riding",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.2,
+    "first_strikes": 1,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "mongol",
+    "symbol": "\u8499",
+    "era": "medieval",
+    "description": "Mongolian unique unit. +1 Movement, ignores terrain cost."
+  },
+  "knight": {
+    "symbol": "K",
+    "era": "medieval",
+    "name": "Knight",
+    "cost": 90,
+    "strength": 10.0,
+    "movement": 2,
+    "required_tech": "guilds",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "camel_archer": {
+    "name": "Camel Archer",
+    "cost": 90,
+    "strength": 10.0,
+    "movement": 2,
+    "required_tech": "guilds",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "",
+    "withdrawal_chance": 0.15,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "arabia",
+    "symbol": "\ud83d\udc2a",
+    "era": "medieval",
+    "description": "Arabian unique unit. Withdraw chance, immune to first strikes."
+  },
+  "cataphract": {
+    "name": "Cataphract",
+    "cost": 90,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "guilds",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "byzantium",
+    "symbol": "K",
+    "era": "medieval"
+  },
+  "conquistador": {
+    "name": "Conquistador",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "withdrawal_chance": 0.15,
+    "collateral_damage": 100,
+    "civilization": "spain",
+    "symbol": "\u2694",
+    "era": "medieval",
+    "description": "Spanish unique unit. +50% vs Melee, can attack from ship."
+  },
+  "cuirassier": {
+    "symbol": "C",
+    "era": "renaissance",
+    "name": "Cuirassier",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "required_resource_2": "iron",
+    "withdrawal_chance": 0.15,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "cavalry": {
+    "symbol": "\u2694",
+    "era": "industrial",
+    "name": "Cavalry",
+    "cost": 120,
+    "strength": 15.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "withdrawal_chance": 0.3,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "cossack": {
+    "name": "Cossack",
+    "cost": 120,
+    "strength": 15.0,
+    "movement": 2,
+    "required_tech": "military_tradition",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "horse",
+    "bonus_vs": {
+      "mounted": 0.5
+    },
+    "withdrawal_chance": 0.3,
+    "collateral_damage": 100,
+    "no_defense_bonus": true,
+    "civilization": "russia",
+    "symbol": "\u041a",
+    "era": "industrial",
+    "description": "Russian unique unit. +50% vs Mounted units."
+  },
+  "war_elephant": {
+    "symbol": "E",
+    "era": "classical",
+    "name": "War Elephant",
+    "cost": 60,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "ivory",
+    "bonus_vs": {
+      "mounted": 0.5
+    },
+    "no_defense_bonus": true
+  },
+  "ballista_elephant": {
+    "name": "Ballista Elephant",
+    "cost": 60,
+    "strength": 8.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "unit_class": "mounted",
+    "domain": "land",
+    "required_resource": "ivory",
+    "bonus_vs": {
+      "mounted": 0.5
+    },
+    "no_defense_bonus": true,
+    "civilization": "khmer"
+  },
+  "tank": {
+    "symbol": "T",
+    "era": "modern",
+    "name": "Tank",
+    "cost": 180,
+    "strength": 28.0,
+    "movement": 2,
+    "required_tech": "industrialism",
+    "unit_class": "armor",
+    "domain": "land",
+    "required_resource": "oil",
+    "collateral_damage": 60,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "blitz"
+    ]
+  },
+  "panzer": {
+    "name": "Panzer",
+    "cost": 180,
+    "strength": 28.0,
+    "movement": 2,
+    "required_tech": "industrialism",
+    "unit_class": "armor",
+    "domain": "land",
+    "required_resource": "oil",
+    "bonus_vs": {
+      "armor": 0.5
+    },
+    "collateral_damage": 60,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "blitz"
+    ],
+    "civilization": "germany",
+    "symbol": "\u2b22",
+    "era": "modern",
+    "description": "German unique unit. Stronger than Tank."
+  },
+  "modern_armor": {
+    "symbol": "\u2b22",
+    "era": "future",
+    "name": "Modern Armor",
+    "cost": 240,
+    "strength": 40.0,
+    "movement": 2,
+    "required_tech": "composites",
+    "unit_class": "armor",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_2": "aluminum",
+    "first_strikes": 1,
+    "collateral_damage": 60,
+    "no_defense_bonus": true,
+    "free_promotions": [
+      "blitz"
+    ]
+  },
+  "gunship": {
+    "symbol": "H",
+    "era": "modern",
+    "name": "Gunship",
+    "cost": 160,
+    "strength": 24.0,
+    "movement": 4,
+    "required_tech": "advanced_flight",
+    "unit_class": "helicopter",
+    "domain": "land",
+    "required_resource": "oil",
+    "bonus_vs": {
+      "armor": 1.0
+    },
+    "withdrawal_chance": 0.25,
+    "collateral_damage": 100,
+    "no_defense_bonus": true
+  },
+  "catapult": {
+    "symbol": "\u2302",
+    "era": "classical",
+    "name": "Catapult",
+    "cost": 50,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "unit_class": "siege",
+    "domain": "land",
+    "required_resource": "",
+    "collateral_damage": 50,
+    "no_defense_bonus": true
+  },
+  "hwacha": {
+    "name": "Hwacha",
+    "cost": 50,
+    "strength": 5.0,
+    "movement": 1,
+    "required_tech": "construction",
+    "unit_class": "siege",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "melee": 0.5
+    },
+    "collateral_damage": 50,
+    "no_defense_bonus": true,
+    "civilization": "korea",
+    "symbol": "H",
+    "era": "classical"
+  },
+  "trebuchet": {
+    "symbol": "\u2690",
+    "era": "medieval",
+    "name": "Trebuchet",
+    "cost": 80,
+    "strength": 4.0,
+    "movement": 1,
+    "required_tech": "engineering",
+    "unit_class": "siege",
+    "domain": "land",
+    "required_resource": "",
+    "collateral_damage": 50,
+    "no_defense_bonus": true
+  },
+  "cannon": {
+    "symbol": "\u233e",
+    "era": "renaissance",
+    "name": "Cannon",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 1,
+    "required_tech": "steel",
+    "unit_class": "siege",
+    "domain": "land",
+    "required_resource": "iron",
+    "collateral_damage": 60,
+    "no_defense_bonus": true
+  },
+  "machine_gun": {
+    "symbol": "M",
+    "era": "industrial",
+    "name": "Machine Gun",
+    "cost": 125,
+    "strength": 18.0,
+    "movement": 1,
+    "required_tech": "railroad",
+    "unit_class": "siege",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "gunpowder": 0.5
+    },
+    "first_strikes": 1,
+    "intercept_chance": 0.2
+  },
+  "artillery": {
+    "symbol": "\u2316",
+    "era": "industrial",
+    "name": "Artillery",
+    "cost": 150,
+    "strength": 18.0,
+    "movement": 1,
+    "required_tech": "artillery",
+    "unit_class": "siege",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs": {
+      "siege": 0.5
+    },
+    "collateral_damage": 70,
+    "no_defense_bonus": true
+  },
+  "mobile_artillery": {
+    "symbol": "A",
+    "era": "modern",
+    "name": "Mobile Artillery",
+    "cost": 200,
+    "strength": 26.0,
+    "movement": 2,
+    "required_tech": "laser",
+    "unit_class": "siege",
+    "domain": "land",
+    "required_resource": "oil",
+    "bonus_vs": {
+      "siege": 0.5
+    },
+    "collateral_damage": 70,
+    "no_defense_bonus": true
+  },
+  "workboat": {
+    "symbol": "B",
+    "era": "ancient",
+    "name": "Workboat",
+    "cost": 30,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "fishing",
+    "unit_class": "",
+    "domain": "land",
     "required_resource": "",
     "abilities": [
-      "paradrop"
-    ],
-    "unit_class": "melee",
-    "paradrop_range": 5
+      "build_sea_improvements"
+    ]
+  },
+  "galley": {
+    "symbol": "\u26f5",
+    "era": "ancient",
+    "name": "Galley",
+    "cost": 50,
+    "strength": 2.0,
+    "movement": 2,
+    "required_tech": "sailing",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 2
+  },
+  "trireme": {
+    "symbol": "\u2693",
+    "era": "classical",
+    "name": "Trireme",
+    "cost": 50,
+    "strength": 2.0,
+    "movement": 2,
+    "required_tech": "metal_casting",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "",
+    "bonus_vs_defense": {
+      "galley": 0.5
+    }
+  },
+  "caravel": {
+    "symbol": "\u26f5",
+    "era": "renaissance",
+    "name": "Caravel",
+    "cost": 60,
+    "strength": 3.0,
+    "movement": 3,
+    "required_tech": "optics",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 1
+  },
+  "carrack": {
+    "name": "Carrack",
+    "cost": 60,
+    "strength": 3.0,
+    "movement": 3,
+    "required_tech": "optics",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 2,
+    "civilization": "portugal"
+  },
+  "galleon": {
+    "symbol": "G",
+    "era": "renaissance",
+    "name": "Galleon",
+    "cost": 80,
+    "strength": 4.0,
+    "movement": 4,
+    "required_tech": "astronomy",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 3
+  },
+  "oostindievaarder": {
+    "name": "Oostindievaarder",
+    "cost": 80,
+    "strength": 6.0,
+    "movement": 4,
+    "required_tech": "astronomy",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "",
+    "cargo": 4,
+    "civilization": "netherlands"
+  },
+  "privateer": {
+    "symbol": "P",
+    "era": "renaissance",
+    "name": "Privateer",
+    "cost": 80,
+    "strength": 6.0,
+    "movement": 4,
+    "required_tech": "chemistry",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "copper",
+    "required_resource_or": "iron",
+    "free_promotions": [
+      "sentry"
+    ]
+  },
+  "frigate": {
+    "symbol": "\u2693",
+    "era": "renaissance",
+    "name": "Frigate",
+    "cost": 90,
+    "strength": 8.0,
+    "movement": 4,
+    "required_tech": "chemistry",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "iron"
+  },
+  "ship_of_the_line": {
+    "symbol": "S",
+    "era": "renaissance",
+    "name": "Ship Of The Line",
+    "cost": 120,
+    "strength": 8.0,
+    "movement": 3,
+    "required_tech": "military_science",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "iron",
+    "bonus_vs_defense": {
+      "frigate": 0.5
+    }
+  },
+  "ironclad": {
+    "symbol": "I",
+    "era": "industrial",
+    "name": "Ironclad",
+    "cost": 100,
+    "strength": 12.0,
+    "movement": 2,
+    "required_tech": "steel",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "iron",
+    "required_resource_2": "coal"
+  },
+  "transport": {
+    "symbol": "\u26f4",
+    "era": "industrial",
+    "name": "Transport",
+    "cost": 125,
+    "strength": 16.0,
+    "movement": 5,
+    "required_tech": "combustion",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "cargo": 4
+  },
+  "destroyer": {
+    "symbol": "\u2693",
+    "era": "modern",
+    "name": "Destroyer",
+    "cost": 200,
+    "strength": 30.0,
+    "movement": 8,
+    "required_tech": "combustion",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "intercept_chance": 0.3
+  },
+  "battleship": {
+    "symbol": "\u2693",
+    "era": "modern",
+    "name": "Battleship",
+    "cost": 225,
+    "strength": 40.0,
+    "movement": 6,
+    "required_tech": "industrialism",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "collateral_damage": 60
+  },
+  "missile_cruiser": {
+    "symbol": "C",
+    "era": "modern",
+    "name": "Missile Cruiser",
+    "cost": 260,
+    "strength": 40.0,
+    "movement": 7,
+    "required_tech": "robotics",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "collateral_damage": 60,
+    "cargo": 4
+  },
+  "stealth_destroyer": {
+    "name": "Stealth Destroyer",
+    "cost": 220,
+    "strength": 30.0,
+    "movement": 8,
+    "required_tech": "stealth",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "first_strikes": 2
+  },
+  "submarine": {
+    "symbol": "\u229b",
+    "era": "modern",
+    "name": "Submarine",
+    "cost": 150,
+    "strength": 24.0,
+    "movement": 6,
+    "required_tech": "radio",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "withdrawal_chance": 0.5,
+    "cargo": 3
+  },
+  "attack_submarine": {
+    "name": "Attack Submarine",
+    "cost": 200,
+    "strength": 30.0,
+    "movement": 7,
+    "required_tech": "rocketry",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "uranium",
+    "bonus_vs_defense": {
+      "submarine": 0.5
+    },
+    "withdrawal_chance": 0.5,
+    "cargo": 1
+  },
+  "carrier": {
+    "symbol": "\u2693",
+    "era": "modern",
+    "name": "Carrier",
+    "cost": 175,
+    "strength": 16.0,
+    "movement": 5,
+    "required_tech": "flight",
+    "unit_class": "naval",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_or": "uranium",
+    "cargo": 3
+  },
+  "airship": {
+    "name": "Airship",
+    "cost": 80,
+    "strength": 0.0,
+    "movement": 1,
+    "required_tech": "physics",
+    "unit_class": "air",
+    "domain": "land",
+    "required_resource": "",
+    "air_range": 8
+  },
+  "fighter": {
+    "symbol": "\u2708",
+    "era": "modern",
+    "name": "Fighter",
+    "cost": 100,
+    "strength": 0.0,
+    "movement": 1,
+    "required_tech": "flight",
+    "unit_class": "air",
+    "domain": "land",
+    "required_resource": "oil",
+    "bombard_rate": 8,
+    "intercept_chance": 1.0,
+    "air_range": 6
+  },
+  "jet_fighter": {
+    "symbol": "\u2708",
+    "era": "modern",
+    "name": "Jet Fighter",
+    "cost": 150,
+    "strength": 0.0,
+    "movement": 1,
+    "required_tech": "advanced_flight",
+    "unit_class": "air",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_2": "aluminum",
+    "bombard_rate": 12,
+    "intercept_chance": 1.0,
+    "air_range": 10
+  },
+  "bomber": {
+    "symbol": "\u2708",
+    "era": "modern",
+    "name": "Bomber",
+    "cost": 140,
+    "strength": 0.0,
+    "movement": 1,
+    "required_tech": "radio",
+    "unit_class": "air",
+    "domain": "land",
+    "required_resource": "oil",
+    "collateral_damage": 50,
+    "bombard_rate": 16,
+    "air_range": 8
+  },
+  "stealth_bomber": {
+    "symbol": "\u2708",
+    "era": "future",
+    "name": "Stealth Bomber",
+    "cost": 200,
+    "strength": 0.0,
+    "movement": 1,
+    "required_tech": "stealth",
+    "unit_class": "air",
+    "domain": "land",
+    "required_resource": "oil",
+    "required_resource_2": "aluminum",
+    "collateral_damage": 50,
+    "bombard_rate": 20,
+    "air_range": 12
+  },
+  "guided_missile": {
+    "symbol": "~",
+    "era": "modern",
+    "name": "Guided Missile",
+    "cost": 60,
+    "strength": 0.0,
+    "movement": 1,
+    "required_tech": "rocketry",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": "",
+    "bombard_rate": 16,
+    "air_range": 4
   },
   "nuclear_missile": {
     "name": "Nuclear Missile",
-    "symbol": "\u2622",
-    "era": "modern",
     "cost": 250,
     "strength": 0.0,
     "movement": 1,
-    "range": 12,
     "required_tech": "fission",
+    "unit_class": "",
+    "domain": "land",
     "required_resource": "uranium",
-    "abilities": [
-      "nuke"
-    ],
-    "unit_class": "missile",
-    "nuke_damage": 50,
-    "nuke_radius": 2,
-    "one_time_use": true
+    "air_range": 4,
+    "nuke_range": 1,
+    "symbol": "\u2622",
+    "era": "modern"
   },
   "icbm": {
-    "name": "ICBM",
     "symbol": "\u2622",
     "era": "future",
+    "name": "Icbm",
     "cost": 500,
     "strength": 0.0,
     "movement": 1,
-    "range": 99,
     "required_tech": "fission",
+    "unit_class": "",
+    "domain": "land",
     "required_resource": "uranium",
-    "abilities": [
-      "nuke"
-    ],
-    "unit_class": "missile",
-    "nuke_damage": 75,
-    "nuke_radius": 3,
-    "one_time_use": true
-  },
-  "great_general": {
-    "name": "Great General",
-    "symbol": "\u2605",
-    "era": "ancient",
-    "cost": 0,
-    "strength": 0.0,
-    "movement": 2,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [
-      "great_person",
-      "military_academy",
-      "attach"
-    ],
-    "unit_class": "great_person"
+    "nuke_range": 1
   },
   "great_prophet": {
     "name": "Great Prophet",
+    "cost": -1,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": "",
     "symbol": "\u2606",
-    "era": "ancient",
-    "cost": 0,
-    "strength": 0.0,
-    "movement": 2,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [
-      "great_person",
-      "found_religion",
-      "build_shrine"
-    ],
-    "unit_class": "great_person"
-  },
-  "great_scientist": {
-    "name": "Great Scientist",
-    "symbol": "\u2697",
-    "era": "ancient",
-    "cost": 0,
-    "strength": 0.0,
-    "movement": 2,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [
-      "great_person",
-      "academy",
-      "discover_tech"
-    ],
-    "unit_class": "great_person"
-  },
-  "great_merchant": {
-    "name": "Great Merchant",
-    "symbol": "$",
-    "era": "ancient",
-    "cost": 0,
-    "strength": 0.0,
-    "movement": 2,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [
-      "great_person",
-      "trade_mission",
-      "build_custom_house"
-    ],
-    "unit_class": "great_person"
-  },
-  "great_engineer": {
-    "name": "Great Engineer",
-    "symbol": "\u2699",
-    "era": "ancient",
-    "cost": 0,
-    "strength": 0.0,
-    "movement": 2,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [
-      "great_person",
-      "hurry_wonder",
-      "build_manufactory"
-    ],
-    "unit_class": "great_person"
+    "era": "ancient"
   },
   "great_artist": {
     "name": "Great Artist",
-    "symbol": "\u266a",
-    "era": "ancient",
-    "cost": 0,
+    "cost": -1,
     "strength": 0.0,
     "movement": 2,
     "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
     "required_resource": "",
-    "abilities": [
-      "great_person",
-      "culture_bomb",
-      "golden_age"
-    ],
-    "unit_class": "great_person"
+    "symbol": "\u266a",
+    "era": "ancient"
+  },
+  "great_scientist": {
+    "name": "Great Scientist",
+    "cost": -1,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": "",
+    "symbol": "\u2697",
+    "era": "ancient"
+  },
+  "great_merchant": {
+    "name": "Great Merchant",
+    "cost": -1,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": "",
+    "symbol": "$",
+    "era": "ancient"
+  },
+  "great_engineer": {
+    "name": "Great Engineer",
+    "cost": -1,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": "",
+    "symbol": "\u2699",
+    "era": "ancient"
+  },
+  "great_general": {
+    "symbol": "\u2605",
+    "era": "ancient",
+    "name": "Great General",
+    "cost": -1,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
+  },
+  "great_spy": {
+    "description": "Can infiltrate enemy civs for massive espionage gains, build Intelligence HQ, or become a Super Spy",
+    "symbol": "\u2295",
+    "era": "medieval",
+    "name": "Great Spy",
+    "cost": -1,
+    "strength": 0.0,
+    "movement": 2,
+    "required_tech": "",
+    "unit_class": "",
+    "domain": "land",
+    "required_resource": ""
   },
   "missionary": {
     "name": "Missionary",
@@ -739,144 +1699,6 @@
     ],
     "unit_class": "civilian",
     "uses": 2
-  },
-  "spy": {
-    "name": "Spy",
-    "symbol": "?",
-    "era": "medieval",
-    "cost": 40,
-    "strength": 0.0,
-    "movement": 1,
-    "required_tech": "alphabet",
-    "required_resource": "",
-    "abilities": [
-      "invisible",
-      "espionage"
-    ],
-    "unit_class": "civilian"
-  },
-  "explorer": {
-    "name": "Explorer",
-    "symbol": "\u26b2",
-    "era": "renaissance",
-    "cost": 40,
-    "strength": 4.0,
-    "movement": 2,
-    "sight_range": 2,
-    "required_tech": "compass",
-    "required_resource": "",
-    "abilities": [
-      "ignore_terrain_cost"
-    ],
-    "unit_class": "recon"
-  },
-  "grenadier": {
-    "name": "Grenadier",
-    "symbol": "G",
-    "era": "renaissance",
-    "cost": 100,
-    "strength": 12.0,
-    "movement": 1,
-    "required_tech": "military_science",
-    "required_resource": "",
-    "abilities": [],
-    "unit_class": "gunpowder",
-    "upgrades_to": "rifleman"
-  },
-  "jet_fighter": {
-    "name": "Jet Fighter",
-    "symbol": "\u2708",
-    "era": "modern",
-    "cost": 150,
-    "strength": 24.0,
-    "air_strength": 32.0,
-    "movement": 1,
-    "sight_range": 4,
-    "range": 10,
-    "required_tech": "advanced_flight",
-    "required_resource": "oil",
-    "abilities": [
-      "intercept",
-      "air_superiority"
-    ],
-    "unit_class": "air",
-    "intercept_chance": 1.0
-  },
-  "stealth_bomber": {
-    "name": "Stealth Bomber",
-    "symbol": "\u2708",
-    "era": "future",
-    "cost": 200,
-    "strength": 20.0,
-    "air_strength": 32.0,
-    "movement": 1,
-    "sight_range": 4,
-    "range": 12,
-    "required_tech": "stealth",
-    "required_resource": "oil",
-    "abilities": [
-      "air_bomb",
-      "evasion"
-    ],
-    "unit_class": "air",
-    "bomb_damage": 24,
-    "evasion_chance": 0.5,
-    "collateral_damage": 100,
-    "air_range": 10
-  },
-  "carrier": {
-    "name": "Carrier",
-    "symbol": "\u2693",
-    "era": "modern",
-    "cost": 175,
-    "strength": 16.0,
-    "movement": 5,
-    "sight_range": 2,
-    "required_tech": "flight",
-    "required_resource": "oil",
-    "abilities": [
-      "carry_aircraft"
-    ],
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "aircraft_capacity": 4,
-    "cargo": 3
-  },
-  "transport": {
-    "name": "Transport",
-    "symbol": "\u26f4",
-    "era": "industrial",
-    "cost": 125,
-    "strength": 16.0,
-    "movement": 5,
-    "sight_range": 2,
-    "required_tech": "combustion",
-    "required_resource": "",
-    "abilities": [
-      "transport"
-    ],
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "transport_capacity": 4
-  },
-  "great_spy": {
-    "name": "Great Spy",
-    "symbol": "\u2295",
-    "era": "medieval",
-    "cost": 0,
-    "strength": 0.0,
-    "movement": 2,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [
-      "great_person",
-      "infiltrate",
-      "counterintelligence_hq",
-      "super_spy"
-    ],
-    "unit_class": "great_person",
-    "espionage_modifier": 3.0,
-    "description": "Can infiltrate enemy civs for massive espionage gains, build Intelligence HQ, or become a Super Spy"
   },
   "executive_mining": {
     "name": "Mining Inc. Executive",
@@ -990,354 +1812,6 @@
     "corporation": "aluminum_co",
     "uses": 3
   },
-  "_comment_unique": "=== UNIQUE UNITS ===",
-  "praetorian": {
-    "name": "Praetorian",
-    "symbol": "P",
-    "era": "classical",
-    "cost": 45,
-    "strength": 8.0,
-    "movement": 1,
-    "required_tech": "iron_working",
-    "required_resource": "iron",
-    "abilities": [],
-    "unit_class": "melee",
-    "upgrades_to": "maceman",
-    "replaces": "swordsman",
-    "civilization": "rome",
-    "description": "Roman unique unit. Stronger than Swordsman."
-  },
-  "phalanx": {
-    "name": "Phalanx",
-    "symbol": "\u03a6",
-    "era": "ancient",
-    "cost": 35,
-    "strength": 5.0,
-    "movement": 1,
-    "required_tech": "bronze_working",
-    "required_resource": "copper",
-    "abilities": [
-      "bonus_vs_mounted"
-    ],
-    "unit_class": "melee",
-    "bonus_vs": {
-      "melee": 0.5
-    },
-    "upgrades_to": "maceman",
-    "replaces": "axeman",
-    "civilization": "greece",
-    "description": "Greek unique unit. Replaces Axeman. +50% vs Melee, +100% defense vs Chariots/Mounted.",
-    "bonus_vs_defense": {
-      "chariot": 1.0,
-      "mounted": 1.0
-    },
-    "required_resource_or": "iron"
-  },
-  "war_chariot": {
-    "name": "War Chariot",
-    "symbol": "C",
-    "era": "ancient",
-    "cost": 30,
-    "strength": 5.0,
-    "movement": 2,
-    "required_tech": "the_wheel",
-    "required_resource": "horse",
-    "abilities": [
-      "withdraw"
-    ],
-    "unit_class": "mounted",
-    "withdraw_chance": 0.2,
-    "no_defense_bonus": true,
-    "upgrades_to": "horse_archer",
-    "replaces": "chariot",
-    "civilization": "egypt",
-    "description": "Egyptian unique unit. Does not require Horses.",
-    "withdrawal_chance": 0.1,
-    "first_strike_immune": true
-  },
-  "cho_ko_nu": {
-    "name": "Cho-Ko-Nu",
-    "symbol": "\u5f29",
-    "era": "medieval",
-    "cost": 60,
-    "strength": 6.0,
-    "movement": 1,
-    "required_tech": "machinery",
-    "required_resource": "iron",
-    "abilities": [],
-    "unit_class": "archery",
-    "first_strikes": 2,
-    "first_strike_immune": true,
-    "upgrades_to": "rifleman",
-    "replaces": "crossbowman",
-    "civilization": "china",
-    "description": "Chinese unique unit. 2 first strikes, immune to first strikes.",
-    "collateral_damage": 50,
-    "bonus_vs": {
-      "melee": 0.5
-    }
-  },
-  "immortal": {
-    "name": "Immortal",
-    "symbol": "I",
-    "era": "ancient",
-    "cost": 30,
-    "strength": 4.0,
-    "movement": 2,
-    "required_tech": "the_wheel",
-    "required_resource": "horse",
-    "abilities": [
-      "bonus_vs_mounted"
-    ],
-    "unit_class": "mounted",
-    "bonus_vs": {
-      "archery": 0.5
-    },
-    "no_defense_bonus": true,
-    "upgrades_to": "knight",
-    "replaces": "chariot",
-    "civilization": "persia",
-    "description": "Persian unique unit. +50% vs Mounted, does not require Horses.",
-    "withdrawal_chance": 0.1
-  },
-  "redcoat": {
-    "name": "Redcoat",
-    "symbol": "R",
-    "era": "industrial",
-    "cost": 110,
-    "strength": 14.0,
-    "movement": 1,
-    "required_tech": "rifling",
-    "required_resource": "",
-    "abilities": [
-      "bonus_vs_gunpowder"
-    ],
-    "unit_class": "gunpowder",
-    "bonus_vs": {
-      "mounted": 0.25,
-      "gunpowder": 0.25
-    },
-    "upgrades_to": "infantry",
-    "replaces": "rifleman",
-    "civilization": "england",
-    "description": "English unique unit. +25% vs Gunpowder units."
-  },
-  "musketeer": {
-    "name": "Musketeer",
-    "symbol": "M",
-    "era": "renaissance",
-    "cost": 80,
-    "strength": 9.0,
-    "movement": 2,
-    "required_tech": "gunpowder",
-    "required_resource": "",
-    "abilities": [],
-    "unit_class": "gunpowder",
-    "upgrades_to": "rifleman",
-    "replaces": "musketman",
-    "civilization": "france",
-    "description": "French unique unit. Stronger than Musketman."
-  },
-  "panzer": {
-    "name": "Panzer",
-    "symbol": "\u2b22",
-    "era": "modern",
-    "cost": 180,
-    "strength": 28.0,
-    "movement": 2,
-    "required_tech": "industrialism",
-    "required_resource": "oil",
-    "abilities": [
-      "blitz"
-    ],
-    "unit_class": "armor",
-    "no_defense_bonus": true,
-    "upgrades_to": "modern_armor",
-    "replaces": "tank",
-    "civilization": "germany",
-    "description": "German unique unit. Stronger than Tank.",
-    "bonus_vs": {
-      "armor": 0.5
-    }
-  },
-  "cossack": {
-    "name": "Cossack",
-    "symbol": "\u041a",
-    "era": "industrial",
-    "cost": 120,
-    "strength": 15.0,
-    "movement": 2,
-    "required_tech": "military_tradition",
-    "required_resource": "horse",
-    "abilities": [
-      "flanking",
-      "bonus_vs_mounted"
-    ],
-    "unit_class": "mounted",
-    "flanking_bonus": 0.15,
-    "bonus_vs": {
-      "mounted": 0.5
-    },
-    "no_defense_bonus": true,
-    "upgrades_to": "gunship",
-    "replaces": "cavalry",
-    "civilization": "russia",
-    "description": "Russian unique unit. +50% vs Mounted units.",
-    "withdrawal_chance": 0.3
-  },
-  "navy_seal": {
-    "name": "Navy SEAL",
-    "symbol": "N",
-    "era": "modern",
-    "cost": 160,
-    "strength": 24.0,
-    "movement": 1,
-    "required_tech": "industrialism",
-    "required_resource": "",
-    "abilities": [
-      "amphibious",
-      "march",
-      "can_use_enemy_roads"
-    ],
-    "unit_class": "gunpowder",
-    "replaces": "marine",
-    "civilization": "america",
-    "description": "American unique unit. Amphibious, can use enemy roads.",
-    "first_strikes": 1
-  },
-  "samurai": {
-    "name": "Samurai",
-    "symbol": "\u4f8d",
-    "era": "medieval",
-    "cost": 70,
-    "strength": 8.0,
-    "movement": 1,
-    "required_tech": "civil_service",
-    "required_resource": "iron",
-    "abilities": [
-      "bonus_vs_melee"
-    ],
-    "unit_class": "melee",
-    "bonus_vs": {
-      "melee": 0.5
-    },
-    "first_strikes": 2,
-    "upgrades_to": "grenadier",
-    "replaces": "maceman",
-    "civilization": "japan",
-    "description": "Japanese unique unit. 2 First Strikes, +50% vs Melee.",
-    "free_promotions": [
-      "drill1"
-    ]
-  },
-  "fast_worker": {
-    "name": "Fast Worker",
-    "symbol": "\u262d",
-    "era": "ancient",
-    "cost": 60,
-    "strength": 0.0,
-    "movement": 3,
-    "required_tech": "",
-    "required_resource": "",
-    "abilities": [
-      "build_improvements"
-    ],
-    "unit_class": "civilian",
-    "replaces": "worker",
-    "civilization": "india",
-    "description": "Indian unique unit. +1 Movement."
-  },
-  "keshik": {
-    "name": "Keshik",
-    "symbol": "\u8499",
-    "era": "medieval",
-    "cost": 50,
-    "strength": 6.0,
-    "movement": 2,
-    "required_tech": "horseback_riding",
-    "required_resource": "horse",
-    "abilities": [
-      "flanking",
-      "ignore_terrain_cost"
-    ],
-    "unit_class": "mounted",
-    "flanking_bonus": 0.1,
-    "no_defense_bonus": true,
-    "upgrades_to": "cavalry",
-    "replaces": "horse_archer",
-    "civilization": "mongolia",
-    "description": "Mongolian unique unit. +1 Movement, ignores terrain cost.",
-    "first_strikes": 1,
-    "withdrawal_chance": 0.2
-  },
-  "jaguar": {
-    "name": "Jaguar Warrior",
-    "symbol": "J",
-    "era": "classical",
-    "cost": 35,
-    "strength": 5.0,
-    "movement": 1,
-    "required_tech": "iron_working",
-    "required_resource": "",
-    "abilities": [
-      "woodsman"
-    ],
-    "unit_class": "melee",
-    "forest_defense": 0.25,
-    "jungle_defense": 0.25,
-    "upgrades_to": "maceman",
-    "replaces": "swordsman",
-    "civilization": "aztec",
-    "description": "Aztec unique unit. +25% in forests and jungles."
-  },
-  "camel_archer": {
-    "name": "Camel Archer",
-    "symbol": "\ud83d\udc2a",
-    "era": "medieval",
-    "cost": 90,
-    "strength": 10.0,
-    "movement": 2,
-    "required_tech": "guilds",
-    "required_resource": "horse",
-    "abilities": [
-      "withdraw",
-      "immune_first_strikes"
-    ],
-    "unit_class": "mounted",
-    "withdraw_chance": 0.25,
-    "no_defense_bonus": true,
-    "upgrades_to": "cavalry",
-    "replaces": "knight",
-    "civilization": "arabia",
-    "description": "Arabian unique unit. Withdraw chance, immune to first strikes.",
-    "withdrawal_chance": 0.15
-  },
-  "conquistador": {
-    "name": "Conquistador",
-    "symbol": "\u2694",
-    "era": "medieval",
-    "cost": 100,
-    "strength": 12.0,
-    "movement": 2,
-    "required_tech": "military_tradition",
-    "required_resource": "horse",
-    "abilities": [
-      "bonus_vs_melee",
-      "can_attack_from_sea"
-    ],
-    "unit_class": "mounted",
-    "bonus_vs": {
-      "melee": 0.5
-    },
-    "no_defense_bonus": true,
-    "upgrades_to": "cavalry",
-    "replaces": "cuirassier",
-    "civilization": "spain",
-    "description": "Spanish unique unit. +50% vs Melee, can attack from ship.",
-    "required_resource_2": "iron",
-    "withdrawal_chance": 0.15
-  },
-  "_comment_inquisitor": "=== INQUISITOR ===",
   "inquisitor": {
     "name": "Inquisitor",
     "symbol": "\u2696",
@@ -1353,483 +1827,5 @@
     "unit_class": "civilian",
     "uses": 2,
     "description": "Can remove non-state religions from cities."
-  },
-  "horse_archer": {
-    "name": "Horse Archer",
-    "symbol": "H",
-    "era": "classical",
-    "cost": 50,
-    "strength": 6.0,
-    "movement": 2,
-    "required_tech": "horseback_riding",
-    "required_resource": "horse",
-    "abilities": [
-      "withdraw",
-      "flanking"
-    ],
-    "unit_class": "mounted",
-    "withdraw_chance": 0.15,
-    "no_defense_bonus": true,
-    "upgrades_to": "knight",
-    "withdrawal_chance": 0.2
-  },
-  "cuirassier": {
-    "name": "Cuirassier",
-    "symbol": "C",
-    "era": "renaissance",
-    "cost": 100,
-    "strength": 12.0,
-    "movement": 2,
-    "required_tech": "military_tradition",
-    "required_resource": "horse",
-    "required_resource_2": "iron",
-    "unit_class": "mounted",
-    "no_defense_bonus": true,
-    "withdrawal_chance": 0.15,
-    "upgrades_to": "cavalry",
-    "abilities": []
-  },
-  "war_elephant": {
-    "name": "War Elephant",
-    "symbol": "E",
-    "era": "classical",
-    "cost": 60,
-    "strength": 8.0,
-    "movement": 1,
-    "required_tech": "construction",
-    "required_resource": "ivory",
-    "unit_class": "mounted",
-    "no_defense_bonus": true,
-    "bonus_vs": {
-      "mounted": 0.5
-    },
-    "upgrades_to": "cuirassier",
-    "abilities": []
-  },
-  "marine": {
-    "name": "Marine",
-    "symbol": "M",
-    "era": "industrial",
-    "cost": 160,
-    "strength": 24.0,
-    "movement": 1,
-    "required_tech": "industrialism",
-    "required_resource": "",
-    "unit_class": "gunpowder",
-    "abilities": [
-      "amphibious"
-    ],
-    "upgrades_to": "mechanized_infantry"
-  },
-  "gunship": {
-    "name": "Gunship",
-    "symbol": "H",
-    "era": "modern",
-    "cost": 160,
-    "strength": 24.0,
-    "movement": 4,
-    "required_tech": "advanced_flight",
-    "required_resource": "oil",
-    "unit_class": "helicopter",
-    "no_defense_bonus": true,
-    "bonus_vs": {
-      "armor": 1.0
-    },
-    "withdrawal_chance": 0.25,
-    "abilities": [],
-    "upgrades_to": ""
-  },
-  "galleon": {
-    "name": "Galleon",
-    "symbol": "G",
-    "era": "renaissance",
-    "cost": 80,
-    "strength": 4.0,
-    "movement": 4,
-    "required_tech": "astronomy",
-    "required_resource": "",
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "cargo": 3,
-    "abilities": [],
-    "upgrades_to": "transport"
-  },
-  "workboat": {
-    "name": "Workboat",
-    "symbol": "B",
-    "era": "ancient",
-    "cost": 30,
-    "strength": 0.0,
-    "movement": 2,
-    "required_tech": "fishing",
-    "required_resource": "",
-    "unit_class": "civilian",
-    "abilities": [
-      "build_sea_improvements"
-    ],
-    "upgrades_to": ""
-  },
-  "machine_gun": {
-    "name": "Machine Gun",
-    "symbol": "M",
-    "era": "industrial",
-    "cost": 125,
-    "strength": 18.0,
-    "movement": 1,
-    "required_tech": "railroad",
-    "required_resource": "",
-    "unit_class": "siege",
-    "no_defense_bonus": true,
-    "bonus_vs": {
-      "gunpowder": 0.5
-    },
-    "abilities": [],
-    "upgrades_to": ""
-  },
-  "privateer": {
-    "name": "Privateer",
-    "symbol": "P",
-    "era": "renaissance",
-    "cost": 80,
-    "strength": 6.0,
-    "movement": 3,
-    "required_tech": "chemistry",
-    "required_resource": "",
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "abilities": [
-      "hidden_nationality"
-    ],
-    "upgrades_to": "destroyer"
-  },
-  "ship_of_the_line": {
-    "name": "Ship of the Line",
-    "symbol": "S",
-    "era": "renaissance",
-    "cost": 120,
-    "strength": 8.0,
-    "movement": 4,
-    "required_tech": "military_science",
-    "required_resource": "iron",
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "abilities": [],
-    "upgrades_to": "ironclad"
-  },
-  "ironclad": {
-    "name": "Ironclad",
-    "symbol": "I",
-    "era": "industrial",
-    "cost": 100,
-    "strength": 12.0,
-    "movement": 3,
-    "required_tech": "steel",
-    "required_resource": "iron",
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "abilities": [],
-    "upgrades_to": "destroyer"
-  },
-  "mobile_artillery": {
-    "name": "Mobile Artillery",
-    "symbol": "A",
-    "era": "modern",
-    "cost": 200,
-    "strength": 26.0,
-    "movement": 2,
-    "required_tech": "laser",
-    "required_resource": "",
-    "unit_class": "siege",
-    "no_defense_bonus": true,
-    "collateral_damage": 100,
-    "abilities": [],
-    "upgrades_to": ""
-  },
-  "sam_infantry": {
-    "name": "SAM Infantry",
-    "symbol": "S",
-    "era": "modern",
-    "cost": 150,
-    "strength": 18.0,
-    "movement": 1,
-    "required_tech": "rocketry",
-    "required_resource": "",
-    "unit_class": "gunpowder",
-    "intercept_chance": 0.4,
-    "abilities": [],
-    "upgrades_to": ""
-  },
-  "missile_cruiser": {
-    "name": "Missile Cruiser",
-    "symbol": "C",
-    "era": "modern",
-    "cost": 260,
-    "strength": 40.0,
-    "movement": 5,
-    "required_tech": "robotics",
-    "required_resource": "oil",
-    "unit_class": "naval",
-    "ocean_travel": true,
-    "abilities": [],
-    "upgrades_to": ""
-  },
-  "guided_missile": {
-    "name": "Guided Missile",
-    "symbol": "~",
-    "era": "modern",
-    "cost": 60,
-    "strength": 0.0,
-    "movement": 1,
-    "required_tech": "rocketry",
-    "required_resource": "",
-    "unit_class": "missile",
-    "air_range": 6,
-    "bomb_damage": 50,
-    "abilities": [],
-    "upgrades_to": ""
-  },
-  "quechua": {
-    "name": "Quechua",
-    "symbol": "Q",
-    "era": "ancient",
-    "cost": 15,
-    "strength": 2.0,
-    "movement": 1,
-    "required_tech": "",
-    "required_resource": "",
-    "civilization": "inca",
-    "replaces": "warrior",
-    "unit_class": "melee",
-    "bonus_vs": {
-      "archery": 1.0
-    },
-    "abilities": [],
-    "upgrades_to": "axeman"
-  },
-  "holkan": {
-    "name": "Holkan",
-    "symbol": "H",
-    "era": "ancient",
-    "cost": 35,
-    "strength": 4.0,
-    "movement": 1,
-    "required_tech": "hunting",
-    "required_resource": "",
-    "civilization": "maya",
-    "replaces": "spearman",
-    "unit_class": "melee",
-    "bonus_vs": {
-      "mounted": 1.0
-    },
-    "abilities": [],
-    "upgrades_to": "pikeman"
-  },
-  "impi": {
-    "name": "Impi",
-    "symbol": "I",
-    "era": "ancient",
-    "cost": 35,
-    "strength": 4.0,
-    "movement": 2,
-    "required_tech": "hunting",
-    "required_resource": "",
-    "civilization": "zulu",
-    "replaces": "spearman",
-    "unit_class": "melee",
-    "bonus_vs": {
-      "mounted": 1.0
-    },
-    "abilities": [],
-    "upgrades_to": "pikeman"
-  },
-  "skirmisher": {
-    "name": "Skirmisher",
-    "symbol": "S",
-    "era": "ancient",
-    "cost": 25,
-    "strength": 4.0,
-    "movement": 1,
-    "required_tech": "archery",
-    "required_resource": "",
-    "civilization": "mali",
-    "replaces": "archer",
-    "unit_class": "archery",
-    "first_strikes": 2,
-    "abilities": [],
-    "upgrades_to": "longbowman"
-  },
-  "bowman": {
-    "name": "Bowman",
-    "symbol": "B",
-    "era": "ancient",
-    "cost": 25,
-    "strength": 3.0,
-    "movement": 1,
-    "required_tech": "archery",
-    "required_resource": "",
-    "civilization": "babylon",
-    "replaces": "archer",
-    "unit_class": "archery",
-    "city_defense": 0.5,
-    "abilities": [],
-    "upgrades_to": "longbowman"
-  },
-  "janissary": {
-    "name": "Janissary",
-    "symbol": "J",
-    "era": "renaissance",
-    "cost": 80,
-    "strength": 9.0,
-    "movement": 1,
-    "required_tech": "gunpowder",
-    "required_resource": "",
-    "civilization": "ottoman",
-    "replaces": "musketman",
-    "unit_class": "gunpowder",
-    "free_promotions": [
-      "drill1",
-      "drill2"
-    ],
-    "abilities": [],
-    "upgrades_to": "rifleman"
-  },
-  "berserker": {
-    "name": "Berserker",
-    "symbol": "B",
-    "era": "medieval",
-    "cost": 70,
-    "strength": 8.0,
-    "movement": 1,
-    "required_tech": "civil_service",
-    "required_resource": "iron",
-    "civilization": "viking",
-    "replaces": "maceman",
-    "unit_class": "melee",
-    "abilities": [
-      "amphibious"
-    ],
-    "upgrades_to": "rifleman"
-  },
-  "gallic_warrior": {
-    "name": "Gallic Warrior",
-    "symbol": "G",
-    "era": "classical",
-    "cost": 40,
-    "strength": 6.0,
-    "movement": 1,
-    "required_tech": "iron_working",
-    "required_resource": "iron",
-    "civilization": "celt",
-    "replaces": "swordsman",
-    "unit_class": "melee",
-    "abilities": [],
-    "upgrades_to": "maceman"
-  },
-  "dog_soldier": {
-    "name": "Dog Soldier",
-    "symbol": "D",
-    "era": "ancient",
-    "cost": 35,
-    "strength": 5.0,
-    "movement": 1,
-    "required_tech": "bronze_working",
-    "required_resource": "",
-    "civilization": "native_america",
-    "replaces": "axeman",
-    "unit_class": "melee",
-    "bonus_vs": {
-      "melee": 0.5
-    },
-    "abilities": [],
-    "upgrades_to": "maceman"
-  },
-  "vulture": {
-    "name": "Vulture",
-    "symbol": "V",
-    "era": "ancient",
-    "cost": 35,
-    "strength": 6.0,
-    "movement": 1,
-    "required_tech": "bronze_working",
-    "required_resource": "copper",
-    "civilization": "sumeria",
-    "replaces": "axeman",
-    "unit_class": "melee",
-    "bonus_vs": {
-      "melee": 0.5
-    },
-    "abilities": [],
-    "upgrades_to": "maceman"
-  },
-  "cataphract": {
-    "name": "Cataphract",
-    "symbol": "K",
-    "era": "medieval",
-    "cost": 90,
-    "strength": 12.0,
-    "movement": 2,
-    "required_tech": "guilds",
-    "required_resource": "horse",
-    "required_resource_2": "iron",
-    "civilization": "byzantium",
-    "replaces": "knight",
-    "unit_class": "mounted",
-    "no_defense_bonus": true,
-    "abilities": [],
-    "upgrades_to": "cuirassier"
-  },
-  "landsknecht": {
-    "name": "Landsknecht",
-    "symbol": "L",
-    "era": "medieval",
-    "cost": 60,
-    "strength": 6.0,
-    "movement": 1,
-    "required_tech": "engineering",
-    "required_resource": "",
-    "civilization": "holy_roman",
-    "replaces": "pikeman",
-    "unit_class": "melee",
-    "bonus_vs": {
-      "mounted": 1.0
-    },
-    "abilities": [],
-    "upgrades_to": "musketman"
-  },
-  "hwacha": {
-    "name": "Hwacha",
-    "symbol": "H",
-    "era": "classical",
-    "cost": 50,
-    "strength": 5.0,
-    "movement": 1,
-    "required_tech": "mathematics",
-    "required_resource": "",
-    "civilization": "korea",
-    "replaces": "catapult",
-    "unit_class": "siege",
-    "no_defense_bonus": true,
-    "collateral_damage": 50,
-    "abilities": [],
-    "upgrades_to": "cannon"
-  },
-  "oromo_warrior": {
-    "name": "Oromo Warrior",
-    "symbol": "O",
-    "era": "renaissance",
-    "cost": 80,
-    "strength": 9.0,
-    "movement": 1,
-    "required_tech": "gunpowder",
-    "required_resource": "",
-    "civilization": "ethiopia",
-    "replaces": "musketman",
-    "unit_class": "gunpowder",
-    "free_promotions": [
-      "drill1",
-      "guerrilla1"
-    ],
-    "abilities": [],
-    "upgrades_to": "rifleman"
   }
 }
