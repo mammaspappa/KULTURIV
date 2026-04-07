@@ -1020,6 +1020,11 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 				var adj_enemies = _find_nearby_enemies(unit, player, 1)
 				for enemy in adj_enemies:
 					if is_instance_valid(enemy) and GridUtils.are_adjacent(unit.grid_position, enemy.grid_position):
+						if sim_logger:
+							var odds = CombatSystem.calculate_odds(unit, enemy)
+							sim_logger.log_decision(player.player_name, "combat", "attack_march",
+								"%s vs %s at (%d,%d)" % [unit.unit_id, enemy.unit_id, enemy.grid_position.x, enemy.grid_position.y],
+								"odds=%.0f%%" % (odds.win_chance * 100))
 						CombatSystem.resolve_combat(unit, enemy)
 						break
 			return
@@ -1485,11 +1490,12 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 		match tech_id:
 			"bronze_working": score += 40  # Slavery civic + chopping + copper reveal + axeman
 			"archery": score += 30  # Archers for city defense — critical early military
+			"pottery": score += 30  # Granary is critical for growth, cottages for economy
 			"the_wheel": score += 20  # Roads for connectivity
-			"pottery": score += 25  # Cottages for economy
-			"writing": score += 20  # Libraries for research
+			"writing": score += 25  # Libraries for research
 			"animal_husbandry": score += 15  # Horse reveal
 			"hunting": score += 10  # Scouts, camps
+			"masonry": score += 10  # Walls for defense
 
 	# Economy critical path — always valuable, scaled by flavor
 	match tech_id:
