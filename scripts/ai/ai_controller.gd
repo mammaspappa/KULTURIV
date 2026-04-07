@@ -1192,8 +1192,15 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(building_to_build)
 			return
 
-	# More military if needed
+	# More military if needed — but interleave with buildings (40% chance to build instead)
 	if need_military:
+		# Check if a building would be more valuable (especially early game)
+		var try_building_instead = randf() < 0.4 and military_units >= garrison_minimum
+		if try_building_instead:
+			var alt_building = _get_best_building_for_specialization(city, player, flavor, specialization)
+			if alt_building != "":
+				city.set_production(alt_building)
+				return
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
