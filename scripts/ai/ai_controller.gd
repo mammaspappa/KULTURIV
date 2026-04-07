@@ -1393,9 +1393,22 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	var culture_flavor = flavor.get("culture", 5)
 	var religion_flavor = flavor.get("religion", 5)
 
-	# Value units - more if military focused
+	# Value units - scale by actual strength improvement over current units
 	if unlocks.has("units"):
-		score += unlocks.units.size() * 10 * (military_flavor / 5.0)
+		var best_current_str = 0.0
+		for unit in player.units:
+			var s = DataManager.get_unit_strength(unit.unit_id)
+			if s > best_current_str:
+				best_current_str = s
+		for unit_id in unlocks.units:
+			var unit_str = DataManager.get_unit_strength(unit_id)
+			var unit_class = DataManager.get_unit(unit_id).get("unit_class", "")
+			if unit_class in ["melee", "mounted", "gunpowder", "archery", "armor", "siege"]:
+				# Strong bonus if this unit is better than what we have
+				var improvement = max(0, unit_str - best_current_str)
+				score += (10 + improvement * 5) * (military_flavor / 5.0)
+			else:
+				score += 5 * (military_flavor / 5.0)
 
 	# Value buildings
 	if unlocks.has("buildings"):
@@ -1436,10 +1449,13 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	# Early game priorities (< 10 techs researched)
 	if num_techs < 10:
 		match tech_id:
-			"bronze_working": score += 40  # Slavery civic + chopping + copper reveal
+			"bronze_working": score += 40  # Slavery civic + chopping + copper reveal + axeman
+			"archery": score += 30  # Archers for city defense — critical early military
+			"the_wheel": score += 20  # Roads for connectivity
 			"pottery": score += 25  # Cottages for economy
 			"writing": score += 20  # Libraries for research
 			"animal_husbandry": score += 15  # Horse reveal
+			"hunting": score += 10  # Scouts, camps
 
 	# Economy critical path — always valuable, scaled by flavor
 	match tech_id:
@@ -1461,12 +1477,15 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 			"education": score += 25  # Universities
 			"liberalism": score += 40  # Free tech!
 
-	# Religion founding — any leader without a religion should consider these
-	if player.state_religion == "":
-		var religion_bonus = 20 + religion_flavor * 5  # 25-70 range
+	# Religion founding — only boost if player has NO religion at all
+	if player.state_religion == "" and player.founded_religion == "":
+		var religion_bonus = 15 + religion_flavor * 3  # 18-45 range (toned down)
 		match tech_id:
 			"meditation", "polytheism": score += religion_bonus
-			"monotheism", "theology": score += int(religion_bonus * 0.7)
+		# Only pursue advanced religion techs if highly religious
+		if religion_flavor >= HIGH_FLAVOR:
+			match tech_id:
+				"monotheism", "theology": score += int(religion_bonus * 0.5)
 
 	# Bonus for techs that reveal strategic resources on tiles we own
 	var reveals = tech.get("reveals_resource", "")
