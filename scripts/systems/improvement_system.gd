@@ -200,6 +200,13 @@ func _complete_build(worker) -> void:
 
 	tile.update_visuals()
 
+	# Neighboring road tiles need to redraw their connections
+	if improvement_id in ["road", "railroad"] and GameManager.hex_grid:
+		for n_pos in GridUtils.get_neighbors(tile.grid_position):
+			var n_tile = GameManager.hex_grid.get_tile(n_pos)
+			if n_tile and n_tile.road_level >= 1:
+				n_tile.update_visuals()
+
 	EventBus.tile_improved.emit(worker.grid_position, improvement_id)
 
 	_clear_build_order(worker)

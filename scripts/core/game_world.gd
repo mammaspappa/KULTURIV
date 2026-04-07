@@ -544,6 +544,11 @@ func found_city(settler: Unit) -> City:
 	if city_tile and city_tile.road_level < 1:
 		city_tile.road_level = 1
 		city_tile.update_visuals()
+		# Neighboring road tiles need to redraw their connections
+		for n_pos in GridUtils.get_neighbors(pos):
+			var n_tile = game_grid.get_tile(n_pos)
+			if n_tile and n_tile.road_level >= 1:
+				n_tile.update_visuals()
 
 	# Reveal visibility around the new city
 	VisibilitySystem.reveal_for_city(city)

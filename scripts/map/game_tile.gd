@@ -31,6 +31,15 @@ var improvement_progress: int = 0
 # Constants
 const TILE_SIZE: int = 64
 
+# Edge midpoints for 8 directions (used by rivers and roads)
+# 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW
+const EDGE_MIDPOINTS = {
+	0: Vector2(32, 0),   1: Vector2(56, 8),
+	2: Vector2(64, 32),  3: Vector2(56, 56),
+	4: Vector2(32, 64),  5: Vector2(8, 56),
+	6: Vector2(0, 32),   7: Vector2(8, 8),
+}
+
 enum VisibilityState { UNEXPLORED, FOGGED, VISIBLE }
 
 # Texture cache (loaded once, shared by all tiles)
@@ -413,14 +422,34 @@ func _draw_road() -> void:
 	if road_level == 0:
 		return
 
-	var road_color = Color("#A9A9A9") if road_level == 1 else Color("#4B4B4B")
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return
 
-	# Draw simple cross pattern for road
 	var center = Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
-	var half = TILE_SIZE / 2
+	var road_color = Color(0.72, 0.60, 0.40)
+	var railroad_color = Color(0.35, 0.35, 0.35)
+	var road_width = 2.5
+	var railroad_width = 3.5
 
-	draw_line(Vector2(0, center.y), Vector2(TILE_SIZE, center.y), road_color, 3.0)
-	draw_line(Vector2(center.x, 0), Vector2(center.x, TILE_SIZE), road_color, 3.0)
+	var connections = 0
+	for dir in GridUtils.ALL_DIRECTIONS:
+		var n_pos = grid_position + GridUtils.DIRECTION_VECTORS[dir]
+		var n_tile = grid.get_tile(n_pos)
+		if n_tile == null or n_tile.road_level == 0:
+			continue
+		connections += 1
+		var edge_point = EDGE_MIDPOINTS[dir]
+		if road_level >= 2 and n_tile.road_level >= 2:
+			draw_line(center, edge_point, railroad_color, railroad_width, true)
+		else:
+			draw_line(center, edge_point, road_color, road_width, true)
+
+	# Junction circle for 3+ connections, or dot for isolated road
+	if connections == 0:
+		draw_circle(center, 3.0, road_color if road_level == 1 else railroad_color)
+	elif connections >= 3:
+		draw_circle(center, road_width * 0.8, road_color if road_level == 1 else railroad_color)
 
 func _draw_rivers() -> void:
 	if river_edges.is_empty():
@@ -430,23 +459,10 @@ func _draw_rivers() -> void:
 	var width = 4.0
 	var center = Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
 
-	# Edge midpoints — where rivers exit each tile edge
-	# 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW
-	var edge_midpoints = {
-		0: Vector2(32, 0),
-		1: Vector2(56, 8),
-		2: Vector2(64, 32),
-		3: Vector2(56, 56),
-		4: Vector2(32, 64),
-		5: Vector2(8, 56),
-		6: Vector2(0, 32),
-		7: Vector2(8, 8),
-	}
-
 	# Draw line from center to each river edge midpoint
 	for edge in river_edges:
-		if edge in edge_midpoints:
-			draw_line(center, edge_midpoints[edge], river_color, width, true)
+		if edge in EDGE_MIDPOINTS:
+			draw_line(center, EDGE_MIDPOINTS[edge], river_color, width, true)
 
 	# Draw a circle at center if 2+ edges (river confluence)
 	if river_edges.size() >= 2:
