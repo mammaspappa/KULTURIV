@@ -15,15 +15,16 @@ var game_ended: bool = false
 # Multiplayer simultaneous turn mode
 var simultaneous_mode: bool = false
 
-# Year progression (Civ4 style)
+# Year progression (BTS-style, Normal speed base — scaled by speed multiplier).
+# Designed so 4000 BC reaches ~2050 AD at turn 500 (Normal speed).
+# Quick/Epic/Marathon scale turn thresholds automatically.
 const YEAR_PROGRESSION = [
-	{"until_turn": 50, "years_per_turn": 40},    # Ancient: 40 years/turn
-	{"until_turn": 100, "years_per_turn": 25},   # Classical: 25 years/turn
-	{"until_turn": 150, "years_per_turn": 20},   # Medieval: 20 years/turn
-	{"until_turn": 200, "years_per_turn": 10},   # Renaissance: 10 years/turn
-	{"until_turn": 280, "years_per_turn": 5},    # Industrial: 5 years/turn
-	{"until_turn": 350, "years_per_turn": 2},    # Modern: 2 years/turn
-	{"until_turn": 9999, "years_per_turn": 1},   # Future: 1 year/turn
+	{"until_turn": 50, "years_per_turn": 60},    # Ancient: 4000 BC → 1000 BC
+	{"until_turn": 100, "years_per_turn": 25},   # Classical: 1000 BC → 250 AD
+	{"until_turn": 200, "years_per_turn": 10},   # Medieval: 250 AD → 1250 AD
+	{"until_turn": 300, "years_per_turn": 5},    # Renaissance: 1250 AD → 1750 AD
+	{"until_turn": 400, "years_per_turn": 2},    # Industrial: 1750 AD → 1950 AD
+	{"until_turn": 9999, "years_per_turn": 1},   # Modern/Future: 1950 AD → 2050+ AD
 ]
 
 func _ready() -> void:
