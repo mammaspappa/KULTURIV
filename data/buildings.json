@@ -184,7 +184,7 @@
     "cost": 60,
     "maintenance": 1,
     "required_tech": "horseback_riding",
-    "requires_resource": "horses",
+    "requires_resource": "horse",
     "effects": {
       "mounted_experience": 2
     },
@@ -979,7 +979,7 @@
     "era": "industrial",
     "cost": 800,
     "maintenance": 0,
-    "required_tech": "military_science",
+    "required_tech": "military_tradition",
     "requires_building": "barracks",
     "requires_great_general": true,
     "wonder_type": "national",
@@ -1007,7 +1007,7 @@
     "era": "ancient",
     "cost": 0,
     "maintenance": 0,
-    "required_tech": "meditation",
+    "required_tech": "",
     "requires_holy_city": "buddhism",
     "requires_great_prophet": true,
     "effects": {
@@ -1021,7 +1021,7 @@
     "era": "ancient",
     "cost": 0,
     "maintenance": 0,
-    "required_tech": "polytheism",
+    "required_tech": "",
     "requires_holy_city": "hinduism",
     "requires_great_prophet": true,
     "effects": {
@@ -1035,7 +1035,7 @@
     "era": "ancient",
     "cost": 0,
     "maintenance": 0,
-    "required_tech": "monotheism",
+    "required_tech": "",
     "requires_holy_city": "judaism",
     "requires_great_prophet": true,
     "effects": {
@@ -1049,7 +1049,7 @@
     "era": "ancient",
     "cost": 0,
     "maintenance": 0,
-    "required_tech": "code_of_laws",
+    "required_tech": "",
     "requires_holy_city": "confucianism",
     "requires_great_prophet": true,
     "effects": {
@@ -1063,7 +1063,7 @@
     "era": "medieval",
     "cost": 0,
     "maintenance": 0,
-    "required_tech": "theology",
+    "required_tech": "",
     "requires_holy_city": "christianity",
     "requires_great_prophet": true,
     "effects": {
@@ -1077,7 +1077,7 @@
     "era": "ancient",
     "cost": 0,
     "maintenance": 0,
-    "required_tech": "philosophy",
+    "required_tech": "",
     "requires_holy_city": "taoism",
     "requires_great_prophet": true,
     "effects": {
@@ -1091,7 +1091,7 @@
     "era": "medieval",
     "cost": 0,
     "maintenance": 0,
-    "required_tech": "divine_right",
+    "required_tech": "",
     "requires_holy_city": "islam",
     "requires_great_prophet": true,
     "effects": {
@@ -1659,7 +1659,7 @@
     "cost": 60,
     "maintenance": 1,
     "required_tech": "horseback_riding",
-    "requires_resource": "horses",
+    "requires_resource": "horse",
     "replaces": "stable",
     "civilization": "mongolia",
     "effects": {
