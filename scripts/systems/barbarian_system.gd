@@ -107,15 +107,14 @@ func _spawn_initial_camps() -> void:
 
 ## Try to spawn a new barbarian camp
 func _try_spawn_camp() -> void:
-	# Scale max camps with map size
-	var grid = GameManager.hex_grid
-	var map_tiles = grid.width * grid.height if grid else 800
-	var max_camps = clampi(map_tiles / 200, 3, MAX_CAMPS)
-	if barbarian_camps.size() >= max_camps:
-		return
-
 	var grid = GameManager.hex_grid
 	if grid == null:
+		return
+
+	# Scale max camps with map size
+	var map_tiles = grid.width * grid.height
+	var max_camps = clampi(map_tiles / 200, 3, MAX_CAMPS)
+	if barbarian_camps.size() >= max_camps:
 		return
 
 	# Find valid position for camp
