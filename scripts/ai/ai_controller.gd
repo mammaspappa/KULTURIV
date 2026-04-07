@@ -679,7 +679,7 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 	if GameManager.hex_grid == null or GameManager.game_world == null:
 		return
 
-	# Safety: settlers should always have a military escort on the same tile
+	# Safety: settlers need escort when far from friendly cities
 	var has_escort = false
 	var units_here = GameManager.get_units_at(unit.grid_position)
 	for u in units_here:
@@ -687,12 +687,19 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 			has_escort = true
 			break
 
-	# If no escort, don't leave city — wait for one
-	if not has_escort:
+	# Check if we're close to a friendly city (safe zone)
+	var near_own_city = false
+	for city in player.cities:
+		if GridUtils.chebyshev_distance(unit.grid_position, city.grid_position) <= 3:
+			near_own_city = true
+			break
+
+	# If no escort and not in safe zone, retreat or wait
+	if not has_escort and not near_own_city:
 		var in_city = GameManager.get_city_at(unit.grid_position) != null
 		if in_city:
 			return  # Stay in city, wait for escort
-		# If out in the field without escort, retreat to nearest city
+		# Out in the wild without escort — retreat toward nearest city
 		var nearest_city_pos = Vector2i(-1, -1)
 		var best_dist = 999
 		for city in player.cities:
