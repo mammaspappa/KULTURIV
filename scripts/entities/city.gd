@@ -1057,10 +1057,16 @@ func can_build_building(building_id: String) -> bool:
 		if not GameManager.is_national_wonder_available(building_id, player_owner.player_id):
 			return false
 
-	# Required building
+	# Required building (singular legacy format)
 	var requires = building.get("requires_building", "")
 	if requires != "" and requires not in buildings:
 		return false
+
+	# Required buildings (BTS array format — all must be present)
+	var required_buildings = building.get("required_buildings", [])
+	for req_bld in required_buildings:
+		if req_bld not in buildings:
+			return false
 
 	# Exclusive buildings
 	var exclusive_with = building.get("exclusive_with", [])

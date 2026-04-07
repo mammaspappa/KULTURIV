@@ -206,7 +206,9 @@ func check_anomalies() -> void:
 		else:
 			negative_gold_turns[p.player_id] = 0
 
-		# Empty production
+		# Empty production (skip base barbarian player — camp cities don't produce)
+		if p.civilization_id == "barbarian" and p.player_id == -1:
+			continue
 		for city in p.cities:
 			var key = "%s_%s" % [p.player_name, city.city_name]
 			if city.current_production == "":

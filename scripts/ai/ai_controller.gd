@@ -1530,7 +1530,10 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	match tech_id:
 		"mathematics": score += 30 * (science_flavor / 5.0)  # Chop bonus, catapults
 		"currency": score += 35 * (gold_flavor / 5.0)  # Trade routes, gold
-		"code_of_laws": score += 25 * (gold_flavor / 5.0)  # Courthouses for expansion
+		"code_of_laws":
+			# Courthouses scale with city count — urgent for wide empires
+			var cities_bonus = min(player.cities.size() * 5, 30)
+			score += (25 + cities_bonus) * (gold_flavor / 5.0)
 
 	# Military beeline (aggressive leaders)
 	if military_flavor >= HIGH_FLAVOR:
