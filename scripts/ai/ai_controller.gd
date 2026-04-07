@@ -1148,6 +1148,34 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	var siege_ratio = float(siege_count) / max(military_units, 1)
 	var needs_siege = not player.at_war_with.is_empty() and siege_ratio < 0.3 and military_units >= 3
 
+	# Need at least 1 worker early on
+	if workers == 0 and num_cities >= 1:
+		if city.can_build_unit("worker"):
+			city.set_production("worker")
+			return
+
+	# Urgent military: if below minimum garrison (1 per city), build military first
+	var garrison_minimum = num_cities
+	if need_military and military_units < garrison_minimum:
+		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege)
+		if unit_to_build != "":
+			city.set_production(unit_to_build)
+			return
+
+	# Build infrastructure early — every city should have key buildings before more military
+	# Check if this city has basic infrastructure (granary, library, etc.)
+	var has_basic_infra = false
+	for bld in ["granary", "library", "monument", "barracks"]:
+		if bld in city.buildings:
+			has_basic_infra = true
+			break
+	if not has_basic_infra and city.population >= 2:
+		var building_to_build = _get_best_building_for_specialization(city, player, flavor, specialization)
+		if building_to_build != "":
+			city.set_production(building_to_build)
+			return
+
+	# More military if needed
 	if need_military:
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege)
 		if unit_to_build != "":
@@ -1160,14 +1188,14 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production("settler")
 			return
 
-	# Need worker?
-	var desired_workers = max(1, num_cities)
+	# Need more workers? (1 per 2 cities)
+	var desired_workers = max(1, (num_cities + 1) / 2)
 	if workers < desired_workers:
 		if city.can_build_unit("worker"):
 			city.set_production("worker")
 			return
 
-	# Build infrastructure based on flavor AND specialization
+	# Build more infrastructure (wonders, temples, markets, etc.)
 	var building_to_build = _get_best_building_for_specialization(city, player, flavor, specialization)
 	if building_to_build != "":
 		city.set_production(building_to_build)
