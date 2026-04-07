@@ -9,6 +9,7 @@ var leader_id: String = ""
 var is_human: bool = false
 var team: int = -1
 var color: Color = Color.WHITE
+var peer_id: int = -1  # Network peer ID (multiplayer only)
 
 # Resources
 var gold: int = 0
@@ -710,6 +711,7 @@ func to_dict() -> Dictionary:
 		"espionage_rate": espionage_rate,
 		"vassals": vassals,
 		"master_id": master_id,
+		"peer_id": peer_id,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -741,3 +743,4 @@ func from_dict(data: Dictionary) -> void:
 	espionage_rate = data.get("espionage_rate", 0.0)
 	vassals.assign(data.get("vassals", []))
 	master_id = data.get("master_id", -1)
+	peer_id = data.get("peer_id", -1)

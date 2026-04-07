@@ -3,6 +3,7 @@ extends Node2D
 ## Main game world manager. Handles the game grid, units, cities, and player interaction.
 
 const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
+const MpAction = preload("res://scripts/multiplayer/mp_action.gd")
 
 # Child nodes (initialized in _ready, either from scene tree or created dynamically)
 var grid_layer: Node2D = null
@@ -92,10 +93,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_SPACE:
 				if selected_unit:
-					selected_unit.skip_turn()
+					if GameManager.is_multiplayer():
+						var idx = GameManager.get_local_player().units.find(selected_unit)
+						NetworkManager.request_action.rpc_id(1, MpAction.create(MpAction.ActionType.SKIP_UNIT, {"unit_index": idx}))
+					else:
+						selected_unit.skip_turn()
 			KEY_F:
 				if selected_unit:
-					selected_unit.fortify()
+					if GameManager.is_multiplayer():
+						var idx = GameManager.get_local_player().units.find(selected_unit)
+						NetworkManager.request_action.rpc_id(1, MpAction.create(MpAction.ActionType.FORTIFY_UNIT, {"unit_index": idx}))
+					else:
+						selected_unit.fortify()
 			KEY_ENTER, KEY_KP_ENTER:
 				TurnManager.end_turn()
 			KEY_T:
@@ -104,7 +113,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				# Build: found city for settlers, build improvements for workers
 				if selected_unit:
 					if selected_unit.can_found_city():
-						found_city(selected_unit)
+						if GameManager.is_multiplayer():
+							var idx = GameManager.get_local_player().units.find(selected_unit)
+							NetworkManager.request_action.rpc_id(1, MpAction.create(MpAction.ActionType.FOUND_CITY, {"unit_index": idx}))
+						else:
+							found_city(selected_unit)
 					elif selected_unit.can_build_improvements():
 						_show_build_menu()
 			KEY_F5:
@@ -212,12 +225,13 @@ func _handle_left_click(screen_pos: Vector2) -> void:
 	var clicked_city = GameManager.get_city_at(grid_pos)
 
 	# If clicking on own unit, select it
-	if clicked_unit and clicked_unit.player_owner == GameManager.human_player:
+	var local_player = GameManager.get_local_player()
+	if clicked_unit and clicked_unit.player_owner == local_player:
 		_select_unit(clicked_unit)
 		return
 
 	# If clicking on own city, select it
-	if clicked_city and clicked_city.player_owner == GameManager.human_player:
+	if clicked_city and clicked_city.player_owner == local_player:
 		_select_city(clicked_city)
 		return
 
@@ -245,7 +259,15 @@ func _handle_right_click(screen_pos: Vector2) -> void:
 		# Attack enemy
 		if target_unit and target_unit.player_owner != selected_unit.player_owner:
 			if selected_unit.can_attack(target_unit):
-				_attack_unit(selected_unit, target_unit)
+				if GameManager.is_multiplayer():
+					var unit_index = GameManager.get_local_player().units.find(selected_unit)
+					NetworkManager.request_action.rpc_id(1, MpAction.create(
+						MpAction.ActionType.ATTACK_UNIT, {
+							"unit_index": unit_index,
+							"target_pos": {"x": grid_pos.x, "y": grid_pos.y},
+						}))
+				else:
+					_attack_unit(selected_unit, target_unit)
 				return
 
 		# Move to position
@@ -254,21 +276,29 @@ func _handle_right_click(screen_pos: Vector2) -> void:
 			if grid_pos == selected_unit.grid_position:
 				return
 
-			var grid = game_grid if game_grid != null else GameManager.hex_grid
-			if grid == null:
-				return
+			if GameManager.is_multiplayer():
+				var unit_index = GameManager.get_local_player().units.find(selected_unit)
+				NetworkManager.request_action.rpc_id(1, MpAction.create(
+					MpAction.ActionType.MOVE_UNIT, {
+						"unit_index": unit_index,
+						"target_pos": {"x": grid_pos.x, "y": grid_pos.y},
+					}))
+			else:
+				var grid = game_grid if game_grid != null else GameManager.hex_grid
+				if grid == null:
+					return
 
-			# Always use pathfinding for movement - simpler and more reliable
-			var pathfinder = PathfindingClass.new(grid, selected_unit)
-			var path = pathfinder.find_path_with_movement(selected_unit.grid_position, grid_pos, selected_unit.movement_remaining)
-			if not path.is_empty():
-				selected_unit.move_along_path(path)
-				_update_reachable_tiles()
+				# Always use pathfinding for movement - simpler and more reliable
+				var pathfinder = PathfindingClass.new(grid, selected_unit)
+				var path = pathfinder.find_path_with_movement(selected_unit.grid_position, grid_pos, selected_unit.movement_remaining)
+				if not path.is_empty():
+					selected_unit.move_along_path(path)
+					_update_reachable_tiles()
 
-				# If destination not reached, set GOTO order for multi-turn movement
-				if selected_unit.grid_position != grid_pos:
-					selected_unit.current_order = selected_unit.UnitOrder.GOTO
-					selected_unit.order_target = grid_pos
+					# If destination not reached, set GOTO order for multi-turn movement
+					if selected_unit.grid_position != grid_pos:
+						selected_unit.current_order = selected_unit.UnitOrder.GOTO
+						selected_unit.order_target = grid_pos
 			return
 
 func _get_unit_at_screen_pos(grid_pos: Vector2i) -> Unit:

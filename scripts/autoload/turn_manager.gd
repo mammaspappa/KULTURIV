@@ -12,6 +12,9 @@ var current_year: int = -4000
 var is_processing: bool = false
 var game_ended: bool = false
 
+# Multiplayer simultaneous turn mode
+var simultaneous_mode: bool = false
+
 # Year progression (Civ4 style)
 const YEAR_PROGRESSION = [
 	{"until_turn": 50, "years_per_turn": 40},    # Ancient: 40 years/turn
@@ -43,12 +46,29 @@ func start_game() -> void:
 	current_year = -4000
 	game_ended = false
 	_update_all_connectivity()
-	_start_turn_for_player(GameManager.get_current_player())
+
+	if simultaneous_mode:
+		_start_simultaneous_turn()
+	else:
+		_start_turn_for_player(GameManager.get_current_player())
 
 func end_turn() -> void:
 	if is_processing or game_ended:
 		return
 
+	if simultaneous_mode:
+		# In multiplayer: notify server that local player is done
+		if NetworkManager.is_multiplayer and not NetworkManager.is_server:
+			NetworkManager.request_end_turn.rpc_id(1)
+		elif NetworkManager.is_server:
+			# Server-side: mark the local/host player as done
+			var local_id = NetworkManager.get_local_player_id()
+			if local_id >= 0 and local_id not in NetworkManager.players_ended_turn:
+				NetworkManager.players_ended_turn.append(local_id)
+				NetworkManager._check_all_turns_ended()
+		return
+
+	# Singleplayer: sequential turn processing (unchanged)
 	var current_player = GameManager.get_current_player()
 	if current_player == null:
 		return
@@ -594,3 +614,148 @@ func _update_all_connectivity() -> void:
 		if player.cities.is_empty():
 			continue
 		player.update_connectivity()
+
+# =============================================================================
+# SIMULTANEOUS TURN MODE (Multiplayer)
+# =============================================================================
+
+## Start a simultaneous turn: refresh movement for ALL human players at once
+func _start_simultaneous_turn() -> void:
+	if game_ended:
+		return
+
+	for player in GameManager.players:
+		if player.civilization_id == "barbarian" and player.player_id == -1:
+			continue  # Barbarians processed in between-turns
+
+		if player.is_human:
+			# Process worker builds (before refreshing movement)
+			for unit in player.units:
+				if unit.current_order == UnitClass.UnitOrder.BUILD:
+					ImprovementSystem.process_build(unit)
+
+			# Refresh movement
+			for unit in player.units:
+				unit.refresh_movement()
+				unit.has_acted = false
+
+			# Process automated workers
+			for unit in player.units:
+				if unit.current_order == UnitClass.UnitOrder.AUTOMATE:
+					unit.process_automation()
+
+			# Process GOTO orders
+			for unit in player.units:
+				if unit.current_order == UnitClass.UnitOrder.GOTO and unit.can_move():
+					_process_goto_order(unit)
+
+			# Refresh visibility
+			VisibilitySystem.refresh_visibility(player)
+
+			EventBus.turn_started.emit(current_turn, player)
+
+## Server-side: process between-turns after all humans have ended
+## Runs city production, research, culture, healing, AI, and round completion.
+func process_between_turns_mp() -> void:
+	if game_ended:
+		return
+
+	is_processing = true
+	turn_processing_started.emit()
+
+	# End turn for all human players (healing, golden age, etc.)
+	for player in GameManager.players:
+		if player.is_human:
+			_end_turn_for_player(player)
+
+	# Process barbarians
+	for player in GameManager.players:
+		if player.civilization_id == "barbarian" and player.player_id == -1:
+			for unit in player.units:
+				unit.refresh_movement()
+				unit.has_acted = false
+			BarbarianSystem._process_barbarian_ai()
+
+	# Process AI players
+	for player in GameManager.players:
+		if player.civilization_id == "barbarian" and player.player_id == -1:
+			continue
+		if not player.is_human:
+			_start_turn_for_player_mp(player)
+			_end_turn_for_player(player)
+
+	# Process city turns for ALL players (human cities already had actions taken)
+	for player in GameManager.players:
+		if player.civilization_id == "barbarian" and player.player_id == -1:
+			continue
+		for city in player.cities:
+			_process_city_turn_start(city)
+		_process_gold(player)
+		_process_research(player)
+		_process_espionage(player)
+
+	# Complete round
+	_complete_round_mp()
+
+	is_processing = false
+	turn_processing_finished.emit()
+
+## Start turn for an AI player in simultaneous mode
+func _start_turn_for_player_mp(player) -> void:
+	if player == null or game_ended:
+		return
+
+	# Process worker builds
+	for unit in player.units:
+		if unit.current_order == UnitClass.UnitOrder.BUILD:
+			ImprovementSystem.process_build(unit)
+
+	# Refresh movement
+	for unit in player.units:
+		unit.refresh_movement()
+		unit.has_acted = false
+
+	# Process automated workers
+	for unit in player.units:
+		if unit.current_order == UnitClass.UnitOrder.AUTOMATE:
+			unit.process_automation()
+
+	# Process GOTO orders
+	for unit in player.units:
+		if unit.current_order == UnitClass.UnitOrder.GOTO and unit.can_move():
+			_process_goto_order(unit)
+
+	# Refresh visibility
+	VisibilitySystem.refresh_visibility(player)
+
+	# Execute AI
+	_execute_ai_turn(player)
+
+## Complete round in simultaneous mode (no sequential player cycling)
+func _complete_round_mp() -> void:
+	GameManager.current_player_index = 0
+	_ai_bonus_cache = {}
+
+	_update_all_connectivity()
+	_process_culture_ownership()
+	_check_culture_flipping()
+
+	current_turn += 1
+	_advance_year()
+
+	EventBus.all_turns_completed.emit(current_turn)
+
+	# Check victory
+	var victory = VictorySystem.check_victory()
+	if not victory.is_empty() and victory.get("achieved", false):
+		if GameManager.current_game_state:
+			GameManager.current_game_state.victory_achieved = true
+			GameManager.current_game_state.victory_type = victory.type
+			GameManager.current_game_state.winner_player_id = victory.player.player_id
+		game_ended = true
+		EventBus.victory_achieved.emit(victory.player, victory.type)
+		EventBus.game_over.emit(victory.player, victory.type)
+		return
+
+	# Start next simultaneous turn
+	_start_simultaneous_turn()
