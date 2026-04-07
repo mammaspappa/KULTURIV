@@ -148,6 +148,11 @@ func _expel_unit(unit, territory_owner) -> void:
 	if grid == null:
 		return
 
+	# Prevent infinite expulsion loops — skip if already expelled this turn
+	var current_turn = TurnManager.current_turn if TurnManager else 0
+	if unit.has_meta("expelled_turn") and unit.get_meta("expelled_turn") == current_turn:
+		return
+
 	var current_pos = unit.grid_position
 	var best_pos: Vector2i = Vector2i(-1, -1)
 	var best_distance = INF
@@ -177,12 +182,13 @@ func _expel_unit(unit, territory_owner) -> void:
 			break
 
 	# Teleport unit to the best position
-	if best_pos.x >= 0:
+	if best_pos.x >= 0 and best_pos != current_pos:
 		unit.teleport_to(best_pos)
 		# Unit loses all movement after being expelled
 		unit.movement_remaining = 0
 		unit.has_acted = true
-		print("[BorderSystem] Unit %s expelled from %s territory to %s" % [unit.unit_id, territory_owner.player_name, best_pos])
+		# Mark as expelled this turn to prevent infinite loops
+		unit.set_meta("expelled_turn", TurnManager.current_turn if TurnManager else -1)
 	else:
 		# No valid tile found - this shouldn't normally happen
 		# As a fallback, try to find the unit's nearest city
