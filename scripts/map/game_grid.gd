@@ -568,18 +568,36 @@ func find_starting_location(avoid_positions: Array[Vector2i], min_distance: int 
 	if min_distance < 0:
 		min_distance = max(8, int(sqrt(width * height) / 4))
 
-	var best_pos = Vector2i(width / 2, height / 2)
-	var best_score = -999.0
-	var attempts = 0
-	var max_attempts = 2000
+	# Try with progressively lower min_distance until we find a valid spot
+	var current_min_dist = min_distance
+	while current_min_dist >= 3:
+		var result = _find_start_with_distance(avoid_positions, current_min_dist)
+		if result != Vector2i(-1, -1):
+			return result
+		current_min_dist -= 2  # Reduce distance and try again
 
-	while attempts < max_attempts:
+	# Last resort: any passable land tile not already taken
+	for _attempt in range(500):
+		var x = randi() % width
+		var y = randi() % (height - 4) + 2
+		var pos = Vector2i(x, y)
+		var tile = get_tile(pos)
+		if tile and tile.is_passable() and not tile.is_water() and pos not in avoid_positions:
+			return pos
+
+	return Vector2i(width / 2, height / 2)
+
+func _find_start_with_distance(avoid_positions: Array[Vector2i], min_distance: int) -> Vector2i:
+	var best_pos = Vector2i(-1, -1)
+	var best_score = -999.0
+	var max_attempts = 1500
+
+	for _attempt in range(max_attempts):
 		var x = randi() % width
 		var y = randi() % (height - 10) + 5  # Avoid poles
 
 		var pos = Vector2i(x, y)
 		var tile = get_tile(pos)
-		attempts += 1
 
 		if tile == null or not tile.is_passable() or tile.is_water():
 			continue
