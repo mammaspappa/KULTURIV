@@ -12,12 +12,12 @@ const CAMP_CITY_DISTANCE = 6   # Minimum distance from any city
 const MAX_CAMPS = 15           # Maximum number of barbarian camps on map
 const UNIT_SPAWN_INTERVAL = 5  # Turns between unit spawns per camp
 
-# Barbarian city founding
-const CITY_FOUNDING_MIN_TURN = 75       # ~1000 BC: earliest barbarian cities
-const CITY_FOUNDING_CHECK_INTERVAL = 5  # Check every 5 turns
+# Barbarian city founding (base values for Normal speed, standard map)
+const CITY_FOUNDING_BASE_MIN_TURN = 75  # ~1000 BC on Normal speed
+const CITY_FOUNDING_BASE_INTERVAL = 5   # Check interval on Normal speed
 const CITY_FOUNDING_BASE_CHANCE = 0.08  # 8% base chance per eligible camp
 const CITY_FOUNDING_SCORE_BONUS = 0.005 # Extra chance per city site score point
-const MAX_BARBARIAN_CIVS = 3            # Max barbarian civilizations that can spawn
+const MAX_BARBARIAN_CIVS_BASE = 3       # Max barb civs on standard map
 
 # Barbarian camp data
 var barbarian_camps: Array = []  # Array of Vector2i positions
@@ -72,7 +72,9 @@ func _on_turn_ended(_turn_number: int, player) -> void:
 	_process_barbarian_ai()
 
 	# Check for barbarian city founding (BTS: camps evolve into aggressive civs)
-	if TurnManager.current_turn >= CITY_FOUNDING_MIN_TURN and TurnManager.current_turn % CITY_FOUNDING_CHECK_INTERVAL == 0:
+	var min_turn = _get_scaled_min_turn()
+	var interval = _get_scaled_interval()
+	if TurnManager.current_turn >= min_turn and TurnManager.current_turn % interval == 0:
 		_try_found_barbarian_city()
 
 ## Ensure barbarian player exists
@@ -459,9 +461,24 @@ func get_camp_positions() -> Array:
 # BTS mechanic: camps in fog of war can evolve into aggressive barbarian civs.
 # Better locations have higher chance. The new civ is permanently hostile.
 
+## Get min turn scaled by game speed (Marathon=3x more turns, Quick=0.67x)
+func _get_scaled_min_turn() -> int:
+	return int(CITY_FOUNDING_BASE_MIN_TURN * GameManager.get_speed_multiplier())
+
+## Get check interval scaled by game speed
+func _get_scaled_interval() -> int:
+	return max(1, int(CITY_FOUNDING_BASE_INTERVAL * GameManager.get_speed_multiplier()))
+
+## Get max barbarian civs scaled by map size
+func _get_max_barbarian_civs() -> int:
+	var map_tiles = GameManager.map_width * GameManager.map_height
+	# Standard map ~4000 tiles = 3 civs, larger maps get more, smaller get fewer
+	var scale = float(map_tiles) / 4000.0
+	return clampi(int(MAX_BARBARIAN_CIVS_BASE * scale), 1, 6)
+
 ## Try to found a barbarian city from an eligible camp
 func _try_found_barbarian_city() -> void:
-	if barbarian_civ_count >= MAX_BARBARIAN_CIVS:
+	if barbarian_civ_count >= _get_max_barbarian_civs():
 		return
 
 	var grid = GameManager.hex_grid
