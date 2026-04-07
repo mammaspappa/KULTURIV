@@ -1144,8 +1144,8 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	if specialization == CitySpecialization.MILITARY:
 		desired_military *= 1.5
 
-	# Hard cap: never exceed cities*4+6 military units
-	var max_military = num_cities * 4 + 6
+	# Hard cap: scale with cities but don't over-build
+	var max_military = num_cities * 3 + 3
 	# Economic cap: don't build more military if going broke
 	var free_supply = num_cities + 2
 	if player.gold <= 0 and military_units > free_supply:
@@ -1229,8 +1229,8 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		city.set_production(project_to_build)
 		return
 
-	# Default: build military if under cap
-	if military_units < max_military:
+	# Default: build military only if at war or significantly under garrison
+	if military_units < max_military and (not player.at_war_with.is_empty() or military_units < num_cities):
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
@@ -1367,17 +1367,13 @@ func _manage_science_rate(player) -> void:
 				break
 	elif player.science_rate < max_science:
 		# Try to maximize science while staying solvent
-		# Be aggressive: increase until gpt would go negative or we hit a reasonable reserve
-		var target_gold_reserve = 50 + player.cities.size() * 10
 		while player.science_rate < max_science:
 			var old_rate = player.science_rate
 			player.science_rate = min(max_science, player.science_rate + 0.1)
 			for city in player.cities:
 				city.calculate_yields()
 			est_gpt = _estimate_gold_per_turn(player)
-			# Allow slightly negative gpt if we have gold reserves
-			var min_gpt = -2 if player.gold > target_gold_reserve else 0
-			if est_gpt < min_gpt:
+			if est_gpt < 0:
 				player.science_rate = old_rate
 				for city in player.cities:
 					city.calculate_yields()
