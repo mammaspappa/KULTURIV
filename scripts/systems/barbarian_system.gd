@@ -208,6 +208,13 @@ func _process_camp_spawning() -> void:
 	if barbarian_player == null:
 		return
 
+	# Global barbarian unit cap (same as spontaneous spawn)
+	var grid = GameManager.hex_grid
+	var map_tiles = grid.width * grid.height if grid else 800
+	var max_barb_units = clampi(map_tiles / 100, 4, 12)
+	if barbarian_player.units.size() >= max_barb_units:
+		return
+
 	for camp_pos in barbarian_camps:
 		# Check if camp still exists
 		var tile = GameManager.hex_grid.get_tile(camp_pos)

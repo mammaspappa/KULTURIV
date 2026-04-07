@@ -231,6 +231,13 @@ func _process_diplomacy(player, flavor: Dictionary) -> void:
 
 ## Consider making peace or capitulating (BTS personality-driven)
 func _consider_peace(player, other, military_flavor: int) -> void:
+	# Don't consider any peace (including capitulation) in the first 10 turns of war
+	var war_key = "%d:%d" % [player.player_id, other.player_id]
+	var war_start = peace_cooldown.get("war_start_" + war_key, 0)
+	var min_war_turns = int(10 * GameManager.get_speed_multiplier())
+	if TurnManager.current_turn - war_start < min_war_turns:
+		return
+
 	# Check if AI should offer capitulation (become vassal)
 	if DiplomacySystem.should_offer_capitulation(player, other):
 		player.become_vassal_of(other.player_id)
@@ -241,13 +248,6 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 		return
 
 	var personality = _get_leader_personality(player)
-
-	# Don't consider peace in the first 10 turns of war (scaled by game speed)
-	var war_key = "%d:%d" % [player.player_id, other.player_id]
-	var war_start = peace_cooldown.get("war_start_" + war_key, 0)
-	var min_war_turns = int(10 * GameManager.get_speed_multiplier())
-	if TurnManager.current_turn - war_start < min_war_turns:
-		return
 
 	# BTS make_peace_rand: roll each turn — higher = more willing to consider peace
 	if randi() % max(int(personality.make_peace_rand), 1) != 0:
@@ -1135,8 +1135,8 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if u.can_found_city():
 			settlers_out += 1
 
-	# Early expansion: settler from capital when only 1 city (need at least 1 military first)
-	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 1:
+	# Early expansion: settler from capital when only 1 city (need escort available)
+	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 2:
 		if city.can_build_unit("settler"):
 			city.set_production("settler")
 			return
@@ -1209,7 +1209,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if c.current_production == "settler":
 			settlers_in_production += 1
 	if num_cities < max_cities and settlers_out == 0 and settlers_in_production == 0:
-		if city.population >= 3 and military_units >= num_cities:
+		if city.population >= 3 and military_units >= num_cities * 2:
 			if city.can_build_unit("settler"):
 				city.set_production("settler")
 				return
