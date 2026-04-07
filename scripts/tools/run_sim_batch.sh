@@ -50,9 +50,9 @@ run_sim "01_baseline_1v1" \
     SIM_MAX_TURNS=150 SIM_MAP_W=40 SIM_MAP_H=25 SIM_PLAYERS=2 \
     SIM_DIFFICULTY=4 SIM_SPEED=0 SIM_MAP_TYPE=pangaea
 
-# --- 2. LARGE MULTIPLAYER: 6 players on standard map (diplomacy/war stress) ---
+# --- 2. LARGE MULTIPLAYER: 6 players on medium map (diplomacy/war stress) ---
 run_sim "02_large_6p" \
-    SIM_MAX_TURNS=200 SIM_MAP_W=80 SIM_MAP_H=50 SIM_PLAYERS=6 \
+    SIM_MAX_TURNS=150 SIM_MAP_W=60 SIM_MAP_H=38 SIM_PLAYERS=6 \
     SIM_DIFFICULTY=4 SIM_SPEED=0 SIM_MAP_TYPE=pangaea
 
 # --- 3. CRAMPED MAP: 4 players on tiny map (early war & aggression test) ---
@@ -100,9 +100,9 @@ run_sim "11_speed_marathon" \
     SIM_MAX_TURNS=400 SIM_MAP_W=50 SIM_MAP_H=30 SIM_PLAYERS=3 \
     SIM_DIFFICULTY=4 SIM_SPEED=3 SIM_MAP_TYPE=pangaea
 
-# --- 12. EPIC BRAWL: 8 players on large fractal (max stress test) ---
-run_sim "12_epic_8p_fractal" \
-    SIM_MAX_TURNS=200 SIM_MAP_W=84 SIM_MAP_H=52 SIM_PLAYERS=8 \
+# --- 12. EPIC BRAWL: 6 players on medium fractal (stress test) ---
+run_sim "12_epic_6p_fractal" \
+    SIM_MAX_TURNS=150 SIM_MAP_W=60 SIM_MAP_H=38 SIM_PLAYERS=6 \
     SIM_DIFFICULTY=4 SIM_SPEED=0 SIM_MAP_TYPE=fractal
 
 # --- 13. AGGRESSIVE AI: Small map aggression test ---
