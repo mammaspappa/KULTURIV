@@ -381,9 +381,9 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	var our_power = DiplomacySystem._calculate_power(player)
 	var their_power = DiplomacySystem._calculate_power(other)
 
-	# Required power ratio: aggressive need only equal power, peaceful need big advantage
-	var required_ratio = 1.0 + personality.base_peace_weight * 0.1
-	required_ratio = clamp(required_ratio, 1.0, 2.0)
+	# Required power ratio: aggressive need only equal power, peaceful need some advantage
+	var required_ratio = 0.8 + personality.base_peace_weight * 0.06
+	required_ratio = clamp(required_ratio, 0.8, 1.5)
 
 	# Dogpile bonus: if target is already at war, we need less advantage
 	var target_at_war = other.at_war_with.size() > 0
@@ -392,9 +392,9 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 		if randi() % max(dogpile_chance, 1) == 0:
 			required_ratio *= 0.7  # Much lower bar for dogpiling
 
-	# Warmonger respect: leaders who respect strength don't attack stronger foes
-	if personality.warmonger_respect >= 2 and their_power > our_power:
-		return
+	# Warmonger respect: leaders who respect strength are less likely (not impossible)
+	if personality.warmonger_respect >= 2 and their_power > our_power * 1.2:
+		return  # Only back off against clearly stronger foes
 
 	if our_power > their_power * required_ratio:
 		# Check defensive pact allies
