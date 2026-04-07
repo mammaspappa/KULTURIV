@@ -355,6 +355,8 @@ func calculate_yields() -> void:
 	# Calculate science and culture
 	_calculate_science()
 	_calculate_culture()
+	# Add culture from commerce slider (calculated in _calculate_science, applied after _calculate_culture)
+	culture_yield += get_meta("culture_from_commerce") if has_meta("culture_from_commerce") else 0
 
 	# Add settled GP science/culture/gold bonuses after base calculation
 	science_yield += settled_gp_bonuses.get("science", 0)
@@ -370,19 +372,25 @@ func calculate_yields() -> void:
 	_calculate_health()
 
 func _calculate_science() -> void:
-	# Get science rate from player (percentage of commerce going to science)
-	var rate = 1.0  # Default 100%
+	# BTS commerce slider: split commerce between science, culture, espionage, and gold
+	var sci_rate = 1.0
+	var cult_rate = 0.0
+	var esp_rate = 0.0
 	if player_owner != null:
-		rate = player_owner.science_rate
+		sci_rate = player_owner.science_rate
+		cult_rate = player_owner.culture_rate
+		esp_rate = player_owner.espionage_rate
+	# Gold gets the remainder
+	var gold_rate = max(0.0, 1.0 - sci_rate - cult_rate - esp_rate)
 
-	# Base science from commerce (based on player's science slider)
-	science_yield = int(commerce_yield * rate)
+	# Base science from commerce
+	science_yield = int(commerce_yield * sci_rate)
 
 	# Specialist science bonus
 	var spec_commerces = get_specialist_commerces()
 	science_yield += spec_commerces.get("research", 0)
 
-	# Building bonuses
+	# Building science percentage bonuses
 	var science_percent = 0.0
 	for building_id in buildings:
 		if _is_building_obsolete(building_id):
@@ -392,20 +400,28 @@ func _calculate_science() -> void:
 
 	science_yield = int(science_yield * (1.0 + science_percent))
 
-	# Gold from remaining commerce (commerce not going to science)
-	# This follows Civ4 mechanics where commerce is split between science and gold
-	var gold_from_commerce = int(commerce_yield * (1.0 - rate))
-	# Add gold from buildings
+	# Gold from commerce remainder + buildings + shrines
+	var gold_from_commerce = int(commerce_yield * gold_rate)
 	var gold_bonus = 0
 	for building_id in buildings:
 		if _is_building_obsolete(building_id):
 			continue
 		var effects = DataManager.get_building_effects(building_id)
 		gold_bonus += effects.get("gold", 0)
-	# Add shrine income (gold per city with religion in holy city)
 	var shrine_gold = ReligionSystem.get_religious_gold(self)
-	# Store in a city property for reference (gold_yield)
 	gold_yield = gold_from_commerce + gold_bonus + shrine_gold
+
+	# Espionage from commerce slider (stored as meta, processed in turn_manager)
+	if esp_rate > 0:
+		set_meta("espionage_from_commerce", int(commerce_yield * esp_rate))
+	else:
+		set_meta("espionage_from_commerce", 0)
+
+	# Culture from commerce is stored temporarily, added after _calculate_culture()
+	if cult_rate > 0 and player_owner and player_owner.has_tech("drama"):
+		set_meta("culture_from_commerce", int(commerce_yield * cult_rate))
+	else:
+		set_meta("culture_from_commerce", 0)
 
 func _calculate_culture() -> void:
 	culture_yield = 0

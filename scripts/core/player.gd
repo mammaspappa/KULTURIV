@@ -15,6 +15,8 @@ var gold: int = 0
 var gold_per_turn: int = 0
 var science_per_turn: int = 0
 var science_rate: float = 1.0  # Percentage of commerce going to science (0.0 to 1.0)
+var culture_rate: float = 0.0  # Percentage of commerce going to culture (requires Drama tech)
+var espionage_rate: float = 0.0  # Percentage of commerce going to espionage
 
 # Research
 var researched_techs: Array[String] = []
@@ -691,6 +693,8 @@ func to_dict() -> Dictionary:
 		"traits": traits,
 		"has_ever_had_city": has_ever_had_city,
 		"science_rate": science_rate,
+		"culture_rate": culture_rate,
+		"espionage_rate": espionage_rate,
 		"vassals": vassals,
 		"master_id": master_id,
 	}
@@ -720,5 +724,7 @@ func from_dict(data: Dictionary) -> void:
 	traits.assign(data.get("traits", []))
 	has_ever_had_city = data.get("has_ever_had_city", false)
 	science_rate = data.get("science_rate", 1.0)
+	culture_rate = data.get("culture_rate", 0.0)
+	espionage_rate = data.get("espionage_rate", 0.0)
 	vassals.assign(data.get("vassals", []))
 	master_id = data.get("master_id", -1)

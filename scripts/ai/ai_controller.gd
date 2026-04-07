@@ -1329,11 +1329,35 @@ func _process_research(player, flavor: Dictionary) -> void:
 
 ## Manage science vs gold slider based on economic situation
 func _manage_science_rate(player) -> void:
+	# AI manages all commerce sliders: science, culture, espionage
+	# Culture slider: only when going for cultural victory or need borders
+	var flavor = _get_leader_flavor(player)
+	var culture_flavor = flavor.get("culture", 5)
+
+	# Culture slider — only available with Drama tech
+	if player.has_tech("drama") and culture_flavor >= HIGH_FLAVOR:
+		# High-culture AI allocates some commerce to culture
+		player.culture_rate = 0.1
+	else:
+		player.culture_rate = 0.0
+
+	# Espionage slider — allocate small amount if at war and have espionage flavor
+	if not player.at_war_with.is_empty() and player.met_players.size() > 0:
+		player.espionage_rate = 0.1
+	else:
+		player.espionage_rate = 0.0
+
+	# Science gets the rest minus culture and espionage
+	var max_science = 1.0 - player.culture_rate - player.espionage_rate
+
 	# Estimate current gold per turn at current science rate
+	player.science_rate = min(player.science_rate, max_science)
+	for city in player.cities:
+		city.calculate_yields()
 	var est_gpt = _estimate_gold_per_turn(player)
 
 	if player.gold <= 10 or est_gpt < -5:
-		# Need more gold — find break-even science rate
+		# Need more gold — reduce science to break even
 		while player.science_rate > 0.0:
 			player.science_rate = max(0.0, player.science_rate - 0.1)
 			for city in player.cities:
@@ -1341,10 +1365,10 @@ func _manage_science_rate(player) -> void:
 			est_gpt = _estimate_gold_per_turn(player)
 			if est_gpt >= 0 or player.science_rate <= 0.01:
 				break
-	elif player.gold > 100 and est_gpt >= 5 and player.science_rate < 1.0:
+	elif player.gold > 100 and est_gpt >= 5 and player.science_rate < max_science:
 		# Can afford more science — try increasing
 		var old_rate = player.science_rate
-		player.science_rate = min(1.0, player.science_rate + 0.1)
+		player.science_rate = min(max_science, player.science_rate + 0.1)
 		for city in player.cities:
 			city.calculate_yields()
 		# Verify it's still affordable

@@ -111,6 +111,9 @@ func _start_turn_for_player(player) -> void:
 	# Process research
 	_process_research(player)
 
+	# Process espionage (from buildings + commerce slider)
+	_process_espionage(player)
+
 	# Refresh visibility for the player (fog of war)
 	VisibilitySystem.refresh_visibility(player)
 	VisibilitySystem.update_all_tile_visuals()
@@ -289,19 +292,34 @@ func _process_gold(player) -> void:
 			capital_pos = city.grid_position
 			break
 
+	# Find secondary capitals (Forbidden Palace, Versailles)
+	var palace_positions = [capital_pos]
+	for city in player.cities:
+		for building_id in city.buildings:
+			var effects = DataManager.get_building_effects(building_id)
+			if effects.get("second_palace", false):
+				palace_positions.append(city.grid_position)
+
 	var city_maintenance = 0
 	for city in player.cities:
-		# Distance maintenance: 0.5 gold per tile from capital
-		var dist = GridUtils.chebyshev_distance(city.grid_position, capital_pos)
-		var dist_cost = int(dist * 0.5)
+		# Distance maintenance: use nearest capital/palace (BTS mechanic)
+		var min_dist = INF
+		for palace_pos in palace_positions:
+			var d = GridUtils.chebyshev_distance(city.grid_position, palace_pos)
+			if d < min_dist:
+				min_dist = d
+		var dist_cost = int(min_dist * 0.5)
 
-		# Check for civic that removes distance maintenance
+		# Check for civic that removes distance maintenance (State Property)
 		if CivicsSystem and CivicsSystem.has_civic_effect(player, "no_distance_maintenance"):
 			dist_cost = 0
 
-		# Courthouse reduces maintenance by 50%
-		if "courthouse" in city.buildings:
-			dist_cost = dist_cost / 2
+		# Courthouse/maintenance_reduction buildings reduce maintenance by 50%
+		for building_id in city.buildings:
+			var effects = DataManager.get_building_effects(building_id)
+			var reduction = effects.get("maintenance_reduction", 0.0)
+			if reduction > 0:
+				dist_cost = int(dist_cost * (1.0 - reduction))
 
 		# City count maintenance: 0.5 gold per total city
 		var count_cost = int((num_cities - 1) * 0.5)
@@ -335,8 +353,21 @@ func _process_gold(player) -> void:
 	else:
 		player.war_weariness = max(0, player.war_weariness - 2)
 
+	# --- Civic Upkeep (BTS: scales by number of cities and upkeep level) ---
+	var civic_upkeep = 0
+	if CivicsSystem:
+		civic_upkeep = CivicsSystem.get_civic_upkeep(player)
+		# BTS Organized trait: -50% civic upkeep
+		if player.has_trait("organized"):
+			civic_upkeep = civic_upkeep / 2
+
+	# --- Corporation Maintenance ---
+	var corp_maintenance = 0
+	if CorporationSystem:
+		corp_maintenance = CorporationSystem.calculate_player_maintenance(player)
+
 	# --- Total ---
-	var total_costs = city_maintenance + unit_supply_cost
+	var total_costs = city_maintenance + unit_supply_cost + civic_upkeep + corp_maintenance
 	player.gold_per_turn = total_gold - total_costs
 
 	# Add to player's gold treasury
@@ -378,6 +409,24 @@ func _process_research(player) -> void:
 
 	if player.research_progress >= cost:
 		player.complete_research()
+
+func _process_espionage(player) -> void:
+	if not EspionageSystem:
+		return
+
+	# Building-based espionage generation
+	var esp_points = EspionageSystem.calculate_espionage_generation(player)
+
+	# Commerce slider-based espionage
+	for city in player.cities:
+		if city.has_meta("espionage_from_commerce"):
+			esp_points += city.get_meta("espionage_from_commerce")
+
+	# Distribute espionage points to all known rivals (evenly for now)
+	if esp_points > 0 and not player.met_players.is_empty():
+		var per_target = max(1, esp_points / player.met_players.size())
+		for target_id in player.met_players:
+			EspionageSystem.add_espionage_points(player.player_id, target_id, per_target)
 
 func _process_culture_ownership() -> void:
 	# Resolve tile ownership based on culture values (BTS-style)
