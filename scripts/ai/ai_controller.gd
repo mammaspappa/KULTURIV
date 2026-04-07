@@ -1485,14 +1485,21 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	# === Strategic beelining bonuses (Civ4 BTS key tech paths) ===
 	var num_techs = player.researched_techs.size()
 
+	# Emergency: if player can only build warriors, STRONGLY boost first military tech
+	var has_military_tech = player.has_tech("archery") or player.has_tech("bronze_working")
+	if not has_military_tech and num_techs < 5:
+		match tech_id:
+			"archery": score += 50  # URGENT: need archers for defense
+			"bronze_working": score += 50  # URGENT: need axemen
+
 	# Early game priorities (< 10 techs researched)
 	if num_techs < 10:
 		match tech_id:
-			"bronze_working": score += 40  # Slavery civic + chopping + copper reveal + axeman
-			"archery": score += 30  # Archers for city defense — critical early military
-			"pottery": score += 30  # Granary is critical for growth, cottages for economy
+			"bronze_working": score += 35  # Slavery civic + chopping + copper reveal + axeman
+			"archery": score += 30  # Archers for city defense
+			"pottery": score += 25  # Granary for growth, cottages for economy
 			"the_wheel": score += 20  # Roads for connectivity
-			"writing": score += 25  # Libraries for research
+			"writing": score += 20  # Libraries for research
 			"animal_husbandry": score += 15  # Horse reveal
 			"hunting": score += 10  # Scouts, camps
 			"masonry": score += 10  # Walls for defense
