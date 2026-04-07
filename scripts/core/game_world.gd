@@ -174,15 +174,15 @@ func _place_starting_units() -> void:
 		var start_pos = game_grid.find_starting_location(start_positions)
 		start_positions.append(start_pos)
 
-		# Create settler
+		# BTS: Auto-found starting city (settler is consumed immediately)
 		var settler = Unit.new("settler", start_pos)
 		player.add_unit(settler)
 		entity_layer.add_child(settler)
 		settler._update_visibility()
+		found_city(settler)  # Immediately found city (consumes settler)
 
-		# Create warrior
-		var warrior_pos = _find_adjacent_land(start_pos)
-		var warrior = Unit.new("warrior", warrior_pos)
+		# Create starting warrior (in the new city)
+		var warrior = Unit.new("warrior", start_pos)
 		player.add_unit(warrior)
 		entity_layer.add_child(warrior)
 		warrior._update_visibility()
