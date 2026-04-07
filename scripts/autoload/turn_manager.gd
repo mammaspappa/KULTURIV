@@ -23,7 +23,18 @@ const YEAR_PROGRESSION = [
 ]
 
 func _ready() -> void:
-	pass
+	EventBus.player_eliminated.connect(_on_player_eliminated)
+
+func _on_player_eliminated(player) -> void:
+	# Immediately check for conquest/domination victory when a player is eliminated
+	var victory = VictorySystem.check_victory()
+	if not victory.is_empty() and victory.get("achieved", false):
+		if GameManager.current_game_state:
+			GameManager.current_game_state.victory_achieved = true
+			GameManager.current_game_state.victory_type = victory.type
+			GameManager.current_game_state.winner_player_id = victory.player.player_id
+		EventBus.victory_achieved.emit(victory.player, victory.type)
+		EventBus.game_over.emit(victory.player, victory.type)
 
 func start_game() -> void:
 	current_turn = 1

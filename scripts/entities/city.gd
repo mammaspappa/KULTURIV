@@ -1291,6 +1291,10 @@ func transfer_to(new_owner) -> void:
 	calculate_yields()
 	update_visual()
 
+	# Check if old owner is now eliminated
+	if old_owner and old_owner.is_eliminated():
+		EventBus.player_eliminated.emit(old_owner)
+
 func to_dict() -> Dictionary:
 	return {
 		"city_name": city_name,

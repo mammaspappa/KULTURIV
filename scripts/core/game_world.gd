@@ -722,6 +722,10 @@ func raze_city(city) -> void:
 	EventBus.notification_added.emit("%s has been razed!" % city_name)
 	city.queue_free()
 
+	# Check if owner is now eliminated
+	if owner and owner.is_eliminated():
+		EventBus.player_eliminated.emit(owner)
+
 ## Liberate a city (return to original owner)
 func liberate_city(city, liberator) -> void:
 	var original_owner = GameManager.get_player(city.original_owner_id)

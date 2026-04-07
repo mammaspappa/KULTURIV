@@ -128,6 +128,7 @@ signal great_person_born(city, great_person_type)
 # Victory events
 signal victory_achieved(player, victory_type)
 signal game_over(winner, victory_type)
+signal player_eliminated(player)
 
 # Map events
 signal tile_revealed(hex, player)

@@ -50,6 +50,7 @@ func _connect_events() -> void:
 	EventBus.victory_achieved.connect(_on_victory_achieved)
 	EventBus.civic_changed.connect(_on_civic_changed)
 	EventBus.state_religion_adopted.connect(_on_state_religion_adopted)
+	EventBus.player_eliminated.connect(_on_player_eliminated)
 
 # --- Core logging ---
 
@@ -140,6 +141,9 @@ func _on_unit_destroyed(unit) -> void:
 		return
 	var owner_name = unit.player_owner.player_name if unit.player_owner else "Unknown"
 	log_entry({"type": "game_event", "event": "unit_destroyed", "description": "%s lost a %s" % [owner_name, unit.unit_id]})
+
+func _on_player_eliminated(player) -> void:
+	_log_event("player_eliminated", "%s has been eliminated!" % player.player_name)
 
 func _on_victory_achieved(player, victory_type: String) -> void:
 	log_victory(player, victory_type)
