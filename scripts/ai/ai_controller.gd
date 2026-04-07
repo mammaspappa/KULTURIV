@@ -382,7 +382,7 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	# Dogpile bonus: if target is already at war, we need less advantage
 	var target_at_war = other.at_war_with.size() > 0
 	if target_at_war:
-		var dogpile_chance = personality.dogpile_war_rand
+		var dogpile_chance = int(personality.dogpile_war_rand)
 		if randi() % max(dogpile_chance, 1) == 0:
 			required_ratio *= 0.7  # Much lower bar for dogpiling
 
