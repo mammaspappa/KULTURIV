@@ -33,6 +33,7 @@ var loading_screen: ColorRect
 var new_game_screen: Control
 var load_game_screen: Control
 var options_screen: Control
+var watch_game_screen: Control
 var multiplayer_screen: Control
 
 func _ready() -> void:
@@ -340,6 +341,15 @@ func _create_screens() -> void:
 		options_screen.back_pressed.connect(_on_subscreen_back)
 		add_child(options_screen)
 
+	var WatchGameScreenClass = load("res://scripts/ui/watch_game_screen.gd")
+	if WatchGameScreenClass:
+		watch_game_screen = Control.new()
+		watch_game_screen.set_script(WatchGameScreenClass)
+		watch_game_screen.name = "WatchGameScreen"
+		watch_game_screen.back_pressed.connect(_on_subscreen_back)
+		watch_game_screen.start_game.connect(_on_start_game)
+		add_child(watch_game_screen)
+
 	var MultiplayerScreenClass = load("res://scripts/ui/multiplayer_connect.gd")
 	if MultiplayerScreenClass:
 		multiplayer_screen = Control.new()
@@ -358,18 +368,9 @@ func _on_submenu_back() -> void:
 	main_menu_container.visible = true
 
 func _on_watch_game_pressed() -> void:
-	# Start spectator mode with default settings (all AI players)
-	var settings = {
-		"map_width": 64,
-		"map_height": 40,
-		"map_type": "fractal",
-		"num_players": 6,
-		"difficulty": 4,
-		"game_speed": 0,  # Quick
-		"ai_aggressiveness": "normal",
-		"spectator": true,
-	}
-	_on_start_game(settings)
+	if watch_game_screen:
+		main_menu_container.visible = false
+		watch_game_screen.show_screen()
 
 func _on_multiplayer_pressed() -> void:
 	if multiplayer_screen:
