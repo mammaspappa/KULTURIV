@@ -71,6 +71,7 @@ func _ready() -> void:
 		cylinder_map.cylinder_radius,
 		cylinder_map.cylinder_height,
 		map_width, map_height)
+	game_camera_3d.current = true
 
 	# Create input raycast converter
 	input_raycast = InputRaycastClass.new(game_camera_3d, cylinder_map)

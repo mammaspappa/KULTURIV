@@ -4,6 +4,8 @@ extends Node
 ## evolve into aggressive barbarian civilizations.
 
 const PlayerClass = preload("res://scripts/core/player.gd")
+const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
+const CityClass = preload("res://scripts/entities/city.gd")
 
 # Barbarian camp properties
 const CAMP_SPAWN_INTERVAL = 10  # Turns between new camp spawn attempts
@@ -496,7 +498,7 @@ func _find_nearby_target(unit) -> Vector2i:
 
 ## Move unit toward a target position
 func _move_toward(unit, target_pos: Vector2i) -> void:
-	var pathfinder = Pathfinding.new(GameManager.hex_grid, unit)
+	var pathfinder = PathfindingClass.new(GameManager.hex_grid, unit)
 	var path = pathfinder.find_path(unit.grid_position, target_pos)
 
 	if path.size() > 1:
@@ -726,7 +728,7 @@ func _create_barbarian_civilization(camp_pos: Vector2i, site_score: int) -> void
 
 	# Create the city
 	var city_name = BARBARIAN_CITY_NAMES[(barbarian_civ_count * 3 + randi() % 3) % BARBARIAN_CITY_NAMES.size()]
-	var city = City.new(camp_pos, city_name)
+	var city = CityClass.new(camp_pos, city_name)
 	city.original_owner_id = new_player.player_id
 	city.founder_civ_id = "barbarian"
 	new_player.add_city(city)

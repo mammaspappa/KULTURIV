@@ -84,7 +84,7 @@ func _init(type: String = "warrior", pos: Vector2i = Vector2i.ZERO) -> void:
 	grid_position = pos
 	position = GridUtils.grid_to_pixel(grid_position)
 	refresh_movement()
-	Unit._load_unit_textures()
+	_load_unit_textures()
 
 func _ready() -> void:
 	update_visual()

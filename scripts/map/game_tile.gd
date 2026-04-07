@@ -67,7 +67,7 @@ static func _load_textures() -> void:
 func _init(pos: Vector2i = Vector2i.ZERO) -> void:
 	grid_position = pos
 	position = GridUtils.grid_to_pixel_corner(grid_position)
-	GameTile._load_textures()
+	_load_textures()
 func _draw() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
