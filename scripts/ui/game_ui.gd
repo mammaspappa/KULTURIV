@@ -811,9 +811,11 @@ func _update_scoreboard() -> void:
 	for child in scoreboard_container.get_children():
 		child.queue_free()
 
-	# Collect met players + self, sorted by score
+	# Collect met players + self, sorted by score (exclude barbarians)
 	var entries = []
 	for player in GameManager.players:
+		if player.civilization_id == "barbarian":
+			continue
 		if player == GameManager.human_player or player.player_id in GameManager.human_player.met_players:
 			player.calculate_score()
 			entries.append(player)
