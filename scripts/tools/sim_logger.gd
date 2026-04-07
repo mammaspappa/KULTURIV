@@ -175,14 +175,16 @@ func _on_goody_hut_discovered(unit, tile, reward_type, reward_value) -> void:
 func _on_barb_camp_spawned(position: Vector2i) -> void:
 	log_entry({"type": "game_event", "event": "barb_camp", "description": "Barbarian camp at (%d,%d)" % [position.x, position.y]})
 
-func _on_tile_improved(tile, improvement_id) -> void:
-	if tile == null:
-		return
+func _on_tile_improved(hex_pos, improvement_id) -> void:
+	var pos = hex_pos if hex_pos is Vector2i else Vector2i.ZERO
 	var owner_name = "Unknown"
-	if tile.tile_owner:
-		owner_name = tile.tile_owner.player_name
-	var pos = tile.grid_position
-	var on_resource = tile.resource_id if tile.resource_id != "" else ""
+	var on_resource = ""
+	if GameManager.hex_grid:
+		var tile = GameManager.hex_grid.get_tile(pos)
+		if tile:
+			if tile.tile_owner:
+				owner_name = tile.tile_owner.player_name
+			on_resource = tile.resource_id
 	var detail = "%s: %s at (%d,%d)" % [owner_name, str(improvement_id), pos.x, pos.y]
 	if on_resource != "":
 		detail += " [%s]" % on_resource

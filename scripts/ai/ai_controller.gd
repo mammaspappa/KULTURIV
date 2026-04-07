@@ -634,6 +634,13 @@ func _process_unit_ai(unit, player, flavor: Dictionary, escort_assignments: Dict
 	if unit.current_order == UnitClass.UnitOrder.BUILD:
 		return
 
+	# Healed units: clear HEAL/SLEEP order if at full health so they resume acting
+	if unit.current_order in [UnitClass.UnitOrder.HEAL, UnitClass.UnitOrder.SLEEP]:
+		if unit.health >= 100:
+			unit.current_order = UnitClass.UnitOrder.NONE
+		else:
+			return  # Still healing
+
 	# Fortified units: stay put unless enemies are nearby or we're at war needing troops
 	if unit.current_order == UnitClass.UnitOrder.FORTIFY and unit.get_strength() > 0:
 		var nearby_threats = _find_nearby_enemies(unit, player, 2)
@@ -901,36 +908,41 @@ func _worker_ai(unit, player, flavor: Dictionary) -> void:
 	if tile == null:
 		return
 
+	# Stuck breaker: if stuck for 3+ turns, move randomly to break deadlock
+	if unit.is_stuck(3):
+		_random_explore(unit)
+		return
+
 	var production_flavor = flavor.get("production", 5)
 	var growth_flavor = flavor.get("growth", 5)
 	var gold_flavor = flavor.get("gold", 5)
 
-	# Priority 1: If on owned tile with a resource but no improvement, build resource improvement
-	if tile.tile_owner == player and tile.resource_id != "" and tile.improvement_id == "":
-		var improvements = ImprovementSystem.get_available_improvements(unit, tile)
-		if not improvements.is_empty():
-			var chosen = _choose_improvement(tile, improvements, production_flavor, growth_flavor, gold_flavor)
-			if chosen != "":
-				ImprovementSystem.start_build(unit, chosen)
-				return
+	# If on owned tile: try to build something here
+	if tile.tile_owner == player and not tile.is_water():
+		# Resource tile without improvement — top priority
+		if tile.resource_id != "" and tile.improvement_id == "":
+			var improvements = ImprovementSystem.get_available_improvements(unit, tile)
+			if not improvements.is_empty():
+				var chosen = _choose_improvement(tile, improvements, production_flavor, growth_flavor, gold_flavor)
+				if chosen != "":
+					ImprovementSystem.start_build(unit, chosen)
+					return
 
-	# Priority 2: If on owned tile without improvement, build one
-	if tile.tile_owner == player and tile.improvement_id == "" and not tile.is_water():
-		var improvements = ImprovementSystem.get_available_improvements(unit, tile)
-		if not improvements.is_empty():
-			var chosen = _choose_improvement(tile, improvements, production_flavor, growth_flavor, gold_flavor)
-			if chosen != "":
-				ImprovementSystem.start_build(unit, chosen)
-				return
+		# Unimproved tile — build improvement
+		if tile.improvement_id == "" and tile.road_level == 0:
+			var improvements = ImprovementSystem.get_available_improvements(unit, tile)
+			if not improvements.is_empty():
+				var chosen = _choose_improvement(tile, improvements, production_flavor, growth_flavor, gold_flavor)
+				if chosen != "":
+					ImprovementSystem.start_build(unit, chosen)
+					return
 
-	# Priority 3: Build road on current tile if it's on a city-connection path
-	if tile.tile_owner == player and tile.road_level == 0 and not tile.is_water():
-		if _is_on_road_path(unit.grid_position, player):
-			if ImprovementSystem.can_build_road(unit, tile):
-				ImprovementSystem.start_build_road(unit)
-				return
+		# Tile has improvement but no road — build road to connect
+		if tile.road_level == 0 and ImprovementSystem.can_build_road(unit, tile):
+			ImprovementSystem.start_build_road(unit)
+			return
 
-	# Priority 4: Move to best work target (resource tiles first, then improvements, then roads)
+	# Move to best target: prioritizes resource > improvement > road connection
 	var target = _find_best_worker_target(unit, player)
 	if target != Vector2i(-1, -1):
 		_move_toward(unit, target)
@@ -944,6 +956,9 @@ func _choose_improvement(tile, improvements: Array, prod_flavor: int, growth_fla
 	var best_score = -1
 
 	for imp_id in improvements:
+		# AI never builds forts proactively (they're defensive, not economic)
+		if imp_id == "fort":
+			continue
 		var score = 0
 		var imp_data = DataManager.get_improvement(imp_id)
 		var yields = imp_data.get("yields", {})
@@ -971,8 +986,8 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 	var unit_data = DataManager.get_unit(unit.unit_id)
 	var unit_class = unit_data.get("unit_class", "")
 
-	# Oscillation breaker: if bouncing, try random exploration to break the loop
-	if unit.is_oscillating():
+	# Stuck/oscillation breaker: if unit is going nowhere, try random move
+	if unit.is_oscillating() or unit.is_stuck(2):
 		_random_explore(unit)
 		return
 
@@ -1355,11 +1370,18 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if u.can_found_city():
 			settlers_out += 1
 
-	# Early expansion: settler from capital when only 1 city (need at least 1 escort)
-	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 1:
+	# Early expansion: settler from capital when only 1 city
+	# MUST have at least 2 military (1 to garrison, 1 to escort)
+	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 2:
 		if city.can_build_unit("settler"):
 			city.set_production("settler")
-			city.set_meta("needs_escort", true)  # Queue escort after settler
+			city.set_meta("needs_escort", true)
+			return
+	# If only 1 military and need settlers, build military first
+	elif num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units < 2:
+		var mil_unit = _get_best_military_unit(city, player, military_flavor, false)
+		if mil_unit != "":
+			city.set_production(mil_unit)
 			return
 
 	# Calculate desired military based on flavor, specialization, and personality
@@ -1471,10 +1493,11 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if c.current_production == "settler":
 			settlers_in_production += 1
 	if num_cities < max_cities and settlers_out == 0 and settlers_in_production == 0:
-		if city.population >= 3 and military_units >= num_cities:
+		# Need garrison (1/city) + at least 1 spare for escort
+		if city.population >= 3 and military_units >= num_cities + 1:
 			if city.can_build_unit("settler"):
 				city.set_production("settler")
-				city.set_meta("needs_escort", true)  # Queue escort after settler
+				city.set_meta("needs_escort", true)
 				return
 
 	# Need more workers? (1 per city, more when expanding)
@@ -2026,14 +2049,16 @@ func _find_best_worker_target(unit, player) -> Vector2i:
 				best_score = score
 				best_pos = tile_pos
 
-	# Check if any cities need road connections to capital
-	var road_target = _find_road_connection_target(unit, player)
-	if road_target != Vector2i(-1, -1):
-		var dist = GridUtils.chebyshev_distance(unit.grid_position, road_target)
-		var road_score = 120.0 - dist * 4.0  # High priority but below resource improvement
-		if road_score > best_score:
-			best_score = road_score
-			best_pos = road_target
+	# Road connections between cities — high priority once improvements are done
+	if player.cities.size() >= 2:
+		var road_target = _find_road_connection_target(unit, player)
+		if road_target != Vector2i(-1, -1):
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, road_target)
+			# Roads are very important for trade — only below resource improvements
+			var road_score = 160.0 - dist * 3.0
+			if road_score > best_score:
+				best_score = road_score
+				best_pos = road_target
 
 	return best_pos
 
