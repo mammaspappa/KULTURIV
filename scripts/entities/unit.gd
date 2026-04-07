@@ -354,11 +354,12 @@ func can_move_to(target: Vector2i) -> bool:
 	if tile.is_water() and not _can_enter_water():
 		return false
 
-	# Check for enemy units
-	var other_unit = GameManager.get_unit_at(target)
-	if other_unit != null and other_unit.player_owner != player_owner:
-		# Can attack instead
-		return false
+	# Check for enemy units (allow friendly/neutral stacking with open borders)
+	var units_at_target = GameManager.get_units_at(target)
+	for other_unit in units_at_target:
+		if other_unit.player_owner != player_owner:
+			if player_owner.is_at_war_with(other_unit.player_owner.player_id):
+				return false  # Enemy unit blocks - must attack instead
 
 	# Check border permissions
 	if not can_enter_tile(tile):
