@@ -117,7 +117,9 @@ func _try_spawn_camp() -> void:
 
 	while attempts < max_attempts:
 		var x = randi() % grid.width
-		var y = 10 + randi() % (grid.height - 20)  # Avoid poles
+		var y_margin = min(10, grid.height / 4)
+		var y_range = max(1, grid.height - y_margin * 2)
+		var y = y_margin + randi() % y_range  # Avoid poles, safe on small maps
 
 		var pos = Vector2i(x, y)
 		if _is_valid_camp_position(pos):

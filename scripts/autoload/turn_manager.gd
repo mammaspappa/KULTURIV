@@ -143,6 +143,7 @@ func _end_turn_for_player(player) -> void:
 func _complete_round() -> void:
 	# All players have taken their turn
 	GameManager.current_player_index = 0
+	_ai_bonus_cache = {}  # Clear difficulty bonus cache each round
 
 	# Process culture radiation and tile ownership
 	_process_culture_ownership()
@@ -173,15 +174,13 @@ func _complete_round() -> void:
 
 func _advance_year() -> void:
 	var years_to_add = 1
+	# Scale turn thresholds by game speed so Quick reaches Modern era faster
+	var speed = GameManager.get_speed_multiplier()
 	for progression in YEAR_PROGRESSION:
-		if current_turn <= progression.until_turn:
+		var scaled_turn = int(progression.until_turn * speed)
+		if current_turn <= scaled_turn:
 			years_to_add = progression.years_per_turn
 			break
-
-	# Apply game speed multiplier (Marathon=more turns, fewer years per turn)
-	years_to_add = int(years_to_add / GameManager.get_speed_multiplier())
-	if years_to_add < 1:
-		years_to_add = 1
 
 	current_year += years_to_add
 
@@ -206,7 +205,12 @@ func _process_city_turn_start(city) -> void:
 				city.starve()
 		# Positive food surplus is NOT added to stockpile (goes to production below)
 	else:
-		city.food_stockpile += city.food_surplus
+		var food_to_add = city.food_surplus
+		# Apply AI difficulty growth bonus
+		if city.player_owner and not city.player_owner.is_human and food_to_add > 0:
+			var ai_bonuses = _get_ai_difficulty_bonuses()
+			food_to_add = int(food_to_add * ai_bonuses.get("growth_percent", 100) / 100.0)
+		city.food_stockpile += food_to_add
 		if city.food_stockpile >= city.food_needed_for_growth():
 			city.grow()
 		elif city.food_stockpile < 0:
@@ -223,6 +227,17 @@ func _process_city_turn_start(city) -> void:
 		# Settlers: add food surplus as bonus production (Civ4 BTS mechanic)
 		if building_settler and city.food_surplus > 0:
 			production += city.food_surplus
+		# Apply AI difficulty production bonus
+		if city.player_owner and not city.player_owner.is_human:
+			var ai_bonuses = _get_ai_difficulty_bonuses()
+			var train_pct = ai_bonuses.get("train_percent", 100) / 100.0
+			var construct_pct = ai_bonuses.get("construct_percent", 100) / 100.0
+			# Use train_percent for units, construct_percent for buildings
+			var is_unit = not DataManager.get_unit(city.current_production).is_empty()
+			if is_unit:
+				production = int(production * train_pct)
+			else:
+				production = int(production * construct_pct)
 		city.production_progress += production
 		var cost = city.get_production_cost()
 		if city.production_progress >= cost:
@@ -317,6 +332,15 @@ func _process_gold(player) -> void:
 			weakest_unit.die()
 			EventBus.notification_added.emit("%s disbanded a unit due to bankruptcy!" % player.player_name)
 		player.gold = 0
+
+## Get AI difficulty bonuses (cached per round)
+var _ai_bonus_cache: Dictionary = {}
+func _get_ai_difficulty_bonuses() -> Dictionary:
+	if not _ai_bonus_cache.is_empty():
+		return _ai_bonus_cache
+	var handicap_id = DataManager.get_handicap_id_by_level(GameManager.difficulty)
+	_ai_bonus_cache = DataManager.get_ai_bonuses(handicap_id)
+	return _ai_bonus_cache
 
 func _process_research(player) -> void:
 	if player.current_research == "":

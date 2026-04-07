@@ -72,11 +72,15 @@ func execute_turn(player) -> void:
 	# Strategic planning (city sites, war targets, defense — runs once before units)
 	AIStrategyClass.update_strategy(player, flavor)
 
-	# Process units
+	# Process units in two passes:
+	# Pass 1: Assign military escorts to settlers/workers outside cities
+	var escort_assignments = _assign_escorts(player)
+
+	# Pass 2: Process all units (escorts move with their charges)
 	for unit in player.units.duplicate():
 		if unit == null or not is_instance_valid(unit):
 			continue
-		_process_unit_ai(unit, player, flavor)
+		_process_unit_ai(unit, player, flavor, escort_assignments)
 
 	# Process cities
 	for city in player.cities:
@@ -210,7 +214,9 @@ func _process_diplomacy(player, flavor: Dictionary) -> void:
 
 		# Skip if at war
 		if GameManager.is_at_war(player, other):
-			_consider_peace(player, other, military_flavor)
+			# Never make peace with barbarian civs — they'll just re-declare
+			if other.civilization_id != "barbarian":
+				_consider_peace(player, other, military_flavor)
 			continue
 
 		# Consider treaties
@@ -524,7 +530,62 @@ func _score_espionage_mission(mission_id: String, player, target, target_city, f
 
 	return score
 
-func _process_unit_ai(unit, player, flavor: Dictionary) -> void:
+## Assign military escorts to settlers and workers outside safe territory
+func _assign_escorts(player) -> Dictionary:
+	var assignments = {}  # military_unit_id -> civilian_unit_id
+
+	# Find civilians that need escorts (outside cities)
+	var civilians_needing_escort = []
+	for unit in player.units:
+		if unit == null or not is_instance_valid(unit):
+			continue
+		if not (unit.can_found_city() or unit.can_build_improvements()):
+			continue
+		# Settlers always need escorts; workers need them outside friendly cities
+		var in_city = GameManager.get_city_at(unit.grid_position) != null
+		if unit.can_found_city() or not in_city:
+			civilians_needing_escort.append(unit)
+
+	# Find available military units to escort (not in cities, not already assigned)
+	var available_military = []
+	for unit in player.units:
+		if unit == null or not is_instance_valid(unit):
+			continue
+		if unit.get_strength() <= 0:
+			continue
+		if unit.can_found_city() or unit.can_build_improvements():
+			continue
+		available_military.append(unit)
+
+	# Prioritize settlers over workers for escort assignment
+	civilians_needing_escort.sort_custom(func(a, b): return a.can_found_city() and not b.can_found_city())
+
+	for civilian in civilians_needing_escort:
+		# Check if already has a military unit on the same tile
+		var has_escort = false
+		for mil in available_military:
+			if mil.grid_position == civilian.grid_position:
+				assignments[mil.get_instance_id()] = civilian.get_instance_id()
+				available_military.erase(mil)
+				has_escort = true
+				break
+
+		if not has_escort and not available_military.is_empty():
+			# Find closest idle military unit
+			var best_mil = null
+			var best_dist = 999
+			for mil in available_military:
+				var dist = GridUtils.chebyshev_distance(mil.grid_position, civilian.grid_position)
+				if dist < best_dist:
+					best_dist = dist
+					best_mil = mil
+			if best_mil and best_dist <= 8:
+				assignments[best_mil.get_instance_id()] = civilian.get_instance_id()
+				available_military.erase(best_mil)
+
+	return assignments
+
+func _process_unit_ai(unit, player, flavor: Dictionary, escort_assignments: Dictionary = {}) -> void:
 	if unit.has_acted or unit.movement_remaining <= 0:
 		return
 
@@ -544,6 +605,24 @@ func _process_unit_ai(unit, player, flavor: Dictionary) -> void:
 	if unit.can_build_improvements():
 		_worker_ai(unit, player, flavor)
 		return
+
+	# Check if this military unit is assigned as escort
+	var escort_target_id = escort_assignments.get(unit.get_instance_id(), -1)
+	if escort_target_id != -1:
+		# Find the civilian we're escorting
+		for civ_unit in player.units:
+			if is_instance_valid(civ_unit) and civ_unit.get_instance_id() == escort_target_id:
+				# Move toward the civilian's position (follow them)
+				if unit.grid_position != civ_unit.grid_position:
+					_move_toward(unit, civ_unit.grid_position)
+				# If on same tile and enemies nearby, fight them
+				if is_instance_valid(unit) and unit.movement_remaining > 0:
+					var threats = _find_nearby_enemies(unit, player, 1)
+					for threat in threats:
+						if is_instance_valid(threat) and GridUtils.are_adjacent(unit.grid_position, threat.grid_position):
+							CombatSystem.resolve_combat(unit, threat)
+							return
+				return
 
 	# Combat unit: attack or explore
 	_combat_unit_ai(unit, player, flavor)
@@ -801,6 +880,10 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 					return
 				else:
 					_move_toward(unit, target.grid_position)
+					# After moving, check if we're now adjacent and can attack
+					if is_instance_valid(unit) and is_instance_valid(target) and unit.movement_remaining > 0:
+						if GridUtils.are_adjacent(unit.grid_position, target.grid_position):
+							CombatSystem.resolve_combat(unit, target)
 					return
 
 	# 2. Strategic: move toward assigned war target
@@ -808,6 +891,15 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 		var war_target = AIStrategyClass.get_war_target_for_unit(player, unit)
 		if not war_target.is_empty():
 			_move_toward(unit, war_target.city_position)
+			# After moving, check for enemies to attack
+			if is_instance_valid(unit) and unit.movement_remaining > 0:
+				var new_enemies = _find_nearby_enemies(unit, player, 1)
+				for enemy in new_enemies:
+					if is_instance_valid(enemy) and GridUtils.are_adjacent(unit.grid_position, enemy.grid_position):
+						var new_odds = CombatSystem.calculate_odds(unit, enemy)
+						if new_odds.win_chance > 0.4:
+							CombatSystem.resolve_combat(unit, enemy)
+							break
 			return
 
 	# 3. Strategic: garrison threatened cities
