@@ -68,6 +68,9 @@ var score: int = 0
 # AI personality (used by AI controller)
 var ai_personality: Dictionary = {}
 
+# AI strategic state (persists across turns, used by AIStrategy)
+var ai_strategy: Dictionary = {}
+
 func _init() -> void:
 	pass
 

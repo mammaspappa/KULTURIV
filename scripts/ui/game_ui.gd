@@ -28,6 +28,7 @@ extends Control
 @onready var civics_button: Button = $TopBar/HBoxContainer/CivicsButton
 @onready var diplomacy_button: Button = $TopBar/HBoxContainer/DiplomacyButton
 @onready var espionage_button: Button = $TopBar/HBoxContainer/EspionageButton
+@onready var religion_button: Button = $TopBar/HBoxContainer/ReligionButton
 @onready var voting_button: Button = $TopBar/HBoxContainer/VotingButton
 @onready var spaceship_button: Button = $TopBar/HBoxContainer/SpaceshipButton
 
@@ -107,6 +108,8 @@ func _ready() -> void:
 		diplomacy_button.pressed.connect(_on_diplomacy_pressed)
 	if espionage_button:
 		espionage_button.pressed.connect(_on_espionage_pressed)
+	if religion_button:
+		religion_button.pressed.connect(_on_religion_pressed)
 	if voting_button:
 		voting_button.pressed.connect(_on_voting_pressed)
 	if spaceship_button:
@@ -169,6 +172,12 @@ func _input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_E:
 				EventBus.show_espionage_screen.emit()
+				get_viewport().set_input_as_handled()
+			KEY_F7:
+				EventBus.show_religion_screen.emit()
+				get_viewport().set_input_as_handled()
+			KEY_F8:
+				EventBus.show_victory_progress.emit()
 				get_viewport().set_input_as_handled()
 			KEY_U:
 				EventBus.show_voting_screen.emit()
@@ -363,6 +372,9 @@ func _on_diplomacy_pressed() -> void:
 func _on_espionage_pressed() -> void:
 	EventBus.show_espionage_screen.emit()
 
+func _on_religion_pressed() -> void:
+	EventBus.show_religion_screen.emit()
+
 func _on_voting_pressed() -> void:
 	EventBus.show_voting_screen.emit()
 
@@ -388,7 +400,7 @@ func _update_top_bar() -> void:
 
 	# Turn info
 	if turn_label:
-		turn_label.text = "Turn %d - %s" % [TurnManager.current_turn, TurnManager.get_year_string()]
+		turn_label.text = "Turn %d - %s (%s Era)" % [TurnManager.current_turn, TurnManager.get_year_string(), TurnManager.get_era()]
 
 	var player = GameManager.human_player
 	if player == null:
@@ -1566,11 +1578,55 @@ func _on_great_person_born(city, gp_type: String) -> void:
 func _on_religion_founded(player, religion_id: String, city) -> void:
 	var rel_data = DataManager.get_religion(religion_id)
 	var rel_name = rel_data.get("name", religion_id)
+	var rel_symbol = rel_data.get("symbol", "?")
+	var rel_color_str = rel_data.get("color", "#FFFFFF")
+	var rel_color = Color(rel_color_str)
+
+	# Show prominent centered popup (BTS style)
+	var dialog = AcceptDialog.new()
+	dialog.title = "Religion Founded"
+	dialog.dialog_text = ""
+	dialog.get_ok_button().text = "OK"
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+
+	# Large religion symbol
+	var symbol_label = Label.new()
+	symbol_label.text = rel_symbol
+	symbol_label.add_theme_font_size_override("font_size", 48)
+	symbol_label.add_theme_color_override("font_color", rel_color)
+	symbol_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(symbol_label)
+
+	# Religion name
+	var name_label = Label.new()
+	name_label.add_theme_font_size_override("font_size", 22)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(name_label)
+
+	# Holy city info
+	var city_label = Label.new()
+	city_label.add_theme_font_size_override("font_size", 14)
+	city_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	city_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(city_label)
+
 	if player == GameManager.human_player:
-		_add_notification("%s founded in %s!" % [rel_name, city.city_name], "religion")
+		name_label.text = "%s has been founded!" % rel_name
+		city_label.text = "Holy City: %s" % city.city_name
 	else:
 		var civ_data = DataManager.get_civ(player.civilization_id)
-		_add_notification("%s founded %s" % [civ_data.get("name", "Unknown"), rel_name], "religion")
+		name_label.text = "%s has been founded!" % rel_name
+		city_label.text = "Founded by %s in %s" % [civ_data.get("name", "Unknown"), city.city_name]
+
+	dialog.add_child(vbox)
+	dialog.min_size = Vector2(320, 200)
+	add_child(dialog)
+	dialog.popup_centered()
+
+	# Also add corner notification
+	_add_notification("%s founded in %s!" % [rel_name, city.city_name], "religion")
 
 func _on_war_declared(aggressor, target) -> void:
 	if target == GameManager.human_player:

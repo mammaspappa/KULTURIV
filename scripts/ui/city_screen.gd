@@ -57,147 +57,45 @@ func _ready() -> void:
 	hide()
 
 func _create_ui() -> void:
-	# Main panel - sized and positioned over the city
+	# Main panel
 	panel = Panel.new()
 	panel.name = "Panel"
 	var style = StyleBoxFlat.new()
 	style.bg_color = BG_COLOR
-	style.border_width_left = 2
-	style.border_width_right = 2
-	style.border_width_top = 2
-	style.border_width_bottom = 2
+	style.set_border_width_all(2)
 	style.border_color = Color(0.4, 0.4, 0.5)
-	style.corner_radius_top_left = 8
-	style.corner_radius_top_right = 8
-	style.corner_radius_bottom_left = 8
-	style.corner_radius_bottom_right = 8
+	style.set_corner_radius_all(8)
+	style.set_content_margin_all(10)
 	panel.add_theme_stylebox_override("panel", style)
 	panel.custom_minimum_size = Vector2(960, 650)
 	add_child(panel)
 
-	# Close button (top right)
-	close_button = Button.new()
-	close_button.name = "CloseButton"
-	close_button.text = "X"
-	close_button.position = Vector2(panel.size.x - 40, 10)
-	close_button.custom_minimum_size = Vector2(30, 30)
-	close_button.pressed.connect(_on_close_pressed)
-	panel.add_child(close_button)
+	# Root VBox inside panel
+	var root_vbox = VBoxContainer.new()
+	root_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_KEEP_SIZE, 10)
+	root_vbox.add_theme_constant_override("separation", 6)
+	panel.add_child(root_vbox)
 
-	# City name header
+	# === HEADER ROW ===
+	var header_row = HBoxContainer.new()
+	header_row.add_theme_constant_override("separation", 10)
+
 	city_name_label = Label.new()
-	city_name_label.name = "CityName"
-	city_name_label.position = Vector2(20, 15)
-	city_name_label.add_theme_font_size_override("font_size", 24)
-	panel.add_child(city_name_label)
+	city_name_label.add_theme_font_size_override("font_size", 22)
+	city_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_row.add_child(city_name_label)
 
-	# Population
 	population_label = Label.new()
-	population_label.name = "Population"
-	population_label.position = Vector2(20, 50)
 	population_label.add_theme_font_size_override("font_size", 16)
-	panel.add_child(population_label)
+	header_row.add_child(population_label)
 
-	# Yields section
-	var yields_header = Label.new()
-	yields_header.text = "City Yields"
-	yields_header.position = Vector2(20, 85)
-	yields_header.add_theme_font_size_override("font_size", 18)
-	panel.add_child(yields_header)
-
-	yields_label = Label.new()
-	yields_label.name = "Yields"
-	yields_label.position = Vector2(20, 115)
-	yields_label.add_theme_font_size_override("font_size", 14)
-	panel.add_child(yields_label)
-
-	# Current production
-	var production_header = Label.new()
-	production_header.text = "Current Production"
-	production_header.position = Vector2(20, 230)
-	production_header.add_theme_font_size_override("font_size", 18)
-	panel.add_child(production_header)
-
-	production_progress_label = Label.new()
-	production_progress_label.name = "ProductionProgress"
-	production_progress_label.position = Vector2(20, 260)
-	production_progress_label.add_theme_font_size_override("font_size", 14)
-	panel.add_child(production_progress_label)
-
-	# Change production button
-	change_production_btn = Button.new()
-	change_production_btn.name = "ChangeProductionBtn"
-	change_production_btn.text = "Change Production"
-	change_production_btn.position = Vector2(20, 310)
-	change_production_btn.custom_minimum_size = Vector2(150, 30)
-	change_production_btn.pressed.connect(_toggle_production_list)
-	panel.add_child(change_production_btn)
-
-	# Whip button (Slavery civic)
-	whip_button = Button.new()
-	whip_button.text = "Whip (-1 Pop)"
-	whip_button.position = Vector2(20, 345)
-	whip_button.custom_minimum_size = Vector2(100, 28)
-	whip_button.visible = false
-	whip_button.pressed.connect(_on_whip_pressed)
-	panel.add_child(whip_button)
-
-	# Buy button (Universal Suffrage civic)
-	buy_button = Button.new()
-	buy_button.text = "Buy"
-	buy_button.position = Vector2(130, 345)
-	buy_button.custom_minimum_size = Vector2(100, 28)
-	buy_button.visible = false
-	buy_button.pressed.connect(_on_buy_pressed)
-	panel.add_child(buy_button)
-
-	# Production options (scrollable, initially hidden)
-	production_scroll = ScrollContainer.new()
-	production_scroll.name = "ProductionScroll"
-	production_scroll.position = Vector2(20, 350)
-	production_scroll.custom_minimum_size = Vector2(350, 180)
-	production_scroll.visible = false
-	panel.add_child(production_scroll)
-
-	production_list = VBoxContainer.new()
-	production_list.name = "ProductionList"
-	production_scroll.add_child(production_list)
-
-	# Tile Grid View (left column, below yields)
-	tile_grid = Control.new()
-	tile_grid.position = Vector2(20, 290)
-	tile_grid.custom_minimum_size = Vector2(210, 210)
-	tile_grid.gui_input.connect(_on_tile_grid_input)
-	panel.add_child(tile_grid)
-
-	# Culture bar (below tile grid)
-	culture_label_display = Label.new()
-	culture_label_display.position = Vector2(20, 505)
-	culture_label_display.add_theme_font_size_override("font_size", 11)
-	panel.add_child(culture_label_display)
-
-	culture_bar = ProgressBar.new()
-	culture_bar.position = Vector2(20, 522)
-	culture_bar.custom_minimum_size = Vector2(210, 8)
-	culture_bar.show_percentage = false
-	panel.add_child(culture_bar)
-
-	# Happiness visualization (below population)
-	happiness_container = HBoxContainer.new()
-	happiness_container.position = Vector2(20, 72)
-	happiness_container.add_theme_constant_override("separation", 1)
-	panel.add_child(happiness_container)
-
-	# City Focus dropdown (middle column)
 	var focus_label = Label.new()
-	focus_label.text = "City Focus:"
-	focus_label.position = Vector2(250, 15)
-	focus_label.add_theme_font_size_override("font_size", 14)
-	panel.add_child(focus_label)
+	focus_label.text = "Focus:"
+	focus_label.add_theme_font_size_override("font_size", 13)
+	header_row.add_child(focus_label)
 
 	focus_dropdown = OptionButton.new()
-	focus_dropdown.position = Vector2(340, 12)
-	focus_dropdown.custom_minimum_size = Vector2(120, 28)
+	focus_dropdown.custom_minimum_size = Vector2(110, 26)
 	focus_dropdown.add_item("Balanced", 0)
 	focus_dropdown.add_item("Food", 1)
 	focus_dropdown.add_item("Production", 2)
@@ -205,52 +103,151 @@ func _create_ui() -> void:
 	focus_dropdown.add_item("Science", 4)
 	focus_dropdown.add_item("Culture", 5)
 	focus_dropdown.item_selected.connect(_on_focus_changed)
-	panel.add_child(focus_dropdown)
+	header_row.add_child(focus_dropdown)
 
-	# Specialist section (middle column)
+	close_button = Button.new()
+	close_button.text = "X"
+	close_button.custom_minimum_size = Vector2(30, 30)
+	close_button.pressed.connect(_on_close_pressed)
+	header_row.add_child(close_button)
+
+	root_vbox.add_child(header_row)
+
+	# Happiness row
+	happiness_container = HBoxContainer.new()
+	happiness_container.add_theme_constant_override("separation", 1)
+	happiness_container.custom_minimum_size = Vector2(0, 14)
+	root_vbox.add_child(happiness_container)
+
+	# === THREE-COLUMN BODY ===
+	var body_hbox = HBoxContainer.new()
+	body_hbox.add_theme_constant_override("separation", 12)
+	body_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root_vbox.add_child(body_hbox)
+
+	# --- LEFT COLUMN (yields, tile grid, culture) ---
+	var left_col = VBoxContainer.new()
+	left_col.custom_minimum_size = Vector2(220, 0)
+	left_col.add_theme_constant_override("separation", 4)
+
+	var yields_header = Label.new()
+	yields_header.text = "City Yields"
+	yields_header.add_theme_font_size_override("font_size", 16)
+	left_col.add_child(yields_header)
+
+	yields_label = Label.new()
+	yields_label.add_theme_font_size_override("font_size", 12)
+	left_col.add_child(yields_label)
+
+	tile_grid = Control.new()
+	tile_grid.custom_minimum_size = Vector2(210, 210)
+	tile_grid.gui_input.connect(_on_tile_grid_input)
+	left_col.add_child(tile_grid)
+
+	culture_label_display = Label.new()
+	culture_label_display.add_theme_font_size_override("font_size", 11)
+	left_col.add_child(culture_label_display)
+
+	culture_bar = ProgressBar.new()
+	culture_bar.custom_minimum_size = Vector2(210, 8)
+	culture_bar.show_percentage = false
+	left_col.add_child(culture_bar)
+
+	body_hbox.add_child(left_col)
+
+	# --- MIDDLE COLUMN (production, specialists, queue) ---
+	var mid_col = VBoxContainer.new()
+	mid_col.custom_minimum_size = Vector2(240, 0)
+	mid_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid_col.add_theme_constant_override("separation", 4)
+
+	var production_header = Label.new()
+	production_header.text = "Production"
+	production_header.add_theme_font_size_override("font_size", 16)
+	mid_col.add_child(production_header)
+
+	production_progress_label = Label.new()
+	production_progress_label.add_theme_font_size_override("font_size", 12)
+	mid_col.add_child(production_progress_label)
+
+	var prod_buttons = HBoxContainer.new()
+	prod_buttons.add_theme_constant_override("separation", 4)
+
+	change_production_btn = Button.new()
+	change_production_btn.text = "Change Production"
+	change_production_btn.custom_minimum_size = Vector2(140, 28)
+	change_production_btn.pressed.connect(_toggle_production_list)
+	prod_buttons.add_child(change_production_btn)
+
+	whip_button = Button.new()
+	whip_button.text = "Whip (-1 Pop)"
+	whip_button.custom_minimum_size = Vector2(90, 28)
+	whip_button.visible = false
+	whip_button.pressed.connect(_on_whip_pressed)
+	prod_buttons.add_child(whip_button)
+
+	buy_button = Button.new()
+	buy_button.text = "Buy"
+	buy_button.custom_minimum_size = Vector2(80, 28)
+	buy_button.visible = false
+	buy_button.pressed.connect(_on_buy_pressed)
+	prod_buttons.add_child(buy_button)
+
+	mid_col.add_child(prod_buttons)
+
+	# Production options (scrollable, initially hidden)
+	production_scroll = ScrollContainer.new()
+	production_scroll.custom_minimum_size = Vector2(230, 160)
+	production_scroll.visible = false
+	production_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	mid_col.add_child(production_scroll)
+
+	production_list = VBoxContainer.new()
+	production_scroll.add_child(production_list)
+
 	var spec_header = Label.new()
 	spec_header.text = "Specialists"
-	spec_header.position = Vector2(250, 50)
 	spec_header.add_theme_font_size_override("font_size", 16)
-	panel.add_child(spec_header)
+	mid_col.add_child(spec_header)
 
 	specialist_container = VBoxContainer.new()
-	specialist_container.position = Vector2(250, 75)
-	specialist_container.custom_minimum_size = Vector2(200, 100)
+	specialist_container.custom_minimum_size = Vector2(0, 60)
 	specialist_container.add_theme_constant_override("separation", 2)
-	panel.add_child(specialist_container)
+	mid_col.add_child(specialist_container)
 
-	# Production queue (middle column, below specialists)
 	var queue_header = Label.new()
 	queue_header.text = "Production Queue"
-	queue_header.position = Vector2(250, 220)
 	queue_header.add_theme_font_size_override("font_size", 16)
-	panel.add_child(queue_header)
+	mid_col.add_child(queue_header)
 
 	queue_container = VBoxContainer.new()
-	queue_container.position = Vector2(250, 245)
-	queue_container.custom_minimum_size = Vector2(220, 80)
+	queue_container.custom_minimum_size = Vector2(0, 60)
 	queue_container.add_theme_constant_override("separation", 2)
-	panel.add_child(queue_container)
+	mid_col.add_child(queue_container)
 
-	# Buildings section (right column) with scroll and individual building buttons
+	body_hbox.add_child(mid_col)
+
+	# --- RIGHT COLUMN (buildings) ---
+	var right_col = VBoxContainer.new()
+	right_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right_col.add_theme_constant_override("separation", 4)
+
 	var buildings_header = Label.new()
 	buildings_header.text = "Buildings"
-	buildings_header.position = Vector2(500, 50)
 	buildings_header.add_theme_font_size_override("font_size", 16)
-	panel.add_child(buildings_header)
+	right_col.add_child(buildings_header)
 
 	building_scroll = ScrollContainer.new()
-	building_scroll.name = "BuildingScroll"
-	building_scroll.position = Vector2(500, 75)
-	building_scroll.custom_minimum_size = Vector2(440, 420)
-	panel.add_child(building_scroll)
+	building_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_col.add_child(building_scroll)
 
 	building_container = VBoxContainer.new()
 	building_container.add_theme_constant_override("separation", 1)
 	building_scroll.add_child(building_container)
 
-	# Building tooltip (floating)
+	body_hbox.add_child(right_col)
+
+	# Building tooltip (floating, outside containers)
 	building_tooltip = PanelContainer.new()
 	building_tooltip.visible = false
 	building_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -313,9 +310,6 @@ func _position_over_city() -> void:
 func _update_display() -> void:
 	if current_city == null:
 		return
-
-	# Update close button position based on panel size
-	close_button.position = Vector2(panel.size.x - 50, 10)
 
 	# City name and population
 	city_name_label.text = current_city.city_name

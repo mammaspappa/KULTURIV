@@ -202,6 +202,10 @@ func use_great_person(unit, ability: String) -> bool:
 			return _culture_bomb(unit, tile)
 		"build_shrine":
 			return _build_shrine(unit, city)
+		"build_academy":
+			return _build_academy(unit, city)
+		"build_military_academy":
+			return _build_military_academy(unit, city)
 		_:
 			return false
 
@@ -393,6 +397,34 @@ func can_build_shrine(unit, city) -> bool:
 
 	return not city.has_building(shrine_building)
 
+## Build an Academy in a city (+50% science)
+func _build_academy(unit, city) -> bool:
+	if city == null or city.player_owner != unit.player_owner:
+		return false
+	if "academy" in city.buildings:
+		return false  # Already has one
+
+	city.buildings.append("academy")
+	city.calculate_yields()
+	EventBus.city_building_constructed.emit(city, "academy")
+	EventBus.notification_added.emit("Academy built in %s! +50%% Science" % city.city_name)
+	unit.die()
+	return true
+
+## Build a Military Academy in a city (+2 XP to new units)
+func _build_military_academy(unit, city) -> bool:
+	if city == null or city.player_owner != unit.player_owner:
+		return false
+	if "military_academy" in city.buildings:
+		return false  # Already has one
+
+	city.buildings.append("military_academy")
+	city.calculate_yields()
+	EventBus.city_building_constructed.emit(city, "military_academy")
+	EventBus.notification_added.emit("Military Academy built in %s! +2 XP to new units" % city.city_name)
+	unit.die()
+	return true
+
 ## Get available abilities for a great person unit
 func get_available_abilities(unit) -> Array:
 	if unit == null:
@@ -407,13 +439,13 @@ func get_available_abilities(unit) -> Array:
 		"great_artist":
 			abilities = ["settle", "golden_age", "culture_bomb"]
 		"great_scientist":
-			abilities = ["settle", "golden_age", "discover_tech"]
+			abilities = ["build_academy", "golden_age", "discover_tech"]
 		"great_merchant":
 			abilities = ["settle", "golden_age", "trade_mission"]
 		"great_engineer":
 			abilities = ["settle", "golden_age", "hurry_production"]
 		"great_general":
-			abilities = ["settle", "golden_age"]
+			abilities = ["build_military_academy", "golden_age"]
 
 	return abilities
 

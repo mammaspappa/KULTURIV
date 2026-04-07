@@ -5,6 +5,7 @@ extends Node
 
 const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
 const UnitClass = preload("res://scripts/entities/unit.gd")
+const AIStrategyClass = preload("res://scripts/ai/ai_strategy.gd")
 
 # Flavor thresholds for decision making
 const HIGH_FLAVOR = 7
@@ -22,22 +23,45 @@ enum CitySpecialization {
 	FOOD          # Growth focused city
 }
 
+# Simulation logger (null during normal gameplay, set by ai_simulation.gd)
+static var sim_logger = null
+
+# Per-turn caches (cleared at start of each execute_turn)
+var _cached_flavor: Dictionary = {}
+var _cached_personality: Dictionary = {}
+var _cached_ai_bonuses: Dictionary = {}
+var _cached_player_id: int = -1
+var _cached_has_coastal: int = -1  # -1=unchecked, 0=no, 1=yes
+var _cached_has_spies: int = -1
+
 ## Execute a full turn for an AI player
 func execute_turn(player) -> void:
 	if player.is_human:
 		return
 
+	# Clear per-turn caches
+	_cached_flavor = {}
+	_cached_personality = {}
+	_cached_ai_bonuses = {}
+	_cached_player_id = player.player_id
+	_cached_has_coastal = -1
+	_cached_has_spies = -1
+
 	# Get leader flavor values for personality-based decisions
 	var flavor = _get_leader_flavor(player)
 
-	# Process diplomacy first
+	# Process diplomacy first (skip unmet players handled internally)
 	_process_diplomacy(player, flavor)
 
 	# Process research
 	_process_research(player, flavor)
 
-	# Process espionage
-	_process_espionage(player, flavor)
+	# Process espionage (skip if no espionage capability)
+	if _has_espionage_capability(player):
+		_process_espionage(player, flavor)
+
+	# Strategic planning (city sites, war targets, defense — runs once before units)
+	AIStrategyClass.update_strategy(player, flavor)
 
 	# Process units
 	for unit in player.units.duplicate():
@@ -47,40 +71,107 @@ func execute_turn(player) -> void:
 
 	# Process cities
 	for city in player.cities:
+		var prev_production = city.current_production
 		_process_city_ai(city, player, flavor)
+		if sim_logger and city.current_production != "" and city.current_production != prev_production:
+			sim_logger.log_decision(player.player_name, "production", "set_production",
+				"%s -> %s" % [city.city_name, city.current_production], "")
 
-	# Process civics adoption
-	_process_civics(player, flavor)
+	# Process civics adoption (deterministic: every 10 turns)
+	if TurnManager.current_turn % 10 == player.player_id % 10:
+		_process_civics(player, flavor)
 
-	# Process naval strategy
-	_process_naval_strategy(player, flavor)
+	# Process naval strategy (skip if no coastal cities)
+	if _has_coastal_cities(player):
+		_process_naval_strategy(player, flavor)
 
-## Get leader flavor values
+## Get leader flavor values (cached per turn)
 func _get_leader_flavor(player) -> Dictionary:
-	var leader_data = DataManager.get_leader(player.leader_id)
-	return leader_data.get("flavor", {
-		"military": 5,
-		"gold": 5,
-		"science": 5,
-		"culture": 5,
-		"religion": 5,
-		"expansion": 5,
-		"growth": 5,
-		"production": 5
-	})
+	if not _cached_flavor.is_empty() and _cached_player_id == player.player_id:
+		return _cached_flavor
 
-## Get difficulty bonuses for AI
+	var leader_data = DataManager.get_leader(player.leader_id)
+	var flavor = leader_data.get("flavor", {
+		"military": 5, "gold": 5, "science": 5, "culture": 5,
+		"religion": 5, "expansion": 5, "growth": 5, "production": 5
+	}).duplicate()
+	# Apply AI aggressiveness modifier from game settings
+	var aggro = GameManager.ai_aggressiveness
+	if aggro == "peaceful":
+		flavor["military"] = int(flavor.get("military", 5) * 0.5)
+	elif aggro == "aggressive":
+		flavor["military"] = int(flavor.get("military", 5) * 1.5)
+
+	_cached_flavor = flavor
+	return flavor
+
+## Get full leader personality data (cached per turn)
+func _get_leader_personality(player) -> Dictionary:
+	if not _cached_personality.is_empty() and _cached_player_id == player.player_id:
+		return _cached_personality
+
+	var leader_data = DataManager.get_leader(player.leader_id)
+	_cached_personality = {
+		"base_peace_weight": leader_data.get("base_peace_weight", 5),
+		"warmonger_respect": leader_data.get("warmonger_respect", 1),
+		"max_war_rand": leader_data.get("max_war_rand", 100),
+		"make_peace_rand": leader_data.get("make_peace_rand", 30),
+		"dogpile_war_rand": leader_data.get("dogpile_war_rand", 50),
+		"raze_city_prob": leader_data.get("raze_city_prob", 20),
+		"build_unit_prob": leader_data.get("build_unit_prob", 40),
+		"wonder_construct_rand": leader_data.get("wonder_construct_rand", 30),
+		"espionage_weight": leader_data.get("espionage_weight", 80),
+		"base_attitude": leader_data.get("base_attitude", 0),
+	}
+	return _cached_personality
+
+## Get difficulty bonuses for AI (cached per turn)
 func _get_ai_bonuses() -> Dictionary:
+	if not _cached_ai_bonuses.is_empty():
+		return _cached_ai_bonuses
 	var handicap_id = DataManager.get_handicap_id_by_level(GameManager.difficulty)
-	return DataManager.get_ai_bonuses(handicap_id)
+	_cached_ai_bonuses = DataManager.get_ai_bonuses(handicap_id)
+	return _cached_ai_bonuses
+
+## Check if player has any espionage capability (cached per turn)
+func _has_espionage_capability(player) -> bool:
+	if _cached_has_spies != -1:
+		return _cached_has_spies == 1
+
+	# Check if player has any espionage points accumulated
+	for other in GameManager.players:
+		if other == player:
+			continue
+		var points = EspionageSystem.get_espionage_points(player.player_id, other.player_id)
+		if points >= 50:
+			_cached_has_spies = 1
+			return true
+
+	_cached_has_spies = 0
+	return false
+
+## Check if player has coastal cities (cached per turn)
+func _has_coastal_cities(player) -> bool:
+	if _cached_has_coastal != -1:
+		return _cached_has_coastal == 1
+
+	for city in player.cities:
+		if _is_coastal_city(city):
+			_cached_has_coastal = 1
+			return true
+
+	_cached_has_coastal = 0
+	return false
 
 ## Process AI diplomacy decisions
 func _process_diplomacy(player, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
+	var met_count = 0
 
 	for other in GameManager.players:
 		if other == player or other.player_id not in player.met_players:
 			continue
+		met_count += 1
 
 		# Skip if at war
 		if GameManager.is_at_war(player, other):
@@ -90,32 +181,55 @@ func _process_diplomacy(player, flavor: Dictionary) -> void:
 		# Consider treaties
 		_consider_treaties(player, other, flavor)
 
-		# Consider trade
-		_consider_trade(player, other, flavor)
+		# Consider trade (limit to avoid spam — max 2 trade checks per turn)
+		if met_count <= 2:
+			_consider_trade(player, other, flavor)
 
 		# Consider war
 		_consider_war(player, other, flavor)
 
-## Consider making peace
+## Consider making peace or capitulating (BTS personality-driven)
 func _consider_peace(player, other, military_flavor: int) -> void:
-	# Calculate power ratio
+	# Check if AI should offer capitulation (become vassal)
+	if DiplomacySystem.should_offer_capitulation(player, other):
+		player.become_vassal_of(other.player_id)
+		EventBus.notification_added.emit("%s has capitulated to %s!" % [player.player_name, other.player_name])
+		GameManager.make_peace(player, other)
+		if sim_logger:
+			sim_logger.log_decision(player.player_name, "peace", "capitulate", other.player_name, "war_score_critical")
+		return
+
+	var personality = _get_leader_personality(player)
+
+	# BTS make_peace_rand: roll each turn — higher = more willing to consider peace
+	# Warmongers (make_peace_rand=80 like Genghis) rarely want peace
+	# Peaceful leaders (make_peace_rand=10 like Gandhi) will stay in war once committed
+	# But peace_weight affects the threshold for accepting peace
+	if randi() % max(int(personality.make_peace_rand), 1) != 0:
+		# Didn't trigger peace consideration this turn
+		# But still check if we're losing badly
+		var our_power = DiplomacySystem._calculate_power(player)
+		var their_power = DiplomacySystem._calculate_power(other)
+		if our_power < their_power * 0.5:
+			# Badly losing — even warmongers consider peace
+			if not other.is_human:
+				GameManager.make_peace(player, other)
+		return
+
 	var our_power = DiplomacySystem._calculate_power(player)
 	var their_power = DiplomacySystem._calculate_power(other)
 
-	# More likely to seek peace if losing
-	if our_power < their_power * 0.7:
-		# We're losing, try to make peace
+	# Peaceful leaders (high peace_weight) seek peace more readily
+	var peace_threshold = 0.7 + personality.base_peace_weight * 0.05  # 0.7 to 1.2
+	if our_power < their_power * peace_threshold:
 		if other.is_human:
-			# AI will accept peace offers from human more readily when losing
-			return
-
-		# Both AI - negotiate peace
-		if their_power < our_power * 1.5:  # They're not crushing us
-			GameManager.make_peace(player, other)
-	elif military_flavor < MEDIUM_FLAVOR and our_power < their_power * 1.2:
-		# Non-aggressive AI seeks peace when not winning decisively
+			return  # Wait for human to propose
+		GameManager.make_peace(player, other)
+	elif personality.base_peace_weight > 6 and our_power < their_power * 1.2:
+		# Very peaceful leaders seek peace even when roughly equal
 		if randf() < 0.3:
-			GameManager.make_peace(player, other)
+			if not other.is_human:
+				GameManager.make_peace(player, other)
 
 ## Consider treaties (open borders, defensive pact)
 func _consider_treaties(player, other, flavor: Dictionary) -> void:
@@ -177,31 +291,46 @@ func _consider_trade(player, other, flavor: Dictionary) -> void:
 				# Propose to human player
 				EventBus.trade_proposed.emit(player, other, proposal)
 
-## Consider declaring war
+## Consider declaring war (BTS personality-driven)
 func _consider_war(player, other, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
-	var expansion_flavor = flavor.get("expansion", 5)
+	var personality = _get_leader_personality(player)
 
-	# Non-aggressive AI rarely declares war unprovoked
-	if military_flavor < MEDIUM_FLAVOR:
-		return
+	# BTS max_war_rand: lower = more warlike. Chance = 100/max_war_rand per turn.
+	# Alexander (50) = 2%, Gandhi (400) = 0.25%, Montezuma (40) = 2.5%
+	var war_chance = 100.0 / max(personality.max_war_rand, 1)
+	if randf() * 100.0 > war_chance:
+		return  # Didn't roll war this turn
 
 	var attitude = DiplomacySystem.calculate_attitude(player, other)
 
-	# Only attack enemies or those we dislike
-	if attitude > -2:
+	# Attitude threshold: aggressive leaders attack at neutral, peaceful need deep hostility
+	# Gandhi (peace=10): need attitude < -3. Alexander (peace=2): need attitude < 0.
+	var war_attitude_threshold = 0 - personality.base_peace_weight / 3
+	if attitude > war_attitude_threshold:
 		return
 
 	# Check military power
 	var our_power = DiplomacySystem._calculate_power(player)
 	var their_power = DiplomacySystem._calculate_power(other)
 
-	# Need significant advantage
-	var required_ratio = 1.5 - (military_flavor - 5) * 0.1  # Aggressive AI needs less advantage
-	required_ratio = max(1.2, required_ratio)
+	# Required power ratio: aggressive need only equal power, peaceful need big advantage
+	var required_ratio = 1.0 + personality.base_peace_weight * 0.1
+	required_ratio = clamp(required_ratio, 1.0, 2.0)
+
+	# Dogpile bonus: if target is already at war, we need less advantage
+	var target_at_war = other.at_war_with.size() > 0
+	if target_at_war:
+		var dogpile_chance = personality.dogpile_war_rand
+		if randi() % max(dogpile_chance, 1) == 0:
+			required_ratio *= 0.7  # Much lower bar for dogpiling
+
+	# Warmonger respect: leaders who respect strength don't attack stronger foes
+	if personality.warmonger_respect >= 2 and their_power > our_power:
+		return
 
 	if our_power > their_power * required_ratio:
-		# Check if they have a defensive pact ally we'd also fight
+		# Check defensive pact allies
 		var pact_allies_power = 0
 		for ally_id in other.defensive_pact_with:
 			var ally = GameManager.get_player(ally_id)
@@ -209,9 +338,12 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 				pact_allies_power += DiplomacySystem._calculate_power(ally)
 
 		if our_power > (their_power + pact_allies_power) * required_ratio:
-			# Declare war with some randomness
-			if randf() < 0.3 * (military_flavor / 10.0):
-				GameManager.declare_war(player, other)
+			GameManager.declare_war(player, other)
+			if sim_logger:
+				sim_logger.log_decision(player.player_name, "war", "declare_war", other.player_name,
+					"power=%.0f vs %.0f, ratio=%.1f, peace_weight=%d, dogpile=%s" % [
+						our_power, their_power, our_power / max(their_power, 1),
+						personality.base_peace_weight, str(target_at_war)])
 
 ## Process AI espionage decisions
 func _process_espionage(player, flavor: Dictionary) -> void:
@@ -350,16 +482,97 @@ func _process_unit_ai(unit, player, flavor: Dictionary) -> void:
 	_combat_unit_ai(unit, player, flavor)
 
 func _settler_ai(unit, player, flavor: Dictionary) -> void:
-	# If on good tile, found city
-	if _is_good_city_location(unit.grid_position, player):
-		if GameManager.game_world:
-			GameManager.game_world.found_city(unit)
+	if GameManager.hex_grid == null or GameManager.game_world == null:
 		return
 
-	# Move toward better location
-	var target = _find_best_city_location(unit, player, flavor)
-	if target != Vector2i(-1, -1):
-		_move_toward(unit, target)
+	# Check if unit has a strategic assignment
+	var assigned_site = _get_assigned_site(unit, player)
+
+	# If no assignment, request one from strategy
+	if assigned_site.is_empty():
+		assigned_site = AIStrategyClass.get_best_unassigned_site(player)
+		if not assigned_site.is_empty():
+			AIStrategyClass.assign_settler_to_site(player, unit, assigned_site)
+			if sim_logger:
+				var pos = assigned_site.position
+				sim_logger.log_decision(player.player_name, "settler", "assigned_site",
+					"(%d,%d) score=%d" % [pos.x, pos.y, assigned_site.score], "")
+
+	if not assigned_site.is_empty():
+		var target_pos: Vector2i = assigned_site.position
+
+		# At or near target? Found city.
+		var dist_to_target = GridUtils.chebyshev_distance(unit.grid_position, target_pos)
+		if dist_to_target == 0 and _can_settle_here(unit.grid_position, player):
+			AIStrategyClass.clear_assignment(player, unit)
+			GameManager.game_world.found_city(unit)
+			return
+
+		# Move toward target — try pathfinding first, then greedy movement
+		var pos_before = unit.grid_position
+		_move_toward(unit, target_pos)
+
+		# If pathfinding failed, try greedy neighbor movement
+		if unit.grid_position == pos_before and unit.movement_remaining > 0:
+			_greedy_move_toward(unit, target_pos)
+
+		# Check if at target after moving
+		dist_to_target = GridUtils.chebyshev_distance(unit.grid_position, target_pos)
+		if dist_to_target <= 1 and _can_settle_here(unit.grid_position, player):
+			AIStrategyClass.clear_assignment(player, unit)
+			GameManager.game_world.found_city(unit)
+			return
+
+		# If couldn't move at all
+		if unit.grid_position == pos_before:
+			# Try to settle here
+			if _can_settle_here(unit.grid_position, player):
+				AIStrategyClass.clear_assignment(player, unit)
+				GameManager.game_world.found_city(unit)
+				return
+			# Try settling on any adjacent tile we can move to
+			var neighbors = GridUtils.get_neighbors(unit.grid_position)
+			for n_pos in neighbors:
+				var n_tile = GameManager.hex_grid.get_tile(n_pos)
+				if n_tile and n_tile.is_passable() and not n_tile.is_water() and _can_settle_here(n_pos, player):
+					if unit.move_to(n_pos):
+						AIStrategyClass.clear_assignment(player, unit)
+						GameManager.game_world.found_city(unit)
+					return
+		return
+
+	# Fallback: no strategic sites — found on current tile if acceptable
+	if _can_settle_here(unit.grid_position, player):
+		GameManager.game_world.found_city(unit)
+		return
+
+	# Try moving to any adjacent settleable tile
+	if GameManager.hex_grid:
+		var neighbors = GridUtils.get_neighbors(unit.grid_position)
+		for n_pos in neighbors:
+			if _can_settle_here(n_pos, player):
+				_move_toward(unit, n_pos)
+				if unit.grid_position == n_pos:
+					GameManager.game_world.found_city(unit)
+				return
+
+func _get_assigned_site(unit, player) -> Dictionary:
+	var uid = unit.get_instance_id()
+	for site in player.ai_strategy.get("city_sites", []):
+		if site.get("assigned_unit_id", -1) == uid:
+			return site
+	return {}
+
+func _can_settle_here(pos: Vector2i, player) -> bool:
+	var tile = GameManager.hex_grid.get_tile(pos) if GameManager.hex_grid else null
+	if tile == null or tile.is_water() or not tile.is_passable():
+		return false
+	for city in player.cities:
+		if GridUtils.chebyshev_distance(pos, city.grid_position) < 4:
+			return false
+	if GameManager.get_city_at(pos) != null:
+		return false
+	return true
 
 func _worker_ai(unit, player, flavor: Dictionary) -> void:
 	var tile = GameManager.hex_grid.get_tile(unit.grid_position) if GameManager.hex_grid else null
@@ -425,13 +638,12 @@ func _choose_improvement(tile, improvements: Array, prod_flavor: int, growth_fla
 func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
 
-	# Check for nearby enemies
+	# 1. Immediate tactical: attack nearby enemies
 	var enemies = _find_nearby_enemies(unit, player, 3)
 	if not enemies.is_empty():
 		var target = _pick_best_target(unit, enemies, military_flavor)
 		if target:
 			var odds = CombatSystem.calculate_odds(unit, target)
-			# Aggressive AI takes more risks
 			var min_odds = 0.5 - (military_flavor - 5) * 0.05
 			min_odds = clamp(min_odds, 0.3, 0.6)
 
@@ -443,7 +655,22 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 					_move_toward(unit, target.grid_position)
 					return
 
-	# Defend cities if needed
+	# 2. Strategic: move toward assigned war target
+	if not player.at_war_with.is_empty():
+		var war_target = AIStrategyClass.get_war_target_for_unit(player, unit)
+		if not war_target.is_empty():
+			_move_toward(unit, war_target.city_position)
+			return
+
+	# 3. Strategic: garrison threatened cities
+	var defense_need = AIStrategyClass.get_city_needing_garrison(player, unit)
+	if not defense_need.is_empty():
+		_move_toward(unit, defense_need.city_position)
+		if unit.grid_position == defense_need.city_position:
+			unit.fortify()
+		return
+
+	# 4. Fallback: garrison undefended own cities
 	for city in player.cities:
 		var garrison = GameManager.get_units_at(city.grid_position)
 		var has_military = false
@@ -457,13 +684,13 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 				unit.fortify()
 			return
 
-	# Explore unexplored tiles
+	# 5. Explore unexplored tiles
 	var unexplored = _find_nearest_unexplored(unit, player)
 	if unexplored != Vector2i(-1, -1):
 		_move_toward(unit, unexplored)
 		return
 
-	# Fortify if nothing to do
+	# 6. Nothing to do
 	unit.fortify()
 
 ## Pick best target from enemies
@@ -492,6 +719,12 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	if city.current_production != "":
 		return
 
+	# Check strategic production advice first
+	var strategic_prod = AIStrategyClass.get_production_advice(player, city, flavor)
+	if strategic_prod != "" and city.can_build_unit(strategic_prod):
+		city.set_production(strategic_prod)
+		return
+
 	var military_flavor = flavor.get("military", 5)
 	var science_flavor = flavor.get("science", 5)
 	var growth_flavor = flavor.get("growth", 5)
@@ -517,39 +750,44 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if u.can_build_improvements():
 			workers += 1
 
-	# Calculate desired military based on flavor and specialization
-	var desired_military = num_cities * (1 + military_flavor / 5)
-	if specialization == CitySpecialization.MILITARY:
-		desired_military *= 1.5  # Military cities want more units
+	# Early expansion: settler is top priority when only 1 city (unless at war)
+	var map_tiles = GameManager.map_width * GameManager.map_height
+	var base_cities = max(3, map_tiles / 300)
+	var max_cities = base_cities + expansion_flavor
+	if num_cities <= 1 and city.population >= 2 and player.at_war_with.is_empty():
+		if city.can_build_unit("settler"):
+			city.set_production("settler")
+			return
 
-	# Need military? (Higher priority for military-specialized cities)
-	var military_priority_threshold = desired_military
+	# Calculate desired military based on flavor, specialization, and personality
+	var personality = _get_leader_personality(player)
+	var build_unit_prob = personality.get("build_unit_prob", 40)
+	var desired_military = num_cities * (1 + military_flavor / 5) * (build_unit_prob / 40.0)
 	if specialization == CitySpecialization.MILITARY:
-		military_priority_threshold = desired_military * 0.8  # Build sooner
+		desired_military *= 1.5
 
-	if military_units < military_priority_threshold:
+	# Hard cap: never exceed cities*6+10 military units
+	var max_military = num_cities * 6 + 10
+	var need_military = military_units < desired_military and military_units < max_military
+
+	if need_military:
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
 			return
 
-	# Need settler? Based on expansion flavor, scaled to map size
-	var map_tiles = GameManager.map_width * GameManager.map_height
-	var base_cities = max(4, map_tiles / 200)
-	var max_cities = base_cities + expansion_flavor
-	if num_cities < max_cities and city.population >= 3:
-		if specialization in [CitySpecialization.PRODUCTION, CitySpecialization.FOOD, CitySpecialization.HYBRID]:
-			if city.can_build_unit("settler"):
-				city.set_production("settler")
-				return
+	# Need settler?
+	if num_cities < max_cities and city.population >= 2:
+		if city.can_build_unit("settler"):
+			city.set_production("settler")
+			return
 
-	# Need worker? (Prefer production cities for this)
-	var desired_workers = num_cities * (1 + production_flavor / 10)
+	# Need worker?
+	var desired_workers = max(1, num_cities)
 	if workers < desired_workers:
-		if specialization in [CitySpecialization.PRODUCTION, CitySpecialization.HYBRID]:
-			if city.can_build_unit("worker"):
-				city.set_production("worker")
-				return
+		if city.can_build_unit("worker"):
+			city.set_production("worker")
+			return
 
 	# Build infrastructure based on flavor AND specialization
 	var building_to_build = _get_best_building_for_specialization(city, player, flavor, specialization)
@@ -563,10 +801,11 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		city.set_production(project_to_build)
 		return
 
-	# Default to military for military cities, or best unit otherwise
-	var unit_to_build = _get_best_military_unit(city, player, military_flavor)
-	if unit_to_build != "":
-		city.set_production(unit_to_build)
+	# Default: only build military if under cap, otherwise wealth/research
+	if military_units < max_military:
+		var unit_to_build = _get_best_military_unit(city, player, military_flavor)
+		if unit_to_build != "":
+			city.set_production(unit_to_build)
 
 func _process_research(player, flavor: Dictionary) -> void:
 	if player.current_research != "":
@@ -592,6 +831,10 @@ func _process_research(player, flavor: Dictionary) -> void:
 			best_tech = tech_id
 
 	player.start_research(best_tech)
+	if sim_logger:
+		var tech_name = DataManager.get_tech(best_tech).get("name", best_tech)
+		sim_logger.log_decision(player.player_name, "research", "start_research", tech_name,
+			"score=%.0f, available=%d" % [best_score, available_techs.size()])
 
 func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 	var score = 0.0
@@ -645,23 +888,35 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 
 # Helper functions
 func _is_good_city_location(pos: Vector2i, player) -> bool:
-	# Check not too close to other cities
-	for city in GameManager.get_all_cities():
+	# Must be 4+ tiles from OWN cities
+	for city in player.cities:
 		if GridUtils.chebyshev_distance(pos, city.grid_position) < 4:
 			return false
 
-	# Check has enough good tiles nearby
-	var good_tiles = 0
+	# Must be 3+ tiles from OTHER players' cities (avoid overlap but don't block expansion)
+	for other in GameManager.players:
+		if other == player:
+			continue
+		for city in other.cities:
+			if GridUtils.chebyshev_distance(pos, city.grid_position) < 3:
+				return false
+
+	# Check tile is on land
 	if GameManager.hex_grid == null:
 		return false
+	var center_tile = GameManager.hex_grid.get_tile(pos)
+	if center_tile == null or center_tile.is_water() or not center_tile.is_passable():
+		return false
 
+	# Check has enough food-producing tiles nearby
+	var good_tiles = 0
 	var tiles = GridUtils.get_tiles_in_range(pos, 2)
 	for tile_pos in tiles:
 		var tile = GameManager.hex_grid.get_tile(tile_pos)
-		if tile != null and tile.get_food() >= 2:
+		if tile != null and tile.get_food() >= 1:
 			good_tiles += 1
 
-	return good_tiles >= 3
+	return good_tiles >= 2
 
 func _find_best_city_location(unit, player, flavor: Dictionary) -> Vector2i:
 	if GameManager.hex_grid == null:
@@ -705,6 +960,27 @@ func _evaluate_city_location(pos: Vector2i, growth_flavor: int, prod_flavor: int
 			if tile.resource_id != "":
 				score += 15  # Resources are always valuable
 	return score
+
+## Greedy movement toward target — picks closest valid neighbor.
+## Used as fallback when pathfinding fails.
+func _greedy_move_toward(unit, target: Vector2i) -> void:
+	if GameManager.hex_grid == null or unit.movement_remaining <= 0:
+		return
+
+	var best_pos = unit.grid_position
+	var best_dist = GridUtils.chebyshev_distance(unit.grid_position, target)
+
+	var neighbors = GridUtils.get_neighbors(unit.grid_position)
+	for n_pos in neighbors:
+		# Use the unit's own can_move_to which checks all restrictions
+		if unit.can_move_to(n_pos):
+			var dist = GridUtils.chebyshev_distance(n_pos, target)
+			if dist < best_dist:
+				best_dist = dist
+				best_pos = n_pos
+
+	if best_pos != unit.grid_position:
+		unit.move_to(best_pos)
 
 func _move_toward(unit, target: Vector2i) -> void:
 	if GameManager.hex_grid == null:
@@ -1038,9 +1314,10 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 
 		var building = DataManager.get_building(building_id)
 
-		# Avoid building a wonder that another of our cities is already building
+		# Wonder handling using leader personality
 		var wonder_type = building.get("wonder_type", "")
 		if wonder_type != "":
+			# Skip if another city already building this wonder
 			var already_building = false
 			for other_city in player.cities:
 				if other_city != city and other_city.current_production == building_id:
@@ -1048,6 +1325,12 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 					break
 			if already_building:
 				continue
+
+			# Leaders with low wonder_construct_rand skip wonders more often
+			var personality = _get_leader_personality(player)
+			var wonder_rand = personality.get("wonder_construct_rand", 30)
+			if randi() % 100 >= wonder_rand:
+				continue  # Skip this wonder based on personality
 
 		var effects = building.get("effects", {})
 		var score = 0.0
@@ -1123,10 +1406,6 @@ func _get_best_building(city, player, flavor: Dictionary) -> String:
 
 ## Process civics adoption based on leader preferences
 func _process_civics(player, flavor: Dictionary) -> void:
-	# Only check civics occasionally
-	if randf() > 0.1:
-		return
-
 	# Get leader data for favorite civic
 	var leader_data = DataManager.get_leader(player.leader_id)
 	var favorite_civic = leader_data.get("favorite_civic", "")

@@ -12,10 +12,14 @@ var resource_id: String = ""
 var improvement_id: String = ""
 var road_level: int = 0  # 0=none, 1=road, 2=railroad
 var has_goody_hut: bool = false  # Tribal village (discoverable bonus)
+var river_edges: Array[int] = []  # Which edges have rivers (0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW)
 
 # Ownership (untyped to avoid circular dependency)
 var tile_owner = null  # Player
 var city_owner = null  # City that works this tile
+
+# Per-player culture values (BTS-style culture competition)
+var tile_culture: Dictionary = {}  # {player_id: int} — culture from each player
 
 # Visibility (per player)
 var visibility: Dictionary = {}  # player_id -> VisibilityState
@@ -28,10 +32,35 @@ const TILE_SIZE: int = 64
 
 enum VisibilityState { UNEXPLORED, FOGGED, VISIBLE }
 
+# Texture cache (loaded once, shared by all tiles)
+static var _textures_loaded: bool = false
+static var terrain_textures: Dictionary = {}
+static var feature_textures: Dictionary = {}
+
+static func _load_textures() -> void:
+	if _textures_loaded:
+		return
+	_textures_loaded = true
+
+	# Load terrain textures
+	for terrain_id_key in ["grassland", "plains", "desert", "tundra", "snow", "ocean", "coast", "hills", "mountains", "deep_ocean"]:
+		var path = "res://assets/terrain/%s.png" % terrain_id_key
+		if ResourceLoader.exists(path):
+			terrain_textures[terrain_id_key] = load(path)
+
+	# Load feature textures
+	for feature_id_key in ["forest", "jungle", "flood_plains", "oasis", "ice"]:
+		var path = "res://assets/features/%s.png" % feature_id_key
+		if ResourceLoader.exists(path):
+			feature_textures[feature_id_key] = load(path)
+
 func _init(pos: Vector2i = Vector2i.ZERO) -> void:
 	grid_position = pos
 	position = GridUtils.grid_to_pixel_corner(grid_position)
+	GameTile._load_textures()
 func _draw() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	# Check visibility for human player
 	var human_player = GameManager.human_player
 	var vis_state = VisibilityState.VISIBLE  # Default to visible if no human player
@@ -45,6 +74,7 @@ func _draw() -> void:
 
 	_draw_terrain()
 	_draw_feature()
+	_draw_rivers()
 
 	# Only show resources, improvements, roads if explored
 	if vis_state == VisibilityState.VISIBLE:
@@ -64,6 +94,14 @@ func _draw() -> void:
 		draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), Color(0, 0, 0, 0.5))
 
 func _draw_terrain() -> void:
+	# Try to use terrain texture if available
+	if terrain_id in terrain_textures:
+		draw_texture(terrain_textures[terrain_id], Vector2.ZERO)
+		# Subtle edge outline for grid readability
+		draw_rect(Rect2(0, 0, TILE_SIZE, TILE_SIZE), Color(0, 0, 0, 0.15), false, 1.0)
+		return
+
+	# Fallback: procedural drawing
 	var color = DataManager.get_terrain_color(terrain_id)
 
 	# Per-tile brightness variation to break up the flat grid look
@@ -210,6 +248,11 @@ func _draw_tundra_details() -> void:
 
 func _draw_feature() -> void:
 	if feature_id == "":
+		return
+
+	# Try texture first
+	if feature_id in feature_textures:
+		draw_texture(feature_textures[feature_id], Vector2.ZERO)
 		return
 
 	var feature = DataManager.get_feature(feature_id)
@@ -378,6 +421,36 @@ func _draw_road() -> void:
 	draw_line(Vector2(0, center.y), Vector2(TILE_SIZE, center.y), road_color, 3.0)
 	draw_line(Vector2(center.x, 0), Vector2(center.x, TILE_SIZE), road_color, 3.0)
 
+func _draw_rivers() -> void:
+	if river_edges.is_empty():
+		return
+
+	var river_color = Color(0.2, 0.5, 0.9, 0.8)
+	var width = 4.0
+	var center = Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
+
+	# Edge midpoints — where rivers exit each tile edge
+	# 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW
+	var edge_midpoints = {
+		0: Vector2(32, 0),
+		1: Vector2(56, 8),
+		2: Vector2(64, 32),
+		3: Vector2(56, 56),
+		4: Vector2(32, 64),
+		5: Vector2(8, 56),
+		6: Vector2(0, 32),
+		7: Vector2(8, 8),
+	}
+
+	# Draw line from center to each river edge midpoint
+	for edge in river_edges:
+		if edge in edge_midpoints:
+			draw_line(center, edge_midpoints[edge], river_color, width, true)
+
+	# Draw a circle at center if 2+ edges (river confluence)
+	if river_edges.size() >= 2:
+		draw_circle(center, width * 0.8, river_color)
+
 func _draw_goody_hut() -> void:
 	if not has_goody_hut:
 		return
@@ -429,6 +502,8 @@ func _draw_owner_border() -> void:
 		draw_line(Vector2(0, TILE_SIZE), Vector2(0, 0), border_color, 3.0)
 
 func update_visuals() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	queue_redraw()
 
 ## Copy visual data from another tile (used for wrap display)
@@ -452,6 +527,78 @@ func get_total_movement_cost() -> int:
 	if road_level >= 2:
 		base_cost = 0  # Railroads are essentially free
 	return max(base_cost, 1)
+
+# --- Per-player culture methods ---
+
+## Add culture for a player on this tile
+func add_culture(player_id: int, amount: int) -> void:
+	tile_culture[player_id] = tile_culture.get(player_id, 0) + amount
+
+## Get culture for a specific player on this tile
+func get_culture_for(player_id: int) -> int:
+	return tile_culture.get(player_id, 0)
+
+## Get player_id with the most culture on this tile (-1 if none)
+func get_dominant_culture_owner_id() -> int:
+	var best_id = -1
+	var best_val = 0
+	for pid in tile_culture:
+		if tile_culture[pid] > best_val:
+			best_val = tile_culture[pid]
+			best_id = pid
+	return best_id
+
+## Resolve tile ownership based on culture values
+## Returns true if ownership changed
+func resolve_culture_ownership() -> bool:
+	if tile_culture.size() < 2:
+		return false  # No competition
+
+	var dominant_id = get_dominant_culture_owner_id()
+	if dominant_id == -1:
+		return false
+
+	var current_owner_id = tile_owner.player_id if tile_owner else -1
+	if dominant_id == current_owner_id:
+		return false  # Already owned by dominant
+
+	# Dominant player must have > 2x the current owner's culture to flip
+	var dominant_culture = tile_culture.get(dominant_id, 0)
+	var owner_culture = tile_culture.get(current_owner_id, 0) if current_owner_id >= 0 else 0
+
+	if dominant_culture <= owner_culture * 2:
+		return false  # Not enough culture advantage to flip
+
+	# Flip ownership
+	var new_owner = GameManager.get_player(dominant_id)
+	if new_owner == null:
+		return false
+
+	# Remove from old city's territory
+	if city_owner:
+		city_owner.territory.erase(grid_position)
+		if grid_position in city_owner.worked_tiles:
+			city_owner.worked_tiles.erase(grid_position)
+
+	# Assign to new owner (find nearest city of new owner)
+	tile_owner = new_owner
+	city_owner = null
+
+	# Find nearest city of new owner to claim this tile
+	var nearest_city = null
+	var nearest_dist = INF
+	for city in new_owner.cities:
+		var dist = GridUtils.chebyshev_distance(grid_position, city.grid_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest_city = city
+	if nearest_city and nearest_dist <= 6:  # Max reasonable territory range
+		city_owner = nearest_city
+		if grid_position not in nearest_city.territory:
+			nearest_city.territory.append(grid_position)
+
+	update_visuals()
+	return true
 
 func is_passable() -> bool:
 	if not DataManager.is_terrain_passable(terrain_id):
@@ -477,10 +624,27 @@ func is_hills() -> bool:
 func is_mountains() -> bool:
 	return terrain_id == "mountains"
 
-func has_fresh_water() -> bool:
-	# Would need to check for adjacent rivers/lakes
-	# Simplified: check if adjacent to coast or has oasis
-	return feature_id == "oasis"
+func has_fresh_water(check_irrigation: bool = false, player = null) -> bool:
+	# Has river on any edge
+	if not river_edges.is_empty():
+		return true
+	# Oasis provides fresh water
+	if feature_id == "oasis":
+		return true
+	# Check if any neighbor has a river edge facing this tile
+	if GameManager.hex_grid:
+		var neighbors = GridUtils.get_neighbors(grid_position)
+		for n_pos in neighbors:
+			var n_tile = GameManager.hex_grid.get_tile(n_pos)
+			if n_tile and not n_tile.river_edges.is_empty():
+				return true
+		# Irrigation chain: adjacent farm acts as fresh water if player has Civil Service
+		if check_irrigation and player != null and player.has_tech("civil_service"):
+			for n_pos in neighbors:
+				var n_tile = GameManager.hex_grid.get_tile(n_pos)
+				if n_tile and n_tile.improvement_id == "farm":
+					return true
+	return false
 
 func get_defense_bonus() -> float:
 	var bonus = DataManager.get_terrain_defense_bonus(terrain_id)
@@ -518,6 +682,10 @@ func get_yields(for_player = null) -> Dictionary:
 		var improvement_yields = DataManager.get_improvement_yields(improvement_id)
 		for key in improvement_yields:
 			yields[key] = yields.get(key, 0) + improvement_yields[key]
+
+	# River bonus: +1 commerce for tiles with river edges
+	if not river_edges.is_empty():
+		yields["commerce"] = yields.get("commerce", 0) + 1
 
 	return yields
 
@@ -627,6 +795,7 @@ func to_dict() -> Dictionary:
 		"has_goody_hut": has_goody_hut,
 		"owner_id": tile_owner.player_id if tile_owner else -1,
 		"visibility": visibility,
+		"tile_culture": tile_culture,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -638,5 +807,6 @@ func from_dict(data: Dictionary) -> void:
 	road_level = data.get("road_level", 0)
 	has_goody_hut = data.get("has_goody_hut", false)
 	visibility = data.get("visibility", {})
+	tile_culture = data.get("tile_culture", {})
 	position = GridUtils.grid_to_pixel_corner(grid_position)
 	update_visuals()

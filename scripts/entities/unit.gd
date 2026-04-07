@@ -50,6 +50,27 @@ const GREAT_GENERAL_XP_BONUS = 0.50  # +50% experience gain when attached
 const TILE_SIZE: int = 64
 var is_selected: bool = false
 
+# Unit icon texture cache (loaded once, shared by all units)
+static var _unit_textures_loaded: bool = false
+static var unit_textures: Dictionary = {}
+
+static func _load_unit_textures() -> void:
+	if _unit_textures_loaded:
+		return
+	_unit_textures_loaded = true
+	var dir = DirAccess.open("res://assets/units/")
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while file_name != "":
+		if file_name.ends_with(".png"):
+			var uid = file_name.replace(".png", "")
+			var path = "res://assets/units/%s" % file_name
+			if ResourceLoader.exists(path):
+				unit_textures[uid] = load(path)
+		file_name = dir.get_next()
+
 # Movement animation
 var is_moving: bool = false
 var movement_tween: Tween = null
@@ -63,11 +84,14 @@ func _init(type: String = "warrior", pos: Vector2i = Vector2i.ZERO) -> void:
 	grid_position = pos
 	position = GridUtils.grid_to_pixel(grid_position)
 	refresh_movement()
+	Unit._load_unit_textures()
 
 func _ready() -> void:
 	update_visual()
 
 func _draw() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	var unit_data = DataManager.get_unit(unit_id)
 	var symbol = unit_data.get("symbol", "?")
 	var unit_class = unit_data.get("unit_class", "melee")
@@ -113,6 +137,15 @@ func _draw() -> void:
 		draw_string(font, Vector2(15, 20), move_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
 
 func _draw_unit_icon(center: Vector2, unit_class: String, symbol: String) -> void:
+	# Try to draw texture icon if available
+	if unit_id in unit_textures:
+		var tex = unit_textures[unit_id]
+		var icon_size = 32.0
+		var draw_pos = center - Vector2(icon_size / 2, icon_size / 2)
+		draw_texture_rect(tex, Rect2(draw_pos, Vector2(icon_size, icon_size)), false)
+		return
+
+	# Fallback: procedural geometric drawing
 	var col = Color.WHITE
 	var lw = 2.0  # line width
 
@@ -296,6 +329,7 @@ func get_abilities() -> Array:
 func refresh_movement() -> void:
 	movement_remaining = get_base_movement()
 	has_acted = false
+	is_moving = false  # Reset animation state (tweens may not complete in headless)
 	update_visual()
 
 func can_move() -> bool:
@@ -341,7 +375,11 @@ func can_enter_tile(tile) -> bool:
 	if tile.tile_owner == null:
 		return true
 
-	# Check if we have permission to enter this player's borders
+	# Own territory
+	if tile.tile_owner == player_owner:
+		return true
+
+	# Need open borders or war to enter foreign territory
 	return player_owner.can_enter_borders_of(tile.tile_owner.player_id)
 
 func _can_enter_water() -> bool:
@@ -544,7 +582,38 @@ func get_combat_strength(is_attacking: bool, target_tile = null, defender = null
 	if attached_great_general != null:
 		strength *= (1.0 + GREAT_GENERAL_COMBAT_BONUS)
 
+	# River crossing penalty (attacker only, -25%)
+	if is_attacking and defender != null and GameManager.hex_grid:
+		var att_tile = GameManager.hex_grid.get_tile(grid_position)
+		if att_tile and not att_tile.river_edges.is_empty():
+			var dx = defender.grid_position.x - grid_position.x
+			var dy = defender.grid_position.y - grid_position.y
+			# Check if the edge toward the defender has a river
+			var edge = _direction_to_edge(dx, dy)
+			if edge >= 0 and edge in att_tile.river_edges:
+				# Check for Amphibious promotion (negates river penalty)
+				var has_amphibious = false
+				for promo in promotions:
+					var eff = DataManager.get_promotion_effects(promo)
+					if eff.get("no_river_penalty", false):
+						has_amphibious = true
+						break
+				if not has_amphibious:
+					strength *= 0.75  # -25% river crossing penalty
+
 	return strength
+
+func _direction_to_edge(dx: int, dy: int) -> int:
+	# Map dx/dy direction to edge index (0=N,1=NE,2=E,3=SE,4=S,5=SW,6=W,7=NW)
+	if dx == 0 and dy == -1: return 0
+	elif dx == 1 and dy == -1: return 1
+	elif dx == 1 and dy == 0: return 2
+	elif dx == 1 and dy == 1: return 3
+	elif dx == 0 and dy == 1: return 4
+	elif dx == -1 and dy == 1: return 5
+	elif dx == -1 and dy == 0: return 6
+	elif dx == -1 and dy == -1: return 7
+	return -1
 
 func get_first_strikes() -> int:
 	var base = DataManager.get_unit(unit_id).get("first_strikes", 0)
@@ -725,6 +794,82 @@ func disband() -> void:
 	player_owner.gold += refund
 	EventBus.notification_added.emit("Unit disbanded for %d gold" % refund)
 	die()
+
+# Paradrop ability
+func can_paradrop() -> bool:
+	if has_acted or movement_remaining <= 0:
+		return false
+	var abilities = DataManager.get_unit(unit_id).get("abilities", [])
+	return "paradrop" in abilities
+
+func get_paradrop_range() -> int:
+	return DataManager.get_unit(unit_id).get("paradrop_range", 5)
+
+func paradrop(target: Vector2i) -> bool:
+	if not can_paradrop():
+		return false
+
+	# Check range from any friendly city
+	var in_range = false
+	for city in player_owner.cities:
+		if GridUtils.chebyshev_distance(city.grid_position, target) <= get_paradrop_range():
+			in_range = true
+			break
+
+	if not in_range:
+		return false
+
+	# Target must be passable land with no enemy unit
+	var tile = GameManager.hex_grid.get_tile(target) if GameManager.hex_grid else null
+	if tile == null or tile.is_water() or not tile.is_passable():
+		return false
+	if GameManager.get_unit_at(target) != null:
+		return false
+
+	# Execute paradrop
+	var from_pos = grid_position
+	grid_position = target
+	position = GridUtils.grid_to_pixel(target)
+	movement_remaining = 0
+	has_acted = true
+	update_visual()
+	EventBus.unit_moved.emit(self, from_pos, target)
+	return true
+
+# Airlift ability
+func can_be_airlifted() -> bool:
+	if has_acted or movement_remaining <= 0:
+		return false
+	var unit_data = DataManager.get_unit(unit_id)
+	if unit_data.get("unit_class", "") in ["air", "naval"]:
+		return false  # Only land units
+	# Must be in a city with airport
+	var city = GameManager.get_city_at(grid_position)
+	if city == null or city.player_owner != player_owner:
+		return false
+	if "airport" not in city.buildings:
+		return false
+	return true
+
+func airlift_to(target_city) -> bool:
+	if not can_be_airlifted():
+		return false
+	if target_city == null or target_city.player_owner != player_owner:
+		return false
+	if "airport" not in target_city.buildings:
+		return false
+	if target_city.grid_position == grid_position:
+		return false
+
+	var from_pos = grid_position
+	grid_position = target_city.grid_position
+	position = GridUtils.grid_to_pixel(grid_position)
+	movement_remaining = 0
+	has_acted = true
+	update_visual()
+	EventBus.unit_moved.emit(self, from_pos, grid_position)
+	EventBus.notification_added.emit("Unit airlifted to %s" % target_city.city_name)
+	return true
 
 # Great General attachment
 func can_attach_great_general(general) -> bool:

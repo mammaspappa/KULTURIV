@@ -14,15 +14,12 @@ var current_player = null  # Player (untyped to avoid load-order issues)
 var pending_changes: Dictionary = {}  # category -> civic_id
 
 # UI elements
-var panel: Panel
-var title_label: Label
-var close_button: Button
-var confirm_button: Button
+var panel: PanelContainer
 var category_containers: Dictionary = {}  # category -> VBoxContainer
 var civic_buttons: Dictionary = {}  # civic_id -> Button
-var info_panel: Panel
 var info_label: RichTextLabel
 var anarchy_label: Label
+var confirm_button: Button
 
 # Colors
 const BG_COLOR = Color(0.08, 0.08, 0.12, 1.0)
@@ -31,9 +28,10 @@ const AVAILABLE_COLOR = Color(0.25, 0.25, 0.35)
 const UNAVAILABLE_COLOR = Color(0.15, 0.15, 0.15)
 const CURRENT_COLOR = Color(0.2, 0.4, 0.5)
 const PENDING_COLOR = Color(0.5, 0.5, 0.2)
+const BORDER_COLOR = Color(0.4, 0.4, 0.5)
 
 func _ready() -> void:
-	# Allow clicks to pass through to top menu
+	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_create_ui()
 	EventBus.show_civics_screen.connect(_on_show_civics_screen)
@@ -42,109 +40,131 @@ func _ready() -> void:
 	hide()
 
 func _create_ui() -> void:
+	# Semi-transparent overlay
+	var bg = ColorRect.new()
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.0, 0.0, 0.0, 0.6)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(bg)
+
 	# Main panel
-	panel = Panel.new()
-	panel.name = "Panel"
-	var style = StyleBoxFlat.new()
-	style.bg_color = BG_COLOR
-	style.border_width_left = 2
-	style.border_width_right = 2
-	style.border_width_top = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(0.4, 0.4, 0.5)
-	panel.add_theme_stylebox_override("panel", style)
+	panel = PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel.offset_left = 10
 	panel.offset_right = -10
-	panel.offset_top = 50  # Below the 40px top menu
+	panel.offset_top = 50
 	panel.offset_bottom = -10
+	var style = StyleBoxFlat.new()
+	style.bg_color = BG_COLOR
+	style.set_border_width_all(2)
+	style.border_color = BORDER_COLOR
+	style.set_corner_radius_all(8)
+	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
 
-	# Title
-	title_label = Label.new()
-	title_label.name = "Title"
-	title_label.text = "Civics"
-	title_label.position = Vector2(20, 10)
-	title_label.add_theme_font_size_override("font_size", 24)
-	panel.add_child(title_label)
+	var main_vbox = VBoxContainer.new()
+	main_vbox.add_theme_constant_override("separation", 10)
+	panel.add_child(main_vbox)
 
-	# Close button
-	close_button = Button.new()
-	close_button.name = "CloseButton"
-	close_button.text = "X"
-	close_button.custom_minimum_size = Vector2(30, 30)
-	close_button.pressed.connect(_on_close_pressed)
-	panel.add_child(close_button)
+	# Header row
+	var header = HBoxContainer.new()
+	main_vbox.add_child(header)
 
-	# Confirm button
-	confirm_button = Button.new()
-	confirm_button.name = "ConfirmButton"
-	confirm_button.text = "Confirm Changes"
-	confirm_button.custom_minimum_size = Vector2(150, 40)
-	confirm_button.pressed.connect(_on_confirm_pressed)
-	confirm_button.disabled = true
-	panel.add_child(confirm_button)
+	var title = Label.new()
+	title.text = "Civics"
+	title.add_theme_font_size_override("font_size", 24)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(title)
 
-	# Anarchy warning label
-	anarchy_label = Label.new()
-	anarchy_label.name = "AnarchyLabel"
-	anarchy_label.add_theme_color_override("font_color", Color(0.9, 0.7, 0.2))
-	anarchy_label.add_theme_font_size_override("font_size", 14)
-	panel.add_child(anarchy_label)
+	var close_btn = Button.new()
+	close_btn.text = "X"
+	close_btn.custom_minimum_size = Vector2(30, 30)
+	close_btn.pressed.connect(_on_close_pressed)
+	header.add_child(close_btn)
 
-	# Create category containers (horizontal layout)
-	var categories_container = HBoxContainer.new()
-	categories_container.name = "Categories"
-	categories_container.position = Vector2(20, 60)
-	categories_container.add_theme_constant_override("separation", 15)
-	panel.add_child(categories_container)
+	# Category columns
+	var categories_hbox = HBoxContainer.new()
+	categories_hbox.add_theme_constant_override("separation", 15)
+	categories_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	main_vbox.add_child(categories_hbox)
 
 	for category in CivicsSystem.CIVIC_CATEGORIES:
 		var category_box = _create_category_container(category)
-		categories_container.add_child(category_box)
+		categories_hbox.add_child(category_box)
 		category_containers[category] = category_box
 
-	# Info panel (bottom)
-	info_panel = Panel.new()
-	info_panel.name = "InfoPanel"
+	# Bottom section: info panel + confirm area
+	var bottom_hbox = HBoxContainer.new()
+	bottom_hbox.add_theme_constant_override("separation", 10)
+	bottom_hbox.custom_minimum_size = Vector2(0, 130)
+	main_vbox.add_child(bottom_hbox)
+
+	# Info panel (left, expanding)
+	var info_panel = PanelContainer.new()
+	info_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var info_style = StyleBoxFlat.new()
 	info_style.bg_color = Color(0.12, 0.12, 0.18)
+	info_style.set_border_width_all(1)
+	info_style.border_color = BORDER_COLOR
+	info_style.set_corner_radius_all(4)
 	info_panel.add_theme_stylebox_override("panel", info_style)
-	panel.add_child(info_panel)
+	bottom_hbox.add_child(info_panel)
 
 	info_label = RichTextLabel.new()
-	info_label.name = "InfoLabel"
 	info_label.bbcode_enabled = true
-	info_label.fit_content = true
-	info_label.scroll_active = false
+	info_label.fit_content = false
+	info_label.scroll_active = true
+	info_label.add_theme_font_size_override("normal_font_size", 14)
 	info_panel.add_child(info_label)
+
+	# Right column: anarchy + confirm
+	var right_vbox = VBoxContainer.new()
+	right_vbox.custom_minimum_size = Vector2(180, 0)
+	right_vbox.add_theme_constant_override("separation", 8)
+	bottom_hbox.add_child(right_vbox)
+
+	# Spacer to push buttons to bottom
+	var spacer = Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_vbox.add_child(spacer)
+
+	anarchy_label = Label.new()
+	anarchy_label.add_theme_color_override("font_color", Color(0.9, 0.7, 0.2))
+	anarchy_label.add_theme_font_size_override("font_size", 13)
+	anarchy_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	anarchy_label.hide()
+	right_vbox.add_child(anarchy_label)
+
+	confirm_button = Button.new()
+	confirm_button.text = "Confirm Changes"
+	confirm_button.custom_minimum_size = Vector2(170, 40)
+	confirm_button.pressed.connect(_on_confirm_pressed)
+	confirm_button.disabled = true
+	right_vbox.add_child(confirm_button)
 
 func _create_category_container(category: String) -> VBoxContainer:
 	var vbox = VBoxContainer.new()
-	vbox.name = category.capitalize() + "Category"
 	vbox.custom_minimum_size = Vector2(160, 0)
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 4)
 
 	# Category header
 	var header = Label.new()
-	header.name = "Header"
 	header.text = CATEGORY_NAMES.get(category, category.capitalize())
 	header.add_theme_font_size_override("font_size", 16)
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(header)
 
-	# Separator
 	var sep = HSeparator.new()
 	vbox.add_child(sep)
 
 	return vbox
 
 func _on_show_civics_screen() -> void:
-	# Close all other popups first
 	EventBus.close_all_popups.emit()
 	current_player = GameManager.human_player
 	pending_changes.clear()
 	_build_civics_list()
-	_update_layout()
 	show()
 
 func _build_civics_list() -> void:
@@ -153,7 +173,7 @@ func _build_civics_list() -> void:
 	for category in CivicsSystem.CIVIC_CATEGORIES:
 		var container = category_containers[category]
 
-		# Clear existing civic buttons
+		# Clear existing civic buttons (keep header + separator)
 		for child in container.get_children():
 			if child is Button:
 				child.queue_free()
@@ -161,23 +181,21 @@ func _build_civics_list() -> void:
 		# Add civic buttons
 		var civics = DataManager.get_civics_by_category(category)
 		for civic_id in civics:
-			var button = _create_civic_button(civic_id, category)
+			var button = _create_civic_button(civic_id)
 			container.add_child(button)
 			civic_buttons[civic_id] = button
 
 	_update_civic_states()
+	_update_confirm_button()
 
-func _create_civic_button(civic_id: String, _category: String) -> Button:
+func _create_civic_button(civic_id: String) -> Button:
 	var civic = DataManager.get_civic(civic_id)
 	var button = Button.new()
-	button.name = civic_id
 	button.text = civic.get("name", civic_id)
 	button.custom_minimum_size = Vector2(150, 35)
 	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-
 	button.pressed.connect(_on_civic_button_pressed.bind(civic_id))
 	button.mouse_entered.connect(_on_civic_hovered.bind(civic_id))
-
 	return button
 
 func _update_civic_states() -> void:
@@ -189,48 +207,58 @@ func _update_civic_states() -> void:
 		var civic = DataManager.get_civic(civic_id)
 		var category = civic.get("category", "")
 
-		# Determine state
 		var is_current = current_player.civics.get(category, "") == civic_id
 		var is_pending = pending_changes.get(category, "") == civic_id
 		var can_adopt = CivicsSystem.can_adopt_civic(current_player, civic_id)
 
+		# Update button text with current marker
+		var base_name = civic.get("name", civic_id)
+		if is_current and not is_pending:
+			button.text = base_name + " (current)"
+		elif is_pending:
+			button.text = base_name + " -> new"
+		else:
+			button.text = base_name
+
 		# Set button style
 		var style = StyleBoxFlat.new()
-		style.corner_radius_top_left = 4
-		style.corner_radius_top_right = 4
-		style.corner_radius_bottom_left = 4
-		style.corner_radius_bottom_right = 4
+		style.set_corner_radius_all(4)
 
 		if is_pending:
 			style.bg_color = PENDING_COLOR
+			style.border_color = Color(0.6, 0.6, 0.3)
 			button.disabled = false
 		elif is_current:
 			style.bg_color = CURRENT_COLOR
+			style.border_color = Color(0.3, 0.5, 0.6)
 			button.disabled = false
 		elif can_adopt:
 			style.bg_color = AVAILABLE_COLOR
+			style.border_color = Color(0.3, 0.3, 0.4)
 			button.disabled = false
 		else:
 			style.bg_color = UNAVAILABLE_COLOR
+			style.border_color = Color(0.2, 0.2, 0.2)
 			button.disabled = true
 
+		style.set_border_width_all(1)
 		button.add_theme_stylebox_override("normal", style)
-		button.add_theme_stylebox_override("hover", style)
+
+		var hover_style = style.duplicate()
+		hover_style.bg_color = style.bg_color.lightened(0.15)
+		button.add_theme_stylebox_override("hover", hover_style)
 
 func _on_civic_button_pressed(civic_id: String) -> void:
 	var civic = DataManager.get_civic(civic_id)
 	var category = civic.get("category", "")
-
 	if category == "":
 		return
 
-	# Check if already current
 	var current_civic = current_player.civics.get(category, "")
 	if current_civic == civic_id:
-		# Remove from pending if it was there
+		# Cancel pending change for this category
 		pending_changes.erase(category)
 	elif CivicsSystem.can_adopt_civic(current_player, civic_id):
-		# Add to pending changes
 		pending_changes[category] = civic_id
 
 	_update_civic_states()
@@ -258,7 +286,9 @@ func _update_info_panel(civic_id: String, civic: Dictionary) -> void:
 	text += "Upkeep: %s\n" % upkeep.capitalize()
 
 	# Description
-	text += "\n%s\n" % civic.get("description", "")
+	var desc = civic.get("description", "")
+	if desc != "":
+		text += "\n%s\n" % desc
 
 	# Effects
 	var effects = civic.get("effects", {})
@@ -330,6 +360,12 @@ func _format_effect(key: String, value) -> String:
 			return "Non-state religions cannot spread" if value else ""
 		"no_state_religion":
 			return "Cannot have state religion" if value else ""
+		"state_religion_building_production":
+			return "+%d%% production for religious buildings" % value
+		"missionary_build_speed":
+			return "+%d%% missionary build speed" % value
+		"state_religion_free_experience":
+			return "+%d XP for units in state religion cities" % value
 		_:
 			if value is bool:
 				return "%s: %s" % [key.capitalize().replace("_", " "), "Yes" if value else "No"]
@@ -342,10 +378,11 @@ func _update_confirm_button() -> void:
 	if has_changes and current_player:
 		var anarchy_turns = CivicsSystem._calculate_anarchy_turns(current_player)
 		if anarchy_turns > 0:
-			anarchy_label.text = "Warning: Changing civics will cause %d turn(s) of anarchy!" % anarchy_turns
+			anarchy_label.text = "Warning: %d turn(s) of anarchy!" % anarchy_turns
 			anarchy_label.show()
 		else:
 			anarchy_label.text = "No anarchy (Spiritual trait)"
+			anarchy_label.add_theme_color_override("font_color", Color(0.5, 0.9, 0.5))
 			anarchy_label.show()
 	else:
 		anarchy_label.hide()
@@ -354,45 +391,16 @@ func _on_confirm_pressed() -> void:
 	if current_player == null or pending_changes.is_empty():
 		return
 
-	# Apply civic changes
 	CivicsSystem.change_civics(current_player, pending_changes)
 	pending_changes.clear()
 
-	# Refresh UI
 	_update_civic_states()
 	_update_confirm_button()
-
-	# Notify
 	EventBus.notification_added.emit("Civics changed!", "civics")
 
 func _on_close_pressed() -> void:
 	pending_changes.clear()
 	hide()
-
-func _update_layout() -> void:
-	if panel == null:
-		return
-
-	var panel_size = panel.size
-
-	# Position close button
-	close_button.position = Vector2(panel_size.x - 50, 10)
-
-	# Position confirm button
-	confirm_button.position = Vector2(panel_size.x - 180, panel_size.y - 60)
-
-	# Position anarchy label
-	anarchy_label.position = Vector2(20, panel_size.y - 55)
-
-	# Info panel at bottom
-	info_panel.position = Vector2(20, panel_size.y - 180)
-	info_panel.size = Vector2(panel_size.x - 40, 110)
-	info_label.position = Vector2(10, 10)
-	info_label.size = Vector2(info_panel.size.x - 20, info_panel.size.y - 20)
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_RESIZED and is_visible():
-		_update_layout()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if visible and event is InputEventKey and event.pressed:

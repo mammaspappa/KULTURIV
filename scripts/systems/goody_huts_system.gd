@@ -119,7 +119,8 @@ func _apply_reward(player, unit, tile, reward_type: GoodyReward):
 			var techs = _get_discoverable_techs(player)
 			if not techs.is_empty():
 				var tech = techs[randi() % techs.size()]
-				player.add_tech(tech)
+				if tech not in player.researched_techs:
+					player.researched_techs.append(tech)
 				var tech_data = DataManager.get_tech(tech)
 				return tech_data.get("name", tech)
 			return null

@@ -2,23 +2,47 @@
 	"julius_caesar": {
 		"name": "Julius Caesar",
 		"civilization": "rome",
-		"traits": ["imperialistic", "organized"],
+		"traits": [
+			"imperialistic",
+			"organized"
+		],
 		"favorite_civic": "representation",
 		"flavor": {
-			"military": 8,
+			"military": 5,
 			"gold": 5,
 			"science": 4,
 			"culture": 3,
 			"religion": 2,
 			"expansion": 9,
 			"growth": 4,
-			"production": 6
+			"production": 2
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 4,
+		"warmonger_respect": 1,
+		"espionage_weight": 100,
+		"max_war_rand": 100,
+		"make_peace_rand": 40,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 20,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"augustus": {
 		"name": "Augustus Caesar",
 		"civilization": "rome",
-		"traits": ["industrious", "imperialistic"],
+		"traits": [
+			"industrious",
+			"imperialistic"
+		],
 		"favorite_civic": "hereditary_rule",
 		"flavor": {
 			"military": 6,
@@ -34,55 +58,121 @@
 	"alexander": {
 		"name": "Alexander",
 		"civilization": "greece",
-		"traits": ["aggressive", "philosophical"],
-		"favorite_civic": "hereditary_rule",
+		"traits": [
+			"aggressive",
+			"philosophical"
+		],
+		"favorite_civic": "vassalage",
 		"flavor": {
-			"military": 10,
+			"military": 5,
 			"gold": 3,
 			"science": 6,
 			"culture": 5,
 			"religion": 2,
 			"expansion": 8,
-			"growth": 4,
+			"growth": 2,
 			"production": 5
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 0,
+		"warmonger_respect": 2,
+		"espionage_weight": 100,
+		"max_war_rand": 50,
+		"make_peace_rand": 40,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 35,
+		"wonder_construct_rand": 20,
+		"base_attack_odds_change": 4,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 1,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"pericles": {
 		"name": "Pericles",
 		"civilization": "greece",
-		"traits": ["creative", "philosophical"],
+		"traits": [
+			"creative",
+			"philosophical"
+		],
 		"favorite_civic": "representation",
 		"flavor": {
 			"military": 4,
 			"gold": 5,
-			"science": 8,
+			"science": 2,
 			"culture": 9,
 			"religion": 3,
 			"expansion": 5,
 			"growth": 6,
 			"production": 5
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 6,
+		"warmonger_respect": 0,
+		"espionage_weight": 100,
+		"max_war_rand": 250,
+		"make_peace_rand": 50,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 40,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"ramesses": {
 		"name": "Ramesses II",
 		"civilization": "egypt",
-		"traits": ["industrious", "spiritual"],
-		"favorite_civic": "theocracy",
+		"traits": [
+			"industrious",
+			"spiritual"
+		],
+		"favorite_civic": "organized_religion",
 		"flavor": {
 			"military": 5,
 			"gold": 4,
 			"science": 4,
-			"culture": 7,
+			"culture": 5,
 			"religion": 8,
 			"expansion": 6,
 			"growth": 5,
-			"production": 9
+			"production": 2
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 6,
+		"warmonger_respect": 0,
+		"espionage_weight": 100,
+		"max_war_rand": 200,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 20,
+		"wonder_construct_rand": 50,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"cleopatra": {
 		"name": "Cleopatra",
 		"civilization": "egypt",
-		"traits": ["creative", "financial"],
+		"traits": [
+			"creative",
+			"financial"
+		],
 		"favorite_civic": "representation",
 		"flavor": {
 			"military": 4,
@@ -98,8 +188,11 @@
 	"qin_shi_huang": {
 		"name": "Qin Shi Huang",
 		"civilization": "china",
-		"traits": ["industrious", "protective"],
-		"favorite_civic": "police_state",
+		"traits": [
+			"industrious",
+			"protective"
+		],
+		"favorite_civic": "bureaucracy",
 		"flavor": {
 			"military": 7,
 			"gold": 5,
@@ -107,14 +200,35 @@
 			"culture": 4,
 			"religion": 2,
 			"expansion": 6,
-			"growth": 5,
-			"production": 9
+			"growth": 2,
+			"production": 5
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 2,
+		"warmonger_respect": 2,
+		"espionage_weight": 90,
+		"max_war_rand": 300,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 25,
+		"raze_city_prob": 0,
+		"build_unit_prob": 20,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "taoism",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"mao_zedong": {
 		"name": "Mao Zedong",
 		"civilization": "china",
-		"traits": ["philosophical", "organized"],
+		"traits": [
+			"philosophical",
+			"organized"
+		],
 		"favorite_civic": "state_property",
 		"flavor": {
 			"military": 6,
@@ -130,119 +244,269 @@
 	"cyrus": {
 		"name": "Cyrus",
 		"civilization": "persia",
-		"traits": ["charismatic", "imperialistic"],
-		"favorite_civic": "representation",
+		"traits": [
+			"charismatic",
+			"imperialistic"
+		],
+		"favorite_civic": "vassalage",
 		"flavor": {
-			"military": 7,
+			"military": 5,
 			"gold": 6,
 			"science": 5,
 			"culture": 5,
 			"religion": 4,
 			"expansion": 8,
-			"growth": 5,
+			"growth": 2,
 			"production": 6
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 3,
+		"warmonger_respect": 0,
+		"espionage_weight": 100,
+		"max_war_rand": 100,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 40,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 2,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"darius": {
 		"name": "Darius I",
 		"civilization": "persia",
-		"traits": ["financial", "organized"],
-		"favorite_civic": "bureaucracy",
+		"traits": [
+			"financial",
+			"organized"
+		],
+		"favorite_civic": "free_religion",
 		"flavor": {
 			"military": 5,
-			"gold": 9,
+			"gold": 5,
 			"science": 6,
 			"culture": 4,
 			"religion": 3,
 			"expansion": 6,
-			"growth": 6,
+			"growth": 2,
 			"production": 7
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 8,
+		"warmonger_respect": 0,
+		"espionage_weight": 100,
+		"max_war_rand": 200,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 40,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 2,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"victoria": {
 		"name": "Victoria",
 		"civilization": "england",
-		"traits": ["financial", "imperialistic"],
+		"traits": [
+			"financial",
+			"imperialistic"
+		],
 		"favorite_civic": "representation",
 		"flavor": {
 			"military": 6,
-			"gold": 9,
+			"gold": 5,
 			"science": 6,
 			"culture": 5,
 			"religion": 4,
 			"expansion": 8,
-			"growth": 5,
+			"growth": 2,
 			"production": 6
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 8,
+		"warmonger_respect": 0,
+		"espionage_weight": 110,
+		"max_war_rand": 200,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"elizabeth": {
 		"name": "Elizabeth I",
 		"civilization": "england",
-		"traits": ["financial", "philosophical"],
+		"traits": [
+			"financial",
+			"philosophical"
+		],
 		"favorite_civic": "free_religion",
 		"flavor": {
 			"military": 4,
-			"gold": 8,
+			"gold": 5,
 			"science": 8,
-			"culture": 6,
+			"culture": 2,
 			"religion": 5,
 			"expansion": 5,
 			"growth": 5,
 			"production": 5
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 9,
+		"warmonger_respect": 0,
+		"espionage_weight": 110,
+		"max_war_rand": 300,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 25,
+		"raze_city_prob": 0,
+		"build_unit_prob": 20,
+		"wonder_construct_rand": 20,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"churchill": {
 		"name": "Winston Churchill",
 		"civilization": "england",
-		"traits": ["charismatic", "protective"],
+		"traits": [
+			"charismatic",
+			"protective"
+		],
 		"favorite_civic": "nationhood",
 		"flavor": {
-			"military": 8,
-			"gold": 5,
+			"military": 5,
+			"gold": 2,
 			"science": 5,
 			"culture": 6,
 			"religion": 3,
 			"expansion": 5,
 			"growth": 4,
 			"production": 6
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 6,
+		"warmonger_respect": 0,
+		"espionage_weight": 120,
+		"max_war_rand": 200,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 10,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"louis_xiv": {
 		"name": "Louis XIV",
 		"civilization": "france",
-		"traits": ["creative", "industrious"],
+		"traits": [
+			"creative",
+			"industrious"
+		],
 		"favorite_civic": "hereditary_rule",
 		"flavor": {
-			"military": 5,
+			"military": 2,
 			"gold": 6,
 			"science": 5,
-			"culture": 9,
+			"culture": 5,
 			"religion": 5,
 			"expansion": 5,
 			"growth": 5,
 			"production": 8
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 1,
+		"warmonger_respect": 2,
+		"espionage_weight": 120,
+		"max_war_rand": 200,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 50,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"napoleon": {
 		"name": "Napoleon",
 		"civilization": "france",
-		"traits": ["aggressive", "organized"],
-		"favorite_civic": "nationhood",
+		"traits": [
+			"aggressive",
+			"organized"
+		],
+		"favorite_civic": "representation",
 		"flavor": {
-			"military": 10,
-			"gold": 5,
+			"military": 5,
+			"gold": 2,
 			"science": 5,
 			"culture": 4,
 			"religion": 2,
 			"expansion": 8,
 			"growth": 4,
 			"production": 7
+		},
+		"base_attitude": -1,
+		"base_peace_weight": 0,
+		"warmonger_respect": 2,
+		"espionage_weight": 100,
+		"max_war_rand": 100,
+		"make_peace_rand": 40,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 40,
+		"wonder_construct_rand": 10,
+		"base_attack_odds_change": 6,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"de_gaulle": {
 		"name": "Charles de Gaulle",
 		"civilization": "france",
-		"traits": ["charismatic", "industrious"],
+		"traits": [
+			"charismatic",
+			"industrious"
+		],
 		"favorite_civic": "nationhood",
 		"flavor": {
 			"military": 7,
@@ -251,15 +515,36 @@
 			"culture": 6,
 			"religion": 3,
 			"expansion": 5,
-			"growth": 5,
-			"production": 8
+			"growth": 2,
+			"production": 5
+		},
+		"base_attitude": -1,
+		"base_peace_weight": 0,
+		"warmonger_respect": 2,
+		"espionage_weight": 110,
+		"max_war_rand": 100,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 20,
+		"raze_city_prob": 0,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 10,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 2,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"frederick": {
 		"name": "Frederick the Great",
 		"civilization": "germany",
-		"traits": ["philosophical", "organized"],
-		"favorite_civic": "representation",
+		"traits": [
+			"philosophical",
+			"organized"
+		],
+		"favorite_civic": "universal_suffrage",
 		"flavor": {
 			"military": 7,
 			"gold": 5,
@@ -268,16 +553,37 @@
 			"religion": 3,
 			"expansion": 5,
 			"growth": 5,
-			"production": 7
+			"production": 10
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 8,
+		"warmonger_respect": 0,
+		"espionage_weight": 90,
+		"max_war_rand": 200,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 20,
+		"wonder_construct_rand": 20,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"bismarck": {
 		"name": "Otto von Bismarck",
 		"civilization": "germany",
-		"traits": ["imperialistic", "industrious"],
+		"traits": [
+			"imperialistic",
+			"industrious"
+		],
 		"favorite_civic": "nationhood",
 		"flavor": {
-			"military": 8,
+			"military": 10,
 			"gold": 6,
 			"science": 5,
 			"culture": 3,
@@ -285,92 +591,218 @@
 			"expansion": 7,
 			"growth": 5,
 			"production": 9
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 6,
+		"warmonger_respect": 1,
+		"espionage_weight": 120,
+		"max_war_rand": 200,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"peter": {
 		"name": "Peter the Great",
 		"civilization": "russia",
-		"traits": ["philosophical", "expansive"],
-		"favorite_civic": "police_state",
+		"traits": [
+			"philosophical",
+			"expansive"
+		],
+		"favorite_civic": "bureaucracy",
 		"flavor": {
 			"military": 6,
 			"gold": 5,
-			"science": 8,
+			"science": 5,
 			"culture": 4,
 			"religion": 3,
 			"expansion": 7,
-			"growth": 7,
+			"growth": 2,
 			"production": 6
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 1,
+		"warmonger_respect": 2,
+		"espionage_weight": 120,
+		"max_war_rand": 100,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 4,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 1,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"catherine": {
 		"name": "Catherine the Great",
 		"civilization": "russia",
-		"traits": ["creative", "imperialistic"],
+		"traits": [
+			"creative",
+			"imperialistic"
+		],
 		"favorite_civic": "hereditary_rule",
 		"flavor": {
-			"military": 5,
+			"military": 2,
 			"gold": 6,
 			"science": 6,
-			"culture": 8,
+			"culture": 5,
 			"religion": 4,
 			"expansion": 8,
 			"growth": 5,
 			"production": 5
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 2,
+		"warmonger_respect": 2,
+		"espionage_weight": 130,
+		"max_war_rand": 100,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 25,
+		"raze_city_prob": 0,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 2,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"stalin": {
 		"name": "Joseph Stalin",
 		"civilization": "russia",
-		"traits": ["aggressive", "industrious"],
-		"favorite_civic": "police_state",
+		"traits": [
+			"aggressive",
+			"industrious"
+		],
+		"favorite_civic": "state_property",
 		"flavor": {
-			"military": 9,
+			"military": 5,
 			"gold": 4,
 			"science": 5,
 			"culture": 2,
 			"religion": 1,
 			"expansion": 7,
 			"growth": 5,
-			"production": 10
+			"production": 2
+		},
+		"base_attitude": -1,
+		"base_peace_weight": 2,
+		"warmonger_respect": 1,
+		"espionage_weight": 150,
+		"max_war_rand": 100,
+		"make_peace_rand": 60,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 25,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"washington": {
 		"name": "George Washington",
 		"civilization": "america",
-		"traits": ["charismatic", "expansive"],
-		"favorite_civic": "representation",
+		"traits": [
+			"charismatic",
+			"expansive"
+		],
+		"favorite_civic": "free_speech",
 		"flavor": {
-			"military": 6,
+			"military": 5,
 			"gold": 5,
 			"science": 5,
 			"culture": 5,
 			"religion": 5,
 			"expansion": 7,
-			"growth": 7,
+			"growth": 2,
 			"production": 5
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 8,
+		"warmonger_respect": 0,
+		"espionage_weight": 120,
+		"max_war_rand": 200,
+		"make_peace_rand": 20,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 20,
+		"base_attack_odds_change": 2,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"lincoln": {
 		"name": "Abraham Lincoln",
 		"civilization": "america",
-		"traits": ["charismatic", "philosophical"],
+		"traits": [
+			"charismatic",
+			"philosophical"
+		],
 		"favorite_civic": "emancipation",
 		"flavor": {
 			"military": 5,
 			"gold": 5,
-			"science": 7,
+			"science": 5,
 			"culture": 6,
 			"religion": 5,
 			"expansion": 5,
-			"growth": 6,
+			"growth": 2,
 			"production": 5
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 9,
+		"warmonger_respect": 0,
+		"espionage_weight": 110,
+		"max_war_rand": 300,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 150,
+		"raze_city_prob": 0,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"roosevelt": {
 		"name": "Franklin Roosevelt",
 		"civilization": "america",
-		"traits": ["industrious", "organized"],
+		"traits": [
+			"industrious",
+			"organized"
+		],
 		"favorite_civic": "universal_suffrage",
 		"flavor": {
 			"military": 6,
@@ -386,10 +818,13 @@
 	"tokugawa": {
 		"name": "Tokugawa Ieyasu",
 		"civilization": "japan",
-		"traits": ["aggressive", "organized"],
+		"traits": [
+			"aggressive",
+			"organized"
+		],
 		"favorite_civic": "mercantilism",
 		"flavor": {
-			"military": 8,
+			"military": 2,
 			"gold": 6,
 			"science": 5,
 			"culture": 5,
@@ -397,12 +832,33 @@
 			"expansion": 4,
 			"growth": 5,
 			"production": 7
+		},
+		"base_attitude": -1,
+		"base_peace_weight": 1,
+		"warmonger_respect": 2,
+		"espionage_weight": 60,
+		"max_war_rand": 100,
+		"make_peace_rand": 40,
+		"dogpile_war_rand": 25,
+		"raze_city_prob": 25,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 20,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "buddhism",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 2,
+			"DefensivePactRefuseAttitudeThreshold": 2,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"meiji": {
 		"name": "Emperor Meiji",
 		"civilization": "japan",
-		"traits": ["industrious", "philosophical"],
+		"traits": [
+			"industrious",
+			"philosophical"
+		],
 		"favorite_civic": "nationhood",
 		"flavor": {
 			"military": 6,
@@ -418,40 +874,84 @@
 	"gandhi": {
 		"name": "Mahatma Gandhi",
 		"civilization": "india",
-		"traits": ["philosophical", "spiritual"],
-		"favorite_civic": "pacifism",
+		"traits": [
+			"philosophical",
+			"spiritual"
+		],
+		"favorite_civic": "universal_suffrage",
 		"flavor": {
 			"military": 1,
 			"gold": 4,
 			"science": 7,
-			"culture": 7,
+			"culture": 10,
 			"religion": 10,
 			"expansion": 4,
 			"growth": 7,
 			"production": 4
+		},
+		"base_attitude": 2,
+		"base_peace_weight": 10,
+		"warmonger_respect": 0,
+		"espionage_weight": 50,
+		"max_war_rand": 400,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 100,
+		"raze_city_prob": 0,
+		"build_unit_prob": 15,
+		"wonder_construct_rand": 10,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "hinduism",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 3,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"asoka": {
 		"name": "Asoka",
 		"civilization": "india",
-		"traits": ["organized", "spiritual"],
-		"favorite_civic": "organized_religion",
+		"traits": [
+			"organized",
+			"spiritual"
+		],
+		"favorite_civic": "free_religion",
 		"flavor": {
 			"military": 3,
 			"gold": 6,
-			"science": 5,
+			"science": 2,
 			"culture": 6,
-			"religion": 9,
+			"religion": 5,
 			"expansion": 5,
 			"growth": 6,
 			"production": 6
+		},
+		"base_attitude": 1,
+		"base_peace_weight": 8,
+		"warmonger_respect": 0,
+		"espionage_weight": 90,
+		"max_war_rand": 200,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 20,
+		"wonder_construct_rand": 40,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "buddhism",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 0,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"genghis_khan": {
 		"name": "Genghis Khan",
 		"civilization": "mongolia",
-		"traits": ["aggressive", "imperialistic"],
-		"favorite_civic": "vassalage",
+		"traits": [
+			"aggressive",
+			"imperialistic"
+		],
+		"favorite_civic": "police_state",
 		"flavor": {
 			"military": 10,
 			"gold": 4,
@@ -461,60 +961,144 @@
 			"expansion": 10,
 			"growth": 3,
 			"production": 5
+		},
+		"base_attitude": -1,
+		"base_peace_weight": 0,
+		"warmonger_respect": 2,
+		"espionage_weight": 100,
+		"max_war_rand": 50,
+		"make_peace_rand": 80,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 75,
+		"build_unit_prob": 35,
+		"wonder_construct_rand": 10,
+		"base_attack_odds_change": 4,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 1,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"kublai_khan": {
 		"name": "Kublai Khan",
 		"civilization": "mongolia",
-		"traits": ["creative", "aggressive"],
-		"favorite_civic": "hereditary_rule",
+		"traits": [
+			"creative",
+			"aggressive"
+		],
+		"favorite_civic": "bureaucracy",
 		"flavor": {
-			"military": 8,
+			"military": 5,
 			"gold": 6,
 			"science": 5,
-			"culture": 6,
+			"culture": 2,
 			"religion": 4,
 			"expansion": 7,
 			"growth": 4,
 			"production": 6
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 1,
+		"warmonger_respect": 2,
+		"espionage_weight": 100,
+		"max_war_rand": 100,
+		"make_peace_rand": 40,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 25,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 30,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "buddhism",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"montezuma": {
 		"name": "Montezuma",
 		"civilization": "aztec",
-		"traits": ["aggressive", "spiritual"],
+		"traits": [
+			"aggressive",
+			"spiritual"
+		],
 		"favorite_civic": "police_state",
 		"flavor": {
-			"military": 9,
+			"military": 5,
 			"gold": 4,
 			"science": 3,
 			"culture": 5,
-			"religion": 8,
+			"religion": 2,
 			"expansion": 7,
 			"growth": 4,
 			"production": 5
+		},
+		"base_attitude": -1,
+		"base_peace_weight": 0,
+		"warmonger_respect": 2,
+		"espionage_weight": 80,
+		"max_war_rand": 50,
+		"make_peace_rand": 80,
+		"dogpile_war_rand": 25,
+		"raze_city_prob": 50,
+		"build_unit_prob": 35,
+		"wonder_construct_rand": 0,
+		"base_attack_odds_change": 4,
+		"favorite_religion": "",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 1,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"saladin": {
 		"name": "Saladin",
 		"civilization": "arabia",
-		"traits": ["philosophical", "spiritual"],
+		"traits": [
+			"philosophical",
+			"spiritual"
+		],
 		"favorite_civic": "theocracy",
 		"flavor": {
-			"military": 6,
+			"military": 5,
 			"gold": 5,
 			"science": 7,
 			"culture": 5,
-			"religion": 9,
+			"religion": 2,
 			"expansion": 5,
 			"growth": 5,
 			"production": 5
+		},
+		"base_attitude": 0,
+		"base_peace_weight": 4,
+		"warmonger_respect": 1,
+		"espionage_weight": 100,
+		"max_war_rand": 200,
+		"make_peace_rand": 10,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 0,
+		"build_unit_prob": 30,
+		"wonder_construct_rand": 10,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "islam",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 2,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"harun_al_rashid": {
 		"name": "Harun al-Rashid",
 		"civilization": "arabia",
-		"traits": ["financial", "spiritual"],
+		"traits": [
+			"financial",
+			"spiritual"
+		],
 		"favorite_civic": "free_market",
 		"flavor": {
 			"military": 4,
@@ -530,7 +1114,10 @@
 	"isabella": {
 		"name": "Isabella",
 		"civilization": "spain",
-		"traits": ["expansive", "spiritual"],
+		"traits": [
+			"expansive",
+			"spiritual"
+		],
 		"favorite_civic": "theocracy",
 		"flavor": {
 			"military": 6,
@@ -541,12 +1128,33 @@
 			"expansion": 8,
 			"growth": 7,
 			"production": 5
+		},
+		"base_attitude": -1,
+		"base_peace_weight": 6,
+		"warmonger_respect": 1,
+		"espionage_weight": 120,
+		"max_war_rand": 200,
+		"make_peace_rand": 40,
+		"dogpile_war_rand": 50,
+		"raze_city_prob": 25,
+		"build_unit_prob": 25,
+		"wonder_construct_rand": 20,
+		"base_attack_odds_change": 0,
+		"favorite_religion": "christianity",
+		"diplomatic_thresholds": {
+			"DeclareWarRefuseAttitudeThreshold": 2,
+			"OpenBordersRefuseAttitudeThreshold": 1,
+			"DefensivePactRefuseAttitudeThreshold": 3,
+			"DemandTributeAttitudeThreshold": 2
 		}
 	},
 	"philip_ii": {
 		"name": "Philip II",
 		"civilization": "spain",
-		"traits": ["imperialistic", "protective"],
+		"traits": [
+			"imperialistic",
+			"protective"
+		],
 		"favorite_civic": "theocracy",
 		"flavor": {
 			"military": 8,

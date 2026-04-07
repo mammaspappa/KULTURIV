@@ -15,7 +15,7 @@ func _ensure_war_declared(attacker, defender) -> void:
 		def_player.declare_war_on(att_player.player_id)
 		EventBus.war_declared.emit(att_player, def_player)
 
-## Resolve combat between attacker and defender
+## Resolve combat between attacker and defender (BTS-authentic damage formula)
 func resolve_combat(attacker, defender) -> Dictionary:
 	if attacker == null or defender == null:
 		return {}
@@ -27,51 +27,57 @@ func resolve_combat(attacker, defender) -> Dictionary:
 	var att_strength = _get_effective_strength(attacker, true, defender)
 	var def_strength = _get_effective_strength(defender, false, attacker)
 
-	# Calculate base damage
-	var strength_ratio = att_strength / max(def_strength, 0.1)
-	var base_damage = 30.0 * strength_ratio
-	var variance = randf_range(0.8, 1.2)
-	var damage_to_defender = base_damage * variance
-	var damage_to_attacker = (30.0 / max(strength_ratio, 0.1)) * randf_range(0.8, 1.2)
+	# BTS damage formula: damage = 20 + (my_str - their_str) * 3, clamped [12, 40]
+	# damage_to_defender is based on attacker's strength advantage
+	var str_diff_att = att_strength - def_strength
+	var str_diff_def = def_strength - att_strength
+	var damage_to_defender = clamp(20.0 + str_diff_att * 3.0, 12.0, 40.0)
+	var damage_to_attacker = clamp(20.0 + str_diff_def * 3.0, 12.0, 40.0)
 
-	# First strikes (attacker deals damage first)
+	# First strikes: attacker deals full damage rounds before defender can respond
 	var att_first_strikes = attacker.get_first_strikes()
 	var def_first_strikes = defender.get_first_strikes()
 
-	# Apply first strike damage
-	if att_first_strikes > def_first_strikes:
-		var first_strike_damage = damage_to_defender * 0.1 * (att_first_strikes - def_first_strikes)
-		defender.take_damage(first_strike_damage)
-		EventBus.first_strike.emit(attacker, defender, first_strike_damage)
-	elif def_first_strikes > att_first_strikes:
-		var first_strike_damage = damage_to_attacker * 0.1 * (def_first_strikes - att_first_strikes)
-		attacker.take_damage(first_strike_damage)
-		EventBus.first_strike.emit(defender, attacker, first_strike_damage)
+	EventBus.combat_started.emit(attacker, defender)
+
+	# Attacker's first strikes (defender takes damage, attacker does not)
+	for i in range(att_first_strikes):
+		if defender.health <= 0:
+			break
+		defender.take_damage(damage_to_defender)
+		EventBus.first_strike.emit(attacker, defender, damage_to_defender)
+
+	# Defender's first strikes (attacker takes damage, defender does not)
+	for i in range(def_first_strikes):
+		if attacker.health <= 0:
+			break
+		attacker.take_damage(damage_to_attacker)
+		EventBus.first_strike.emit(defender, attacker, damage_to_attacker)
 
 	# Check if either died from first strikes
 	if defender.health <= 0 or attacker.health <= 0:
 		return _finalize_combat(attacker, defender)
 
-	# Main combat rounds
-	EventBus.combat_started.emit(attacker, defender)
-
-	var max_rounds = 20  # Safety limit
+	# Main combat rounds — alternating damage until one side reaches 0 HP
+	var max_rounds = 100  # Safety limit (100 HP / 12 min damage = ~8 rounds max)
 	var rounds = 0
 
 	while attacker.health > 0 and defender.health > 0 and rounds < max_rounds:
 		rounds += 1
 
-		# Both deal damage simultaneously
-		var att_dmg = damage_to_defender * randf_range(0.1, 0.2)
-		var def_dmg = damage_to_attacker * randf_range(0.1, 0.2)
+		# Attacker strikes first in each round
+		defender.take_damage(damage_to_defender)
+		EventBus.combat_round.emit(attacker, defender, damage_to_defender, 0)
 
-		defender.take_damage(att_dmg)
-		attacker.take_damage(def_dmg)
+		if defender.health <= 0:
+			break
 
-		EventBus.combat_round.emit(attacker, defender, att_dmg, def_dmg)
+		# Defender strikes back
+		attacker.take_damage(damage_to_attacker)
+		EventBus.combat_round.emit(attacker, defender, 0, damage_to_attacker)
 
-		# Withdrawal check for attacker
-		if attacker.health < 30 and attacker.health > 0:
+		# Withdrawal check for attacker when below 30% HP
+		if attacker.health > 0 and attacker.health < attacker.max_health * 0.3:
 			if randf() < attacker.get_withdraw_chance():
 				EventBus.unit_withdrew.emit(attacker)
 				break
@@ -123,17 +129,43 @@ func _calculate_xp(defeated, victor) -> int:
 	var base_xp = int(defeated_strength / max(victor_strength, 1.0) * 4)
 	return max(1, base_xp)
 
-## Calculate odds for UI display
+## Calculate odds for UI display (BTS-style simulation)
 func calculate_odds(attacker, defender) -> Dictionary:
 	var att_strength = _get_effective_strength(attacker, true, defender)
 	var def_strength = _get_effective_strength(defender, false, attacker)
-	var ratio = att_strength / max(def_strength, 0.1)
+
+	# BTS damage formula
+	var dmg_to_def = clamp(20.0 + (att_strength - def_strength) * 3.0, 12.0, 40.0)
+	var dmg_to_att = clamp(20.0 + (def_strength - att_strength) * 3.0, 12.0, 40.0)
+
+	# Simulate: how many rounds to kill each side
+	var rounds_to_kill_def = ceil(defender.health / dmg_to_def)
+	var rounds_to_kill_att = ceil(attacker.health / dmg_to_att)
+
+	# First strikes shift the balance
+	var att_fs = attacker.get_first_strikes()
+	var def_fs = defender.get_first_strikes()
+	# First strikes give free damage rounds
+	var def_hp_after_fs = max(1, defender.health - att_fs * dmg_to_def)
+	var att_hp_after_fs = max(1, attacker.health - def_fs * dmg_to_att)
+
+	rounds_to_kill_def = ceil(def_hp_after_fs / dmg_to_def)
+	rounds_to_kill_att = ceil(att_hp_after_fs / dmg_to_att)
+
+	# Win chance approximation based on rounds needed
+	var win_chance: float
+	if rounds_to_kill_def <= 0:
+		win_chance = 0.99
+	elif rounds_to_kill_att <= 0:
+		win_chance = 0.01
+	else:
+		win_chance = clamp(float(rounds_to_kill_att) / (rounds_to_kill_att + rounds_to_kill_def), 0.05, 0.95)
 
 	return {
-		"win_chance": clamp(ratio / (ratio + 1), 0.05, 0.95),
+		"win_chance": win_chance,
 		"attacker_strength": att_strength,
 		"defender_strength": def_strength,
-		"ratio": ratio
+		"ratio": att_strength / max(def_strength, 0.1)
 	}
 
 ## Get a summary of combat modifiers for UI

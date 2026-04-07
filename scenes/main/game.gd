@@ -23,6 +23,7 @@ var event_popup: Control
 var espionage_screen: Control
 var spaceship_screen: Control
 var voting_screen: Control
+var religion_screen: Control
 
 func _ready() -> void:
 	var settings = {
@@ -145,6 +146,13 @@ func _setup_ui_screens() -> void:
 		voting_screen.set_script(VotingScreenScript)
 		voting_screen.name = "VotingScreen"
 		screen_ui_layer.add_child(voting_screen)
+
+	var ReligionScreenScript = load("res://scripts/ui/religion_screen.gd")
+	if ReligionScreenScript:
+		religion_screen = Control.new()
+		religion_screen.set_script(ReligionScreenScript)
+		religion_screen.name = "ReligionScreen"
+		screen_ui_layer.add_child(religion_screen)
 
 func _on_turn_started(turn: int, player: Player) -> void:
 	if player == GameManager.human_player:

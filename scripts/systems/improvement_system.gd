@@ -19,7 +19,9 @@ const BUILD_TIMES = {
 	"well": 5,
 	"winery": 5,
 	"fort": 6,
-	"fishing_boats": 4
+	"fishing_boats": 4,
+	"workshop": 5,
+	"watermill": 5
 }
 
 ## Check if a worker can build a specific improvement on a tile
@@ -67,9 +69,9 @@ func can_build(worker, tile, improvement_id: String) -> bool:
 		if tile.resource_id == "" or tile.resource_id not in requires_resource:
 			return false
 
-	# Check fresh water requirement
+	# Check fresh water requirement (pass player for irrigation chain check)
 	var requires_fresh_water = improvement.get("requires_fresh_water_on", [])
-	if tile.terrain_id in requires_fresh_water and not tile.has_fresh_water():
+	if tile.terrain_id in requires_fresh_water and not tile.has_fresh_water(true, worker.player_owner):
 		return false
 
 	# Can't build on water (except specific naval improvements)

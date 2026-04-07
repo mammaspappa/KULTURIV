@@ -12,7 +12,9 @@
 			"buildings": []
 		},
 		"quote": "Where tillage begins, other arts follow.",
-		"description": "Enables Farms"
+		"description": "Enables Farms",
+		"gridX": 1,
+		"gridY": 5
 	},
 	"hunting": {
 		"name": "Hunting",
@@ -28,7 +30,9 @@
 			],
 			"buildings": []
 		},
-		"description": "Enables Camps, Scout"
+		"description": "Enables Camps, Scout",
+		"gridX": 1,
+		"gridY": 7
 	},
 	"fishing": {
 		"name": "Fishing",
@@ -42,7 +46,9 @@
 			"units": [],
 			"buildings": []
 		},
-		"description": "Enables Fishing Boats"
+		"description": "Enables Fishing Boats",
+		"gridX": 1,
+		"gridY": 1
 	},
 	"mining": {
 		"name": "Mining",
@@ -56,7 +62,9 @@
 			"units": [],
 			"buildings": []
 		},
-		"description": "Enables Mines"
+		"description": "Enables Mines",
+		"gridX": 1,
+		"gridY": 14
 	},
 	"mysticism": {
 		"name": "Mysticism",
@@ -69,7 +77,9 @@
 			],
 			"enables_religion_founding": true
 		},
-		"description": "Enables Obelisk, can found first religion"
+		"description": "Enables Obelisk, can found first religion",
+		"gridX": 1,
+		"gridY": 11
 	},
 	"the_wheel": {
 		"name": "The Wheel",
@@ -84,7 +94,9 @@
 				"chariot"
 			]
 		},
-		"description": "Enables Roads, Chariot"
+		"description": "Enables Roads, Chariot",
+		"gridX": 1,
+		"gridY": 3
 	},
 	"pottery": {
 		"name": "Pottery",
@@ -101,7 +113,9 @@
 				"granary"
 			]
 		},
-		"description": "Enables Cottages, Granary"
+		"description": "Enables Cottages, Granary",
+		"gridX": 2,
+		"gridY": 3
 	},
 	"animal_husbandry": {
 		"name": "Animal Husbandry",
@@ -120,7 +134,9 @@
 				"sheep"
 			]
 		},
-		"description": "Enables Pastures, reveals Horses"
+		"description": "Enables Pastures, reveals Horses",
+		"gridX": 2,
+		"gridY": 5
 	},
 	"archery": {
 		"name": "Archery",
@@ -134,7 +150,9 @@
 				"archer"
 			]
 		},
-		"description": "Enables Archer"
+		"description": "Enables Archer",
+		"gridX": 2,
+		"gridY": 7
 	},
 	"meditation": {
 		"name": "Meditation",
@@ -146,7 +164,9 @@
 		"unlocks": {
 			"enables_religion_founding": true
 		},
-		"description": "Can found Buddhism"
+		"description": "Can found Buddhism",
+		"gridX": 2,
+		"gridY": 9
 	},
 	"polytheism": {
 		"name": "Polytheism",
@@ -158,7 +178,9 @@
 		"unlocks": {
 			"enables_religion_founding": true
 		},
-		"description": "Can found Hinduism"
+		"description": "Can found Hinduism",
+		"gridX": 2,
+		"gridY": 11
 	},
 	"sailing": {
 		"name": "Sailing",
@@ -175,7 +197,9 @@
 				"lighthouse"
 			]
 		},
-		"description": "Enables Galley, Lighthouse"
+		"description": "Enables Galley, Lighthouse",
+		"gridX": 2,
+		"gridY": 1
 	},
 	"masonry": {
 		"name": "Masonry",
@@ -196,7 +220,9 @@
 				"stone"
 			]
 		},
-		"description": "Enables Quarry, Walls"
+		"description": "Enables Quarry, Walls",
+		"gridX": 2,
+		"gridY": 13
 	},
 	"bronze_working": {
 		"name": "Bronze Working",
@@ -214,7 +240,9 @@
 				"copper"
 			]
 		},
-		"description": "Enables Axeman, Spearman, reveals Copper"
+		"description": "Enables Axeman, Spearman, reveals Copper",
+		"gridX": 3,
+		"gridY": 14
 	},
 	"writing": {
 		"name": "Writing",
@@ -228,7 +256,9 @@
 				"library"
 			]
 		},
-		"description": "Enables Library, Open Borders"
+		"description": "Enables Library, Open Borders",
+		"gridX": 4,
+		"gridY": 3
 	},
 	"priesthood": {
 		"name": "Priesthood",
@@ -242,7 +272,9 @@
 				"temple"
 			]
 		},
-		"description": "Enables Temple"
+		"description": "Enables Temple",
+		"gridX": 3,
+		"gridY": 9
 	},
 	"monotheism": {
 		"name": "Monotheism",
@@ -254,7 +286,9 @@
 		"unlocks": {
 			"enables_religion_founding": true
 		},
-		"description": "Can found Judaism"
+		"description": "Can found Judaism",
+		"gridX": 3,
+		"gridY": 11
 	},
 	"horseback_riding": {
 		"name": "Horseback Riding",
@@ -271,7 +305,9 @@
 				"stable"
 			]
 		},
-		"description": "Enables Horseman, Stable"
+		"description": "Enables Horseman, Stable",
+		"gridX": 3,
+		"gridY": 6
 	},
 	"iron_working": {
 		"name": "Iron Working",
@@ -288,7 +324,9 @@
 				"iron"
 			]
 		},
-		"description": "Enables Swordsman, reveals Iron"
+		"description": "Enables Swordsman, reveals Iron",
+		"gridX": 4,
+		"gridY": 14
 	},
 	"metal_casting": {
 		"name": "Metal Casting",
@@ -305,7 +343,9 @@
 				"forge"
 			]
 		},
-		"description": "Enables Trireme, Forge"
+		"description": "Enables Trireme, Forge",
+		"gridX": 4,
+		"gridY": 12
 	},
 	"mathematics": {
 		"name": "Mathematics",
@@ -316,7 +356,9 @@
 		],
 		"prereq_type": "AND",
 		"unlocks": {},
-		"description": "Enables Catapult"
+		"description": "Enables Catapult",
+		"gridX": 5,
+		"gridY": 5
 	},
 	"alphabet": {
 		"name": "Alphabet",
@@ -326,7 +368,9 @@
 			"writing"
 		],
 		"unlocks": {},
-		"description": "Enables Tech Trading"
+		"description": "Enables Tech Trading",
+		"gridX": 5,
+		"gridY": 7
 	},
 	"code_of_laws": {
 		"name": "Code of Laws",
@@ -341,7 +385,9 @@
 			],
 			"enables_religion_founding": true
 		},
-		"description": "Enables Courthouse, can found Confucianism"
+		"description": "Enables Courthouse, can found Confucianism",
+		"gridX": 7,
+		"gridY": 8
 	},
 	"currency": {
 		"name": "Currency",
@@ -355,7 +401,9 @@
 				"market"
 			]
 		},
-		"description": "Enables Market"
+		"description": "Enables Market",
+		"gridX": 6,
+		"gridY": 7
 	},
 	"construction": {
 		"name": "Construction",
@@ -375,7 +423,9 @@
 				"aqueduct"
 			]
 		},
-		"description": "Enables Catapult, Colosseum, Aqueduct"
+		"description": "Enables Catapult, Colosseum, Aqueduct",
+		"gridX": 6,
+		"gridY": 5
 	},
 	"monarchy": {
 		"name": "Monarchy",
@@ -389,7 +439,9 @@
 				"winery"
 			]
 		},
-		"description": "Enables Hereditary Rule civic"
+		"description": "Enables Hereditary Rule civic",
+		"gridX": 5,
+		"gridY": 10
 	},
 	"aesthetics": {
 		"name": "Aesthetics",
@@ -399,7 +451,9 @@
 			"writing"
 		],
 		"unlocks": {},
-		"description": "Enables artistic development and cultural expression"
+		"description": "Enables artistic development and cultural expression",
+		"gridX": 5,
+		"gridY": 2
 	},
 	"literature": {
 		"name": "Literature",
@@ -416,7 +470,9 @@
 			],
 			"improvements": []
 		},
-		"description": "Enables National Epic, Heroic Epic"
+		"description": "Enables National Epic, Heroic Epic",
+		"gridX": 6,
+		"gridY": 1
 	},
 	"theology": {
 		"name": "Theology",
@@ -430,7 +486,9 @@
 		"unlocks": {
 			"enables_religion_founding": true
 		},
-		"description": "Can found Christianity"
+		"description": "Can found Christianity",
+		"gridX": 8,
+		"gridY": 11
 	},
 	"calendar": {
 		"name": "Calendar",
@@ -444,7 +502,9 @@
 				"plantation"
 			]
 		},
-		"description": "Enables Plantation"
+		"description": "Enables Plantation",
+		"gridX": 6,
+		"gridY": 3
 	},
 	"feudalism": {
 		"name": "Feudalism",
@@ -458,7 +518,9 @@
 				"longbowman"
 			]
 		},
-		"description": "Enables Longbowman, Vassalage civic"
+		"description": "Enables Longbowman, Vassalage civic",
+		"gridX": 7,
+		"gridY": 10
 	},
 	"engineering": {
 		"name": "Engineering",
@@ -478,7 +540,9 @@
 			]
 		},
 		"bonus": "roads_double_movement",
-		"description": "Enables Castle, faster roads"
+		"description": "Enables Castle, faster roads",
+		"gridX": 7,
+		"gridY": 5
 	},
 	"machinery": {
 		"name": "Machinery",
@@ -493,7 +557,9 @@
 				"trebuchet"
 			]
 		},
-		"description": "Enables Crossbowman, Trebuchet"
+		"description": "Enables Crossbowman, Trebuchet",
+		"gridX": 6,
+		"gridY": 12
 	},
 	"civil_service": {
 		"name": "Civil Service",
@@ -510,7 +576,9 @@
 				"maceman"
 			]
 		},
-		"description": "Enables Pikeman, Maceman, Bureaucracy civic"
+		"description": "Enables Pikeman, Maceman, Bureaucracy civic",
+		"gridX": 8,
+		"gridY": 8
 	},
 	"guilds": {
 		"name": "Guilds",
@@ -529,7 +597,9 @@
 				"grocer"
 			]
 		},
-		"description": "Enables Knight, Grocer"
+		"description": "Enables Knight, Grocer",
+		"gridX": 9,
+		"gridY": 12
 	},
 	"philosophy": {
 		"name": "Philosophy",
@@ -543,7 +613,9 @@
 		"unlocks": {
 			"enables_religion_founding": true
 		},
-		"description": "Can found Taoism"
+		"description": "Can found Taoism",
+		"gridX": 8,
+		"gridY": 3
 	},
 	"monasticism": {
 		"name": "Monasticism",
@@ -557,7 +629,9 @@
 				"monastery"
 			]
 		},
-		"description": "Enables Monastery"
+		"description": "Enables Monastery",
+		"gridX": 4,
+		"gridY": 9
 	},
 	"drama": {
 		"name": "Drama",
@@ -571,7 +645,9 @@
 				"theatre"
 			]
 		},
-		"description": "Enables Theatre, Globe Theatre"
+		"description": "Enables Theatre, Globe Theatre",
+		"gridX": 7,
+		"gridY": 2
 	},
 	"music": {
 		"name": "Music",
@@ -582,7 +658,9 @@
 		],
 		"unlocks": {},
 		"first_to_discover_bonus": "free_great_artist",
-		"description": "First to discover gets a free Great Artist"
+		"description": "First to discover gets a free Great Artist",
+		"gridX": 8,
+		"gridY": 1
 	},
 	"banking": {
 		"name": "Banking",
@@ -598,7 +676,9 @@
 				"bank"
 			]
 		},
-		"description": "Enables Bank"
+		"description": "Enables Bank",
+		"gridX": 10,
+		"gridY": 14
 	},
 	"paper": {
 		"name": "Paper",
@@ -614,7 +694,9 @@
 			"buildings": [],
 			"improvements": []
 		},
-		"description": "Prerequisite for Education"
+		"description": "Prerequisite for Education",
+		"gridX": 9,
+		"gridY": 8
 	},
 	"divine_right": {
 		"name": "Divine Right",
@@ -631,7 +713,9 @@
 			"improvements": [],
 			"enables_religion_founding": true
 		},
-		"description": "Can found Islam. Enables Versailles wonder."
+		"description": "Can found Islam. Enables Versailles wonder.",
+		"gridX": 9,
+		"gridY": 5
 	},
 	"education": {
 		"name": "Education",
@@ -647,7 +731,9 @@
 				"university"
 			]
 		},
-		"description": "Enables University"
+		"description": "Enables University",
+		"gridX": 10,
+		"gridY": 10
 	},
 	"optics": {
 		"name": "Optics",
@@ -662,7 +748,9 @@
 				"explorer"
 			]
 		},
-		"description": "Enables Caravel, Explorer, ocean travel"
+		"description": "Enables Caravel, Explorer, ocean travel",
+		"gridX": 7,
+		"gridY": 14
 	},
 	"compass": {
 		"name": "Compass",
@@ -676,7 +764,9 @@
 				"harbor"
 			]
 		},
-		"description": "Enables Harbor"
+		"description": "Enables Harbor",
+		"gridX": 5,
+		"gridY": 14
 	},
 	"astronomy": {
 		"name": "Astronomy",
@@ -695,7 +785,9 @@
 				"observatory"
 			]
 		},
-		"description": "Enables Frigate, Observatory"
+		"description": "Enables Frigate, Observatory",
+		"gridX": 12,
+		"gridY": 7
 	},
 	"gunpowder": {
 		"name": "Gunpowder",
@@ -711,7 +803,9 @@
 				"musketman"
 			]
 		},
-		"description": "Enables Musketman"
+		"description": "Enables Musketman",
+		"gridX": 11,
+		"gridY": 12
 	},
 	"chemistry": {
 		"name": "Chemistry",
@@ -726,7 +820,9 @@
 				"cannon"
 			]
 		},
-		"description": "Enables Grenadier, Cannon"
+		"description": "Enables Grenadier, Cannon",
+		"gridX": 12,
+		"gridY": 12
 	},
 	"printing_press": {
 		"name": "Printing Press",
@@ -739,7 +835,9 @@
 		"prereq_type": "AND",
 		"unlocks": {},
 		"bonus": "cottage_growth_bonus",
-		"description": "Cottages grow faster"
+		"description": "Cottages grow faster",
+		"gridX": 10,
+		"gridY": 5
 	},
 	"nationalism": {
 		"name": "Nationalism",
@@ -755,7 +853,9 @@
 				"spy"
 			]
 		},
-		"description": "Enables Spy, Nationhood civic"
+		"description": "Enables Spy, Nationhood civic",
+		"gridX": 10,
+		"gridY": 3
 	},
 	"constitution": {
 		"name": "Constitution",
@@ -765,7 +865,9 @@
 			"nationalism"
 		],
 		"unlocks": {},
-		"description": "Enables Representation civic"
+		"description": "Enables Representation civic",
+		"gridX": 11,
+		"gridY": 1
 	},
 	"economics": {
 		"name": "Economics",
@@ -778,7 +880,9 @@
 		"prereq_type": "AND",
 		"unlocks": {},
 		"first_to_discover_bonus": "free_great_merchant",
-		"description": "First to discover gets a free Great Merchant"
+		"description": "First to discover gets a free Great Merchant",
+		"gridX": 11,
+		"gridY": 10
 	},
 	"liberalism": {
 		"name": "Liberalism",
@@ -795,7 +899,9 @@
 			"improvements": []
 		},
 		"first_to_discover_bonus": "free_tech",
-		"description": "Enables Free Speech and Free Religion civics. First to discover gets a free tech."
+		"description": "Enables Free Speech and Free Religion civics. First to discover gets a free tech.",
+		"gridX": 11,
+		"gridY": 8
 	},
 	"military_tradition": {
 		"name": "Military Tradition",
@@ -811,7 +917,9 @@
 				"cavalry"
 			]
 		},
-		"description": "Enables Cavalry"
+		"description": "Enables Cavalry",
+		"gridX": 11,
+		"gridY": 3
 	},
 	"rifling": {
 		"name": "Rifling",
@@ -827,7 +935,9 @@
 				"rifleman"
 			]
 		},
-		"description": "Enables Rifleman"
+		"description": "Enables Rifleman",
+		"gridX": 12,
+		"gridY": 4
 	},
 	"steel": {
 		"name": "Steel",
@@ -843,7 +953,9 @@
 				"artillery"
 			]
 		},
-		"description": "Enables Artillery"
+		"description": "Enables Artillery",
+		"gridX": 13,
+		"gridY": 14
 	},
 	"steam_power": {
 		"name": "Steam Power",
@@ -865,7 +977,9 @@
 				"coal"
 			]
 		},
-		"description": "Enables Transport, Coal Plant, reveals Coal"
+		"description": "Enables Transport, Coal Plant, reveals Coal",
+		"gridX": 13,
+		"gridY": 5
 	},
 	"railroad": {
 		"name": "Railroad",
@@ -879,7 +993,9 @@
 				"railroad"
 			]
 		},
-		"description": "Enables Railroads"
+		"description": "Enables Railroads",
+		"gridX": 14,
+		"gridY": 14
 	},
 	"corporation": {
 		"name": "Corporation",
@@ -895,7 +1011,9 @@
 				"stock_exchange"
 			]
 		},
-		"description": "Enables Stock Exchange, corporations"
+		"description": "Enables Stock Exchange, corporations",
+		"gridX": 12,
+		"gridY": 10
 	},
 	"medicine": {
 		"name": "Medicine",
@@ -909,7 +1027,9 @@
 				"hospital"
 			]
 		},
-		"description": "Enables Hospital"
+		"description": "Enables Hospital",
+		"gridX": 15,
+		"gridY": 11
 	},
 	"scientific_method": {
 		"name": "Scientific Method",
@@ -921,7 +1041,9 @@
 		],
 		"prereq_type": "AND",
 		"unlocks": {},
-		"description": "Doubles research from scientists"
+		"description": "Doubles research from scientists",
+		"gridX": 13,
+		"gridY": 9
 	},
 	"military_science": {
 		"name": "Military Science",
@@ -940,7 +1062,9 @@
 			"buildings": [],
 			"improvements": []
 		},
-		"description": "Enables Grenadier, Cavalry. Enables West Point national wonder."
+		"description": "Enables Grenadier, Cavalry. Enables West Point national wonder.",
+		"gridX": 13,
+		"gridY": 12
 	},
 	"replaceable_parts": {
 		"name": "Replaceable Parts",
@@ -960,7 +1084,9 @@
 				"lumbermill"
 			]
 		},
-		"description": "Enables Infantry, Lumbermill improvement"
+		"description": "Enables Infantry, Lumbermill improvement",
+		"gridX": 11,
+		"gridY": 5
 	},
 	"democracy": {
 		"name": "Democracy",
@@ -976,7 +1102,9 @@
 			"buildings": [],
 			"improvements": []
 		},
-		"description": "Enables Universal Suffrage and Emancipation civics. Enables Statue of Liberty."
+		"description": "Enables Universal Suffrage and Emancipation civics. Enables Statue of Liberty.",
+		"gridX": 12,
+		"gridY": 1
 	},
 	"communism": {
 		"name": "Communism",
@@ -990,7 +1118,9 @@
 			"buildings": [],
 			"improvements": []
 		},
-		"description": "Enables State Property civic. Enables Intelligence Agency, Security Bureau."
+		"description": "Enables State Property civic. Enables Intelligence Agency, Security Bureau.",
+		"gridX": 13,
+		"gridY": 7
 	},
 	"fascism": {
 		"name": "Fascism",
@@ -1004,7 +1134,9 @@
 			"buildings": [],
 			"improvements": []
 		},
-		"description": "Enables Police State civic. Enables Mt. Rushmore national wonder."
+		"description": "Enables Police State civic. Enables Mt. Rushmore national wonder.",
+		"gridX": 15,
+		"gridY": 6
 	},
 	"electricity": {
 		"name": "Electricity",
@@ -1016,7 +1148,9 @@
 		],
 		"prereq_type": "AND",
 		"unlocks": {},
-		"description": "Prerequisite for modern techs"
+		"description": "Prerequisite for modern techs",
+		"gridX": 15,
+		"gridY": 9
 	},
 	"combustion": {
 		"name": "Combustion",
@@ -1039,7 +1173,9 @@
 				"oil"
 			]
 		},
-		"description": "Enables Destroyer, Submarine, reveals Oil"
+		"description": "Enables Destroyer, Submarine, reveals Oil",
+		"gridX": 15,
+		"gridY": 14
 	},
 	"assembly_line": {
 		"name": "Assembly Line",
@@ -1058,7 +1194,9 @@
 				"factory"
 			]
 		},
-		"description": "Enables Infantry, Factory"
+		"description": "Enables Infantry, Factory",
+		"gridX": 14,
+		"gridY": 5
 	},
 	"industrialism": {
 		"name": "Industrialism",
@@ -1076,7 +1214,9 @@
 				"carrier"
 			]
 		},
-		"description": "Enables Tank, Battleship, Carrier"
+		"description": "Enables Tank, Battleship, Carrier",
+		"gridX": 16,
+		"gridY": 5
 	},
 	"flight": {
 		"name": "Flight",
@@ -1095,7 +1235,9 @@
 			]
 		},
 		"first_to_discover_bonus": "free_great_merchant",
-		"description": "Enables Fighter, Bomber, Airport"
+		"description": "Enables Fighter, Bomber, Airport",
+		"gridX": 15,
+		"gridY": 1
 	},
 	"radio": {
 		"name": "Radio",
@@ -1105,7 +1247,9 @@
 			"electricity"
 		],
 		"unlocks": {},
-		"description": "Enables propaganda"
+		"description": "Enables propaganda",
+		"gridX": 16,
+		"gridY": 9
 	},
 	"mass_media": {
 		"name": "Mass Media",
@@ -1119,7 +1263,9 @@
 				"broadcast_tower"
 			]
 		},
-		"description": "Enables Broadcast Tower"
+		"description": "Enables Broadcast Tower",
+		"gridX": 17,
+		"gridY": 9
 	},
 	"refrigeration": {
 		"name": "Refrigeration",
@@ -1135,7 +1281,9 @@
 				"supermarket"
 			]
 		},
-		"description": "Enables Supermarket"
+		"description": "Enables Supermarket",
+		"gridX": 16,
+		"gridY": 13
 	},
 	"plastics": {
 		"name": "Plastics",
@@ -1149,7 +1297,9 @@
 				"hydro_plant"
 			]
 		},
-		"description": "Enables Hydro Plant"
+		"description": "Enables Hydro Plant",
+		"gridX": 17,
+		"gridY": 5
 	},
 	"rocketry": {
 		"name": "Rocketry",
@@ -1165,7 +1315,9 @@
 				"jet_fighter"
 			]
 		},
-		"description": "Enables Jet Fighter, rockets"
+		"description": "Enables Jet Fighter, rockets",
+		"gridX": 16,
+		"gridY": 3
 	},
 	"fission": {
 		"name": "Fission",
@@ -1185,7 +1337,9 @@
 				"uranium"
 			]
 		},
-		"description": "Enables Nuclear Missile, Nuclear Plant, reveals Uranium"
+		"description": "Enables Nuclear Missile, Nuclear Plant, reveals Uranium",
+		"gridX": 16,
+		"gridY": 7
 	},
 	"computers": {
 		"name": "Computers",
@@ -1201,7 +1355,9 @@
 				"research_lab"
 			]
 		},
-		"description": "Enables Research Lab"
+		"description": "Enables Research Lab",
+		"gridX": 17,
+		"gridY": 11
 	},
 	"ecology": {
 		"name": "Ecology",
@@ -1217,7 +1373,9 @@
 				"recycling_center"
 			]
 		},
-		"description": "Enables Recycling Center"
+		"description": "Enables Recycling Center",
+		"gridX": 18,
+		"gridY": 7
 	},
 	"robotics": {
 		"name": "Robotics",
@@ -1236,7 +1394,9 @@
 				"spaceship_parts_factory"
 			]
 		},
-		"description": "Enables Mechanized Infantry, Spaceship Parts Factory"
+		"description": "Enables Mechanized Infantry, Spaceship Parts Factory",
+		"gridX": 19,
+		"gridY": 11
 	},
 	"satellites": {
 		"name": "Satellites",
@@ -1249,7 +1409,9 @@
 		"prereq_type": "AND",
 		"unlocks": {},
 		"bonus": "reveal_entire_map",
-		"description": "Reveals the entire map"
+		"description": "Reveals the entire map",
+		"gridX": 17,
+		"gridY": 3
 	},
 	"composites": {
 		"name": "Composites",
@@ -1265,7 +1427,9 @@
 				"modern_armor"
 			]
 		},
-		"description": "Enables Modern Armor"
+		"description": "Enables Modern Armor",
+		"gridX": 18,
+		"gridY": 5
 	},
 	"stealth": {
 		"name": "Stealth",
@@ -1281,7 +1445,9 @@
 				"stealth_bomber"
 			]
 		},
-		"description": "Enables Stealth Bomber"
+		"description": "Enables Stealth Bomber",
+		"gridX": 19,
+		"gridY": 1
 	},
 	"advanced_flight": {
 		"name": "Advanced Flight",
@@ -1297,7 +1463,9 @@
 				"icbm"
 			]
 		},
-		"description": "Enables ICBM"
+		"description": "Enables ICBM",
+		"gridX": 18,
+		"gridY": 1
 	},
 	"fusion": {
 		"name": "Fusion",
@@ -1309,7 +1477,9 @@
 		],
 		"prereq_type": "AND",
 		"unlocks": {},
-		"description": "Enables spaceship engines"
+		"description": "Enables spaceship engines",
+		"gridX": 20,
+		"gridY": 8
 	},
 	"genetics": {
 		"name": "Genetics",
@@ -1321,7 +1491,9 @@
 		],
 		"prereq_type": "AND",
 		"unlocks": {},
-		"description": "Enables spaceship life support"
+		"description": "Enables spaceship life support",
+		"gridX": 19,
+		"gridY": 13
 	},
 	"future_tech": {
 		"name": "Future Tech",
@@ -1339,6 +1511,8 @@
 				"health": 1
 			}
 		},
-		"description": "Can be researched repeatedly for bonuses"
+		"description": "Can be researched repeatedly for bonuses",
+		"gridX": 20,
+		"gridY": 13
 	}
 }

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://sim_runner"]
+
+[ext_resource type="Script" path="res://scripts/tools/ai_simulation.gd" id="1_sim"]
+
+[node name="AISimulation" type="Node"]
+script = ExtResource("1_sim")

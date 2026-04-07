@@ -19,7 +19,8 @@ enum MemoryType {
 	WORST_ENEMY_OF_FRIEND,
 	TRADED_WITH_ENEMY,
 	HELPED_IN_WAR,
-	DEFIED_RESOLUTION
+	DEFIED_RESOLUTION,
+	LIBERATED_CITY
 }
 
 # Memory decay rates (per turn)
@@ -37,7 +38,8 @@ const MEMORY_DECAY = {
 	MemoryType.WORST_ENEMY_OF_FRIEND: 0.03,
 	MemoryType.TRADED_WITH_ENEMY: 0.05,
 	MemoryType.HELPED_IN_WAR: 0.05,
-	MemoryType.DEFIED_RESOLUTION: 0.05     # Medium decay
+	MemoryType.DEFIED_RESOLUTION: 0.05,    # Medium decay
+	MemoryType.LIBERATED_CITY: 0.01        # Very slow decay
 }
 
 # Memory attitude effects
@@ -55,7 +57,8 @@ const MEMORY_EFFECTS = {
 	MemoryType.WORST_ENEMY_OF_FRIEND: -3,
 	MemoryType.TRADED_WITH_ENEMY: -2,
 	MemoryType.HELPED_IN_WAR: 4,
-	MemoryType.DEFIED_RESOLUTION: -2
+	MemoryType.DEFIED_RESOLUTION: -2,
+	MemoryType.LIBERATED_CITY: 8
 }
 
 # Diplomacy memory storage: player_id -> {target_id -> [{type, strength, turns}]}
@@ -369,6 +372,39 @@ func get_peace_demands(winner, loser) -> Dictionary:
 			demands["techs"].append(tradeable[0])
 
 	return demands
+
+## Calculate war score between two players (negative = losing)
+func calculate_war_score(player, enemy) -> int:
+	var score = 0
+
+	# Compare military power
+	var player_power = _calculate_power(player)
+	var enemy_power = _calculate_power(enemy)
+	if player_power > 0 or enemy_power > 0:
+		var ratio = float(player_power) / max(1, enemy_power)
+		score += int((ratio - 1.0) * 30)  # +/- 30 based on power ratio
+
+	# Cities: losing cities is very bad
+	var player_cities = player.cities.size()
+	var enemy_cities = enemy.cities.size()
+	score += (player_cities - enemy_cities) * 10
+
+	# Check if enemy is near capital
+	for city in player.cities:
+		if city.is_capital():
+			for enemy_unit in enemy.units:
+				if GridUtils.chebyshev_distance(city.grid_position, enemy_unit.grid_position) < 5:
+					score -= 20  # Enemy near capital is very bad
+			break
+
+	return score
+
+## Check if a player should offer capitulation (become vassal)
+func should_offer_capitulation(player, enemy) -> bool:
+	if player.is_vassal():
+		return false
+	var war_score = calculate_war_score(player, enemy)
+	return war_score < -50
 
 # Signal handlers
 func _on_war_declared(aggressor, target) -> void:

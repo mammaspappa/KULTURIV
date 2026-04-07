@@ -39,7 +39,7 @@
 		"yields": {},
 		"commerces": {
 			"gold": 0,
-			"research": 1,
+			"research": 0,
 			"culture": 4
 		},
 		"great_people_type": "artist",
@@ -91,9 +91,9 @@
 		"yields": {},
 		"commerces": {
 			"gold": 0,
-			"research": 1,
+			"research": 0,
 			"culture": 0,
-			"espionage": 4
+			"espionage": 3
 		},
 		"great_people_type": "spy",
 		"great_people_points": 3

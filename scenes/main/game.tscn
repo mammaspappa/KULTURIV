@@ -106,6 +106,10 @@ text = "Diplomacy (D)"
 layout_mode = 2
 text = "Espionage (E)"
 
+[node name="ReligionButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Religion (F7)"
+
 [node name="VotingButton" type="Button" parent="ScreenUILayer/GameUI/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "UN (U)"

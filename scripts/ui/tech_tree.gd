@@ -2,9 +2,10 @@ class_name TechTree
 extends Control
 ## Technology tree screen showing all techs and research options.
 
-const TECH_NODE_SIZE = Vector2(160, 85)
-const TECH_SPACING_X = 200
-const TECH_SPACING_Y = 105
+# BTS-style grid layout: 20 columns x 14 rows
+const TECH_NODE_SIZE = Vector2(180, 50)
+const CELL_WIDTH = 220   # Horizontal spacing between grid columns
+const CELL_HEIGHT = 54   # Vertical spacing between grid rows
 
 var tech_nodes: Dictionary = {}  # tech_id -> Control
 var current_player = null  # Player (untyped to avoid load-order issues)
@@ -20,13 +21,13 @@ var current_research_label: Label
 
 # Colors
 const BG_COLOR = Color(0.08, 0.08, 0.12, 1.0)
-const RESEARCHED_COLOR = Color(0.2, 0.6, 0.2)
-const AVAILABLE_COLOR = Color(0.3, 0.3, 0.5)
-const UNAVAILABLE_COLOR = Color(0.2, 0.2, 0.2)
-const CURRENT_COLOR = Color(0.6, 0.6, 0.2)
+# BTS-authentic colors
+const RESEARCHED_COLOR = Color(0.33, 0.59, 0.34)   # #559957 muted green
+const CURRENT_COLOR = Color(0.41, 0.62, 0.65)       # #689ea5 teal
+const AVAILABLE_COLOR = Color(0.39, 0.41, 0.63)     # #6468a0 slate blue
+const UNAVAILABLE_COLOR = Color(0.27, 0.27, 0.27)   # #444444 dark gray
 
 # Era order
-const ERA_ORDER = ["ancient", "classical", "medieval", "renaissance", "industrial", "modern", "future"]
 
 func _ready() -> void:
 	# Allow clicks to pass through to top menu
@@ -138,52 +139,36 @@ func _update_layout() -> void:
 
 func _build_tech_tree() -> void:
 	# Clear existing nodes
-	for node in tech_nodes.values():
-		node.queue_free()
+	for child in tech_container.get_children():
+		child.queue_free()
 	tech_nodes.clear()
 
 	# Update current research display
 	_update_current_research()
 
-	# Group techs by era
-	var eras: Dictionary = {}
-	for tech_id in DataManager.techs:
-		var tech = DataManager.get_tech(tech_id)
-		var era = tech.get("era", "ancient")
-		if not eras.has(era):
-			eras[era] = []
-		eras[era].append(tech_id)
-
-	# Position techs by era
-	var x_pos = 20
+	# Position techs using BTS grid coordinates (gridX, gridY)
+	var max_x = 0
 	var max_y = 0
 
-	for era in ERA_ORDER:
-		if not eras.has(era):
+	for tech_id in DataManager.techs:
+		if tech_id.begins_with("_"):
 			continue
+		var tech = DataManager.get_tech(tech_id)
+		var grid_x = tech.get("gridX", 1)
+		var grid_y = tech.get("gridY", 1)
 
-		var y_pos = 20
+		var node = _create_tech_node(tech_id)
+		var px = (grid_x - 1) * CELL_WIDTH + 20
+		var py = (grid_y - 1) * CELL_HEIGHT + 10
+		node.position = Vector2(px, py)
+		tech_nodes[tech_id] = node
+		tech_container.add_child(node)
 
-		# Era label
-		var era_label = Label.new()
-		era_label.text = era.capitalize()
-		era_label.position = Vector2(x_pos, y_pos - 20)
-		era_label.add_theme_font_size_override("font_size", 16)
-		era_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
-		tech_container.add_child(era_label)
+		max_x = max(max_x, px + TECH_NODE_SIZE.x)
+		max_y = max(max_y, py + TECH_NODE_SIZE.y)
 
-		for tech_id in eras[era]:
-			var node = _create_tech_node(tech_id)
-			node.position = Vector2(x_pos, y_pos)
-			tech_nodes[tech_id] = node
-			tech_container.add_child(node)
-			y_pos += TECH_SPACING_Y
-			max_y = max(max_y, y_pos)
-
-		x_pos += TECH_SPACING_X
-
-	# Set container size
-	tech_container.custom_minimum_size = Vector2(x_pos, max_y + 50)
+	# Set container size for scrolling
+	tech_container.custom_minimum_size = Vector2(max_x + 40, max_y + 40)
 
 	# Draw connections after positioning
 	_draw_connections()
@@ -220,71 +205,50 @@ func _create_tech_node(tech_id: String) -> Control:
 	style.corner_radius_bottom_right = 4
 	node.add_theme_stylebox_override("panel", style)
 
-	# Tech name label
+	# Tech name + cost on one line (compact)
+	var cost = int(DataManager.get_tech_cost(tech_id) * GameManager.get_speed_multiplier())
 	var name_label = Label.new()
-	name_label.text = tech.get("name", tech_id)
-	name_label.position = Vector2(5, 5)
-	name_label.size = Vector2(TECH_NODE_SIZE.x - 10, 20)
-	name_label.add_theme_font_size_override("font_size", 12)
+	name_label.text = "%s (%d)" % [tech.get("name", tech_id), cost]
+	name_label.position = Vector2(4, 2)
+	name_label.size = Vector2(TECH_NODE_SIZE.x - 8, 18)
+	name_label.add_theme_font_size_override("font_size", 11)
 	name_label.clip_text = true
 	node.add_child(name_label)
 
-	# Cost label
-	var cost_label = Label.new()
-	var cost = int(DataManager.get_tech_cost(tech_id) * GameManager.get_speed_multiplier())
-	cost_label.text = "%d beakers" % cost
-	cost_label.position = Vector2(5, 25)
-	cost_label.add_theme_font_size_override("font_size", 10)
-	cost_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-	node.add_child(cost_label)
-
-	# Unlock badges row
+	# Unlock badges row (bottom half of card)
 	var unlocks = DataManager.get_tech_unlocks(tech_id)
-	var badge_container = HBoxContainer.new()
-	badge_container.position = Vector2(5, 42)
-	badge_container.add_theme_constant_override("separation", 3)
-	node.add_child(badge_container)
+	var badge_hbox = HBoxContainer.new()
+	badge_hbox.position = Vector2(4, 22)
+	badge_hbox.add_theme_constant_override("separation", 2)
+	node.add_child(badge_hbox)
 
 	var unlock_units = unlocks.get("units", [])
 	var unlock_buildings = unlocks.get("buildings", [])
 	var unlock_improvements = unlocks.get("improvements", [])
 
-	for i in range(unlock_units.size()):
-		var badge = _create_badge("U", Color(0.85, 0.2, 0.2))
-		badge_container.add_child(badge)
-		if i >= 3:
-			break  # Limit to avoid overflow
-
-	for i in range(unlock_buildings.size()):
-		var badge = _create_badge("B", Color(0.2, 0.35, 0.85))
-		badge_container.add_child(badge)
-		if i >= 3:
-			break
-
-	for i in range(unlock_improvements.size()):
-		var badge = _create_badge("I", Color(0.2, 0.7, 0.25))
-		badge_container.add_child(badge)
-		if i >= 3:
-			break
+	for i in range(mini(unlock_units.size(), 3)):
+		badge_hbox.add_child(_create_badge("U", Color(0.85, 0.2, 0.2)))
+	for i in range(mini(unlock_buildings.size(), 3)):
+		badge_hbox.add_child(_create_badge("B", Color(0.2, 0.35, 0.85)))
+	for i in range(mini(unlock_improvements.size(), 2)):
+		badge_hbox.add_child(_create_badge("I", Color(0.2, 0.7, 0.25)))
 
 	# Progress bar for currently-researching tech
 	if state == "current" and current_player != null:
 		var progress_bar = ProgressBar.new()
-		progress_bar.position = Vector2(2, TECH_NODE_SIZE.y - 10)
-		progress_bar.custom_minimum_size = Vector2(TECH_NODE_SIZE.x - 4, 8)
-		progress_bar.size = Vector2(TECH_NODE_SIZE.x - 4, 8)
+		progress_bar.position = Vector2(2, TECH_NODE_SIZE.y - 8)
+		progress_bar.custom_minimum_size = Vector2(TECH_NODE_SIZE.x - 4, 6)
+		progress_bar.size = Vector2(TECH_NODE_SIZE.x - 4, 6)
 		progress_bar.max_value = cost
 		progress_bar.value = current_player.research_progress
 		progress_bar.show_percentage = false
 		var bar_bg = StyleBoxFlat.new()
 		bar_bg.bg_color = Color(0.15, 0.15, 0.15)
-		bar_bg.corner_radius_bottom_left = 2
-		bar_bg.corner_radius_bottom_right = 2
+		bar_bg.set_corner_radius_all(2)
 		progress_bar.add_theme_stylebox_override("background", bar_bg)
 		var bar_fill = StyleBoxFlat.new()
 		bar_fill.bg_color = Color(0.3, 0.8, 0.3)
-		bar_fill.corner_radius_bottom_left = 2
-		bar_fill.corner_radius_bottom_right = 2
+		bar_fill.set_corner_radius_all(2)
 		progress_bar.add_theme_stylebox_override("fill", bar_fill)
 		node.add_child(progress_bar)
 
@@ -344,50 +308,67 @@ func _get_tech_state(tech_id: String) -> String:
 	return "unavailable"
 
 func _draw_connections() -> void:
-	# Create a custom draw node for lines
+	# Create a container for connection lines (behind tech nodes)
 	var line_container = Node2D.new()
 	line_container.name = "LineContainer"
 	line_container.z_index = -1
 	tech_container.add_child(line_container)
-	line_container.set_script(load("res://scripts/ui/tech_lines.gd") if ResourceLoader.exists("res://scripts/ui/tech_lines.gd") else null)
 
-	# Store line data for drawing with colors based on research state
 	var researched_techs = []
 	if current_player != null:
 		researched_techs = current_player.researched_techs
 
-	var lines = []
 	for tech_id in tech_nodes:
 		var prereqs = DataManager.get_tech_prerequisites(tech_id)
 		var to_node = tech_nodes[tech_id]
-		var to_pos = to_node.position + Vector2(0, TECH_NODE_SIZE.y / 2)
+		var to_pos = to_node.position + Vector2(0, TECH_NODE_SIZE.y / 2)  # Left-middle of target
 
 		for prereq in prereqs:
-			if prereq in tech_nodes:
-				var from_node = tech_nodes[prereq]
-				var from_pos = from_node.position + Vector2(TECH_NODE_SIZE.x, TECH_NODE_SIZE.y / 2)
+			if prereq not in tech_nodes:
+				continue
+			var from_node = tech_nodes[prereq]
+			var from_pos = from_node.position + Vector2(TECH_NODE_SIZE.x, TECH_NODE_SIZE.y / 2)  # Right-middle of source
 
-				# Determine line color based on research state
-				var prereq_researched = prereq in researched_techs
-				var tech_researched = tech_id in researched_techs
-				var line_color: Color
-				if prereq_researched and tech_researched:
-					line_color = Color(0.2, 0.75, 0.2)  # Green - both researched
-				elif prereq_researched and not tech_researched:
-					line_color = Color(0.85, 0.85, 0.2)  # Yellow - prereq done, dependent not
-				else:
-					line_color = Color(0.5, 0.5, 0.6)  # Gray - neither researched
+			# Determine line color
+			var prereq_researched = prereq in researched_techs
+			var tech_researched = tech_id in researched_techs
+			var line_color: Color
+			if prereq_researched and tech_researched:
+				line_color = Color(0.2, 0.75, 0.2)   # Green
+			elif prereq_researched:
+				line_color = Color(0.85, 0.85, 0.2)  # Yellow
+			else:
+				line_color = Color(0.5, 0.5, 0.6)    # Gray
 
-				lines.append({"from": from_pos, "to": to_pos, "color": line_color})
+			# L-shaped routing: right from source → bend → left into target
+			var line = Line2D.new()
+			line.width = 2.0
+			line.default_color = line_color
 
-	# Draw lines manually
-	for line_data in lines:
-		var line = Line2D.new()
-		line.add_point(line_data.from)
-		line.add_point(line_data.to)
-		line.default_color = line_data.color
-		line.width = 2.0
-		line_container.add_child(line)
+			if abs(from_pos.y - to_pos.y) < 4:
+				# Same row — straight horizontal line
+				line.add_point(from_pos)
+				line.add_point(to_pos)
+			else:
+				# Different rows — L-bend at horizontal midpoint
+				var mid_x = (from_pos.x + to_pos.x) / 2
+				line.add_point(from_pos)
+				line.add_point(Vector2(mid_x, from_pos.y))
+				line.add_point(Vector2(mid_x, to_pos.y))
+				line.add_point(to_pos)
+
+			line_container.add_child(line)
+
+			# Arrowhead at destination
+			var arrow_size = 6.0
+			var arrow = Polygon2D.new()
+			arrow.polygon = PackedVector2Array([
+				to_pos,
+				to_pos + Vector2(-arrow_size, -arrow_size / 2),
+				to_pos + Vector2(-arrow_size, arrow_size / 2)
+			])
+			arrow.color = line_color
+			line_container.add_child(arrow)
 
 func _update_current_research() -> void:
 	if current_player == null:

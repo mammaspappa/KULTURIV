@@ -79,8 +79,9 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 			tiles[pos] = tile
 			add_child(tile)
 
-	# Post-process: add features, resources
+	# Post-process: add features, resources, rivers
 	_add_features()
+	_generate_rivers()
 	_add_resources()
 
 	# Add tribal villages (goody huts)
@@ -238,6 +239,132 @@ func _add_features() -> void:
 		# Oasis in desert
 		if tile.terrain_id == "desert" and randf() < 0.03:
 			tile.feature_id = "oasis"
+
+func _generate_rivers() -> void:
+	# Generate rivers flowing from high elevation to coast/ocean
+	var num_rivers = max(3, int(width * height / 600))  # ~3-6 rivers for standard maps
+
+	# Find candidate source positions (high elevation, inland)
+	var candidates = []
+	for pos in tiles:
+		var tile = tiles[pos]
+		if tile.is_water() or tile.is_mountains():
+			continue
+		var elev = _get_elevation(pos)
+		if elev > 0.55 and tile.terrain_id in ["hills", "grassland", "plains", "tundra"]:
+			# Must not be at map edge
+			if pos.x > 3 and pos.x < width - 3 and pos.y > 3 and pos.y < height - 3:
+				candidates.append({"pos": pos, "elevation": elev})
+
+	# Sort by elevation descending
+	candidates.sort_custom(func(a, b): return a.elevation > b.elevation)
+
+	var rivers_placed = 0
+	var used_sources = []
+
+	for candidate in candidates:
+		if rivers_placed >= num_rivers:
+			break
+
+		var source = candidate.pos
+
+		# Don't start too close to another river source
+		var too_close = false
+		for used in used_sources:
+			if GridUtils.chebyshev_distance(source, used) < 8:
+				too_close = true
+				break
+		if too_close:
+			continue
+
+		# Trace river path downhill
+		var path = _trace_river_path(source)
+		if path.size() >= 3:  # Must be at least 3 tiles long
+			_apply_river_path(path)
+			used_sources.append(source)
+			rivers_placed += 1
+
+## Trace a river path from source downhill to coast/ocean
+func _trace_river_path(start: Vector2i) -> Array[Vector2i]:
+	var path: Array[Vector2i] = [start]
+	var current = start
+	var visited = {start: true}
+	var max_length = 30
+
+	for step in range(max_length):
+		var neighbors = GridUtils.get_neighbors(current)
+		var best_next = Vector2i(-1, -1)
+		var best_elev = 999.0
+
+		for n_pos in neighbors:
+			if n_pos in visited:
+				continue
+			var tile = get_tile(n_pos)
+			if tile == null:
+				continue
+
+			# River reached ocean/coast — done
+			if tile.is_water():
+				path.append(n_pos)
+				return path
+
+			var elev = _get_elevation(n_pos)
+			# Prefer lower elevation, avoid mountains
+			if tile.is_mountains():
+				continue
+			if elev < best_elev:
+				best_elev = elev
+				best_next = n_pos
+
+		if best_next == Vector2i(-1, -1):
+			break  # Stuck, end river here
+
+		path.append(best_next)
+		visited[best_next] = true
+		current = best_next
+
+	return path
+
+## Apply river edges along a path of tiles
+func _apply_river_path(path: Array[Vector2i]) -> void:
+	for i in range(path.size() - 1):
+		var from_pos = path[i]
+		var to_pos = path[i + 1]
+		var from_tile = get_tile(from_pos)
+		var to_tile = get_tile(to_pos)
+		if from_tile == null or to_tile == null:
+			continue
+
+		# Determine which edge connects these tiles
+		var dx = to_pos.x - from_pos.x
+		var dy = to_pos.y - from_pos.y
+
+		# Map direction to edge index for square grid
+		# 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW
+		var from_edge = -1
+		var to_edge = -1
+
+		if dx == 0 and dy == -1:    # North
+			from_edge = 0; to_edge = 4
+		elif dx == 1 and dy == -1:   # NE
+			from_edge = 1; to_edge = 5
+		elif dx == 1 and dy == 0:    # East
+			from_edge = 2; to_edge = 6
+		elif dx == 1 and dy == 1:    # SE
+			from_edge = 3; to_edge = 7
+		elif dx == 0 and dy == 1:    # South
+			from_edge = 4; to_edge = 0
+		elif dx == -1 and dy == 1:   # SW
+			from_edge = 5; to_edge = 1
+		elif dx == -1 and dy == 0:   # West
+			from_edge = 6; to_edge = 2
+		elif dx == -1 and dy == -1:  # NW
+			from_edge = 7; to_edge = 3
+
+		if from_edge >= 0 and from_edge not in from_tile.river_edges:
+			from_tile.river_edges.append(from_edge)
+		if to_edge >= 0 and to_edge not in to_tile.river_edges:
+			to_tile.river_edges.append(to_edge)
 
 func _add_resources() -> void:
 	var all_resources = DataManager.resources

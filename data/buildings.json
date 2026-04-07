@@ -2,7 +2,7 @@
 	"palace": {
 		"name": "Palace",
 		"era": "ancient",
-		"cost": 0,
+		"cost": 160,
 		"maintenance": 0,
 		"required_tech": "",
 		"is_capital": true,
@@ -53,7 +53,7 @@
 	"obelisk": {
 		"name": "Obelisk",
 		"era": "ancient",
-		"cost": 40,
+		"cost": 30,
 		"maintenance": 1,
 		"required_tech": "mysticism",
 		"effects": {
@@ -114,7 +114,7 @@
 	"forge": {
 		"name": "Forge",
 		"era": "ancient",
-		"cost": 90,
+		"cost": 120,
 		"maintenance": 2,
 		"required_tech": "metal_casting",
 		"effects": {
@@ -137,7 +137,7 @@
 	"market": {
 		"name": "Market",
 		"era": "classical",
-		"cost": 100,
+		"cost": 150,
 		"maintenance": 1,
 		"required_tech": "currency",
 		"effects": {
@@ -178,7 +178,7 @@
 	"stable": {
 		"name": "Stable",
 		"era": "classical",
-		"cost": 70,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "horseback_riding",
 		"requires_resource": "horses",
@@ -245,7 +245,7 @@
 	"observatory": {
 		"name": "Observatory",
 		"era": "renaissance",
-		"cost": 180,
+		"cost": 150,
 		"maintenance": 2,
 		"required_tech": "astronomy",
 		"requires_building": "university",
@@ -258,7 +258,7 @@
 	"theatre": {
 		"name": "Theatre",
 		"era": "renaissance",
-		"cost": 100,
+		"cost": 50,
 		"maintenance": 2,
 		"required_tech": "drama",
 		"effects": {
@@ -271,7 +271,7 @@
 	"grocer": {
 		"name": "Grocer",
 		"era": "renaissance",
-		"cost": 120,
+		"cost": 150,
 		"maintenance": 2,
 		"required_tech": "guilds",
 		"requires_building": "granary",
@@ -289,7 +289,7 @@
 	"harbor": {
 		"name": "Harbor",
 		"era": "renaissance",
-		"cost": 120,
+		"cost": 80,
 		"maintenance": 2,
 		"required_tech": "compass",
 		"requires_coast": true,
@@ -315,7 +315,7 @@
 	"coal_plant": {
 		"name": "Coal Plant",
 		"era": "industrial",
-		"cost": 200,
+		"cost": 150,
 		"maintenance": 2,
 		"required_tech": "steam_power",
 		"requires_building": "factory",
@@ -332,7 +332,7 @@
 	"hydro_plant": {
 		"name": "Hydro Plant",
 		"era": "modern",
-		"cost": 240,
+		"cost": 200,
 		"maintenance": 3,
 		"required_tech": "plastics",
 		"requires_building": "factory",
@@ -349,7 +349,7 @@
 	"nuclear_plant": {
 		"name": "Nuclear Plant",
 		"era": "modern",
-		"cost": 350,
+		"cost": 250,
 		"maintenance": 4,
 		"required_tech": "fission",
 		"requires_building": "factory",
@@ -378,7 +378,7 @@
 	"supermarket": {
 		"name": "Supermarket",
 		"era": "modern",
-		"cost": 180,
+		"cost": 150,
 		"maintenance": 2,
 		"required_tech": "refrigeration",
 		"requires_building": "grocer",
@@ -391,7 +391,7 @@
 	"broadcast_tower": {
 		"name": "Broadcast Tower",
 		"era": "modern",
-		"cost": 200,
+		"cost": 175,
 		"maintenance": 3,
 		"required_tech": "mass_media",
 		"requires_building": "theatre",
@@ -454,7 +454,7 @@
 	"recycling_center": {
 		"name": "Recycling Center",
 		"era": "modern",
-		"cost": 180,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "ecology",
 		"effects": {
@@ -505,7 +505,7 @@
 	"the_great_wall": {
 		"name": "The Great Wall",
 		"era": "ancient",
-		"cost": 300,
+		"cost": 150,
 		"maintenance": 0,
 		"required_tech": "masonry",
 		"wonder_type": "world",
@@ -520,7 +520,7 @@
 	"the_oracle": {
 		"name": "The Oracle",
 		"era": "ancient",
-		"cost": 200,
+		"cost": 150,
 		"maintenance": 0,
 		"required_tech": "priesthood",
 		"wonder_type": "world",
@@ -605,7 +605,7 @@
 	"chichen_itza": {
 		"name": "Chichen Itza",
 		"era": "medieval",
-		"cost": 450,
+		"cost": 500,
 		"maintenance": 0,
 		"required_tech": "code_of_laws",
 		"wonder_type": "world",
@@ -618,7 +618,7 @@
 	"notre_dame": {
 		"name": "Notre Dame",
 		"era": "medieval",
-		"cost": 500,
+		"cost": 550,
 		"maintenance": 0,
 		"required_tech": "engineering",
 		"wonder_type": "world",
@@ -631,7 +631,7 @@
 	"sistine_chapel": {
 		"name": "Sistine Chapel",
 		"era": "medieval",
-		"cost": 500,
+		"cost": 600,
 		"maintenance": 0,
 		"required_tech": "theology",
 		"wonder_type": "world",
@@ -644,7 +644,7 @@
 	"angkor_wat": {
 		"name": "Angkor Wat",
 		"era": "medieval",
-		"cost": 450,
+		"cost": 500,
 		"maintenance": 0,
 		"required_tech": "philosophy",
 		"wonder_type": "world",
@@ -671,7 +671,7 @@
 	"university_of_sankore": {
 		"name": "University of Sankore",
 		"era": "medieval",
-		"cost": 500,
+		"cost": 550,
 		"maintenance": 0,
 		"required_tech": "paper",
 		"wonder_type": "world",
@@ -684,7 +684,7 @@
 	"versailles": {
 		"name": "Versailles",
 		"era": "renaissance",
-		"cost": 600,
+		"cost": 800,
 		"maintenance": 0,
 		"required_tech": "divine_right",
 		"wonder_type": "world",
@@ -710,7 +710,7 @@
 	"statue_of_liberty": {
 		"name": "Statue of Liberty",
 		"era": "industrial",
-		"cost": 1000,
+		"cost": 1500,
 		"maintenance": 0,
 		"required_tech": "democracy",
 		"requires_coast": true,
@@ -724,7 +724,7 @@
 	"eiffel_tower": {
 		"name": "Eiffel Tower",
 		"era": "industrial",
-		"cost": 850,
+		"cost": 1250,
 		"maintenance": 0,
 		"required_tech": "steel",
 		"wonder_type": "world",
@@ -737,7 +737,7 @@
 	"broadway": {
 		"name": "Broadway",
 		"era": "modern",
-		"cost": 900,
+		"cost": 800,
 		"maintenance": 0,
 		"required_tech": "mass_media",
 		"wonder_type": "world",
@@ -789,7 +789,7 @@
 	"the_pentagon": {
 		"name": "The Pentagon",
 		"era": "modern",
-		"cost": 1000,
+		"cost": 1250,
 		"maintenance": 0,
 		"required_tech": "assembly_line",
 		"wonder_type": "world",
@@ -845,7 +845,7 @@
 	"national_epic": {
 		"name": "National Epic",
 		"era": "classical",
-		"cost": 200,
+		"cost": 250,
 		"maintenance": 0,
 		"required_tech": "literature",
 		"requires_building": "library",
@@ -859,7 +859,7 @@
 	"globe_theatre": {
 		"name": "Globe Theatre",
 		"era": "renaissance",
-		"cost": 350,
+		"cost": 300,
 		"maintenance": 0,
 		"required_tech": "drama",
 		"requires_building": "theatre",
@@ -873,7 +873,7 @@
 	"hermitage": {
 		"name": "Hermitage",
 		"era": "renaissance",
-		"cost": 400,
+		"cost": 300,
 		"maintenance": 0,
 		"required_tech": "nationalism",
 		"requires_building": "theatre",
@@ -930,7 +930,7 @@
 	"red_cross": {
 		"name": "Red Cross",
 		"era": "industrial",
-		"cost": 400,
+		"cost": 600,
 		"maintenance": 0,
 		"required_tech": "medicine",
 		"requires_building": "hospital",
@@ -944,7 +944,7 @@
 	"west_point": {
 		"name": "West Point",
 		"era": "industrial",
-		"cost": 450,
+		"cost": 800,
 		"maintenance": 0,
 		"required_tech": "military_science",
 		"requires_building": "barracks",
@@ -1085,7 +1085,7 @@
 	"buddhist_monastery": {
 		"name": "Buddhist Monastery",
 		"era": "medieval",
-		"cost": 100,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "meditation",
 		"requires_religion": "buddhism",
@@ -1100,7 +1100,7 @@
 	"buddhist_cathedral": {
 		"name": "Buddhist Stupa",
 		"era": "medieval",
-		"cost": 200,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "theology",
 		"requires_religion": "buddhism",
@@ -1129,7 +1129,7 @@
 	"hindu_monastery": {
 		"name": "Hindu Ashram",
 		"era": "medieval",
-		"cost": 100,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "polytheism",
 		"requires_religion": "hinduism",
@@ -1144,7 +1144,7 @@
 	"hindu_cathedral": {
 		"name": "Hindu Temple Complex",
 		"era": "medieval",
-		"cost": 200,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "theology",
 		"requires_religion": "hinduism",
@@ -1173,7 +1173,7 @@
 	"jewish_monastery": {
 		"name": "Jewish Seminary",
 		"era": "medieval",
-		"cost": 100,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "monotheism",
 		"requires_religion": "judaism",
@@ -1188,7 +1188,7 @@
 	"jewish_cathedral": {
 		"name": "Great Synagogue",
 		"era": "medieval",
-		"cost": 200,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "theology",
 		"requires_religion": "judaism",
@@ -1217,7 +1217,7 @@
 	"christian_monastery": {
 		"name": "Christian Monastery",
 		"era": "medieval",
-		"cost": 100,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "theology",
 		"requires_religion": "christianity",
@@ -1232,7 +1232,7 @@
 	"christian_cathedral": {
 		"name": "Cathedral",
 		"era": "medieval",
-		"cost": 200,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "music",
 		"requires_religion": "christianity",
@@ -1261,7 +1261,7 @@
 	"confucian_monastery": {
 		"name": "Confucian Study Hall",
 		"era": "medieval",
-		"cost": 100,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "code_of_laws",
 		"requires_religion": "confucianism",
@@ -1276,7 +1276,7 @@
 	"confucian_cathedral": {
 		"name": "Grand Academy",
 		"era": "medieval",
-		"cost": 200,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "theology",
 		"requires_religion": "confucianism",
@@ -1305,7 +1305,7 @@
 	"taoist_monastery": {
 		"name": "Taoist Hermitage",
 		"era": "medieval",
-		"cost": 100,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "philosophy",
 		"requires_religion": "taoism",
@@ -1320,7 +1320,7 @@
 	"taoist_cathedral": {
 		"name": "Grand Pagoda",
 		"era": "medieval",
-		"cost": 200,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "theology",
 		"requires_religion": "taoism",
@@ -1349,7 +1349,7 @@
 	"islamic_monastery": {
 		"name": "Islamic Madrassa",
 		"era": "medieval",
-		"cost": 100,
+		"cost": 60,
 		"maintenance": 1,
 		"required_tech": "divine_right",
 		"requires_religion": "islam",
@@ -1364,7 +1364,7 @@
 	"islamic_cathedral": {
 		"name": "Grand Mosque",
 		"era": "medieval",
-		"cost": 200,
+		"cost": 300,
 		"maintenance": 2,
 		"required_tech": "theology",
 		"requires_religion": "islam",
@@ -1380,7 +1380,7 @@
 	"intelligence_agency": {
 		"name": "Intelligence Agency",
 		"era": "modern",
-		"cost": 250,
+		"cost": 180,
 		"maintenance": 4,
 		"required_tech": "communism",
 		"effects": {
@@ -1520,6 +1520,28 @@
 			"gold_per_corp_city": 3
 		},
 		"description": "Aluminum Co. Headquarters. +5 Production, +3 Gold per city."
+	},
+	"academy": {
+		"name": "Academy",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"not_buildable": true,
+		"effects": {
+			"science_percent": 0.50
+		},
+		"description": "+50% Science in this city (built by Great Scientist)"
+	},
+	"military_academy": {
+		"name": "Military Academy",
+		"era": "ancient",
+		"cost": 0,
+		"maintenance": 0,
+		"not_buildable": true,
+		"effects": {
+			"free_experience": 2
+		},
+		"description": "+2 XP to new military units (built by Great General)"
 	},
 	"_comment_unique_buildings": "=== UNIQUE BUILDINGS ===",
 	"forum": {

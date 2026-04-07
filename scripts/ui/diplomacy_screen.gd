@@ -16,7 +16,7 @@ var civ_name_label: Label
 var leader_name_label: Label
 var relation_label: Label
 var attitude_label: Label
-var breakdown_label: Label
+var breakdown_label: RichTextLabel
 var religion_label: Label
 var civics_label: Label
 
@@ -175,10 +175,12 @@ func _setup_detail_content() -> void:
 	attitude_label.text = ""
 	detail_container.add_child(attitude_label)
 
-	# Attitude breakdown
-	breakdown_label = Label.new()
-	breakdown_label.add_theme_font_size_override("font_size", 12)
-	breakdown_label.add_theme_color_override("font_color", Color.LIGHT_GRAY)
+	# Attitude breakdown (RichTextLabel for colored modifiers)
+	breakdown_label = RichTextLabel.new()
+	breakdown_label.bbcode_enabled = true
+	breakdown_label.fit_content = true
+	breakdown_label.scroll_active = false
+	breakdown_label.add_theme_font_size_override("normal_font_size", 12)
 	detail_container.add_child(breakdown_label)
 
 	# State religion
@@ -374,12 +376,15 @@ func _update_detail_panel() -> void:
 			attitude_color = Color.RED
 	attitude_label.add_theme_color_override("font_color", attitude_color)
 
-	# Attitude breakdown
+	# Attitude breakdown with colored modifiers
 	var breakdown = DiplomacySystem.get_attitude_breakdown(selected_player, human)
 	var breakdown_text = ""
 	for item in breakdown:
-		var sign = "+" if item["value"] > 0 else ""
-		breakdown_text += "  %s%d: %s\n" % [sign, item["value"], item["reason"]]
+		var val = item["value"]
+		var sign = "+" if val > 0 else ""
+		var color = Color.LIGHT_GREEN if val > 0 else Color.INDIAN_RED if val < 0 else Color.GRAY
+		var color_hex = color.to_html(false)
+		breakdown_text += "  [color=#%s]%s%d[/color]: %s\n" % [color_hex, sign, val, item["reason"]]
 	breakdown_label.text = breakdown_text
 
 	# State religion

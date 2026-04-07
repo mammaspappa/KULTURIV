@@ -56,7 +56,7 @@
 	},
 	"taoism": {
 		"name": "Taoism",
-		"symbol": "☯",
+		"symbol": "☰",
 		"founding_tech": "philosophy",
 		"color": "#800080",
 		"shrine": "taoist_shrine",

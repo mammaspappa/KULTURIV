@@ -61,6 +61,18 @@ var unhappiness: int = 0
 var health: int = 0
 var unhealthiness: int = 0
 
+func get_happiness() -> int:
+	return happiness
+
+func get_unhappiness() -> int:
+	return unhappiness
+
+func get_health() -> int:
+	return health
+
+func get_unhealthiness() -> int:
+	return unhealthiness
+
 # Available resources
 var available_resources: Array[String] = []
 
@@ -70,6 +82,12 @@ var defense_damage: float = 0.0
 
 # Resistance (after capture)
 var resistance_turns: int = 0
+var original_owner_id: int = -1  # Player who founded this city
+var founder_civ_id: String = ""  # Civilization that founded this city
+
+# Trade routes
+var trade_routes: Array = []  # [{target_name, value, is_foreign}]
+var trade_route_income: int = 0
 
 # Visual
 const TILE_SIZE: int = 64
@@ -92,6 +110,8 @@ func _ready() -> void:
 	update_visual()
 
 func _draw() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	var font = ThemeDB.fallback_font
 	var bg_color = player_owner.color if player_owner else Color.GRAY
 	var is_own = player_owner == GameManager.human_player
@@ -219,11 +239,33 @@ func _can_claim_tile(pos: Vector2i) -> bool:
 	var tile = GameManager.hex_grid.get_tile(pos)
 	if tile == null:
 		return false
-	if tile.tile_owner != null and tile.tile_owner != player_owner:
-		return false
-	return true
+
+	# Unclaimed tiles can always be claimed
+	if tile.tile_owner == null:
+		return true
+
+	# Own tiles are fine
+	if tile.tile_owner == player_owner:
+		return true
+
+	# Rival tiles: can claim if our culture dominates (>2x theirs)
+	if player_owner:
+		var our_culture = tile.get_culture_for(player_owner.player_id)
+		var their_culture = tile.get_culture_for(tile.tile_owner.player_id)
+		if our_culture > their_culture * 2:
+			return true
+
+	return false
 
 # Yield calculation
+## Check if a building is obsolete (tech that makes it stop functioning has been researched)
+func _is_building_obsolete(building_id: String) -> bool:
+	var building_data = DataManager.get_building(building_id)
+	var obsolete_tech = building_data.get("obsolete_tech", "")
+	if obsolete_tech != "" and player_owner and obsolete_tech in player_owner.researched_techs:
+		return true
+	return false
+
 func calculate_yields() -> void:
 	food_yield = 0
 	production_yield = 0
@@ -255,6 +297,8 @@ func calculate_yields() -> void:
 	var commerce_percent = 0.0
 
 	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
 		var effects = DataManager.get_building_effects(building_id)
 		# Flat bonuses from buildings (e.g., Palace gives +8 commerce)
 		food_yield += effects.get("food", 0)
@@ -297,6 +341,10 @@ func calculate_yields() -> void:
 	production_yield += settled_gp_bonuses.get("production", 0)
 	commerce_yield += settled_gp_bonuses.get("commerce", 0)
 
+	# Calculate trade route income
+	_calculate_trade_routes()
+	gold_yield += trade_route_income
+
 	# Calculate science and culture
 	_calculate_science()
 	_calculate_culture()
@@ -330,6 +378,8 @@ func _calculate_science() -> void:
 	# Building bonuses
 	var science_percent = 0.0
 	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
 		var effects = DataManager.get_building_effects(building_id)
 		science_percent += effects.get("science_percent", 0.0)
 
@@ -341,6 +391,8 @@ func _calculate_science() -> void:
 	# Add gold from buildings
 	var gold_bonus = 0
 	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
 		var effects = DataManager.get_building_effects(building_id)
 		gold_bonus += effects.get("gold", 0)
 	# Add shrine income (gold per city with religion in holy city)
@@ -354,6 +406,8 @@ func _calculate_culture() -> void:
 	# Buildings that produce culture
 	var culture_percent = 0.0
 	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
 		var effects = DataManager.get_building_effects(building_id)
 		culture_yield += effects.get("culture", 0)
 		culture_percent += effects.get("culture_percent", 0.0)
@@ -365,11 +419,66 @@ func _calculate_culture() -> void:
 	# Religion bonuses
 	if player_owner and player_owner.state_religion in religions:
 		for building_id in buildings:
+			if _is_building_obsolete(building_id):
+				continue
 			var effects = DataManager.get_building_effects(building_id)
 			culture_yield += effects.get("culture_from_religion", 0)
 
 	# Apply percentage modifier (e.g., Broadcast Tower gives +50% culture)
 	culture_yield = int(culture_yield * (1.0 + culture_percent))
+
+## Calculate trade route income (BTS-style passive commerce from city connections)
+func _calculate_trade_routes() -> void:
+	trade_routes.clear()
+	trade_route_income = 0
+
+	if player_owner == null:
+		return
+
+	# Determine max trade routes: base 1, +1 per harbor/airport
+	var max_routes = 1
+	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
+		var effects = DataManager.get_building_effects(building_id)
+		max_routes += effects.get("trade_route_yield", 0)
+
+	# Civic bonuses for trade routes
+	if CivicsSystem:
+		var civic_effects = CivicsSystem.get_civic_effects(player_owner)
+		max_routes += civic_effects.get("extra_trade_routes", 0)
+
+	# Gather all potential trade route targets
+	var candidates = []
+
+	for other_city in GameManager.get_all_cities():
+		if other_city == self:
+			continue
+
+		var is_foreign = (other_city.player_owner != player_owner)
+
+		# Foreign routes require open borders
+		if is_foreign:
+			if not player_owner.has_open_borders_with(other_city.player_owner.player_id):
+				continue
+
+		# Route value: (target_pop + own_pop) / 4, foreign gets +25%
+		var route_value = int((other_city.population + population) / 4)
+		if is_foreign:
+			route_value = int(route_value * 1.25)
+
+		route_value = max(1, route_value)
+		candidates.append({
+			"target_name": other_city.city_name,
+			"value": route_value,
+			"is_foreign": is_foreign
+		})
+
+	# Sort by value descending and take top N
+	candidates.sort_custom(func(a, b): return a.value > b.value)
+	for i in range(min(max_routes, candidates.size())):
+		trade_routes.append(candidates[i])
+		trade_route_income += candidates[i].value
 
 func _calculate_happiness() -> void:
 	happiness = 0
@@ -380,6 +489,8 @@ func _calculate_happiness() -> void:
 
 	# Buildings
 	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
 		var effects = DataManager.get_building_effects(building_id)
 		happiness += effects.get("happiness", 0)
 
@@ -389,6 +500,10 @@ func _calculate_happiness() -> void:
 		var resource = DataManager.get_resource(resource_id)
 		if resource.get("type", "") == "luxury":
 			happiness += resource.get("happiness", 1)
+
+	# Religious happiness (holy city bonus, temple/monastery happiness with state religion)
+	if ReligionSystem:
+		happiness += ReligionSystem.get_religious_happiness(self)
 
 	# Wonder effects
 	if WonderSystem and player_owner:
@@ -428,6 +543,8 @@ func _calculate_health() -> void:
 
 	# Buildings
 	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
 		var effects = DataManager.get_building_effects(building_id)
 		health += effects.get("health", 0)
 		unhealthiness += effects.get("unhealthiness", 0)
@@ -753,12 +870,11 @@ func complete_production() -> void:
 func _produce_unit(unit_type: String) -> void:
 	var unit_data = DataManager.get_unit(unit_type)
 
-	# Settler: consume population on completion (Civ4 BTS mechanic)
+	# Civ4 BTS: settlers do NOT consume population (that's a Civ5 mechanic)
+	# Food surplus was already redirected to production during building
 	var food_cost = unit_data.get("food_cost", 0)
-	if food_cost > 0 and population > 1:
-		population -= 1
-		food_stockpile = 0
-		calculate_yields()
+	if food_cost > 0:
+		food_stockpile = 0  # Reset food stockpile after settler completes
 
 	var unit = UnitClass.new(unit_type, grid_position)
 	player_owner.add_unit(unit)
@@ -770,8 +886,15 @@ func _produce_unit(unit_type: String) -> void:
 	# Apply free experience from buildings
 	var free_xp = 0
 	for building_id in buildings:
+		if _is_building_obsolete(building_id):
+			continue
 		var effects = DataManager.get_building_effects(building_id)
 		free_xp += effects.get("free_experience", 0)
+
+	# Theocracy civic: +2 XP in cities with state religion
+	if CivicsSystem and player_owner and player_owner.state_religion in religions:
+		var civic_effects = CivicsSystem.get_civic_effects(player_owner)
+		free_xp += civic_effects.get("state_religion_free_experience", 0)
 
 	unit.experience = free_xp
 
@@ -798,10 +921,8 @@ func has_building(building_id: String) -> bool:
 func can_build_unit(unit_id: String) -> bool:
 	if player_owner == null:
 		return false
-	# Settlers require minimum population of 2 (Civ4 BTS)
-	var unit_data = DataManager.get_unit(unit_id)
-	if unit_data.get("food_cost", 0) > 0 and population < 2:
-		return false
+	# Civ4 BTS: any city can build settlers (food surplus goes to production)
+	# No population requirement — city just stops growing during construction
 	return player_owner.can_build_unit(unit_id)
 
 func can_build_building(building_id: String) -> bool:
@@ -858,6 +979,42 @@ func has_resource(resource_id: String) -> bool:
 	return resource_id in available_resources
 
 # Culture and borders
+
+## Radiate culture to surrounding tiles (BTS-style culture competition)
+func radiate_culture() -> void:
+	if player_owner == null or GameManager.hex_grid == null:
+		return
+	if culture_yield <= 0:
+		return
+
+	var pid = player_owner.player_id
+	var max_radius = min(culture_level + 2, 6)  # Radius based on culture level
+
+	# City tile gets full culture
+	var city_tile = GameManager.hex_grid.get_tile(grid_position)
+	if city_tile:
+		city_tile.add_culture(pid, culture_yield)
+
+	# Radiate outward with diminishing amounts
+	for radius in range(1, max_radius + 1):
+		var ring_tiles = GridUtils.get_tiles_in_range(grid_position, radius)
+		var amount = 0
+		match radius:
+			1: amount = int(culture_yield * 0.5)
+			2: amount = int(culture_yield * 0.25)
+			_: amount = int(culture_yield * 0.1)
+
+		if amount <= 0:
+			continue
+
+		for tile_pos in ring_tiles:
+			# Skip tiles already processed in inner rings
+			if GridUtils.chebyshev_distance(grid_position, tile_pos) != radius:
+				continue
+			var tile = GameManager.hex_grid.get_tile(tile_pos)
+			if tile and not tile.is_water():
+				tile.add_culture(pid, amount)
+
 func check_border_expansion() -> void:
 	# Check if we've reached the next culture level threshold
 	# culture_level 0 = Poor (initial 3x3), expands to level 1 at 10 culture
@@ -879,8 +1036,16 @@ func _expand_borders() -> void:
 			territory.append(tile_pos)
 			var tile = _get_tile(tile_pos)
 			if tile != null:
+				# Remove from rival city territory if culture-flipping
+				if tile.city_owner and tile.city_owner != self:
+					tile.city_owner.territory.erase(tile_pos)
+					if tile_pos in tile.city_owner.worked_tiles:
+						tile.city_owner.worked_tiles.erase(tile_pos)
 				tile.tile_owner = player_owner
 				tile.city_owner = self
+				# Seed initial culture for the claiming player
+				if player_owner:
+					tile.add_culture(player_owner.player_id, 20)
 				added_new_tiles = true
 
 	# Redraw ALL territory tiles so old border lines are removed
@@ -1070,6 +1235,62 @@ func deselect() -> void:
 	EventBus.city_deselected.emit(self)
 
 # Serialization
+## Check if this city is the capital (has palace)
+func is_capital() -> bool:
+	return "palace" in buildings
+
+## Check if this city is a holy city for any religion
+func is_holy_city() -> bool:
+	return holy_city_of != ""
+
+## Check if this city can be razed (not capital, not holy city)
+func can_be_razed() -> bool:
+	return not is_capital() and not is_holy_city()
+
+## Transfer city to a new owner (used during capture)
+func transfer_to(new_owner) -> void:
+	var old_owner = player_owner
+
+	# Remove from old owner
+	if old_owner:
+		old_owner.cities.erase(self)
+
+	# Add to new owner
+	player_owner = new_owner
+	if new_owner:
+		new_owner.cities.append(self)
+
+	# Set resistance proportional to population
+	resistance_turns = max(1, population / 2)
+
+	# Reset production
+	current_production = ""
+	production_progress = 0
+	production_queue.clear()
+
+	# Clear food stockpile
+	food_stockpile = 0.0
+
+	# Remove unique buildings from old owner's civ
+	if old_owner:
+		var old_civ = DataManager.get_civ(old_owner.civilization_id)
+		var unique_buildings = old_civ.get("unique_buildings", {})
+		for ub in unique_buildings.values():
+			if ub in buildings:
+				buildings.erase(ub)
+
+	# Update tile ownership
+	for tile_pos in territory:
+		var tile = GameManager.hex_grid.get_tile(tile_pos) if GameManager.hex_grid else null
+		if tile:
+			tile.tile_owner = new_owner
+			tile.city_owner = self
+			tile.update_visuals()
+
+	# Recalculate yields
+	calculate_yields()
+	update_visual()
+
 func to_dict() -> Dictionary:
 	return {
 		"city_name": city_name,
@@ -1090,6 +1311,9 @@ func to_dict() -> Dictionary:
 		"specialists": specialists,
 		"city_focus": city_focus,
 		"locked_tiles": locked_tiles.map(func(v): return {"x": v.x, "y": v.y}),
+		"original_owner_id": original_owner_id,
+		"founder_civ_id": founder_civ_id,
+		"resistance_turns": resistance_turns,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -1116,6 +1340,9 @@ func from_dict(data: Dictionary) -> void:
 	holy_city_of = data.get("holy_city_of", "")
 	specialists = data.get("specialists", {})
 	city_focus = data.get("city_focus", "")
+	original_owner_id = data.get("original_owner_id", -1)
+	founder_civ_id = data.get("founder_civ_id", "")
+	resistance_turns = data.get("resistance_turns", 0)
 	locked_tiles.clear()
 	for t in data.get("locked_tiles", []):
 		locked_tiles.append(Vector2i(t.x, t.y))

@@ -17,6 +17,7 @@ var civ_option: OptionButton
 var leader_option: OptionButton
 var player_name_edit: LineEdit
 var map_type_option: OptionButton
+var ai_aggro_option: OptionButton
 
 var start_button: Button
 var back_button: Button
@@ -122,6 +123,17 @@ func _build_ui() -> void:
 		map_type_option.add_item(MAP_TYPES[i])
 	map_type_option.selected = 0  # Fractal as default
 	grid.add_child(map_type_option)
+
+	# AI Aggressiveness
+	_add_label(grid, "AI Behavior:")
+	ai_aggro_option = OptionButton.new()
+	ai_aggro_option.custom_minimum_size = Vector2(200, 30)
+	ai_aggro_option.add_item("Peaceful")
+	ai_aggro_option.add_item("Normal")
+	ai_aggro_option.add_item("Aggressive")
+	ai_aggro_option.add_item("Random")
+	ai_aggro_option.selected = 1  # Normal as default
+	grid.add_child(ai_aggro_option)
 
 	# Number of Players
 	_add_label(grid, "Opponents:")
@@ -236,6 +248,7 @@ func _on_start_pressed() -> void:
 		"player_name": player_name_edit.text if player_name_edit.text != "" else "Player",
 		"difficulty": difficulty_option.selected,
 		"game_speed": speed_option.selected,
+		"ai_aggressiveness": ["peaceful", "normal", "aggressive", "random"][ai_aggro_option.selected],
 	}
 
 	start_game.emit(settings)

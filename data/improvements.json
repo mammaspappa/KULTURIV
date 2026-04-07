@@ -173,6 +173,27 @@
 		"build_turns": 5,
 		"pillage_turns": 1
 	},
+	"workshop": {
+		"name": "Workshop",
+		"symbol": "⚒",
+		"color": "#B87333",
+		"yields": {"food": 0, "production": 1, "commerce": 0},
+		"required_tech": "metal_casting",
+		"valid_terrains": ["grassland", "plains"],
+		"build_turns": 5,
+		"pillage_turns": 1
+	},
+	"watermill": {
+		"name": "Watermill",
+		"symbol": "⚙",
+		"color": "#4682B4",
+		"yields": {"food": 1, "production": 0, "commerce": 1},
+		"required_tech": "the_wheel",
+		"valid_terrains": ["grassland", "plains"],
+		"requires_fresh_water_on": ["grassland", "plains"],
+		"build_turns": 5,
+		"pillage_turns": 1
+	},
 	"barbarian_camp": {
 		"name": "Barbarian Camp",
 		"symbol": "⚔",

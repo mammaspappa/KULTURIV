@@ -119,6 +119,9 @@ func _complete_round() -> void:
 	# All players have taken their turn
 	GameManager.current_player_index = 0
 
+	# Process culture radiation and tile ownership
+	_process_culture_ownership()
+
 	# Check culture flipping
 	_check_culture_flipping()
 
@@ -201,6 +204,7 @@ func _process_city_turn_start(city) -> void:
 
 	# Process culture
 	city.culture += city.culture_yield
+	city.radiate_culture()  # BTS-style culture radiation to tiles
 	city.check_border_expansion()
 
 func _process_gold(player) -> void:
@@ -285,14 +289,24 @@ func _process_research(player) -> void:
 	if player.research_progress >= cost:
 		player.complete_research()
 
+func _process_culture_ownership() -> void:
+	# Resolve tile ownership based on culture values (BTS-style)
+	if GameManager.hex_grid == null:
+		return
+
+	for x in range(GameManager.hex_grid.width):
+		for y in range(GameManager.hex_grid.height):
+			var tile = GameManager.hex_grid.get_tile(Vector2i(x, y))
+			if tile == null or tile.tile_culture.size() < 2:
+				continue  # Skip tiles with culture from only 1 player
+			tile.resolve_culture_ownership()
+
 func _check_culture_flipping() -> void:
-	# Civ4 culture flip: if rival culture dominates a city, small chance it defects
+	# Civ4 culture flip: if rival culture dominates a city's territory, chance it defects
+	# BTS allows any city to flip but larger cities are much harder
 	for player in GameManager.players:
 		for city in player.cities.duplicate():  # duplicate to avoid modifying during iteration
-			if city.population > 3:
-				continue  # Only small cities can flip
-
-			# Count rival culture in territory
+			# Count rival tiles in city territory
 			var rival_tiles = 0
 			var total_tiles = city.territory.size()
 			var dominant_rival = null
@@ -329,12 +343,12 @@ func _check_culture_flipping() -> void:
 				if u.player_owner == player and u.get_strength() > 0:
 					garrison_count += 1
 
-			var flip_chance = 0.05 - garrison_count * 0.02  # 5% base, -2% per garrison
+			# Flip chance scales inversely with population (BTS: larger cities harder to flip)
+			var base_chance = 0.05 / max(1, city.population - 2)
+			var flip_chance = base_chance - garrison_count * 0.02
 			if randf() < flip_chance:
 				# City flips to rival
-				player.cities.erase(city)
-				city.player_owner = dominant_rival
-				dominant_rival.cities.append(city)
+				city.transfer_to(dominant_rival)
 				city.resistance_turns = 0
 				city.calculate_yields()
 				EventBus.notification_added.emit("%s has defected to %s!" % [city.city_name, dominant_rival.player_name])

@@ -439,12 +439,112 @@
 	},
 	"leadership": {
 		"name": "Leadership",
-		"prerequisites": [],
+		"prerequisites": ["leader"],
 		"required_experience": 4,
 		"effects": {
 			"experience_bonus": 1.0
 		},
 		"valid_unit_classes": ["melee", "mounted", "gunpowder", "armor"],
 		"description": "+100% Experience from combat"
+	},
+	"pinch": {
+		"name": "Pinch",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"bonus_vs_melee": 0.25
+		},
+		"valid_unit_classes": ["melee", "archery", "gunpowder"],
+		"description": "+25% vs Melee Units"
+	},
+	"ambush": {
+		"name": "Ambush",
+		"prerequisites": [],
+		"required_experience": 5,
+		"effects": {
+			"bonus_vs_armor": 0.25
+		},
+		"valid_unit_classes": ["melee", "gunpowder"],
+		"description": "+25% vs Armored Units"
+	},
+	"leader": {
+		"name": "Leader",
+		"prerequisites": [],
+		"required_experience": 0,
+		"effects": {},
+		"valid_unit_classes": ["melee", "archery", "mounted", "gunpowder", "armor"],
+		"is_leader_promotion": true,
+		"description": "Great General promotion (enables leadership tree)"
+	},
+	"combat6": {
+		"name": "Combat VI",
+		"prerequisites": ["leader", "combat5"],
+		"required_experience": 37,
+		"effects": {
+			"strength_bonus": 0.25
+		},
+		"valid_unit_classes": ["melee", "archery", "mounted", "gunpowder", "armor"],
+		"description": "+25% Strength (requires Great General)"
+	},
+	"tactics": {
+		"name": "Tactics",
+		"prerequisites": ["leader"],
+		"required_experience": 4,
+		"effects": {
+			"withdraw_chance": 0.3
+		},
+		"valid_unit_classes": ["melee", "mounted", "gunpowder", "armor"],
+		"description": "+30% Withdrawal Chance (requires Great General)"
+	},
+	"range1": {
+		"name": "Range I",
+		"prerequisites": ["combat2"],
+		"required_experience": 5,
+		"effects": {
+			"air_range_increase": 1
+		},
+		"valid_unit_classes": ["air"],
+		"description": "+1 Air Range"
+	},
+	"range2": {
+		"name": "Range II",
+		"prerequisites": ["range1"],
+		"required_experience": 10,
+		"effects": {
+			"air_range_increase": 1
+		},
+		"valid_unit_classes": ["air"],
+		"description": "+1 Air Range"
+	},
+	"interception1": {
+		"name": "Interception I",
+		"prerequisites": [],
+		"required_experience": 2,
+		"effects": {
+			"interception_chance": 0.2
+		},
+		"valid_unit_classes": ["air"],
+		"description": "+20% Interception Chance"
+	},
+	"interception2": {
+		"name": "Interception II",
+		"prerequisites": ["interception1"],
+		"required_experience": 5,
+		"effects": {
+			"interception_chance": 0.2
+		},
+		"valid_unit_classes": ["air"],
+		"description": "+20% Interception Chance"
+	},
+	"ace": {
+		"name": "Ace",
+		"prerequisites": ["combat3"],
+		"required_experience": 10,
+		"effects": {
+			"strength_bonus": 0.2,
+			"air_evasion": 0.2
+		},
+		"valid_unit_classes": ["air"],
+		"description": "+20% Strength, +20% Evasion"
 	}
 }

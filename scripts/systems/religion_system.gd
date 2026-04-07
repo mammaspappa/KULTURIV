@@ -229,17 +229,42 @@ func get_religious_gold(city) -> int:
 	# Shrine gives 1 gold per city with religion
 	return count
 
+## Get list of all founded religion IDs in the game
+func get_founded_religions() -> Array:
+	var founded = []
+	for player in GameManager.players:
+		if player.founded_religion != "" and player.founded_religion not in founded:
+			founded.append(player.founded_religion)
+	return founded
+
+## Get the player who founded a religion
+func get_religion_founder(religion_id: String):
+	for player in GameManager.players:
+		if player.founded_religion == religion_id:
+			return player
+	return null
+
+## Get the holy city of a religion
+func get_holy_city(religion_id: String):
+	for city in GameManager.get_all_cities():
+		if city.holy_city_of == religion_id:
+			return city
+	return null
+
 func _on_research_completed(player, tech: String) -> void:
 	# Check if this tech founds a religion
 	if tech in FOUNDING_TECHS:
 		var religion_id = FOUNDING_TECHS[tech]
 
 		if can_found_religion(religion_id):
-			# Found religion in capital or first city
+			# Found religion in capital (city with palace)
 			var city = null
-			if not player.cities.is_empty():
-				# Prefer capital (first city usually)
-				city = player.cities[0]
+			for c in player.cities:
+				if "palace" in c.buildings:
+					city = c
+					break
+			if city == null and not player.cities.is_empty():
+				city = player.cities[0]  # Fallback to first city
 
 			if city:
 				found_religion(city, religion_id, player)

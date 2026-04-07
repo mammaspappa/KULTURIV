@@ -4,10 +4,10 @@ extends Node2D
 
 const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
 
-# Child nodes
-@onready var grid_layer: Node2D = $GridLayer
-@onready var entity_layer: Node2D = $EntityLayer
-@onready var ui_layer: CanvasLayer = $UILayer
+# Child nodes (initialized in _ready, either from scene tree or created dynamically)
+var grid_layer: Node2D = null
+var entity_layer: Node2D = null
+var ui_layer: CanvasLayer = null
 
 # References
 var game_grid = null  # GameGrid (untyped to avoid load-order issues)
@@ -25,18 +25,24 @@ var path_preview: Node2D = null
 var movement_overlay: Node2D = null
 
 func _ready() -> void:
-	# Create layers if not in scene
-	if not has_node("GridLayer"):
+	# Use existing child nodes from scene, or create dynamically
+	if has_node("GridLayer"):
+		grid_layer = $GridLayer
+	else:
 		grid_layer = Node2D.new()
 		grid_layer.name = "GridLayer"
 		add_child(grid_layer)
 
-	if not has_node("EntityLayer"):
+	if has_node("EntityLayer"):
+		entity_layer = $EntityLayer
+	else:
 		entity_layer = Node2D.new()
 		entity_layer.name = "EntityLayer"
 		add_child(entity_layer)
 
-	if not has_node("UILayer"):
+	if has_node("UILayer"):
+		ui_layer = $UILayer
+	else:
 		ui_layer = CanvasLayer.new()
 		ui_layer.name = "UILayer"
 		add_child(ui_layer)
@@ -310,8 +316,15 @@ func _attack_unit(attacker: Unit, defender: Unit) -> void:
 	# Emit attack event
 	EventBus.unit_attacked.emit(attacker, defender)
 
+	var defender_pos = defender.grid_position
+	var defender_owner = defender.player_owner
+
 	# Resolve combat using CombatSystem
 	var result = CombatSystem.resolve_combat(attacker, defender)
+
+	# Check for city capture after combat (attacker won and defender died)
+	if result.get("attacker_won", false) and is_instance_valid(attacker) and attacker.health > 0:
+		_check_city_capture(attacker, defender_pos, defender_owner)
 
 	# Update movement overlay after combat
 	_update_reachable_tiles()
@@ -505,6 +518,8 @@ func found_city(settler: Unit) -> City:
 
 	# Create city
 	var city = City.new(pos, city_name)
+	city.original_owner_id = owner.player_id
+	city.founder_civ_id = owner.civilization_id
 	owner.add_city(city)
 	entity_layer.add_child(city)
 
@@ -535,6 +550,195 @@ func found_city(settler: Unit) -> City:
 
 	EventBus.city_founded.emit(city, settler)
 	return city
+
+## Check if a city should be captured after combat victory
+func _check_city_capture(attacker: Unit, defender_pos: Vector2i, defender_owner) -> void:
+	var city = GameManager.get_city_at(defender_pos)
+	if city == null or city.player_owner != defender_owner:
+		return
+
+	# Check if there are still enemy defenders on the tile
+	var remaining_defenders = GameManager.get_units_at(defender_pos)
+	for unit in remaining_defenders:
+		if unit.player_owner == defender_owner and unit.get_strength() > 0:
+			return  # Still has defenders
+
+	# Move attacker onto the city tile
+	if attacker.grid_position != defender_pos:
+		attacker.grid_position = defender_pos
+		attacker.position = GridUtils.grid_to_pixel(defender_pos)
+
+	# For human player, show capture dialog
+	if attacker.player_owner.is_human:
+		_show_capture_dialog(city, attacker.player_owner)
+	else:
+		# AI decision
+		_ai_capture_decision(city, attacker.player_owner)
+
+## Show capture dialog for human player
+func _show_capture_dialog(city, new_owner) -> void:
+	var old_owner = city.player_owner
+	var dialog = AcceptDialog.new()
+	dialog.title = "City Captured!"
+	dialog.dialog_text = "%s has been captured!\nPopulation: %d" % [city.city_name, city.population]
+
+	# Remove default OK button
+	dialog.get_ok_button().hide()
+
+	var hbox = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+
+	var keep_btn = Button.new()
+	keep_btn.text = "Keep"
+	keep_btn.pressed.connect(func():
+		capture_city(city, new_owner)
+		dialog.queue_free()
+	)
+	hbox.add_child(keep_btn)
+
+	if city.can_be_razed():
+		var raze_btn = Button.new()
+		raze_btn.text = "Raze"
+		raze_btn.pressed.connect(func():
+			raze_city(city)
+			dialog.queue_free()
+		)
+		hbox.add_child(raze_btn)
+
+	# Check if can liberate (original owner is different from capturer and still exists)
+	if city.original_owner_id != new_owner.player_id and city.original_owner_id != -1:
+		var original = GameManager.get_player(city.original_owner_id)
+		if original != null and original != city.player_owner:
+			var liberate_btn = Button.new()
+			liberate_btn.text = "Liberate"
+			liberate_btn.pressed.connect(func():
+				liberate_city(city, new_owner)
+				dialog.queue_free()
+			)
+			hbox.add_child(liberate_btn)
+
+	dialog.add_child(hbox)
+	dialog.min_size = Vector2(300, 150)
+
+	# Add to UI layer
+	if ui_layer:
+		ui_layer.add_child(dialog)
+	else:
+		add_child(dialog)
+	dialog.popup_centered()
+
+## AI decides what to do with a captured city (BTS personality-driven)
+func _ai_capture_decision(city, new_owner) -> void:
+	# AI always keeps capitals and holy cities
+	if not city.can_be_razed():
+		capture_city(city, new_owner)
+		return
+
+	# Check if can liberate for diplomatic bonus
+	if city.original_owner_id != new_owner.player_id and city.original_owner_id != -1:
+		var original = GameManager.get_player(city.original_owner_id)
+		if original != null and original != city.player_owner:
+			var leader = DataManager.get_leader(new_owner.leader_id)
+			var peace_weight = leader.get("base_peace_weight", 5)
+			# Peaceful leaders liberate more often for diplomacy bonus
+			if peace_weight >= 7 and not GameManager.is_at_war(new_owner, original):
+				liberate_city(city, new_owner)
+				return
+
+	# BTS raze decision uses leader personality
+	var leader = DataManager.get_leader(new_owner.leader_id)
+	var raze_prob = leader.get("raze_city_prob", 20)
+
+	# Apply AI aggressiveness modifier
+	match GameManager.ai_aggressiveness:
+		"peaceful":
+			raze_prob = int(raze_prob * 0.5)
+		"aggressive":
+			raze_prob = int(raze_prob * 1.5)
+		"random":
+			raze_prob = int(raze_prob * randf_range(0.5, 1.5))
+
+	# Distance from capital increases raze chance
+	var capital_pos = Vector2i.ZERO
+	for c in new_owner.cities:
+		if c.is_capital():
+			capital_pos = c.grid_position
+			break
+	var distance = GridUtils.chebyshev_distance(city.grid_position, capital_pos)
+	if distance > 12:
+		raze_prob += 15
+	elif distance > 8:
+		raze_prob += 5
+
+	# Having many cities increases raze chance (maintenance pressure)
+	var own_cities = new_owner.cities.size()
+	if own_cities > 6:
+		raze_prob += 10
+
+	# Small cities are more likely to be razed
+	if city.population <= 2:
+		raze_prob += 10
+	elif city.population >= 6:
+		raze_prob -= 15
+
+	# Cities close to own territory are kept
+	for c in new_owner.cities:
+		if GridUtils.chebyshev_distance(city.grid_position, c.grid_position) <= 4:
+			raze_prob -= 20
+			break
+
+	raze_prob = clampi(raze_prob, 0, 100)
+	if randi() % 100 < raze_prob:
+		raze_city(city)
+	else:
+		capture_city(city, new_owner)
+
+## Capture a city (transfer ownership)
+func capture_city(city, new_owner) -> void:
+	var old_owner = city.player_owner
+	city.transfer_to(new_owner)
+	EventBus.city_captured.emit(city, old_owner, new_owner)
+	EventBus.notification_added.emit("%s has captured %s!" % [new_owner.player_name, city.city_name])
+
+## Raze (destroy) a captured city
+func raze_city(city) -> void:
+	var owner = city.player_owner
+	var city_name = city.city_name
+
+	# Remove from owner
+	if owner:
+		owner.cities.erase(city)
+
+	# Clear territory ownership
+	for tile_pos in city.territory:
+		var tile = game_grid.get_tile(tile_pos) if game_grid else null
+		if tile:
+			tile.tile_owner = null
+			tile.city_owner = null
+			tile.update_visuals()
+
+	# Remove from scene
+	EventBus.city_destroyed.emit(city)
+	EventBus.notification_added.emit("%s has been razed!" % city_name)
+	city.queue_free()
+
+## Liberate a city (return to original owner)
+func liberate_city(city, liberator) -> void:
+	var original_owner = GameManager.get_player(city.original_owner_id)
+	if original_owner == null:
+		# Can't liberate if original owner doesn't exist, just keep it
+		capture_city(city, liberator)
+		return
+
+	# Transfer to original owner
+	city.transfer_to(original_owner)
+	city.resistance_turns = 0  # No resistance when liberated
+
+	# Diplomatic bonus for liberating
+	DiplomacySystem.add_memory(original_owner.player_id, liberator.player_id, DiplomacySystem.MemoryType.LIBERATED_CITY)
+
+	EventBus.city_captured.emit(city, liberator, original_owner)
+	EventBus.notification_added.emit("%s has been liberated!" % city.city_name)
 
 ## Debug: Spawn a unit at the human player's capital
 func _debug_spawn_unit(unit_type: String) -> void:

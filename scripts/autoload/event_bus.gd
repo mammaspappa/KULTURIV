@@ -154,6 +154,9 @@ signal show_spaceship_screen()
 signal hide_spaceship_screen()
 signal show_voting_screen()
 signal hide_voting_screen()
+signal show_religion_screen()
+signal hide_religion_screen()
+signal show_victory_progress()
 signal notification_added(message, type_name)
 
 # Game state events

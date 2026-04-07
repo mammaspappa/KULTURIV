@@ -192,7 +192,7 @@ func _check_global_triggers(triggers: Dictionary, current_turn: int) -> bool:
 	var min_cities = triggers.get("min_cities", 0)
 	if min_cities > 0:
 		var total_cities = 0
-		var players = GameManager.get_all_players() if GameManager else []
+		var players = GameManager.players if GameManager else []
 		for player in players:
 			total_cities += player.cities.size()
 		if total_cities < min_cities:
@@ -212,7 +212,7 @@ func _trigger_global_event(event_id: String) -> void:
 			occurred_events[event_id] = []
 
 	# Trigger for all players
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	for player in players:
 		if player.cities.is_empty():
 			continue
@@ -347,7 +347,7 @@ func _check_triggers(triggers: Dictionary, player, city, current_turn: int) -> b
 
 	# Health checks
 	if triggers.get("positive_food", false):
-		if city.get_food_surplus() <= 0:
+		if city.food_surplus <= 0:
 			return false
 
 	if triggers.get("negative_health", false):
@@ -527,7 +527,7 @@ func _get_available_choices(event: Dictionary, player) -> Array:
 		# Check civic requirement
 		var req_civic = choice.get("requires_civic", "")
 		if req_civic != "":
-			var current_civics = CivicsSystem.get_player_civics(player.player_id) if CivicsSystem else {}
+			var current_civics = player.civics if player else {}
 			var has_civic = false
 			for category in current_civics:
 				if current_civics[category] == req_civic:
@@ -684,13 +684,13 @@ func _apply_effect(effect_type: String, value, player, city, result: Dictionary)
 				var religions = ReligionSystem.get_founded_religions()
 				if not religions.is_empty():
 					var religion = religions[randi() % religions.size()]
-					ReligionSystem.spread_religion(religion, city)
+					ReligionSystem.spread_religion(city, religion)
 			result.effects_applied.append("Religion spread to city")
 
 		"revolt_chance":
 			# Roll for city revolt
 			if randi() % 100 < value and city:
-				city.revolt_turns = 2
+				city.resistance_turns = 2
 				result.effects_applied.append("City revolts!")
 			else:
 				result.effects_applied.append("Revolt avoided")
