@@ -634,6 +634,15 @@ func _process_unit_ai(unit, player, flavor: Dictionary, escort_assignments: Dict
 	if unit.current_order == UnitClass.UnitOrder.BUILD:
 		return
 
+	# Fortified units: stay put unless enemies are nearby or we're at war needing troops
+	if unit.current_order == UnitClass.UnitOrder.FORTIFY and unit.get_strength() > 0:
+		var nearby_threats = _find_nearby_enemies(unit, player, 2)
+		var at_war = not player.at_war_with.is_empty()
+		# Wake up if: threats nearby, or at war and not garrisoning a city
+		var in_city = GameManager.get_city_at(unit.grid_position) != null
+		if nearby_threats.is_empty() and (not at_war or in_city):
+			return  # Stay fortified — no reason to wake up
+
 	# Settler: find good city location
 	if unit.can_found_city():
 		_settler_ai(unit, player, flavor)
