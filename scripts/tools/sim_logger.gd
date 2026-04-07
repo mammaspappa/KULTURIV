@@ -51,6 +51,13 @@ func _connect_events() -> void:
 	EventBus.civic_changed.connect(_on_civic_changed)
 	EventBus.state_religion_adopted.connect(_on_state_religion_adopted)
 	EventBus.player_eliminated.connect(_on_player_eliminated)
+	# Additional events for better diagnostics
+	if GoodyHutsSystem:
+		GoodyHutsSystem.goody_hut_discovered.connect(_on_goody_hut_discovered)
+	if BarbarianSystem:
+		BarbarianSystem.barbarian_camp_spawned.connect(_on_barb_camp_spawned)
+	EventBus.tile_improved.connect(_on_tile_improved)
+	EventBus.unit_created.connect(_on_unit_created)
 
 # --- Core logging ---
 
@@ -161,31 +168,116 @@ func _on_state_religion_adopted(player, religion: String) -> void:
 	log_entry({"type": "game_event", "event": "state_religion_changed",
 		"description": "%s adopted %s" % [player.player_name, rel_name]})
 
+func _on_goody_hut_discovered(unit, tile, reward_type, reward_value) -> void:
+	var owner = unit.player_owner.player_name if unit.player_owner else "Unknown"
+	_log_event("goody_hut", "%s discovered tribal village: %s (%s)" % [owner, str(reward_type), str(reward_value)])
+
+func _on_barb_camp_spawned(position: Vector2i) -> void:
+	log_entry({"type": "game_event", "event": "barb_camp", "description": "Barbarian camp at (%d,%d)" % [position.x, position.y]})
+
+func _on_tile_improved(tile, improvement_id) -> void:
+	if tile == null:
+		return
+	var owner_name = "Unknown"
+	if tile.tile_owner:
+		owner_name = tile.tile_owner.player_name
+	var pos = tile.grid_position
+	var on_resource = tile.resource_id if tile.resource_id != "" else ""
+	var detail = "%s: %s at (%d,%d)" % [owner_name, str(improvement_id), pos.x, pos.y]
+	if on_resource != "":
+		detail += " [%s]" % on_resource
+	log_entry({"type": "game_event", "event": "improvement_built", "description": detail})
+
+func _on_unit_created(unit) -> void:
+	if unit == null or unit.player_owner == null:
+		return
+	# Only log non-barbarian unit creation (barb spawns tracked separately)
+	if unit.player_owner.civilization_id == "barbarian":
+		return
+	log_entry({"type": "game_event", "event": "unit_trained",
+		"description": "%s trained %s" % [unit.player_owner.player_name, unit.unit_id]})
+
 # --- State snapshots ---
 
 func log_state_snapshot() -> void:
 	var players_data = []
 	for p in GameManager.players:
 		p.calculate_score()
+
+		# Unit composition
 		var military = 0
+		var workers = 0
+		var settlers = 0
+		var unit_types = {}
 		for u in p.units:
 			if u.get_strength() > 0:
 				military += 1
-		players_data.append({
+			if u.can_build_improvements():
+				workers += 1
+			if u.can_found_city():
+				settlers += 1
+			unit_types[u.unit_id] = unit_types.get(u.unit_id, 0) + 1
+
+		# Economy
+		var total_science = p.get_research_output()
+		var total_commerce = 0
+		var total_food = 0
+		var total_production = 0
+		for city in p.cities:
+			total_commerce += city.commerce_yield
+			total_food += city.food_yield
+			total_production += city.production_yield
+
+		# City details
+		var cities_detail = []
+		for city in p.cities:
+			var city_info = {
+				"name": city.city_name,
+				"pop": city.population,
+				"producing": city.current_production if city.current_production != "" else "none",
+				"buildings": city.buildings.size(),
+				"food": city.food_yield,
+				"prod": city.production_yield,
+				"commerce": city.commerce_yield,
+				"culture": city.culture_yield,
+			}
+			if city.current_production != "":
+				var cost = city.get_production_cost()
+				city_info["prod_progress"] = "%d/%d" % [city.production_progress, cost]
+			cities_detail.append(city_info)
+
+		var pd = {
 			"name": p.player_name, "civ": p.civilization_id,
 			"cities": p.cities.size(), "units": p.units.size(),
-			"military": military, "gold": p.gold, "gold_per_turn": p.gold_per_turn,
-			"techs": p.researched_techs.size(), "score": p.score,
+			"military": military, "workers": workers, "settlers": settlers,
+			"gold": p.gold, "gold_per_turn": p.gold_per_turn,
+			"science_per_turn": total_science,
+			"science_rate": int(p.science_rate * 100),
+			"techs": p.researched_techs.size(),
+			"current_research": p.current_research,
+			"score": p.score,
+			"total_pop": p.get_total_population(),
+			"total_food": total_food,
+			"total_production": total_production,
+			"total_commerce": total_commerce,
 			"state_religion": p.state_religion,
-			"at_war_with": p.at_war_with.duplicate()
-		})
+			"at_war_with": p.at_war_with.duplicate(),
+		}
+		# Include unit breakdown and city details in JSONL (not stdout)
+		pd["unit_types"] = unit_types
+		pd["cities_detail"] = cities_detail
+		players_data.append(pd)
+
 	log_entry({"type": "state_snapshot", "players": players_data})
 
-	# Print progress to stdout
+	# Print concise progress to stdout
 	var parts = []
 	for pd in players_data:
+		if pd.civ == "barbarian" and pd.get("cities", 0) <= 1:
+			continue  # Skip base barbarian in stdout
 		if pd.cities > 0:
-			parts.append("%s: %d pts, %d cities" % [pd.name, pd.score, pd.cities])
+			parts.append("%s: %d pts, %d cities, %d mil, %d techs, %dg, %d bpt" % [
+				pd.name, pd.score, pd.cities, pd.military, pd.techs, pd.gold, pd.science_per_turn])
 		else:
 			parts.append("%s: ELIMINATED" % pd.name)
 	print("  Turn %d (%s) — %s" % [TurnManager.current_turn, TurnManager.get_year_string(), ", ".join(parts)])
@@ -247,14 +339,35 @@ func write_summary(elapsed_seconds: float) -> void:
 
 	print("Player Summary:")
 	for p in GameManager.players:
+		if p.civilization_id == "barbarian" and p.player_id == -1:
+			continue
 		p.calculate_score()
 		var marker = " <- WINNER" if p == winner_player else ""
 		if p.cities.is_empty():
 			print("  %s: Score %d — ELIMINATED%s" % [p.player_name, p.score, marker])
 		else:
-			print("  %s: Score %d — %d cities, %d units, %d techs, %d gold%s" % [
-				p.player_name, p.score, p.cities.size(), p.units.size(),
-				p.researched_techs.size(), p.gold, marker])
+			# Unit composition
+			var military = 0
+			var workers = 0
+			var settlers = 0
+			for u in p.units:
+				if u.get_strength() > 0: military += 1
+				if u.can_build_improvements(): workers += 1
+				if u.can_found_city(): settlers += 1
+			var science = p.get_research_output()
+			var pop = p.get_total_population()
+			print("  %s: Score %d — %d cities (pop %d), %d mil/%d wrk/%d set, %d techs, %dg (%+d gpt), %d bpt (sci %d%%)%s" % [
+				p.player_name, p.score, p.cities.size(), pop,
+				military, workers, settlers,
+				p.researched_techs.size(), p.gold, p.gold_per_turn,
+				science, int(p.science_rate * 100), marker])
+			# Show cities
+			for city in p.cities:
+				var prod_str = city.current_production if city.current_production != "" else "idle"
+				var bld_count = city.buildings.size()
+				print("    %s (pop %d): %s, %d bld, yields %df/%dp/%dc/%dcu" % [
+					city.city_name, city.population, prod_str, bld_count,
+					city.food_yield, city.production_yield, city.commerce_yield, city.culture_yield])
 
 	if not key_events.is_empty():
 		print("\nKey Events (last 25):")
