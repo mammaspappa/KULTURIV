@@ -10,6 +10,7 @@ signal turn_processing_finished()
 var current_turn: int = 1
 var current_year: int = -4000
 var is_processing: bool = false
+var game_ended: bool = false
 
 # Year progression (Civ4 style)
 const YEAR_PROGRESSION = [
@@ -29,6 +30,7 @@ func _on_player_eliminated(player) -> void:
 	# Immediately check for conquest/domination victory when a player is eliminated
 	var victory = VictorySystem.check_victory()
 	if not victory.is_empty() and victory.get("achieved", false):
+		game_ended = true
 		if GameManager.current_game_state:
 			GameManager.current_game_state.victory_achieved = true
 			GameManager.current_game_state.victory_type = victory.type
@@ -39,10 +41,11 @@ func _on_player_eliminated(player) -> void:
 func start_game() -> void:
 	current_turn = 1
 	current_year = -4000
+	game_ended = false
 	_start_turn_for_player(GameManager.get_current_player())
 
 func end_turn() -> void:
-	if is_processing:
+	if is_processing or game_ended:
 		return
 
 	var current_player = GameManager.get_current_player()
@@ -63,7 +66,7 @@ func end_turn() -> void:
 		_start_turn_for_player(GameManager.get_current_player())
 
 func _start_turn_for_player(player) -> void:
-	if player == null:
+	if player == null or game_ended:
 		return
 
 	# Base barbarian player (id=-1): only refresh movement, skip all civ systems
@@ -160,6 +163,7 @@ func _complete_round() -> void:
 			GameManager.current_game_state.victory_achieved = true
 			GameManager.current_game_state.victory_type = victory.type
 			GameManager.current_game_state.winner_player_id = victory.player.player_id
+		game_ended = true
 		EventBus.victory_achieved.emit(victory.player, victory.type)
 		EventBus.game_over.emit(victory.player, victory.type)
 		return  # Don't start new round if game is over

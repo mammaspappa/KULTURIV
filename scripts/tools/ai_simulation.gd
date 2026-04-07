@@ -117,8 +117,7 @@ func _end_game() -> void:
 		return
 	game_finished = true
 	# Stop the turn manager from processing further turns
-	TurnManager.set_process(false)
-	TurnManager.is_processing = true  # Block end_turn() calls
+	TurnManager.game_ended = true
 
 func _process(_delta: float) -> void:
 	if game_finished:
