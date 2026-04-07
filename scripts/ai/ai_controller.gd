@@ -242,10 +242,14 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 
 	var personality = _get_leader_personality(player)
 
+	# Don't consider peace in the first 10 turns of war (scaled by game speed)
+	var war_key = "%d:%d" % [player.player_id, other.player_id]
+	var war_start = peace_cooldown.get("war_start_" + war_key, 0)
+	var min_war_turns = int(10 * GameManager.get_speed_multiplier())
+	if TurnManager.current_turn - war_start < min_war_turns:
+		return
+
 	# BTS make_peace_rand: roll each turn — higher = more willing to consider peace
-	# Warmongers (make_peace_rand=80 like Genghis) rarely want peace
-	# Peaceful leaders (make_peace_rand=10 like Gandhi) will stay in war once committed
-	# But peace_weight affects the threshold for accepting peace
 	if randi() % max(int(personality.make_peace_rand), 1) != 0:
 		# Didn't trigger peace consideration this turn
 		# But still check if we're losing badly
@@ -255,13 +259,6 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 			# Badly losing — even warmongers consider peace
 			if not other.is_human:
 				_make_peace_with_cooldown(player, other)
-		return
-
-	# Don't consider peace in the first 10 turns of war (scaled by game speed)
-	var war_key = "%d:%d" % [player.player_id, other.player_id]
-	var war_start = peace_cooldown.get("war_start_" + war_key, 0)
-	var min_war_turns = int(10 * GameManager.get_speed_multiplier())
-	if TurnManager.current_turn - war_start < min_war_turns:
 		return
 
 	var our_power = DiplomacySystem._calculate_power(player)
