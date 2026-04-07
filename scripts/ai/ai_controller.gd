@@ -874,18 +874,64 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 					CombatSystem.bombard_city(unit, bombard_target)
 				return
 
-	# 0b. Non-siege near enemy city: wait for siege to soften defenses before assaulting
+	# 0b. CITY ASSAULT — "break eggs to make an omelette" strategic logic
+	# Evaluate whether attacking an enemy city is worth sacrificing units
 	if unit_class != "siege" and not player.at_war_with.is_empty():
 		var nearby_enemy_city = _find_nearby_enemy_city(unit, player, 3)
 		if nearby_enemy_city != null:
-			var has_siege_nearby = _has_siege_units_near(unit.grid_position, player, 4)
-			if has_siege_nearby:
-				var city_defense = nearby_enemy_city.get_defense_strength()
-				if city_defense > unit.get_strength() * 1.5:
-					# Siege is nearby and city is still well defended — hold position, let siege bombard
-					if not GridUtils.are_adjacent(unit.grid_position, nearby_enemy_city.grid_position):
-						_move_toward(unit, nearby_enemy_city.grid_position)
-					return  # Wait for bombardment to soften
+			var city_pos = nearby_enemy_city.grid_position
+
+			# Count our forces vs their defenders near the city
+			var our_force = 0.0
+			var their_defense = 0.0
+			var our_units_near = 0
+			var tiles_near_city = GridUtils.get_tiles_in_range(city_pos, 2)
+			for t_pos in tiles_near_city:
+				for u in GameManager.get_units_at(t_pos):
+					if u.player_owner == player and u.get_strength() > 0:
+						our_force += u.get_strength() * (u.health / 100.0)
+						our_units_near += 1
+					elif u.player_owner == nearby_enemy_city.player_owner and u.get_strength() > 0:
+						their_defense += u.get_strength() * (u.health / 100.0) * 1.5  # Defender bonus
+
+			# Strategic value of the city (higher = worth more sacrifice)
+			var city_value = nearby_enemy_city.population * 10 + nearby_enemy_city.buildings.size() * 5
+			if nearby_enemy_city.player_owner.cities.size() <= 1:
+				city_value *= 2  # Elimination blow — very high value
+
+			# Cost estimate: we might lose ~half our force to take the city
+			var estimated_cost = our_force * 0.5
+
+			# Decision: attack if we have enough force AND the city is worth it
+			var should_assault = our_force > their_defense * 0.8 and our_units_near >= 2
+			# Or if city value greatly exceeds cost (worth the sacrifice)
+			if not should_assault and city_value > estimated_cost * 3:
+				should_assault = our_units_near >= 1
+
+			if should_assault and GridUtils.are_adjacent(unit.grid_position, city_pos):
+				# Find the weakest defender on the city tile to attack
+				var city_defenders = GameManager.get_units_at(city_pos)
+				var weakest_def = null
+				var weakest_str = INF
+				for def in city_defenders:
+					if def.player_owner != player and def.get_strength() > 0:
+						var eff_str = def.get_strength() * (def.health / 100.0)
+						if eff_str < weakest_str:
+							weakest_str = eff_str
+							weakest_def = def
+				if weakest_def:
+					if sim_logger:
+						sim_logger.log_decision(player.player_name, "combat", "city_assault",
+							"%s vs %s at %s (force=%.0f vs def=%.0f, value=%d)" % [
+								unit.unit_id, weakest_def.unit_id, nearby_enemy_city.city_name,
+								our_force, their_defense, city_value], "")
+					CombatSystem.resolve_combat(unit, weakest_def)
+					return
+			elif not should_assault:
+				# Not ready to assault — move adjacent and wait for reinforcements
+				if not GridUtils.are_adjacent(unit.grid_position, city_pos):
+					_move_toward(unit, city_pos)
+				return
 
 	# 1. Immediate tactical: attack nearby enemies
 	var enemies = _find_nearby_enemies(unit, player, 3)
@@ -927,31 +973,57 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 					"%s vs %s" % [unit.unit_id, target.unit_id],
 					"odds=%.0f%% < min %.0f%%" % [odds.win_chance * 100, min_odds * 100])
 
-	# 2. Strategic: move toward assigned war target
+	# 2. Strategic: move toward assigned war target and assault enemy cities
 	if not player.at_war_with.is_empty():
 		var war_target = AIStrategyClass.get_war_target_for_unit(player, unit)
 		if not war_target.is_empty():
-			_move_toward(unit, war_target.city_position)
-			# After moving, check for enemies to attack
+			var target_pos: Vector2i = war_target.city_position
+			_move_toward(unit, target_pos)
+			# After moving, aggressively attack any adjacent enemy
 			if is_instance_valid(unit) and unit.movement_remaining > 0:
 				var new_enemies = _find_nearby_enemies(unit, player, 1)
 				for enemy in new_enemies:
-					if is_instance_valid(enemy) and GridUtils.are_adjacent(unit.grid_position, enemy.grid_position):
-						var new_odds = CombatSystem.calculate_odds(unit, enemy)
-						if new_odds.win_chance > 0.4:
-							CombatSystem.resolve_combat(unit, enemy)
-							break
+					if not is_instance_valid(enemy):
+						continue
+					if not GridUtils.are_adjacent(unit.grid_position, enemy.grid_position):
+						continue
+					# Lower threshold for city assaults — we MUST take the city
+					var is_city_assault = GameManager.get_city_at(enemy.grid_position) != null
+					var assault_min_odds = 0.25 if is_city_assault else 0.35
+					var new_odds = CombatSystem.calculate_odds(unit, enemy)
+					if new_odds.win_chance > assault_min_odds:
+						if sim_logger:
+							sim_logger.log_decision(player.player_name, "combat",
+								"city_assault" if is_city_assault else "attack_after_move",
+								"%s vs %s at (%d,%d)" % [unit.unit_id, enemy.unit_id, enemy.grid_position.x, enemy.grid_position.y],
+								"odds=%.0f%%" % (new_odds.win_chance * 100))
+						CombatSystem.resolve_combat(unit, enemy)
+						break
 			return
 
-	# 3. Strategic: garrison threatened cities
-	var defense_need = AIStrategyClass.get_city_needing_garrison(player, unit)
-	if not defense_need.is_empty():
-		_move_toward(unit, defense_need.city_position)
-		if unit.grid_position == defense_need.city_position:
-			unit.fortify()
-		return
+		# No war target assigned — move toward nearest enemy city
+		var nearest_enemy_city = _find_nearest_enemy_city(unit, player)
+		if nearest_enemy_city != Vector2i(-1, -1):
+			_move_toward(unit, nearest_enemy_city)
+			# Try to attack after moving
+			if is_instance_valid(unit) and unit.movement_remaining > 0:
+				var adj_enemies = _find_nearby_enemies(unit, player, 1)
+				for enemy in adj_enemies:
+					if is_instance_valid(enemy) and GridUtils.are_adjacent(unit.grid_position, enemy.grid_position):
+						CombatSystem.resolve_combat(unit, enemy)
+						break
+			return
 
-	# 4. Fallback: garrison undefended own cities
+	# 3. Strategic: garrison threatened cities (but not while at war — send units to fight)
+	if player.at_war_with.is_empty():
+		var defense_need = AIStrategyClass.get_city_needing_garrison(player, unit)
+		if not defense_need.is_empty():
+			_move_toward(unit, defense_need.city_position)
+			if unit.grid_position == defense_need.city_position:
+				unit.fortify()
+			return
+
+	# 4. Fallback: garrison undefended own cities (keep 1 defender per city)
 	for city in player.cities:
 		var garrison = GameManager.get_units_at(city.grid_position)
 		var has_military = false
@@ -1338,11 +1410,12 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 			"education": score += 25  # Universities
 			"liberalism": score += 40  # Free tech!
 
-	# Religion founding (devout leaders without a religion)
-	if religion_flavor >= HIGH_FLAVOR and player.state_religion == "":
+	# Religion founding — any leader without a religion should consider these
+	if player.state_religion == "":
+		var religion_bonus = 20 + religion_flavor * 5  # 25-70 range
 		match tech_id:
-			"meditation", "polytheism": score += 30
-			"monotheism", "theology": score += 20
+			"meditation", "polytheism": score += religion_bonus
+			"monotheism", "theology": score += int(religion_bonus * 0.7)
 
 	# Bonus for techs that reveal strategic resources on tiles we own
 	var reveals = tech.get("reveals_resource", "")
@@ -1611,6 +1684,21 @@ func _find_nearby_enemy_city(unit, player, search_range: int):
 				best_city = city
 
 	return best_city
+
+## Find the nearest enemy city position (global search)
+func _find_nearest_enemy_city(unit, player) -> Vector2i:
+	var best_pos = Vector2i(-1, -1)
+	var best_dist = INF
+	for enemy_id in player.at_war_with:
+		var enemy = GameManager.get_player(enemy_id)
+		if enemy == null:
+			continue
+		for city in enemy.cities:
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, city.grid_position)
+			if dist < best_dist:
+				best_dist = dist
+				best_pos = city.grid_position
+	return best_pos
 
 ## Check if player has siege units near a position
 func _has_siege_units_near(pos: Vector2i, player, search_range: int) -> bool:
@@ -1882,9 +1970,10 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 			if already_building:
 				continue
 
-			# Leaders with low wonder_construct_rand skip wonders more often
+			# Leaders with low wonder_construct_rand skip wonders sometimes
+			# But all leaders should consider wonders (BTS: even warmongers build some)
 			var personality = _get_leader_personality(player)
-			var wonder_rand = personality.get("wonder_construct_rand", 30)
+			var wonder_rand = max(personality.get("wonder_construct_rand", 30), 50)
 			if randi() % 100 >= wonder_rand:
 				continue  # Skip this wonder based on personality
 
