@@ -679,6 +679,28 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 	if GameManager.hex_grid == null or GameManager.game_world == null:
 		return
 
+	# Safety: don't move settler if enemies nearby and no military escort on same tile
+	var nearby_threats = _find_nearby_enemies(unit, player, 2)
+	if not nearby_threats.is_empty():
+		var has_escort = false
+		var units_here = GameManager.get_units_at(unit.grid_position)
+		for u in units_here:
+			if u != unit and u.player_owner == player and u.get_strength() > 0:
+				has_escort = true
+				break
+		if not has_escort:
+			# No escort and danger nearby — retreat toward nearest city
+			var nearest_city_pos = Vector2i(-1, -1)
+			var best_dist = 999
+			for city in player.cities:
+				var d = GridUtils.chebyshev_distance(unit.grid_position, city.grid_position)
+				if d < best_dist:
+					best_dist = d
+					nearest_city_pos = city.grid_position
+			if nearest_city_pos != Vector2i(-1, -1) and best_dist > 0:
+				_move_toward(unit, nearest_city_pos)
+			return  # Don't move toward settlement site without escort
+
 	# Check if unit has a strategic assignment
 	var assigned_site = _get_assigned_site(unit, player)
 

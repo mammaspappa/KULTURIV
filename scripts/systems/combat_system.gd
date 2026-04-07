@@ -106,8 +106,14 @@ func _finalize_combat(attacker, defender) -> Dictionary:
 		var xp = _calculate_xp(defender, attacker)
 		attacker.gain_experience(xp)
 		EventBus.combat_ended.emit(attacker, defender)
+		# Remember defender position/owner before they die
+		var def_pos = defender.grid_position
+		var def_owner = defender.player_owner
 		# Defender dies
 		defender.die()
+		# Check for city capture (works for both AI and human combat)
+		if is_instance_valid(attacker) and attacker.health > 0:
+			_check_city_capture_after_combat(attacker, def_pos, def_owner)
 	elif attacker.health <= 0:
 		result["winner"] = defender
 		result["loser"] = attacker
@@ -122,6 +128,35 @@ func _finalize_combat(attacker, defender) -> Dictionary:
 		result["loser"] = null
 
 	return result
+
+## After combat, check if a city was left undefended and should be captured
+func _check_city_capture_after_combat(attacker, defender_pos: Vector2i, defender_owner) -> void:
+	var city = GameManager.get_city_at(defender_pos)
+	if city == null or city.player_owner != defender_owner:
+		return
+
+	# Check if there are still enemy defenders on the tile
+	var remaining_defenders = GameManager.get_units_at(defender_pos)
+	for unit in remaining_defenders:
+		if unit.player_owner == defender_owner and unit.get_strength() > 0:
+			return  # Still has defenders
+
+	# Move attacker onto the city tile
+	if attacker.grid_position != defender_pos:
+		attacker.grid_position = defender_pos
+		attacker.position = GridUtils.grid_to_pixel(defender_pos)
+
+	# AI auto-captures; human gets dialog via game_world
+	if attacker.player_owner.is_human:
+		# Human players get capture handled by game_world._check_city_capture
+		return
+	else:
+		# AI always captures (may raze small cities)
+		if GameManager.game_world:
+			if city.population <= 1 and city.can_be_razed():
+				GameManager.game_world.raze_city(city)
+			else:
+				GameManager.game_world.capture_city(city, attacker.player_owner)
 
 func _calculate_xp(defeated, victor) -> int:
 	var defeated_strength = DataManager.get_unit_strength(defeated.unit_id)
