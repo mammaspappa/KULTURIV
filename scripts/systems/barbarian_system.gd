@@ -247,7 +247,6 @@ func _try_spontaneous_spawn() -> void:
 		return
 
 	# Try to find a valid fog-of-war tile
-	var grid = GameManager.hex_grid
 	var attempts = 0
 	while attempts < 50:
 		attempts += 1
