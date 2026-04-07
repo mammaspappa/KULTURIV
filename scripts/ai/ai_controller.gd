@@ -871,8 +871,15 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 		var target = _pick_best_target(unit, enemies, military_flavor)
 		if target:
 			var odds = CombatSystem.calculate_odds(unit, target)
-			var min_odds = 0.5 - (military_flavor - 5) * 0.05
-			min_odds = clamp(min_odds, 0.3, 0.6)
+			var min_odds = 0.35 - (military_flavor - 5) * 0.05
+			min_odds = clamp(min_odds, 0.2, 0.5)
+
+			# Lower threshold when defending own territory or desperate
+			var in_own_territory = false
+			var own_tile = GameManager.hex_grid.get_tile(unit.grid_position) if GameManager.hex_grid else null
+			if own_tile and own_tile.tile_owner == player:
+				in_own_territory = true
+				min_odds *= 0.6  # Fight harder to defend homeland
 
 			if odds.win_chance > min_odds:
 				if GridUtils.are_adjacent(unit.grid_position, target.grid_position):
