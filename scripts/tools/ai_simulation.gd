@@ -91,6 +91,9 @@ func _get_settings() -> Dictionary:
 	}
 
 func _on_round_complete(turn: int) -> void:
+	if game_finished:
+		return
+
 	# State snapshot every 25 turns
 	if turn % 25 == 0:
 		logger.log_state_snapshot()
@@ -101,14 +104,21 @@ func _on_round_complete(turn: int) -> void:
 	# Safety limit
 	if turn >= max_turns:
 		print("\n  Max turns (%d) reached, ending simulation." % max_turns)
-		game_finished = true
+		_end_game()
 
 func _on_victory(player, victory_type: String) -> void:
-	game_finished = true
-	# Victory is logged by sim_logger via EventBus connection
+	_end_game()
 
 func _on_game_over(_player, _victory_type: String) -> void:
+	_end_game()
+
+func _end_game() -> void:
+	if game_finished:
+		return
 	game_finished = true
+	# Stop the turn manager from processing further turns
+	TurnManager.set_process(false)
+	TurnManager.is_processing = true  # Block end_turn() calls
 
 func _process(_delta: float) -> void:
 	if game_finished:
