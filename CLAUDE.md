@@ -1,6 +1,6 @@
 # KulturIV - Project Context
 
-A Civilization IV: Beyond the Sword clone built in Godot 4.5.1.
+A Civilization IV: Beyond the Sword clone built in Godot 4.6.2.
 
 ## Commands
 
@@ -238,7 +238,7 @@ var abilities = DataManager.get_unit_abilities("warrior")
 
 ## Development Notes
 
-- Using Godot 4.5.1 with Forward+ renderer
+- Using Godot 4.6.2 with Forward+ renderer
 - Target resolution: 1920x1080, windowed mode
 - All game data externalized to JSON for easy modding
 - Following Civ4's mechanics closely for authenticity
