@@ -1123,7 +1123,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if p.civilization_id != "barbarian":
 			num_real_players += 1
 	var land_per_player = map_tiles / max(num_real_players, 1)
-	var max_cities = clampi(land_per_player / 80 + expansion_flavor / 2, 3, 12)
+	var max_cities = clampi(land_per_player / 120 + expansion_flavor / 3, 3, 10)
 
 	# Count settlers already in production or in the field
 	var settlers_out = 0
@@ -1131,8 +1131,8 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if u.can_found_city():
 			settlers_out += 1
 
-	# Early expansion: settler from capital when only 1 city
-	if num_cities <= 1 and settlers_out == 0 and city.population >= 2 and player.at_war_with.is_empty():
+	# Early expansion: settler from capital when only 1 city (need at least 1 military first)
+	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 1:
 		if city.can_build_unit("settler"):
 			city.set_production("settler")
 			return
@@ -1195,11 +1195,20 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 			return
 
-	# Need settler? (only if no settlers already out, and city has pop to spare)
-	if num_cities < max_cities and settlers_out == 0 and city.population >= 3:
-		if city.can_build_unit("settler"):
-			city.set_production("settler")
-			return
+	# Need settler? Strict conditions to avoid settler spam:
+	# - No settlers already out or in production
+	# - Have enough military to escort (at least 1 per city)
+	# - Don't build more than 1 settler per 3 cities
+	# - City must have population to spare
+	var settlers_in_production = 0
+	for c in player.cities:
+		if c.current_production == "settler":
+			settlers_in_production += 1
+	if num_cities < max_cities and settlers_out == 0 and settlers_in_production == 0:
+		if city.population >= 3 and military_units >= num_cities:
+			if city.can_build_unit("settler"):
+				city.set_production("settler")
+				return
 
 	# Need more workers? (1 per 2 cities)
 	var desired_workers = max(1, (num_cities + 1) / 2)
