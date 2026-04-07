@@ -227,13 +227,30 @@ func _process_city_turn_start(city) -> void:
 		# Settlers: add food surplus as bonus production (Civ4 BTS mechanic)
 		if building_settler and city.food_surplus > 0:
 			production += city.food_surplus
+
+		var is_unit = not DataManager.get_unit(city.current_production).is_empty()
+		var building_data = DataManager.get_building(city.current_production) if not is_unit else {}
+		var is_wonder = building_data.get("wonder_type", "") != ""
+
+		# BTS: Stone/Marble give +50% wonder production
+		if is_wonder and city.player_owner:
+			var wonder_resource_bonus = 0.0
+			for res_id in ["stone", "marble"]:
+				if city.player_owner.has_resource(res_id):
+					var res_data = DataManager.get_resource(res_id)
+					wonder_resource_bonus += res_data.get("wonder_bonus", 0.0)
+			if wonder_resource_bonus > 0.0:
+				production = int(production * (1.0 + wonder_resource_bonus))
+
+		# BTS: Industrious trait gives +50% wonder production
+		if is_wonder and city.player_owner and city.player_owner.has_trait("industrious"):
+			production = int(production * 1.5)
+
 		# Apply AI difficulty production bonus
 		if city.player_owner and not city.player_owner.is_human:
 			var ai_bonuses = _get_ai_difficulty_bonuses()
 			var train_pct = ai_bonuses.get("train_percent", 100) / 100.0
 			var construct_pct = ai_bonuses.get("construct_percent", 100) / 100.0
-			# Use train_percent for units, construct_percent for buildings
-			var is_unit = not DataManager.get_unit(city.current_production).is_empty()
 			if is_unit:
 				production = int(production * train_pct)
 			else:
