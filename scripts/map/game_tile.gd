@@ -13,6 +13,7 @@ var improvement_id: String = ""
 var road_level: int = 0  # 0=none, 1=road, 2=railroad
 var has_goody_hut: bool = false  # Tribal village (discoverable bonus)
 var river_edges: Array[int] = []  # Which edges have rivers (0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW)
+var continent_id: int = -1  # Landmass ID (-1 for water), assigned during map generation
 
 # Ownership (untyped to avoid circular dependency)
 var tile_owner = null  # Player
@@ -624,6 +625,23 @@ func is_hills() -> bool:
 func is_mountains() -> bool:
 	return terrain_id == "mountains"
 
+## Check if this tile has a river edge in the direction of a neighbor tile
+func has_river_edge_toward(neighbor_pos: Vector2i) -> bool:
+	if river_edges.is_empty():
+		return false
+	var dx = neighbor_pos.x - grid_position.x
+	var dy = neighbor_pos.y - grid_position.y
+	var edge = -1
+	if dx == 0 and dy == -1: edge = 0    # N
+	elif dx == 1 and dy == -1: edge = 1   # NE
+	elif dx == 1 and dy == 0: edge = 2    # E
+	elif dx == 1 and dy == 1: edge = 3    # SE
+	elif dx == 0 and dy == 1: edge = 4    # S
+	elif dx == -1 and dy == 1: edge = 5   # SW
+	elif dx == -1 and dy == 0: edge = 6   # W
+	elif dx == -1 and dy == -1: edge = 7  # NW
+	return edge >= 0 and edge in river_edges
+
 func has_fresh_water(check_irrigation: bool = false, player = null) -> bool:
 	# Has river on any edge
 	if not river_edges.is_empty():
@@ -796,6 +814,7 @@ func to_dict() -> Dictionary:
 		"owner_id": tile_owner.player_id if tile_owner else -1,
 		"visibility": visibility,
 		"tile_culture": tile_culture,
+		"continent_id": continent_id,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -808,5 +827,6 @@ func from_dict(data: Dictionary) -> void:
 	has_goody_hut = data.get("has_goody_hut", false)
 	visibility = data.get("visibility", {})
 	tile_culture = data.get("tile_culture", {})
+	continent_id = data.get("continent_id", -1)
 	position = GridUtils.grid_to_pixel_corner(grid_position)
 	update_visuals()

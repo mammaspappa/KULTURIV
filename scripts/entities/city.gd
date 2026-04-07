@@ -435,7 +435,7 @@ func _calculate_trade_routes() -> void:
 	if player_owner == null:
 		return
 
-	# Determine max trade routes: base 1, +1 per harbor/airport
+	# Determine max trade routes: base 1, +1 per building effect
 	var max_routes = 1
 	for building_id in buildings:
 		if _is_building_obsolete(building_id):
@@ -443,12 +443,19 @@ func _calculate_trade_routes() -> void:
 		var effects = DataManager.get_building_effects(building_id)
 		max_routes += effects.get("trade_route_yield", 0)
 
-	# Civic bonuses for trade routes
+	# Civic bonuses for trade routes (Free Market: +1)
 	if CivicsSystem:
 		var civic_effects = CivicsSystem.get_civic_effects(player_owner)
 		max_routes += civic_effects.get("extra_trade_routes", 0)
 
-	# Gather all potential trade route targets
+	# Check if foreign trade is blocked (Mercantilism)
+	var no_foreign_trade = false
+	if CivicsSystem:
+		no_foreign_trade = CivicsSystem.has_civic_effect(player_owner, "no_foreign_trade")
+
+	var is_connected_to_capital = self in player_owner.connected_cities
+
+	# Gather candidates with BTS connectivity checks
 	var candidates = []
 
 	for other_city in GameManager.get_all_cities():
@@ -457,17 +464,20 @@ func _calculate_trade_routes() -> void:
 
 		var is_foreign = (other_city.player_owner != player_owner)
 
-		# Foreign routes require open borders
+		# Foreign routes require open borders and no Mercantilism
 		if is_foreign:
+			if no_foreign_trade:
+				continue
 			if not player_owner.has_open_borders_with(other_city.player_owner.player_id):
 				continue
 
-		# Route value: (target_pop + own_pop) / 4, foreign gets +25%
-		var route_value = int((other_city.population + population) / 4)
-		if is_foreign:
-			route_value = int(route_value * 1.25)
+		# BTS connectivity check
+		if not _can_trade_with(other_city, is_foreign):
+			continue
 
-		route_value = max(1, route_value)
+		# BTS trade route value formula
+		var route_value = _calculate_route_value(other_city, is_foreign, is_connected_to_capital)
+
 		candidates.append({
 			"target_name": other_city.city_name,
 			"value": route_value,
@@ -479,6 +489,64 @@ func _calculate_trade_routes() -> void:
 	for i in range(min(max_routes, candidates.size())):
 		trade_routes.append(candidates[i])
 		trade_route_income += candidates[i].value
+
+## BTS: check if two cities can trade (road/river/coastal connectivity required)
+func _can_trade_with(other_city, is_foreign: bool) -> bool:
+	if not is_foreign:
+		# Domestic: both connected to capital via roads/rivers
+		if self in player_owner.connected_cities and other_city in player_owner.connected_cities:
+			return true
+		# Or both coastal (sea trade)
+		if _is_coastal() and other_city._is_coastal():
+			return true
+		return false
+	else:
+		# Foreign: this city connected to our capital, other to theirs
+		var other_owner = other_city.player_owner
+		if other_owner == null:
+			return false
+		if self in player_owner.connected_cities and other_city in other_owner.connected_cities:
+			return true
+		# Sea trade: both coastal
+		if _is_coastal() and other_city._is_coastal():
+			return true
+		return false
+
+## BTS trade route value formula
+func _calculate_route_value(other_city, is_foreign: bool, connected_to_capital: bool) -> int:
+	var base = (population + other_city.population) / 5
+	var modifier = 1.0
+
+	# Capital connectivity: +25%
+	if connected_to_capital:
+		modifier += 0.25
+
+	# Overseas (different continent): +100%
+	if _is_overseas(other_city):
+		modifier += 1.0
+
+	# Foreign trade: +150% with open borders, +75% without
+	if is_foreign:
+		if player_owner.has_open_borders_with(other_city.player_owner.player_id):
+			modifier += 1.5
+		else:
+			modifier += 0.75
+
+	# Population modifier: max(0, (pop - 10) * 5%)
+	modifier += max(0.0, (population - 10) * 0.05)
+
+	return max(1, int(base * modifier))
+
+## Check if other city is on a different continent
+func _is_overseas(other_city) -> bool:
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return false
+	var my_tile = grid.get_tile(grid_position)
+	var other_tile = grid.get_tile(other_city.grid_position)
+	if my_tile == null or other_tile == null:
+		return false
+	return my_tile.continent_id != other_tile.continent_id and my_tile.continent_id >= 0
 
 func _calculate_happiness() -> void:
 	happiness = 0

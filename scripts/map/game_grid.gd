@@ -87,6 +87,9 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 	# Add tribal villages (goody huts)
 	_add_goody_huts()
 
+	# Assign continent IDs to landmasses
+	_assign_continents()
+
 	# Ensure starting locations have good terrain
 	_prepare_starting_locations()
 
@@ -473,6 +476,39 @@ func _add_goody_huts() -> void:
 				placed += 1
 
 	print("[MapGen] Placed %d goody huts" % placed)
+
+## Assign continent IDs via BFS flood fill across all land tiles
+func _assign_continents() -> void:
+	var next_id = 0
+	var visited: Dictionary = {}
+	for pos in tiles:
+		if pos in visited:
+			continue
+		var tile = tiles[pos]
+		if tile.is_water():
+			tile.continent_id = -1
+			visited[pos] = true
+			continue
+		# BFS flood fill for this landmass
+		var queue: Array[Vector2i] = [pos]
+		visited[pos] = true
+		while not queue.is_empty():
+			var current = queue.pop_front()
+			tiles[current].continent_id = next_id
+			for n_pos in GridUtils.get_neighbors(current):
+				if n_pos in visited:
+					continue
+				var wrapped = _wrap_position(n_pos)
+				if wrapped not in tiles:
+					continue
+				if wrapped in visited:
+					continue
+				var n_tile = tiles[wrapped]
+				if n_tile.is_water():
+					continue
+				visited[wrapped] = true
+				queue.append(wrapped)
+		next_id += 1
 
 # Tile access
 func get_tile(pos: Vector2i) -> GameTile:

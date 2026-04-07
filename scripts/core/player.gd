@@ -55,6 +55,10 @@ var anarchy_turns: int = 0
 # Leader traits (cached from DataManager)
 var traits: Array[String] = []
 
+# Trade connectivity (recomputed once per round)
+var connected_cities: Array = []  # Cities connected to capital by road/river
+var coastal_trade_cities: Array = []  # Coastal cities for sea trade
+
 # Entities (untyped to avoid circular dependency with Unit/City classes)
 var units: Array = []
 var cities: Array = []
@@ -383,19 +387,105 @@ func _is_building_replaced_by_unique(building_id: String) -> bool:
 	return false
 
 func has_resource(resource_id: String) -> bool:
-	# Check if any city has access to this resource
+	# BTS: resources only available if the city is connected to the capital
 	for city in cities:
 		if city.has_resource(resource_id):
-			return true
+			if city in connected_cities or city in coastal_trade_cities:
+				return true
+	# Fallback: single-city civs always have their own resources
+	if cities.size() == 1 and not cities[0].available_resources.is_empty():
+		return resource_id in cities[0].available_resources
 	return false
 
 func get_available_resources() -> Array:
 	var resources = []
 	for city in cities:
+		if city not in connected_cities and city not in coastal_trade_cities:
+			if cities.size() > 1:
+				continue  # Not connected — skip
 		for resource in city.available_resources:
 			if resource not in resources:
 				resources.append(resource)
 	return resources
+
+## Compute which cities are connected to capital via road/river network.
+## BFS flood fill along tiles with roads or shared river edges (Sailing required).
+## Coastal cities collected separately for sea trade.
+func update_connectivity() -> void:
+	connected_cities.clear()
+	coastal_trade_cities.clear()
+
+	if cities.is_empty():
+		return
+
+	var capital = _get_capital()
+	if capital == null:
+		return
+
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return
+
+	var has_sailing = has_tech("sailing")
+
+	# BFS from capital tile along road/river connections
+	var visited: Dictionary = {}
+	var queue: Array[Vector2i] = [capital.grid_position]
+	visited[capital.grid_position] = true
+
+	while not queue.is_empty():
+		var current_pos = queue.pop_front()
+		var current_tile = grid.get_tile(current_pos)
+		if current_tile == null:
+			continue
+
+		for neighbor_pos in GridUtils.get_neighbors(current_pos):
+			if neighbor_pos in visited:
+				continue
+			var n_tile = grid.get_tile(neighbor_pos)
+			if n_tile == null or n_tile.is_water():
+				continue
+			# Mountains block unless they have a road
+			if n_tile.is_mountains() and n_tile.road_level == 0:
+				continue
+
+			var can_traverse = false
+
+			# Road connection: both tiles have roads
+			if current_tile.road_level >= 1 and n_tile.road_level >= 1:
+				can_traverse = true
+
+			# River connection: tiles share a river edge AND player has Sailing
+			if not can_traverse and has_sailing:
+				if current_tile.has_river_edge_toward(neighbor_pos) or n_tile.has_river_edge_toward(current_pos):
+					can_traverse = true
+
+			# City tiles connect if adjacent city has a road
+			if not can_traverse:
+				var city_at = GameManager.get_city_at(neighbor_pos)
+				if city_at != null and city_at.player_owner == self:
+					if current_tile.road_level >= 1:
+						can_traverse = true
+
+			if can_traverse:
+				visited[neighbor_pos] = true
+				queue.append(neighbor_pos)
+
+	# Map visited tiles to cities
+	for city in cities:
+		if city.grid_position in visited:
+			connected_cities.append(city)
+
+	# Collect coastal cities for sea trade
+	for city in cities:
+		if city._is_coastal():
+			coastal_trade_cities.append(city)
+
+func _get_capital():
+	for city in cities:
+		if "palace" in city.buildings:
+			return city
+	return cities[0] if not cities.is_empty() else null
 
 # Diplomacy methods
 func is_at_war_with(other_id: int) -> bool:

@@ -42,6 +42,7 @@ func start_game() -> void:
 	current_turn = 1
 	current_year = -4000
 	game_ended = false
+	_update_all_connectivity()
 	_start_turn_for_player(GameManager.get_current_player())
 
 func end_turn() -> void:
@@ -144,6 +145,9 @@ func _complete_round() -> void:
 	# All players have taken their turn
 	GameManager.current_player_index = 0
 	_ai_bonus_cache = {}  # Clear difficulty bonus cache each round
+
+	# Update trade connectivity (road/river/coast BFS from capital)
+	_update_all_connectivity()
 
 	# Process culture radiation and tile ownership
 	_process_culture_ownership()
@@ -510,3 +514,9 @@ func get_era() -> String:
 		return "Modern"
 	else:
 		return "Future"
+
+func _update_all_connectivity() -> void:
+	for player in GameManager.players:
+		if player.cities.is_empty():
+			continue
+		player.update_connectivity()
