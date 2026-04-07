@@ -163,8 +163,10 @@ func _start_turn_for_player(player) -> void:
 				if not game_ended:
 					end_turn()
 			else:
-				# Max speed — no delay
-				call_deferred("end_turn")
+				# Max speed — yield one frame to prevent stack overflow
+				await get_tree().process_frame
+				if not game_ended:
+					end_turn()
 		else:
 			call_deferred("end_turn")
 
