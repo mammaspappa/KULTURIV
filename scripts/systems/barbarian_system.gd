@@ -107,7 +107,11 @@ func _spawn_initial_camps() -> void:
 
 ## Try to spawn a new barbarian camp
 func _try_spawn_camp() -> void:
-	if barbarian_camps.size() >= MAX_CAMPS:
+	# Scale max camps with map size
+	var grid = GameManager.hex_grid
+	var map_tiles = grid.width * grid.height if grid else 800
+	var max_camps = clampi(map_tiles / 200, 3, MAX_CAMPS)
+	if barbarian_camps.size() >= max_camps:
 		return
 
 	var grid = GameManager.hex_grid
@@ -230,8 +234,11 @@ func _try_spontaneous_spawn() -> void:
 	if barbarian_player == null or GameManager.hex_grid == null:
 		return
 
-	# Limit total barbarian units to prevent runaway spawning
-	if barbarian_player.units.size() >= 20:
+	# Limit total barbarian units — scale with map size, cap lower for small maps
+	var grid = GameManager.hex_grid
+	var map_tiles = grid.width * grid.height if grid else 800
+	var max_barb_units = clampi(map_tiles / 100, 4, 12)
+	if barbarian_player.units.size() >= max_barb_units:
 		return
 
 	# Scale spawn frequency with game speed and map size
