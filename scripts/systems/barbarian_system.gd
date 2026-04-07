@@ -313,10 +313,19 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 	if GameManager.game_world == null:
 		return
 
-	# Determine unit type based on era/turn
-	var unit_type = _get_barbarian_unit_type()
+	# Try spawning a naval unit if camp is coastal (10% chance)
+	if randf() < 0.1:
+		var water_pos = _find_adjacent_water(camp_pos)
+		if water_pos != Vector2i(-1, -1):
+			var naval_type = _get_barbarian_naval_type()
+			if naval_type != "":
+				var unit = GameManager.game_world.spawn_unit(naval_type, water_pos, barbarian_player)
+				if unit:
+					barbarian_unit_spawned.emit(unit, camp_pos)
+				return
 
-	# Find spawn position
+	# Spawn a land unit
+	var unit_type = _get_barbarian_unit_type()
 	var spawn_pos = _find_spawn_position(camp_pos)
 	if spawn_pos == Vector2i(-1, -1):
 		return
@@ -325,63 +334,96 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 	if unit:
 		barbarian_unit_spawned.emit(unit, camp_pos)
 
-## Get appropriate barbarian unit type for current era
+## Get appropriate barbarian unit type based on real civ tech progress.
+## BTS rule: a barbarian unit can only spawn when >= 50% of real civs have
+## the tech that unlocks it. Returns a land unit only (naval handled separately).
 func _get_barbarian_unit_type() -> String:
-	# Scale turn thresholds by game speed so unit progression matches
-	var speed = GameManager.get_speed_multiplier()
-	var turn = TurnManager.current_turn / speed  # Normalize to Normal-speed turns
+	# Build pool of units that barbarians can spawn based on civ tech progress
+	var pool = _get_available_barb_units(false)
+	if pool.is_empty():
+		return "warrior"  # Fallback
+	return pool[randi() % pool.size()]
 
-	# Naval units near coast (10% chance)
-	if randf() < 0.1:
-		if turn < 100:
-			return "galley"
-		elif turn < 200:
-			return "caravel"
-		else:
-			return "frigate"
+## Get a naval unit type if enough civs have the tech, or "" if none available.
+func _get_barbarian_naval_type() -> String:
+	var pool = _get_available_barb_units(true)
+	if pool.is_empty():
+		return ""
+	return pool[randi() % pool.size()]
 
-	# Land units scale with game progress
-	if turn < 30:
-		return "warrior"
-	elif turn < 60:
-		if randf() < 0.7:
-			return "warrior"
-		else:
-			return "archer"
-	elif turn < 100:
-		var roll = randf()
-		if roll < 0.3:
-			return "warrior"
-		elif roll < 0.6:
-			return "archer"
-		elif roll < 0.85:
-			return "axeman"
-		else:
-			return "chariot"
-	elif turn < 150:
-		var roll = randf()
-		if roll < 0.25:
-			return "archer"
-		elif roll < 0.5:
-			return "axeman"
-		elif roll < 0.75:
-			return "swordsman"
-		else:
-			return "horseman"
-	else:
-		var roll = randf()
-		if roll < 0.2:
-			return "swordsman"
-		elif roll < 0.4:
-			return "crossbowman"
-		elif roll < 0.6:
-			return "maceman"
-		elif roll < 0.8:
-			return "knight"
-		else:
-			return "longbowman"
+## Build pool of units barbarians can spawn. Requires >= 50% of real civs to
+## have the required tech. naval_only filters to naval/land units.
+func _get_available_barb_units(naval_only: bool) -> Array:
+	# Count real (non-barbarian) civs
+	var real_civs: Array = []
+	for p in GameManager.players:
+		if p.civilization_id != "barbarian":
+			real_civs.append(p)
+	var threshold = max(1, real_civs.size() / 2)  # 50% rounded down, min 1
 
-## Find valid spawn position near camp
+	# Barbarian unit progression: unit_id -> required_tech
+	# Land units (ordered by era)
+	var land_units = {
+		"warrior": "",               # Always available
+		"archer": "archery",
+		"axeman": "bronze_working",
+		"chariot": "the_wheel",
+		"spearman": "bronze_working",
+		"swordsman": "iron_working",
+		"horseman": "horseback_riding",
+		"crossbowman": "machinery",
+		"maceman": "machinery",
+		"longbowman": "machinery",
+		"knight": "guilds",
+		"musketman": "gunpowder",
+		"grenadier": "chemistry",
+		"rifleman": "rifling",
+	}
+	# Naval units
+	var naval_units = {
+		"galley": "sailing",
+		"caravel": "astronomy",
+		"frigate": "astronomy",
+	}
+
+	var source = naval_units if naval_only else land_units
+	var pool: Array = []
+
+	for unit_id in source:
+		var req_tech = source[unit_id]
+		if req_tech == "":
+			pool.append(unit_id)
+			continue
+		# Count how many real civs have this tech
+		var have_count = 0
+		for civ in real_civs:
+			if civ.has_tech(req_tech):
+				have_count += 1
+		if have_count >= threshold:
+			pool.append(unit_id)
+
+	# Bias toward more advanced units: keep only the top half of available units
+	# (so once swordsmen unlock, warriors become rare)
+	if pool.size() > 2:
+		var keep = max(2, pool.size() / 2)
+		pool = pool.slice(pool.size() - keep)
+
+	return pool
+
+## Find an adjacent water tile for spawning naval units
+func _find_adjacent_water(pos: Vector2i) -> Vector2i:
+	var grid = GameManager.hex_grid
+	if grid == null:
+		return Vector2i(-1, -1)
+	var neighbors = GridUtils.get_neighbors(pos)
+	neighbors.shuffle()
+	for n_pos in neighbors:
+		var tile = grid.get_tile(n_pos)
+		if tile and tile.is_water() and GameManager.get_unit_at(n_pos) == null:
+			return n_pos
+	return Vector2i(-1, -1)
+
+## Find valid spawn position near camp (land only)
 func _find_spawn_position(camp_pos: Vector2i) -> Vector2i:
 	var grid = GameManager.hex_grid
 	if grid == null:
