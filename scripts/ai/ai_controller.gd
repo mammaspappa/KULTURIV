@@ -2179,15 +2179,62 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 			var mod = spec_mods.get("great_person", 1.0)
 			score += effects.great_person_points * mod * 3
 
-		# Wonders get a bonus — they're unique and provide lasting advantages
+		# Wonders get a strategic bonus based on AI's long-term goals
 		if wonder_type == "world":
-			score += 15  # Significant bonus for world wonders
+			score += 10  # Base bonus for world wonders
+
+			# Strategy-aligned wonder bonuses (flavor as proxy for victory path)
+			# Cultural victory: culture buildings/wonders
+			if culture_flavor >= HIGH_FLAVOR:
+				if effects.has("culture") or effects.has("culture_percent") or effects.has("culture_state_religion"):
+					score += 15
+				if effects.has("great_artist_points"):
+					score += 8
+				if effects.has("golden_age_length_modifier"):
+					score += 10
+
+			# Science/Space victory: science and production wonders
+			if science_flavor >= HIGH_FLAVOR:
+				if effects.has("science_percent") or effects.has("free_tech") or effects.has("free_scientists"):
+					score += 15
+				if effects.has("great_scientist_points"):
+					score += 8
+				if effects.has("spaceship_production_all_cities"):
+					score += 20
+
+			# Domination: military and expansion wonders
+			if military_flavor >= HIGH_FLAVOR:
+				if effects.has("free_experience_all_units") or effects.has("great_general_rate_modifier"):
+					score += 15
+				if effects.has("defense_all_cities") or effects.has("border_obstacle"):
+					score += 10
+				if effects.has("enemy_war_weariness"):
+					score += 10
+
+			# Economy: gold and trade wonders
+			if gold_flavor >= HIGH_FLAVOR:
+				if effects.has("gold_percent") or effects.has("trade_route_yield"):
+					score += 12
+				if effects.has("gold_state_religion_cities"):
+					score += 10
+
+			# Religious leaders: religion-related wonders
+			if flavor.get("religion", 5) >= HIGH_FLAVOR:
+				if effects.has("enables_apostolic_votes") or effects.has("any_religion_civic"):
+					score += 15
+				if effects.has("no_anarchy"):
+					score += 10
+
 		elif wonder_type == "national":
 			score += 8
 
 		# Reduce score by cost (prefer cheaper when scores are similar)
+		# Wonders should be penalized less by cost since they're unique
 		var cost = building.get("cost", 100)
-		score -= cost / 50
+		if wonder_type != "":
+			score -= cost / 100  # Lighter penalty for wonders
+		else:
+			score -= cost / 50
 
 		if score > best_score:
 			best_score = score
