@@ -146,6 +146,14 @@ func _is_valid_camp_position(pos: Vector2i) -> bool:
 	if tile.tile_owner != null:
 		return false
 
+	# BTS: camps only spawn in fog of war — no civ units within 3 tiles
+	var tiles_nearby = GridUtils.get_tiles_in_range(pos, 3)
+	for near_pos in tiles_nearby:
+		var units_here = GameManager.get_units_at(near_pos)
+		for u in units_here:
+			if u.player_owner != null and u.player_owner.civilization_id != "barbarian":
+				return false  # Civ unit nearby, not in fog
+
 	# Cannot have goody hut
 	if tile.has_goody_hut:
 		return false
@@ -335,6 +343,16 @@ func _process_barbarian_ai() -> void:
 
 ## Process AI for a single barbarian unit
 func _process_single_barbarian(unit) -> void:
+	# BTS: Early-game barbarians ("animals") avoid civilized borders
+	var speed = GameManager.get_speed_multiplier()
+	var is_early = TurnManager.current_turn < int(50 * speed)
+	if is_early:
+		var tile = GameManager.hex_grid.get_tile(unit.grid_position) if GameManager.hex_grid else null
+		if tile and tile.tile_owner != null and tile.tile_owner != barbarian_player:
+			# In civ territory during animal era — retreat
+			_random_move(unit)
+			return
+
 	# Priority 1: Attack adjacent enemies
 	var adjacent_target = _find_adjacent_enemy(unit)
 	if adjacent_target:

@@ -86,7 +86,14 @@ func resolve_combat(attacker, defender) -> Dictionary:
 
 func _get_effective_strength(unit, is_attacking: bool, opponent) -> float:
 	var tile = GameManager.hex_grid.get_tile(unit.grid_position) if GameManager.hex_grid else null
-	return unit.get_combat_strength(is_attacking, tile, opponent)
+	var strength = unit.get_combat_strength(is_attacking, tile, opponent)
+
+	# BTS: all civilizations get +25% combat bonus vs barbarian units
+	if opponent and opponent.player_owner and opponent.player_owner.civilization_id == "barbarian":
+		if unit.player_owner and unit.player_owner.civilization_id != "barbarian":
+			strength *= 1.25
+
+	return strength
 
 func _finalize_combat(attacker, defender) -> Dictionary:
 	var result = {
