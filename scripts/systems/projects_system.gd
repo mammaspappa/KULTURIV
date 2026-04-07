@@ -242,7 +242,7 @@ func _calculate_spaceship_travel_time(player_id: int) -> int:
 	var progress = spaceship_progress[player_id]
 	var parts = progress.parts
 
-	var base_time = 10  # Base travel time in turns
+	var base_time = int(10 * GameManager.get_speed_multiplier())  # Scaled by game speed
 
 	# Engines reduce travel time
 	var engines = parts.get("ss_engine", 0)

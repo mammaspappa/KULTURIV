@@ -61,8 +61,9 @@ func _on_turn_ended(_turn_number: int, player) -> void:
 	if player != null and player != barbarian_player:
 		return
 
-	# Process barbarian camp spawning
-	if TurnManager.current_turn % CAMP_SPAWN_INTERVAL == 0:
+	# Process barbarian camp spawning (scale interval with game speed)
+	var camp_interval = max(1, int(CAMP_SPAWN_INTERVAL * GameManager.get_speed_multiplier()))
+	if TurnManager.current_turn % camp_interval == 0:
 		_try_spawn_camp()
 
 	# Process unit spawning from existing camps
@@ -198,8 +199,9 @@ func _process_camp_spawning() -> void:
 			barbarian_camps.erase(camp_pos)
 			continue
 
-		# Spawn interval check
-		if TurnManager.current_turn % UNIT_SPAWN_INTERVAL != 0:
+		# Spawn interval check (scale with game speed)
+		var unit_interval = max(1, int(UNIT_SPAWN_INTERVAL * GameManager.get_speed_multiplier()))
+		if TurnManager.current_turn % unit_interval != 0:
 			continue
 
 		# Don't spawn too many units per camp
@@ -241,7 +243,9 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 
 ## Get appropriate barbarian unit type for current era
 func _get_barbarian_unit_type() -> String:
-	var turn = TurnManager.current_turn
+	# Scale turn thresholds by game speed so unit progression matches
+	var speed = GameManager.get_speed_multiplier()
+	var turn = TurnManager.current_turn / speed  # Normalize to Normal-speed turns
 
 	# Naval units near coast (10% chance)
 	if randf() < 0.1:
@@ -680,7 +684,8 @@ func _create_barbarian_civilization(camp_pos: Vector2i, site_score: int) -> void
 
 ## Grant era-appropriate techs to a barbarian civ
 func _grant_era_techs(player) -> void:
-	var turn = TurnManager.current_turn
+	var speed = GameManager.get_speed_multiplier()
+	var normalized_turn = TurnManager.current_turn / speed
 
 	# Always start with ancient techs
 	var basic_techs = ["agriculture", "hunting", "mining", "the_wheel", "archery", "bronze_working", "warrior_code"]
@@ -688,14 +693,14 @@ func _grant_era_techs(player) -> void:
 		if tech_id not in player.researched_techs:
 			player.researched_techs.append(tech_id)
 
-	# Add more techs based on game progression
-	if turn >= 100:
+	# Add more techs based on game progression (normalized to Normal speed)
+	if normalized_turn >= 100:
 		var classical_techs = ["iron_working", "horseback_riding", "construction", "mathematics"]
 		for tech_id in classical_techs:
 			if tech_id not in player.researched_techs:
 				player.researched_techs.append(tech_id)
 
-	if turn >= 150:
+	if normalized_turn >= 150:
 		var medieval_techs = ["machinery", "engineering", "civil_service", "feudalism"]
 		for tech_id in medieval_techs:
 			if tech_id not in player.researched_techs:

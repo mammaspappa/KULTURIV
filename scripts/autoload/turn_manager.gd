@@ -163,8 +163,8 @@ func _advance_year() -> void:
 			years_to_add = progression.years_per_turn
 			break
 
-	# Apply game speed multiplier
-	years_to_add = int(years_to_add * GameManager.get_speed_multiplier())
+	# Apply game speed multiplier (Marathon=more turns, fewer years per turn)
+	years_to_add = int(years_to_add / GameManager.get_speed_multiplier())
 	if years_to_add < 1:
 		years_to_add = 1
 
@@ -267,8 +267,9 @@ func _process_gold(player) -> void:
 	var excess_units = max(0, military_count - free_units)
 	var unit_supply_cost = excess_units  # 1 gold per excess unit
 
-	# --- Inflation (BTS-style: very gradual, 0.1% per turn, cap at 1.5x) ---
-	var inflation_rate = min(1.0 + current_turn * 0.001, 1.5)
+	# --- Inflation (BTS-style: gradual, normalized by game speed so Marathon doesn't over-inflate) ---
+	var normalized_turn = current_turn / GameManager.get_speed_multiplier()
+	var inflation_rate = min(1.0 + normalized_turn * 0.001, 1.5)
 	city_maintenance = int(city_maintenance * inflation_rate)
 	unit_supply_cost = int(unit_supply_cost * inflation_rate)
 

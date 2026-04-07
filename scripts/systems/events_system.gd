@@ -204,7 +204,7 @@ func _trigger_global_event(event_id: String) -> void:
 	var event = events[event_id]
 
 	# Set global cooldown
-	global_event_cooldowns[event_id] = 20  # 20 turn cooldown for global events
+	global_event_cooldowns[event_id] = int(20 * GameManager.get_speed_multiplier())  # Scaled cooldown
 
 	# Mark as occurred for non-recurring events
 	if not event.get("recurring", true):
@@ -431,7 +431,7 @@ func _trigger_event(event_id: String, player, city) -> void:
 	}
 
 	# Set cooldown
-	event_cooldowns[player.player_id][event_id] = 10  # 10 turn cooldown between same events
+	event_cooldowns[player.player_id][event_id] = int(10 * GameManager.get_speed_multiplier())  # Scaled cooldown
 
 	# AI players make choices automatically
 	if not player.is_human:

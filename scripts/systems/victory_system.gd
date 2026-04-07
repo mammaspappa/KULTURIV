@@ -36,8 +36,9 @@ func check_victory() -> Dictionary:
 		if _check_space_race(player):
 			return {"achieved": true, "player": player, "type": "space"}
 
-	# Score victory at turn limit
-	if TurnManager.current_turn >= MAX_TURNS:
+	# Score victory at turn limit (scaled by game speed)
+	var max_turns = int(MAX_TURNS * GameManager.get_speed_multiplier())
+	if TurnManager.current_turn >= max_turns:
 		var winner = _get_highest_score_player()
 		return {"achieved": true, "player": winner, "type": "score"}
 
@@ -252,9 +253,10 @@ func get_victory_progress(player) -> Dictionary:
 
 	# Score
 	player.calculate_score()
+	var scaled_max_turns = int(MAX_TURNS * GameManager.get_speed_multiplier())
 	progress["score"] = {
 		"current": player.score,
-		"turns_remaining": MAX_TURNS - TurnManager.current_turn
+		"turns_remaining": scaled_max_turns - TurnManager.current_turn
 	}
 
 	return progress

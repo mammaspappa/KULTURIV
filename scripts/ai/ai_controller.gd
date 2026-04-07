@@ -86,8 +86,9 @@ func execute_turn(player) -> void:
 			sim_logger.log_decision(player.player_name, "production", "set_production",
 				"%s -> %s" % [city.city_name, city.current_production], "")
 
-	# Process civics adoption (deterministic: every 10 turns)
-	if TurnManager.current_turn % 10 == player.player_id % 10:
+	# Process civics adoption (scaled by game speed)
+	var civics_interval = max(1, int(10 * GameManager.get_speed_multiplier()))
+	if TurnManager.current_turn % civics_interval == player.player_id % civics_interval:
 		_process_civics(player, flavor)
 
 	# Process naval strategy (skip if no coastal cities)
@@ -247,10 +248,11 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 				_make_peace_with_cooldown(player, other)
 		return
 
-	# Don't consider peace in the first 10 turns of war (give wars time to develop)
+	# Don't consider peace in the first 10 turns of war (scaled by game speed)
 	var war_key = "%d:%d" % [player.player_id, other.player_id]
 	var war_start = peace_cooldown.get("war_start_" + war_key, 0)
-	if TurnManager.current_turn - war_start < 10:
+	var min_war_turns = int(10 * GameManager.get_speed_multiplier())
+	if TurnManager.current_turn - war_start < min_war_turns:
 		return
 
 	var our_power = DiplomacySystem._calculate_power(player)
@@ -347,7 +349,8 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	# Check peace cooldown — cannot redeclare war too soon after making peace
 	var cooldown_key = "%d:%d" % [player.player_id, other.player_id]
 	var last_peace_turn = peace_cooldown.get(cooldown_key, -999)
-	if TurnManager.current_turn - last_peace_turn < PEACE_COOLDOWN_TURNS:
+	var scaled_cooldown = int(PEACE_COOLDOWN_TURNS * GameManager.get_speed_multiplier())
+	if TurnManager.current_turn - last_peace_turn < scaled_cooldown:
 		return  # Still in cooldown period
 
 	# BTS max_war_rand: lower = more warlike. Chance = 100/max_war_rand per turn.
