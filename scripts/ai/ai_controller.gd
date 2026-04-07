@@ -1115,11 +1115,23 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if u.can_build_improvements():
 			workers += 1
 
-	# Early expansion: settler is top priority when only 1 city (unless at war)
+	# Calculate target city count based on map size and player count
 	var map_tiles = GameManager.map_width * GameManager.map_height
-	var base_cities = max(3, map_tiles / 300)
-	var max_cities = base_cities + expansion_flavor
-	if num_cities <= 1 and city.population >= 2 and player.at_war_with.is_empty():
+	var num_real_players = 0
+	for p in GameManager.players:
+		if p.civilization_id != "barbarian":
+			num_real_players += 1
+	var land_per_player = map_tiles / max(num_real_players, 1)
+	var max_cities = clampi(land_per_player / 80 + expansion_flavor / 2, 3, 12)
+
+	# Count settlers already in production or in the field
+	var settlers_out = 0
+	for u in player.units:
+		if u.can_found_city():
+			settlers_out += 1
+
+	# Early expansion: settler from capital when only 1 city
+	if num_cities <= 1 and settlers_out == 0 and city.population >= 2 and player.at_war_with.is_empty():
 		if city.can_build_unit("settler"):
 			city.set_production("settler")
 			return
@@ -1182,8 +1194,8 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 			return
 
-	# Need settler?
-	if num_cities < max_cities and city.population >= 2:
+	# Need settler? (only if no settlers already out, and city has pop to spare)
+	if num_cities < max_cities and settlers_out == 0 and city.population >= 3:
 		if city.can_build_unit("settler"):
 			city.set_production("settler")
 			return
