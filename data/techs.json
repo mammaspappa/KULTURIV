@@ -5,7 +5,16 @@
     "name": "Mysticism",
     "cost": 50,
     "grid_x": 1,
-    "grid_y": 11
+    "grid_y": 11,
+    "unlocks": {
+      "buildings": [
+        "obelisk",
+        "egyptian_obelisk",
+        "ethiopian_stele",
+        "native_america_totem",
+        "stonehenge"
+      ]
+    }
   },
   "meditation": {
     "description": "Can found Buddhism",
@@ -16,7 +25,12 @@
     "grid_y": 9,
     "or_prerequisites": [
       "mysticism"
-    ]
+    ],
+    "unlocks": {
+      "religions": [
+        "buddhism"
+      ]
+    }
   },
   "polytheism": {
     "description": "Can found Hinduism",
@@ -27,7 +41,16 @@
     "grid_y": 11,
     "or_prerequisites": [
       "mysticism"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "artemis",
+        "temple_of_artemis"
+      ],
+      "religions": [
+        "hinduism"
+      ]
+    }
   },
   "priesthood": {
     "description": "Enables Temple",
@@ -39,7 +62,15 @@
     "or_prerequisites": [
       "meditation",
       "polytheism"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "sumerian_ziggurat",
+        "oracle",
+        "temple",
+        "the_oracle"
+      ]
+    }
   },
   "monotheism": {
     "description": "Can found Judaism",
@@ -53,7 +84,12 @@
     ],
     "or_prerequisites": [
       "polytheism"
-    ]
+    ],
+    "unlocks": {
+      "religions": [
+        "judaism"
+      ]
+    }
   },
   "monarchy": {
     "description": "Enables Hereditary Rule civic",
@@ -65,7 +101,12 @@
     "or_prerequisites": [
       "priesthood",
       "monotheism"
-    ]
+    ],
+    "unlocks": {
+      "improvements": [
+        "winery"
+      ]
+    }
   },
   "literature": {
     "description": "Enables National Epic, Heroic Epic",
@@ -79,7 +120,15 @@
     ],
     "or_prerequisites": [
       "aesthetics"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "heroic_epic",
+        "national_epic",
+        "great_library",
+        "the_great_library"
+      ]
+    }
   },
   "code_of_laws": {
     "description": "Enables Courthouse, can found Confucianism",
@@ -94,7 +143,18 @@
     "or_prerequisites": [
       "priesthood",
       "currency"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "courthouse",
+        "sacrificial_altar",
+        "holy_roman_rathaus",
+        "chichen_itza"
+      ],
+      "religions": [
+        "confucianism"
+      ]
+    }
   },
   "drama": {
     "description": "Enables Theatre, Globe Theatre",
@@ -105,7 +165,16 @@
     "grid_y": 2,
     "or_prerequisites": [
       "aesthetics"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "theatre",
+        "chinese_pavillion",
+        "byzantine_hippodrome",
+        "globe_theatre",
+        "pavilion"
+      ]
+    }
   },
   "feudalism": {
     "description": "Enables Longbowman, Vassalage civic",
@@ -119,7 +188,12 @@
     ],
     "or_prerequisites": [
       "monarchy"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "longbowman"
+      ]
+    }
   },
   "theology": {
     "description": "Can found Christianity",
@@ -133,7 +207,19 @@
     ],
     "or_prerequisites": [
       "monotheism"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "inquisitor"
+      ],
+      "buildings": [
+        "hagia_sophia",
+        "apostolic_palace"
+      ],
+      "religions": [
+        "christianity"
+      ]
+    }
   },
   "music": {
     "description": "First to discover gets a free Great Artist",
@@ -148,7 +234,12 @@
     "or_prerequisites": [
       "literature",
       "drama"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "sistine_chapel"
+      ]
+    }
   },
   "civil_service": {
     "description": "Enables Pikeman, Maceman, Bureaucracy civic",
@@ -163,7 +254,14 @@
     "or_prerequisites": [
       "code_of_laws",
       "feudalism"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "maceman",
+        "samurai",
+        "berserker"
+      ]
+    }
   },
   "guilds": {
     "description": "Enables Knight, Grocer",
@@ -177,7 +275,19 @@
     ],
     "or_prerequisites": [
       "machinery"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "knight",
+        "camel_archer",
+        "cataphract"
+      ],
+      "buildings": [
+        "grocer",
+        "persian_apothecary",
+        "apothecary"
+      ]
+    }
   },
   "divine_right": {
     "description": "Can found Islam. Enables Versailles wonder.",
@@ -189,7 +299,16 @@
     "prerequisites": [
       "theology",
       "monarchy"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "versailles",
+        "spiral_minaret"
+      ],
+      "religions": [
+        "islam"
+      ]
+    }
   },
   "nationalism": {
     "description": "Enables Spy, Nationhood civic",
@@ -204,7 +323,13 @@
     "or_prerequisites": [
       "divine_right",
       "philosophy"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "hermitage",
+        "taj_mahal"
+      ]
+    }
   },
   "military_tradition": {
     "description": "Enables Cavalry",
@@ -218,7 +343,18 @@
     ],
     "or_prerequisites": [
       "nationalism"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "conquistador",
+        "cuirassier",
+        "cavalry",
+        "cossack"
+      ],
+      "buildings": [
+        "west_point"
+      ]
+    }
   },
   "constitution": {
     "description": "Enables Representation civic",
@@ -232,7 +368,13 @@
     ],
     "or_prerequisites": [
       "nationalism"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "jail",
+        "indian_mausoleum"
+      ]
+    }
   },
   "liberalism": {
     "description": "Enables Free Speech and Free Religion civics. First to discover gets a free tech.",
@@ -260,7 +402,13 @@
     ],
     "or_prerequisites": [
       "constitution"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "national_security",
+        "statue_of_liberty"
+      ]
+    }
   },
   "corporation": {
     "description": "Enables Stock Exchange, corporations",
@@ -274,7 +422,29 @@
     ],
     "or_prerequisites": [
       "economics"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "executive_mining",
+        "executive_sushi",
+        "executive_cereal",
+        "executive_ethanol",
+        "executive_construction",
+        "executive_jewelers",
+        "executive_aluminum"
+      ],
+      "buildings": [
+        "wall_street",
+        "stock_exchange",
+        "mining_inc_hq",
+        "sids_sushi_hq",
+        "cereal_mills_hq",
+        "standard_ethanol_hq",
+        "creative_constructions_hq",
+        "civilized_jewelers_hq",
+        "aluminum_co_hq"
+      ]
+    }
   },
   "fascism": {
     "description": "Enables Police State civic. Enables Mt. Rushmore national wonder.",
@@ -288,7 +458,15 @@
     ],
     "or_prerequisites": [
       "assembly_line"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "paratrooper"
+      ],
+      "buildings": [
+        "mt_rushmore"
+      ]
+    }
   },
   "utopia": {
     "era": "industrial",
@@ -301,7 +479,13 @@
     ],
     "or_prerequisites": [
       "scientific_method"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "intelligence_agency",
+        "kremlin"
+      ]
+    }
   },
   "mass_media": {
     "description": "Enables Broadcast Tower",
@@ -312,7 +496,15 @@
     "grid_y": 9,
     "or_prerequisites": [
       "radio"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "broadcast_tower",
+        "hollywood",
+        "united_nations",
+        "corporation_7"
+      ]
+    }
   },
   "ecology": {
     "description": "Enables Recycling Center",
@@ -327,7 +519,12 @@
     "or_prerequisites": [
       "plastics",
       "fission"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "recycling_center"
+      ]
+    }
   },
   "fishing": {
     "description": "Enables Fishing Boats",
@@ -335,7 +532,15 @@
     "name": "Fishing",
     "cost": 40,
     "grid_x": 1,
-    "grid_y": 1
+    "grid_y": 1,
+    "unlocks": {
+      "units": [
+        "workboat"
+      ],
+      "improvements": [
+        "fishing_boats"
+      ]
+    }
   },
   "the_wheel": {
     "description": "Enables Roads, Chariot",
@@ -343,7 +548,18 @@
     "name": "The Wheel",
     "cost": 60,
     "grid_x": 1,
-    "grid_y": 3
+    "grid_y": 3,
+    "unlocks": {
+      "units": [
+        "chariot",
+        "war_chariot",
+        "immortal"
+      ],
+      "improvements": [
+        "road",
+        "watermill"
+      ]
+    }
   },
   "agriculture": {
     "description": "Enables Farms",
@@ -351,7 +567,12 @@
     "name": "Agriculture",
     "cost": 60,
     "grid_x": 1,
-    "grid_y": 5
+    "grid_y": 5,
+    "unlocks": {
+      "improvements": [
+        "farm"
+      ]
+    }
   },
   "pottery": {
     "description": "Enables Cottages, Granary",
@@ -366,7 +587,16 @@
     "or_prerequisites": [
       "agriculture",
       "fishing"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "granary",
+        "incan_terrace"
+      ],
+      "improvements": [
+        "cottage"
+      ]
+    }
   },
   "aesthetics": {
     "description": "Enables artistic development and cultural expression",
@@ -377,7 +607,15 @@
     "grid_y": 2,
     "or_prerequisites": [
       "writing"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "parthenon",
+        "statue_of_zeus",
+        "shwedagon_paya",
+        "the_parthenon"
+      ]
+    }
   },
   "sailing": {
     "description": "Enables Galley, Lighthouse",
@@ -388,7 +626,19 @@
     "grid_y": 1,
     "or_prerequisites": [
       "fishing"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "galley"
+      ],
+      "buildings": [
+        "lighthouse",
+        "viking_trading_post",
+        "great_lighthouse",
+        "moai_statues",
+        "the_great_lighthouse"
+      ]
+    }
   },
   "writing": {
     "description": "Enables Library, Open Borders",
@@ -401,7 +651,14 @@
       "priesthood",
       "animal_husbandry",
       "pottery"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "library",
+        "arabian_madrassa",
+        "madrassa"
+      ]
+    }
   },
   "mathematics": {
     "description": "Enables Catapult",
@@ -412,7 +669,16 @@
     "grid_y": 5,
     "or_prerequisites": [
       "writing"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "aqueduct",
+        "ottoman_hammam",
+        "khmer_baray",
+        "hanging_garden",
+        "the_hanging_gardens"
+      ]
+    }
   },
   "alphabet": {
     "description": "Enables Tech Trading",
@@ -423,7 +689,12 @@
     "grid_y": 7,
     "or_prerequisites": [
       "writing"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "spy"
+      ]
+    }
   },
   "calendar": {
     "description": "Enables Plantation",
@@ -437,7 +708,15 @@
     ],
     "or_prerequisites": [
       "mathematics"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "mausoleum_of_maussollos"
+      ],
+      "improvements": [
+        "plantation"
+      ]
+    }
   },
   "currency": {
     "description": "Enables Market",
@@ -449,7 +728,14 @@
     "or_prerequisites": [
       "mathematics",
       "alphabet"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "market",
+        "roman_forum",
+        "forum"
+      ]
+    }
   },
   "philosophy": {
     "description": "Can found Taoism",
@@ -464,7 +750,15 @@
     "or_prerequisites": [
       "code_of_laws",
       "drama"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "angkor_wat"
+      ],
+      "religions": [
+        "taoism"
+      ]
+    }
   },
   "paper": {
     "description": "Prerequisite for Education",
@@ -476,7 +770,13 @@
     "or_prerequisites": [
       "theology",
       "civil_service"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "sankore",
+        "university_of_sankore"
+      ]
+    }
   },
   "banking": {
     "description": "Enables Bank",
@@ -490,7 +790,13 @@
     ],
     "or_prerequisites": [
       "guilds"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "bank",
+        "english_stock_exchange"
+      ]
+    }
   },
   "education": {
     "description": "Enables University",
@@ -501,7 +807,14 @@
     "grid_y": 10,
     "or_prerequisites": [
       "paper"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "university",
+        "korean_seowon",
+        "oxford_university"
+      ]
+    }
   },
   "printing_press": {
     "description": "Cottages grow faster",
@@ -530,7 +843,13 @@
     ],
     "or_prerequisites": [
       "education"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "custom_house",
+        "portugal_feitoria"
+      ]
+    }
   },
   "astronomy": {
     "description": "Enables Frigate, Observatory",
@@ -542,7 +861,17 @@
     "prerequisites": [
       "calendar",
       "optics"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "galleon",
+        "oostindievaarder"
+      ],
+      "buildings": [
+        "observatory",
+        "french_salon"
+      ]
+    }
   },
   "chemistry": {
     "description": "Enables Grenadier, Cannon",
@@ -556,7 +885,13 @@
     ],
     "or_prerequisites": [
       "gunpowder"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "privateer",
+        "frigate"
+      ]
+    }
   },
   "scientific_method": {
     "description": "Doubles research from scientists",
@@ -584,7 +919,12 @@
     ],
     "or_prerequisites": [
       "scientific_method"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "airship"
+      ]
+    }
   },
   "biology": {
     "era": "industrial",
@@ -597,7 +937,12 @@
     ],
     "or_prerequisites": [
       "scientific_method"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "national_park"
+      ]
+    }
   },
   "medicine": {
     "description": "Enables Hospital",
@@ -611,7 +956,14 @@
     ],
     "or_prerequisites": [
       "biology"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "hospital",
+        "red_cross",
+        "corporation_2"
+      ]
+    }
   },
   "electricity": {
     "description": "Prerequisite for modern techs",
@@ -622,7 +974,14 @@
     "grid_y": 9,
     "or_prerequisites": [
       "physics"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "bunker",
+        "bomb_shelter",
+        "broadway"
+      ]
+    }
   },
   "combustion": {
     "description": "Enables Destroyer, Submarine, reveals Oil",
@@ -633,7 +992,21 @@
     "grid_y": 14,
     "or_prerequisites": [
       "railroad"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "transport",
+        "destroyer"
+      ],
+      "buildings": [
+        "public_transportation",
+        "corporation_4",
+        "public_transport"
+      ],
+      "improvements": [
+        "well"
+      ]
+    }
   },
   "fission": {
     "description": "Enables Nuclear Missile, Nuclear Plant, reveals Uranium",
@@ -644,7 +1017,16 @@
     "grid_y": 7,
     "or_prerequisites": [
       "electricity"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "nuclear_missile",
+        "icbm"
+      ],
+      "buildings": [
+        "nuclear_plant"
+      ]
+    }
   },
   "flight": {
     "description": "Enables Fighter, Bomber, Airport",
@@ -656,7 +1038,16 @@
     "prerequisites": [
       "physics",
       "combustion"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "carrier",
+        "fighter"
+      ],
+      "buildings": [
+        "airport"
+      ]
+    }
   },
   "advanced_flight": {
     "description": "Enables ICBM",
@@ -670,7 +1061,13 @@
     ],
     "or_prerequisites": [
       "flight"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "gunship",
+        "jet_fighter"
+      ]
+    }
   },
   "plastics": {
     "description": "Enables Hydro Plant",
@@ -684,7 +1081,15 @@
     ],
     "or_prerequisites": [
       "industrialism"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "hydro_plant",
+        "great_dam",
+        "corporation_3",
+        "three_gorges_dam"
+      ]
+    }
   },
   "composites": {
     "description": "Enables Modern Armor",
@@ -698,7 +1103,12 @@
     ],
     "or_prerequisites": [
       "plastics"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "modern_armor"
+      ]
+    }
   },
   "stealth": {
     "description": "Enables Stealth Bomber",
@@ -712,7 +1122,13 @@
     ],
     "or_prerequisites": [
       "advanced_flight"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "stealth_destroyer",
+        "stealth_bomber"
+      ]
+    }
   },
   "genetics": {
     "description": "Enables spaceship life support",
@@ -759,7 +1175,18 @@
     "name": "Hunting",
     "cost": 40,
     "grid_x": 1,
-    "grid_y": 7
+    "grid_y": 7,
+    "unlocks": {
+      "units": [
+        "scout",
+        "spearman",
+        "impi",
+        "holkan"
+      ],
+      "improvements": [
+        "camp"
+      ]
+    }
   },
   "mining": {
     "description": "Enables Mines",
@@ -767,7 +1194,12 @@
     "name": "Mining",
     "cost": 50,
     "grid_x": 1,
-    "grid_y": 14
+    "grid_y": 14,
+    "unlocks": {
+      "improvements": [
+        "mine"
+      ]
+    }
   },
   "archery": {
     "description": "Enables Archer",
@@ -778,7 +1210,14 @@
     "grid_y": 7,
     "or_prerequisites": [
       "hunting"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "archer",
+        "skirmisher",
+        "bowman"
+      ]
+    }
   },
   "masonry": {
     "description": "Enables Quarry, Walls",
@@ -790,7 +1229,21 @@
     "or_prerequisites": [
       "mining",
       "mysticism"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "walls",
+        "celtic_dun",
+        "pyramid",
+        "great_wall",
+        "the_pyramids",
+        "the_great_wall"
+      ],
+      "improvements": [
+        "quarry",
+        "fort"
+      ]
+    }
   },
   "animal_husbandry": {
     "description": "Enables Pastures, reveals Horses",
@@ -802,7 +1255,12 @@
     "or_prerequisites": [
       "hunting",
       "agriculture"
-    ]
+    ],
+    "unlocks": {
+      "improvements": [
+        "pasture"
+      ]
+    }
   },
   "bronze_working": {
     "description": "Enables Axeman, Spearman, reveals Copper",
@@ -813,7 +1271,15 @@
     "grid_y": 14,
     "or_prerequisites": [
       "mining"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "axeman",
+        "phalanx",
+        "vulture",
+        "dog_soldier"
+      ]
+    }
   },
   "horseback_riding": {
     "description": "Enables Horseman, Stable",
@@ -824,7 +1290,18 @@
     "grid_y": 6,
     "or_prerequisites": [
       "animal_husbandry"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "horse_archer",
+        "numidian_cavalry",
+        "keshik"
+      ],
+      "buildings": [
+        "stable",
+        "ger"
+      ]
+    }
   },
   "iron_working": {
     "description": "Enables Swordsman, reveals Iron",
@@ -835,7 +1312,15 @@
     "grid_y": 14,
     "or_prerequisites": [
       "bronze_working"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "swordsman",
+        "jaguar",
+        "gallic_warrior",
+        "praetorian"
+      ]
+    }
   },
   "metal_casting": {
     "description": "Enables Trireme, Forge",
@@ -849,7 +1334,21 @@
     ],
     "or_prerequisites": [
       "bronze_working"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "trireme"
+      ],
+      "buildings": [
+        "forge",
+        "mali_mint",
+        "colossus",
+        "the_colossus"
+      ],
+      "improvements": [
+        "workshop"
+      ]
+    }
   },
   "compass": {
     "description": "Enables Harbor",
@@ -863,7 +1362,16 @@
     ],
     "or_prerequisites": [
       "iron_working"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "explorer"
+      ],
+      "buildings": [
+        "harbor",
+        "carthage_cothon"
+      ]
+    }
   },
   "construction": {
     "description": "Enables Catapult, Colosseum, Aqueduct",
@@ -877,7 +1385,22 @@
     ],
     "or_prerequisites": [
       "mathematics"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "war_elephant",
+        "ballista_elephant",
+        "catapult",
+        "hwacha"
+      ],
+      "buildings": [
+        "colosseum",
+        "greek_odeon",
+        "maya_ball_court",
+        "babylon_garden",
+        "odeon"
+      ]
+    }
   },
   "machinery": {
     "description": "Enables Crossbowman, Trebuchet",
@@ -888,7 +1411,13 @@
     "grid_y": 12,
     "or_prerequisites": [
       "metal_casting"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "crossbowman",
+        "cho_ko_nu"
+      ]
+    }
   },
   "engineering": {
     "description": "Enables Castle, faster roads",
@@ -902,7 +1431,20 @@
     ],
     "or_prerequisites": [
       "construction"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "pikeman",
+        "landsknecht",
+        "trebuchet"
+      ],
+      "buildings": [
+        "castle",
+        "spanish_citadel",
+        "notre_dame",
+        "citadel"
+      ]
+    }
   },
   "optics": {
     "description": "Enables Caravel, Explorer, ocean travel",
@@ -916,7 +1458,13 @@
     ],
     "or_prerequisites": [
       "compass"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "caravel",
+        "carrack"
+      ]
+    }
   },
   "gunpowder": {
     "description": "Enables Musketman",
@@ -928,7 +1476,15 @@
     "or_prerequisites": [
       "guilds",
       "education"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "musketman",
+        "musketeer",
+        "janissary",
+        "oromo_warrior"
+      ]
+    }
   },
   "replaceable_parts": {
     "description": "Enables Infantry, Lumbermill improvement",
@@ -942,7 +1498,12 @@
     ],
     "or_prerequisites": [
       "printing_press"
-    ]
+    ],
+    "unlocks": {
+      "improvements": [
+        "lumbermill"
+      ]
+    }
   },
   "military_science": {
     "description": "Enables Grenadier, Cavalry. Enables West Point national wonder.",
@@ -953,7 +1514,16 @@
     "grid_y": 12,
     "or_prerequisites": [
       "chemistry"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "grenadier",
+        "ship_of_the_line"
+      ],
+      "buildings": [
+        "military_academy"
+      ]
+    }
   },
   "rifling": {
     "description": "Enables Rifleman",
@@ -967,7 +1537,13 @@
     ],
     "or_prerequisites": [
       "replaceable_parts"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "rifleman",
+        "redcoat"
+      ]
+    }
   },
   "steam_power": {
     "description": "Enables Transport, Coal Plant, reveals Coal",
@@ -981,7 +1557,13 @@
     ],
     "or_prerequisites": [
       "replaceable_parts"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "levee",
+        "netherlands_dike"
+      ]
+    }
   },
   "steel": {
     "description": "Enables Artillery",
@@ -995,7 +1577,18 @@
     ],
     "or_prerequisites": [
       "chemistry"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "cannon",
+        "ironclad"
+      ],
+      "buildings": [
+        "drydock",
+        "iron_works",
+        "ironworks"
+      ]
+    }
   },
   "assembly_line": {
     "description": "Enables Infantry, Factory",
@@ -1009,7 +1602,20 @@
     ],
     "or_prerequisites": [
       "steam_power"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "infantry"
+      ],
+      "buildings": [
+        "factory",
+        "german_assembly_plant",
+        "coal_plant",
+        "japanese_shale_plant",
+        "pentagon",
+        "the_pentagon"
+      ]
+    }
   },
   "railroad": {
     "description": "Enables Railroads",
@@ -1023,7 +1629,18 @@
     ],
     "or_prerequisites": [
       "steel"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "machine_gun"
+      ],
+      "buildings": [
+        "corporation_5"
+      ],
+      "improvements": [
+        "railroad"
+      ]
+    }
   },
   "artillery": {
     "era": "industrial",
@@ -1037,7 +1654,13 @@
     ],
     "or_prerequisites": [
       "rifling"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "at_infantry",
+        "artillery"
+      ]
+    }
   },
   "industrialism": {
     "description": "Enables Tank, Battleship, Carrier",
@@ -1051,7 +1674,19 @@
     ],
     "or_prerequisites": [
       "assembly_line"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "marine",
+        "navy_seal",
+        "tank",
+        "panzer",
+        "battleship"
+      ],
+      "buildings": [
+        "industrial_park"
+      ]
+    }
   },
   "radio": {
     "description": "Enables propaganda",
@@ -1062,7 +1697,19 @@
     "grid_y": 9,
     "or_prerequisites": [
       "electricity"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "submarine",
+        "bomber"
+      ],
+      "buildings": [
+        "eiffel_tower",
+        "rocknroll",
+        "cristo_redentor",
+        "rock_n_roll"
+      ]
+    }
   },
   "refrigeration": {
     "description": "Enables Supermarket",
@@ -1076,7 +1723,14 @@
     ],
     "or_prerequisites": [
       "electricity"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "supermarket",
+        "american_mall",
+        "corporation_1"
+      ]
+    }
   },
   "superconductors": {
     "era": "modern",
@@ -1087,7 +1741,14 @@
     "or_prerequisites": [
       "refrigeration",
       "computers"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "laboratory",
+        "russian_research_institute",
+        "research_lab"
+      ]
+    }
   },
   "computers": {
     "description": "Enables Research Lab",
@@ -1101,7 +1762,12 @@
     ],
     "or_prerequisites": [
       "radio"
-    ]
+    ],
+    "unlocks": {
+      "buildings": [
+        "the_internet"
+      ]
+    }
   },
   "laser": {
     "era": "modern",
@@ -1114,7 +1780,13 @@
     ],
     "or_prerequisites": [
       "satellites"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "mobile_sam",
+        "mobile_artillery"
+      ]
+    }
   },
   "rocketry": {
     "description": "Enables Jet Fighter, rockets",
@@ -1129,7 +1801,17 @@
     "or_prerequisites": [
       "flight",
       "artillery"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "sam_infantry",
+        "attack_submarine",
+        "guided_missile"
+      ],
+      "buildings": [
+        "corporation_6"
+      ]
+    }
   },
   "satellites": {
     "description": "Reveals the entire map",
@@ -1154,7 +1836,17 @@
     "grid_y": 11,
     "or_prerequisites": [
       "computers"
-    ]
+    ],
+    "unlocks": {
+      "units": [
+        "mechanized_infantry",
+        "missile_cruiser"
+      ],
+      "buildings": [
+        "space_elevator",
+        "spaceship_parts_factory"
+      ]
+    }
   },
   "future_tech": {
     "description": "Can be researched repeatedly for bonuses",
@@ -1194,9 +1886,10 @@
       "scientific_method"
     ],
     "unlocks": {
-      "units": [],
-      "buildings": [],
-      "improvements": []
+      "buildings": [
+        "security_bureau",
+        "the_kremlin"
+      ]
     },
     "description": "Enables State Property civic. Enables Intelligence Agency, Security Bureau.",
     "gridX": 13,

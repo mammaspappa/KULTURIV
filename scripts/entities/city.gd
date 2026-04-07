@@ -307,7 +307,7 @@ func calculate_yields() -> void:
 		# Percentage modifiers
 		food_percent += effects.get("food_percent", 0.0)
 		prod_percent += effects.get("production_percent", 0.0)
-		commerce_percent += effects.get("gold_percent", 0.0)
+		commerce_percent += effects.get("commerce_percent", 0.0)
 
 	food_yield = int(food_yield * (1.0 + food_percent))
 	production_yield = int(production_yield * (1.0 + prod_percent))
@@ -400,14 +400,17 @@ func _calculate_science() -> void:
 
 	science_yield = int(science_yield * (1.0 + science_percent))
 
-	# Gold from commerce remainder + buildings + shrines
+	# Gold from commerce remainder + building gold percent + flat gold + shrines
 	var gold_from_commerce = int(commerce_yield * gold_rate)
+	var gold_percent = 0.0
 	var gold_bonus = 0
 	for building_id in buildings:
 		if _is_building_obsolete(building_id):
 			continue
 		var effects = DataManager.get_building_effects(building_id)
+		gold_percent += effects.get("gold_percent", 0.0)
 		gold_bonus += effects.get("gold", 0)
+	gold_from_commerce = int(gold_from_commerce * (1.0 + gold_percent))
 	var shrine_gold = ReligionSystem.get_religious_gold(self)
 	gold_yield = gold_from_commerce + gold_bonus + shrine_gold
 

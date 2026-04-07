@@ -85,6 +85,23 @@ def find_list(el, ns, list_tag, item_tag, text_tag=None):
     return result
 
 
+def parse_int_array(parent, ns, child_tag):
+    """Parse array of ints from XML like <YieldChanges><iYield>0</iYield><iYield>8</iYield></YieldChanges>.
+
+    The child elements are leaf nodes with text content — read .text directly,
+    not via find_int (which looks for a nested child element).
+    """
+    if parent is None:
+        return []
+    result = []
+    for child in parent.findall(ns + child_tag):
+        try:
+            result.append(int(child.text.strip()) if child.text and child.text.strip() else 0)
+        except ValueError:
+            result.append(0)
+    return result
+
+
 # --- Unit Class Defaults (needed for UU mapping) ---
 def load_unit_class_defaults():
     """Load unit class -> default unit mapping."""
@@ -486,7 +503,7 @@ def extract_buildings():
         # Yield changes (food, production, commerce)
         yield_changes = info.find(ns + "YieldChanges")
         if yield_changes is not None:
-            yields = [find_int(yc, ns, "iYield") for yc in yield_changes.findall(ns + "iYield")]
+            yields = parse_int_array(yield_changes, ns, "iYield")
             # BTS order: food, production, commerce
             if len(yields) >= 1 and yields[0]: effects["food"] = yields[0]
             if len(yields) >= 2 and yields[1]: effects["production"] = yields[1]
@@ -495,7 +512,7 @@ def extract_buildings():
         # Yield modifiers (percentages)
         yield_mods = info.find(ns + "YieldModifiers")
         if yield_mods is not None:
-            mods = [find_int(ym, ns, "iYield") for ym in yield_mods.findall(ns + "iYield")]
+            mods = parse_int_array(yield_mods, ns, "iYield")
             if len(mods) >= 1 and mods[0]: effects["food_percent"] = mods[0] / 100.0
             if len(mods) >= 2 and mods[1]: effects["production_percent"] = mods[1] / 100.0
             if len(mods) >= 3 and mods[2]: effects["commerce_percent"] = mods[2] / 100.0
@@ -503,7 +520,7 @@ def extract_buildings():
         # Commerce changes (gold, research, culture, espionage)
         commerce = info.find(ns + "CommerceChanges")
         if commerce is not None:
-            vals = [find_int(cc, ns, "iCommerce") for cc in commerce.findall(ns + "iCommerce")]
+            vals = parse_int_array(commerce, ns, "iCommerce")
             if len(vals) >= 1 and vals[0]: effects["gold"] = vals[0]
             if len(vals) >= 2 and vals[1]: effects["science"] = vals[1]
             if len(vals) >= 3 and vals[2]: effects["culture"] = vals[2]
@@ -512,11 +529,27 @@ def extract_buildings():
         # Commerce modifiers (percentages)
         comm_mods = info.find(ns + "CommerceModifiers")
         if comm_mods is not None:
-            mods = [find_int(cm, ns, "iCommerce") for cm in comm_mods.findall(ns + "iCommerce")]
+            mods = parse_int_array(comm_mods, ns, "iCommerce")
             if len(mods) >= 1 and mods[0]: effects["gold_percent"] = mods[0] / 100.0
             if len(mods) >= 2 and mods[1]: effects["science_percent"] = mods[1] / 100.0
             if len(mods) >= 3 and mods[2]: effects["culture_percent"] = mods[2] / 100.0
             if len(mods) >= 4 and mods[3]: effects["espionage_percent"] = mods[3] / 100.0
+
+        # Sea plot yield changes (e.g., Lighthouse: +1 food from water tiles)
+        sea_yields = info.find(ns + "SeaPlotYieldChanges")
+        if sea_yields is not None:
+            sea_vals = parse_int_array(sea_yields, ns, "iYield")
+            if len(sea_vals) >= 1 and sea_vals[0]: effects["sea_food"] = sea_vals[0]
+            if len(sea_vals) >= 2 and sea_vals[1]: effects["sea_production"] = sea_vals[1]
+            if len(sea_vals) >= 3 and sea_vals[2]: effects["sea_commerce"] = sea_vals[2]
+
+        # River plot yield changes (e.g., Levee: +1 production on river tiles)
+        river_yields = info.find(ns + "RiverPlotYieldChanges")
+        if river_yields is not None:
+            river_vals = parse_int_array(river_yields, ns, "iYield")
+            if len(river_vals) >= 1 and river_vals[0]: effects["river_food"] = river_vals[0]
+            if len(river_vals) >= 2 and river_vals[1]: effects["river_production"] = river_vals[1]
+            if len(river_vals) >= 3 and river_vals[2]: effects["river_commerce"] = river_vals[2]
 
         # Happiness / Health
         happiness = find_int(info, ns, "iHappiness")
@@ -536,11 +569,59 @@ def extract_buildings():
 
         # Defense
         defense = find_int(info, ns, "iDefenseModifier")
+        if not defense:
+            defense = find_int(info, ns, "iDefense")
         if defense: effects["defense"] = defense / 100.0
+        bombard_def = find_int(info, ns, "iBombardDefense")
+        if bombard_def: effects["bombard_defense"] = bombard_def / 100.0
 
-        # Experience
+        # Bonus health from resources (e.g., Granary: +1 health from corn/rice/wheat)
+        bhc = info.find(ns + "BonusHealthChanges")
+        if bhc is not None:
+            health_bonuses = {}
+            for entry in bhc:
+                bt = find_text(entry, ns, "BonusType")
+                hc = find_int(entry, ns, "iHealthChange")
+                if bt and hc:
+                    health_bonuses[bts_id_to_key(bt, "BONUS_")] = hc
+            if health_bonuses:
+                effects["health_from_resources"] = health_bonuses
+
+        # Bonus happiness from resources (e.g., Forge: +1 happy from gems/gold/silver)
+        bhh = info.find(ns + "BonusHappinessChanges")
+        if bhh is not None:
+            happy_bonuses = {}
+            for entry in bhh:
+                bt = find_text(entry, ns, "BonusType")
+                hc = find_int(entry, ns, "iHappinessChange")
+                if bt and hc:
+                    happy_bonuses[bts_id_to_key(bt, "BONUS_")] = hc
+            if happy_bonuses:
+                effects["happiness_from_resources"] = happy_bonuses
+
+        # Experience (global)
         xp = find_int(info, ns, "iFreeExperience")
         if xp: effects["free_experience"] = xp
+
+        # Domain-specific experience (e.g., barracks = 3 XP for land units)
+        dfe = info.find(ns + "DomainFreeExperiences")
+        if dfe is not None:
+            for dfe_entry in dfe:
+                domain_type = find_text(dfe_entry, ns, "DomainType")
+                domain_xp = find_int(dfe_entry, ns, "iExperience")
+                if domain_type and domain_xp:
+                    domain_key = domain_type.replace("DOMAIN_", "").lower()
+                    effects[f"{domain_key}_experience"] = domain_xp
+
+        # Unit combat type experience (e.g., stable = 2 XP for mounted)
+        ucfe = info.find(ns + "UnitCombatFreeExperiences")
+        if ucfe is not None:
+            for ucfe_entry in ucfe:
+                combat_type = find_text(ucfe_entry, ns, "UnitCombatType")
+                combat_xp = find_int(ucfe_entry, ns, "iExperience")
+                if combat_type and combat_xp:
+                    ct_key = combat_type.replace("UNITCOMBAT_", "").lower()
+                    effects[f"{ct_key}_experience"] = combat_xp
 
         # Trade routes
         trade = find_int(info, ns, "iTradeRoutes")

@@ -424,8 +424,8 @@ func _process_research(player) -> void:
 		return
 
 	player.research_progress += player.get_research_output()
-	var cost = DataManager.get_tech_cost(player.current_research)
-	cost = int(cost * GameManager.get_speed_multiplier())
+	# Use effective cost (includes speed multiplier + tech diffusion discount)
+	var cost = player.get_effective_tech_cost(player.current_research)
 
 	if player.research_progress >= cost:
 		player.complete_research()

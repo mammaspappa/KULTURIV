@@ -1,7 +1,9 @@
 extends Node
 ## Handles victory condition checking.
 
-const MAX_TURNS = 400
+# BTS turn limits: Quick=330, Normal=500, Epic=750, Marathon=1500
+# This is the Normal speed limit; scaled by game speed multiplier
+const MAX_TURNS = 500
 const DOMINATION_LAND_PERCENT = 0.55  # 55% of total land mass (BTS-adjusted for smaller maps)
 const DOMINATION_POP_PERCENT = 0.55   # 55% of total population
 const CULTURAL_THRESHOLD = 50000

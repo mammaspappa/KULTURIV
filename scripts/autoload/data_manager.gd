@@ -208,23 +208,28 @@ func get_tech_unlocks(tech_id: String) -> Dictionary:
 	return tech.get("unlocks", {})
 
 func is_tech_available(tech_id: String, researched_techs: Array) -> bool:
-	var prereqs = get_tech_prerequisites(tech_id)
-	if prereqs.is_empty():
-		return true
-
 	var tech = get_tech(tech_id)
-	var prereq_type = tech.get("prereq_type", "AND")
 
-	if prereq_type == "OR":
-		for prereq in prereqs:
+	# BTS tech tree: AND prerequisites (all must be met) + OR prerequisites (at least one)
+	var and_prereqs = tech.get("prerequisites", [])
+	var or_prereqs = tech.get("or_prerequisites", [])
+
+	# Check AND prerequisites: ALL must be researched
+	for prereq in and_prereqs:
+		if prereq not in researched_techs:
+			return false
+
+	# Check OR prerequisites: at least ONE must be researched (if any exist)
+	if not or_prereqs.is_empty():
+		var has_any = false
+		for prereq in or_prereqs:
 			if prereq in researched_techs:
-				return true
-		return false
-	else:  # AND
-		for prereq in prereqs:
-			if prereq not in researched_techs:
-				return false
-		return true
+				has_any = true
+				break
+		if not has_any:
+			return false
+
+	return true
 
 # Civilization accessors
 func get_civ(civ_id: String) -> Dictionary:

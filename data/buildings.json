@@ -1,12 +1,14 @@
 {
   "palace": {
-    "description": "Marks your capital city",
     "era": "ancient",
+    "description": "Marks your capital city",
     "name": "Palace",
     "cost": 160,
     "required_tech": "",
     "wonder_type": "national",
     "effects": {
+      "commerce": 8,
+      "espionage": 4,
       "happiness": 1,
       "second_palace": true
     }
@@ -25,8 +27,8 @@
     }
   },
   "versailles": {
-    "description": "Reduces maintenance like a second palace",
     "era": "renaissance",
+    "description": "Reduces maintenance like a second palace",
     "name": "Versailles",
     "cost": 800,
     "required_tech": "divine_right",
@@ -37,23 +39,31 @@
     }
   },
   "walls": {
-    "description": "+50% city defense",
     "era": "ancient",
+    "description": "+50% city defense",
     "name": "Walls",
     "cost": 50,
     "required_tech": "masonry",
-    "obsolete_tech": "rifling"
+    "obsolete_tech": "rifling",
+    "effects": {
+      "defense": 0.5,
+      "bombard_defense": 0.5
+    }
   },
   "celtic_dun": {
     "name": "Celtic Dun",
     "cost": 50,
     "required_tech": "masonry",
     "obsolete_tech": "rifling",
-    "civilization": "celt"
+    "civilization": "celt",
+    "effects": {
+      "defense": 0.5,
+      "bombard_defense": 0.5
+    }
   },
   "castle": {
-    "description": "+50% defense, +25% vs siege",
     "era": "medieval",
+    "description": "+50% defense, +25% vs siege",
     "name": "Castle",
     "cost": 100,
     "required_tech": "engineering",
@@ -62,6 +72,9 @@
       "walls"
     ],
     "effects": {
+      "espionage_percent": 0.25,
+      "defense": 0.5,
+      "bombard_defense": 0.25,
       "trade_routes": 1
     }
   },
@@ -75,15 +88,22 @@
     ],
     "civilization": "spain",
     "effects": {
+      "espionage_percent": 0.25,
+      "defense": 0.5,
+      "bombard_defense": 0.25,
+      "siege_experience": 5,
       "trade_routes": 1
     }
   },
   "barracks": {
-    "description": "New units start with 4 XP",
     "era": "ancient",
+    "description": "New units start with 4 XP",
     "name": "Barracks",
     "cost": 50,
-    "required_tech": ""
+    "required_tech": "",
+    "effects": {
+      "land_experience": 3
+    }
   },
   "zulu_ikhanda": {
     "name": "Zulu Ikhanda",
@@ -91,16 +111,20 @@
     "required_tech": "",
     "civilization": "zulu",
     "effects": {
+      "land_experience": 3,
       "maintenance_reduction": 0.2
     }
   },
   "stable": {
-    "description": "Mounted units get +4 XP, +25% production",
     "era": "classical",
+    "description": "Mounted units get +4 XP, +25% production",
     "name": "Stable",
     "cost": 60,
     "required_tech": "horseback_riding",
-    "obsolete_tech": "advanced_flight"
+    "obsolete_tech": "advanced_flight",
+    "effects": {
+      "mounted_experience": 2
+    }
   },
   "ger": {
     "name": "Ger",
@@ -108,6 +132,9 @@
     "required_tech": "horseback_riding",
     "obsolete_tech": "advanced_flight",
     "civilization": "mongol",
+    "effects": {
+      "mounted_experience": 4
+    },
     "era": "classical",
     "description": "Mongolian unique building. +2 XP for all units."
   },
@@ -122,12 +149,17 @@
     "required_tech": "electricity"
   },
   "granary": {
-    "description": "Stores 50% food after growth",
     "era": "ancient",
+    "description": "Stores 50% food after growth",
     "name": "Granary",
     "cost": 60,
     "required_tech": "pottery",
     "effects": {
+      "health_from_resources": {
+        "corn": 1,
+        "rice": 1,
+        "wheat": 1
+      },
       "food_stored_on_growth": 0.5
     }
   },
@@ -137,12 +169,17 @@
     "required_tech": "pottery",
     "civilization": "inca",
     "effects": {
+      "health_from_resources": {
+        "corn": 1,
+        "rice": 1,
+        "wheat": 1
+      },
       "food_stored_on_growth": 0.5
     }
   },
   "aqueduct": {
-    "description": "+2 Health, +50% food stored",
     "era": "classical",
+    "description": "+2 Health, +50% food stored",
     "name": "Aqueduct",
     "cost": 100,
     "required_tech": "mathematics",
@@ -166,12 +203,13 @@
     "required_tech": "mathematics",
     "civilization": "khmer",
     "effects": {
+      "food": 1,
       "health": 2
     }
   },
   "hospital": {
-    "description": "+3 Health",
     "era": "industrial",
+    "description": "+3 Health",
     "name": "Hospital",
     "cost": 200,
     "required_tech": "medicine",
@@ -180,31 +218,44 @@
     }
   },
   "recycling_center": {
-    "description": "+2 Health, removes 2 unhealthiness",
     "era": "modern",
+    "description": "+2 Health, removes 2 unhealthiness",
     "name": "Recycling Center",
     "cost": 300,
     "required_tech": "ecology"
   },
   "lighthouse": {
-    "description": "+1 Food from water tiles",
     "era": "ancient",
+    "description": "+1 Food from water tiles",
     "name": "Lighthouse",
     "cost": 60,
-    "required_tech": "sailing"
+    "required_tech": "sailing",
+    "effects": {
+      "sea_food": 1
+    }
   },
   "viking_trading_post": {
     "name": "Viking Trading Post",
     "cost": 60,
     "required_tech": "sailing",
-    "civilization": "viking"
+    "civilization": "viking",
+    "effects": {
+      "sea_food": 1
+    }
   },
   "harbor": {
-    "description": "+1 Trade route yield, +1 Commerce from water",
     "era": "renaissance",
+    "description": "+1 Trade route yield, +1 Commerce from water",
     "name": "Harbor",
     "cost": 80,
-    "required_tech": "compass"
+    "required_tech": "compass",
+    "effects": {
+      "health_from_resources": {
+        "clam": 1,
+        "crab": 1,
+        "fish": 1
+      }
+    }
   },
   "carthage_cothon": {
     "name": "Carthage Cothon",
@@ -212,6 +263,11 @@
     "required_tech": "compass",
     "civilization": "carthage",
     "effects": {
+      "health_from_resources": {
+        "clam": 1,
+        "crab": 1,
+        "fish": 1
+      },
       "trade_routes": 1
     }
   },
@@ -230,35 +286,46 @@
     "required_buildings": [
       "harbor"
     ],
-    "civilization": "portugal"
+    "civilization": "portugal",
+    "effects": {
+      "sea_commerce": 1
+    }
   },
   "drydock": {
     "name": "Drydock",
     "cost": 120,
     "required_tech": "steel",
     "effects": {
-      "health": -1
+      "health": -1,
+      "sea_experience": 4
     }
   },
   "airport": {
-    "description": "Enables airlift, +1 Trade route yield",
     "era": "modern",
+    "description": "Enables airlift, +1 Trade route yield",
     "name": "Airport",
     "cost": 250,
     "required_tech": "flight",
     "effects": {
       "health": -1,
+      "air_experience": 3,
       "trade_routes": 1
     }
   },
   "forge": {
-    "description": "+25% Production",
     "era": "ancient",
+    "description": "+25% Production",
     "name": "Forge",
     "cost": 120,
     "required_tech": "metal_casting",
     "effects": {
+      "production_percent": 0.25,
       "health": -1,
+      "happiness_from_resources": {
+        "gems": 1,
+        "gold": 1,
+        "silver": 1
+      },
       "engineer_slots": 1
     }
   },
@@ -268,18 +335,30 @@
     "required_tech": "metal_casting",
     "civilization": "mali",
     "effects": {
+      "production_percent": 0.25,
+      "gold_percent": 0.1,
       "health": -1,
+      "happiness_from_resources": {
+        "gems": 1,
+        "gold": 1,
+        "silver": 1
+      },
       "engineer_slots": 1
     }
   },
   "factory": {
-    "description": "+50% Production, +2 Unhealthiness",
     "era": "industrial",
+    "description": "+50% Production, +2 Unhealthiness",
     "name": "Factory",
     "cost": 250,
     "required_tech": "assembly_line",
     "effects": {
+      "production_percent": 0.25,
       "health": -1,
+      "health_from_resources": {
+        "oil": -2,
+        "coal": -2
+      },
       "engineer_slots": 2
     }
   },
@@ -289,13 +368,18 @@
     "required_tech": "assembly_line",
     "civilization": "germany",
     "effects": {
+      "production_percent": 0.25,
       "health": -1,
+      "health_from_resources": {
+        "oil": -2,
+        "coal": -2
+      },
       "engineer_slots": 4
     }
   },
   "coal_plant": {
-    "description": "+25% Production, +2 Unhealthiness",
     "era": "industrial",
+    "description": "+25% Production, +2 Unhealthiness",
     "name": "Coal Plant",
     "cost": 150,
     "required_tech": "assembly_line",
@@ -312,12 +396,13 @@
     ],
     "civilization": "japan",
     "effects": {
+      "production_percent": 0.1,
       "provides_power": true
     }
   },
   "hydro_plant": {
-    "description": "+25% Production (clean)",
     "era": "modern",
+    "description": "+25% Production (clean)",
     "name": "Hydro Plant",
     "cost": 200,
     "required_tech": "plastics",
@@ -329,8 +414,8 @@
     }
   },
   "nuclear_plant": {
-    "description": "+50% Production, risk of meltdown",
     "era": "modern",
+    "description": "+50% Production, risk of meltdown",
     "name": "Nuclear Plant",
     "cost": 250,
     "required_tech": "fission",
@@ -347,12 +432,16 @@
     ],
     "effects": {
       "health": -2,
+      "health_from_resources": {
+        "oil": -1,
+        "coal": -1
+      },
       "engineer_slots": 2
     }
   },
   "obelisk": {
-    "description": "+2 Culture per turn",
     "era": "ancient",
+    "description": "+2 Culture per turn",
     "name": "Obelisk",
     "cost": 30,
     "required_tech": "mysticism",
@@ -373,37 +462,50 @@
     "cost": 30,
     "required_tech": "mysticism",
     "obsolete_tech": "astronomy",
-    "civilization": "ethiopia"
+    "civilization": "ethiopia",
+    "effects": {
+      "culture_percent": 0.25
+    }
   },
   "native_america_totem": {
     "name": "Native America Totem",
     "cost": 30,
     "required_tech": "mysticism",
     "obsolete_tech": "astronomy",
-    "civilization": "native_america"
+    "civilization": "native_america",
+    "effects": {
+      "archer_experience": 3
+    }
   },
   "public_transportation": {
     "name": "Public Transportation",
     "cost": 150,
     "required_tech": "combustion",
     "effects": {
-      "health": 1
+      "health": 1,
+      "health_from_resources": {
+        "oil": 1
+      }
     }
   },
   "academy": {
-    "description": "+50% Science in this city (built by Great Scientist)",
     "era": "ancient",
+    "description": "+50% Science in this city (built by Great Scientist)",
     "name": "Academy",
     "cost": -1,
-    "required_tech": ""
+    "required_tech": "",
+    "effects": {
+      "science_percent": 0.5
+    }
   },
   "library": {
-    "description": "+25% Science",
     "era": "ancient",
+    "description": "+25% Science",
     "name": "Library",
     "cost": 90,
     "required_tech": "writing",
     "effects": {
+      "science_percent": 0.25,
       "scientist_slots": 2
     }
   },
@@ -413,19 +515,23 @@
     "required_tech": "writing",
     "civilization": "arabia",
     "effects": {
+      "science_percent": 0.25,
       "scientist_slots": 2,
       "priest_slots": 2
     }
   },
   "university": {
-    "description": "+25% Science",
     "era": "medieval",
+    "description": "+25% Science",
     "name": "University",
     "cost": 200,
     "required_tech": "education",
     "required_buildings": [
       "library"
-    ]
+    ],
+    "effects": {
+      "science_percent": 0.25
+    }
   },
   "korean_seowon": {
     "name": "Korean Seowon",
@@ -434,15 +540,19 @@
     "required_buildings": [
       "library"
     ],
-    "civilization": "korea"
+    "civilization": "korea",
+    "effects": {
+      "science_percent": 0.35
+    }
   },
   "observatory": {
-    "description": "+25% Science",
     "era": "renaissance",
+    "description": "+25% Science",
     "name": "Observatory",
     "cost": 150,
     "required_tech": "astronomy",
     "effects": {
+      "science_percent": 0.25,
       "scientist_slots": 1
     }
   },
@@ -452,6 +562,7 @@
     "required_tech": "astronomy",
     "civilization": "france",
     "effects": {
+      "science_percent": 0.25,
       "scientist_slots": 1
     }
   },
@@ -463,6 +574,7 @@
       "observatory"
     ],
     "effects": {
+      "science_percent": 0.25,
       "health": -1,
       "space_production_percent": 0.5,
       "scientist_slots": 1
@@ -477,18 +589,22 @@
     ],
     "civilization": "russia",
     "effects": {
+      "science_percent": 0.25,
       "health": -1,
       "space_production_percent": 0.5,
       "scientist_slots": 1
     }
   },
   "theatre": {
-    "description": "+3 Culture, +1 Happiness",
     "era": "renaissance",
+    "description": "+3 Culture, +1 Happiness",
     "name": "Theatre",
     "cost": 50,
     "required_tech": "drama",
     "effects": {
+      "happiness_from_resources": {
+        "dye": 1
+      },
       "artist_slots": 2
     }
   },
@@ -498,6 +614,10 @@
     "required_tech": "drama",
     "civilization": "china",
     "effects": {
+      "culture_percent": 0.25,
+      "happiness_from_resources": {
+        "dye": 1
+      },
       "artist_slots": 2
     }
   },
@@ -507,12 +627,15 @@
     "required_tech": "drama",
     "civilization": "byzantium",
     "effects": {
-      "happiness": 1
+      "happiness": 1,
+      "happiness_from_resources": {
+        "horse": 1
+      }
     }
   },
   "colosseum": {
-    "description": "+1 Happiness",
     "era": "classical",
+    "description": "+1 Happiness",
     "name": "Colosseum",
     "cost": 80,
     "required_tech": "construction",
@@ -527,6 +650,9 @@
     "civilization": "greece",
     "effects": {
       "happiness": 2,
+      "happiness_from_resources": {
+        "music": 1
+      },
       "artist_slots": 2
     }
   },
@@ -550,22 +676,35 @@
     }
   },
   "broadcast_tower": {
-    "description": "+50% Culture, +1 Happiness",
     "era": "modern",
+    "description": "+50% Culture, +1 Happiness",
     "name": "Broadcast Tower",
     "cost": 175,
     "required_tech": "mass_media",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "drama": 1,
+        "music": 1,
+        "movies": 1
+      },
       "artist_slots": 2
     }
   },
   "market": {
-    "description": "+25% Gold, +1 Happiness from luxury resources",
     "era": "classical",
+    "description": "+25% Gold, +1 Happiness from luxury resources",
     "name": "Market",
     "cost": 150,
     "required_tech": "currency",
     "effects": {
+      "gold_percent": 0.25,
+      "happiness_from_resources": {
+        "fur": 1,
+        "ivory": 1,
+        "silk": 1,
+        "whale": 1
+      },
       "merchant_slots": 2
     }
   },
@@ -575,16 +714,30 @@
     "required_tech": "currency",
     "civilization": "rome",
     "effects": {
+      "gold_percent": 0.25,
+      "happiness_from_resources": {
+        "fur": 1,
+        "ivory": 1,
+        "silk": 1,
+        "whale": 1
+      },
       "merchant_slots": 2
     }
   },
   "grocer": {
-    "description": "+2 Health, +1 Happiness from resources",
     "era": "renaissance",
+    "description": "+2 Health, +1 Happiness from resources",
     "name": "Grocer",
     "cost": 150,
     "required_tech": "guilds",
     "effects": {
+      "gold_percent": 0.25,
+      "health_from_resources": {
+        "spices": 1,
+        "sugar": 1,
+        "wine": 1,
+        "banana": 1
+      },
       "merchant_slots": 2
     }
   },
@@ -594,32 +747,54 @@
     "required_tech": "guilds",
     "civilization": "persia",
     "effects": {
+      "gold_percent": 0.25,
       "health": 2,
+      "health_from_resources": {
+        "spices": 1,
+        "sugar": 1,
+        "wine": 1,
+        "banana": 1
+      },
       "merchant_slots": 2
     }
   },
   "bank": {
-    "description": "+50% Gold",
     "era": "medieval",
+    "description": "+50% Gold",
     "name": "Bank",
     "cost": 200,
-    "required_tech": "banking"
+    "required_tech": "banking",
+    "effects": {
+      "gold_percent": 0.5
+    }
   },
   "english_stock_exchange": {
     "name": "English Stock Exchange",
     "cost": 200,
     "required_tech": "banking",
-    "civilization": "england"
+    "civilization": "england",
+    "effects": {
+      "gold_percent": 0.65
+    }
   },
   "supermarket": {
-    "description": "+2 Health, +1 Food from farms",
     "era": "modern",
+    "description": "+2 Health, +1 Food from farms",
     "name": "Supermarket",
     "cost": 150,
     "required_tech": "refrigeration",
     "required_buildings": [
       "grocer"
-    ]
+    ],
+    "effects": {
+      "food": 1,
+      "health_from_resources": {
+        "cow": 1,
+        "deer": 1,
+        "pig": 1,
+        "sheep": 1
+      }
+    }
   },
   "american_mall": {
     "name": "American Mall",
@@ -628,15 +803,31 @@
     "required_buildings": [
       "grocer"
     ],
-    "civilization": "america"
+    "civilization": "america",
+    "effects": {
+      "food": 1,
+      "gold_percent": 0.2,
+      "health_from_resources": {
+        "cow": 1,
+        "deer": 1,
+        "pig": 1,
+        "sheep": 1
+      },
+      "happiness_from_resources": {
+        "drama": 1,
+        "music": 1,
+        "movies": 1
+      }
+    }
   },
   "courthouse": {
-    "description": "-50% city maintenance",
     "era": "classical",
+    "description": "-50% city maintenance",
     "name": "Courthouse",
     "cost": 120,
     "required_tech": "code_of_laws",
     "effects": {
+      "espionage": 2,
       "maintenance_reduction": 0.5,
       "spy_slots": 1
     }
@@ -647,6 +838,7 @@
     "required_tech": "code_of_laws",
     "civilization": "aztec",
     "effects": {
+      "espionage": 2,
       "maintenance_reduction": 0.5,
       "spy_slots": 1
     },
@@ -659,6 +851,7 @@
     "required_tech": "code_of_laws",
     "civilization": "holy_roman",
     "effects": {
+      "espionage": 2,
       "maintenance_reduction": 0.75,
       "spy_slots": 1
     }
@@ -669,6 +862,7 @@
     "required_tech": "priesthood",
     "civilization": "sumeria",
     "effects": {
+      "espionage": 2,
       "maintenance_reduction": 0.5,
       "spy_slots": 1
     }
@@ -678,6 +872,8 @@
     "cost": 120,
     "required_tech": "constitution",
     "effects": {
+      "espionage": 4,
+      "espionage_percent": 0.5,
       "spy_slots": 2
     }
   },
@@ -687,6 +883,8 @@
     "required_tech": "constitution",
     "civilization": "india",
     "effects": {
+      "espionage": 4,
+      "espionage_percent": 0.5,
       "happiness": 2,
       "spy_slots": 2
     }
@@ -694,21 +892,30 @@
   "levee": {
     "name": "Levee",
     "cost": 180,
-    "required_tech": "steam_power"
+    "required_tech": "steam_power",
+    "effects": {
+      "river_production": 1
+    }
   },
   "netherlands_dike": {
     "name": "Netherlands Dike",
     "cost": 180,
     "required_tech": "steam_power",
-    "civilization": "netherlands"
+    "civilization": "netherlands",
+    "effects": {
+      "sea_production": 1,
+      "river_production": 1
+    }
   },
   "intelligence_agency": {
-    "description": "+100% Espionage, +8 Espionage points",
     "era": "modern",
+    "description": "+100% Espionage, +8 Espionage points",
     "name": "Intelligence Agency",
     "cost": 180,
     "required_tech": "utopia",
     "effects": {
+      "espionage": 8,
+      "espionage_percent": 0.5,
       "spy_slots": 2
     }
   },
@@ -717,12 +924,13 @@
     "cost": 220,
     "required_tech": "democracy",
     "effects": {
+      "espionage": 8,
       "spy_slots": 2
     }
   },
   "jewish_temple": {
-    "description": "+1 Culture, +1 Happiness from Judaism",
     "era": "ancient",
+    "description": "+1 Culture, +1 Happiness from Judaism",
     "name": "Jewish Temple",
     "cost": 80,
     "required_tech": "",
@@ -733,27 +941,34 @@
     }
   },
   "jewish_cathedral": {
-    "description": "+4 Culture, +2 Happiness from Judaism",
     "era": "medieval",
+    "description": "+4 Culture, +2 Happiness from Judaism",
     "name": "Jewish Cathedral",
     "cost": 300,
     "required_tech": "",
     "required_religion": "judaism",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "incense": 1
+      },
       "priest_slots": 2
     }
   },
   "jewish_monastery": {
-    "description": "+10% Science, can build Jewish missionaries faster",
     "era": "medieval",
+    "description": "+10% Science, can build Jewish missionaries faster",
     "name": "Jewish Monastery",
     "cost": 60,
     "required_tech": "",
-    "required_religion": "judaism"
+    "required_religion": "judaism",
+    "effects": {
+      "science_percent": 0.1
+    }
   },
   "jewish_shrine": {
-    "description": "+1 Gold per city with Judaism",
     "era": "ancient",
+    "description": "+1 Gold per city with Judaism",
     "name": "Jewish Shrine",
     "cost": -1,
     "required_tech": "",
@@ -764,8 +979,8 @@
     }
   },
   "christian_temple": {
-    "description": "+1 Culture, +1 Happiness from Christianity",
     "era": "medieval",
+    "description": "+1 Culture, +1 Happiness from Christianity",
     "name": "Christian Temple",
     "cost": 80,
     "required_tech": "",
@@ -776,27 +991,34 @@
     }
   },
   "christian_cathedral": {
-    "description": "+4 Culture, +2 Happiness from Christianity",
     "era": "medieval",
+    "description": "+4 Culture, +2 Happiness from Christianity",
     "name": "Christian Cathedral",
     "cost": 300,
     "required_tech": "",
     "required_religion": "christianity",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "incense": 1
+      },
       "priest_slots": 2
     }
   },
   "christian_monastery": {
-    "description": "+10% Science, can build Christian missionaries faster",
     "era": "medieval",
+    "description": "+10% Science, can build Christian missionaries faster",
     "name": "Christian Monastery",
     "cost": 60,
     "required_tech": "",
-    "required_religion": "christianity"
+    "required_religion": "christianity",
+    "effects": {
+      "science_percent": 0.1
+    }
   },
   "christian_shrine": {
-    "description": "+1 Gold per city with Christianity",
     "era": "medieval",
+    "description": "+1 Gold per city with Christianity",
     "name": "Christian Shrine",
     "cost": -1,
     "required_tech": "",
@@ -807,8 +1029,8 @@
     }
   },
   "islamic_temple": {
-    "description": "+1 Culture, +1 Happiness from Islam",
     "era": "medieval",
+    "description": "+1 Culture, +1 Happiness from Islam",
     "name": "Islamic Temple",
     "cost": 80,
     "required_tech": "",
@@ -819,27 +1041,34 @@
     }
   },
   "islamic_cathedral": {
-    "description": "+4 Culture, +2 Happiness from Islam",
     "era": "medieval",
+    "description": "+4 Culture, +2 Happiness from Islam",
     "name": "Islamic Cathedral",
     "cost": 300,
     "required_tech": "",
     "required_religion": "islam",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "incense": 1
+      },
       "priest_slots": 2
     }
   },
   "islamic_monastery": {
-    "description": "+10% Science, can build Islamic missionaries faster",
     "era": "medieval",
+    "description": "+10% Science, can build Islamic missionaries faster",
     "name": "Islamic Monastery",
     "cost": 60,
     "required_tech": "",
-    "required_religion": "islam"
+    "required_religion": "islam",
+    "effects": {
+      "science_percent": 0.1
+    }
   },
   "islamic_shrine": {
-    "description": "+1 Gold per city with Islam",
     "era": "medieval",
+    "description": "+1 Gold per city with Islam",
     "name": "Islamic Shrine",
     "cost": -1,
     "required_tech": "",
@@ -850,8 +1079,8 @@
     }
   },
   "hindu_temple": {
-    "description": "+1 Culture, +1 Happiness from Hinduism",
     "era": "ancient",
+    "description": "+1 Culture, +1 Happiness from Hinduism",
     "name": "Hindu Temple",
     "cost": 80,
     "required_tech": "",
@@ -862,27 +1091,34 @@
     }
   },
   "hindu_cathedral": {
-    "description": "+4 Culture, +2 Happiness from Hinduism",
     "era": "medieval",
+    "description": "+4 Culture, +2 Happiness from Hinduism",
     "name": "Hindu Cathedral",
     "cost": 300,
     "required_tech": "",
     "required_religion": "hinduism",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "incense": 1
+      },
       "priest_slots": 2
     }
   },
   "hindu_monastery": {
-    "description": "+10% Science, can build Hindu missionaries faster",
     "era": "medieval",
+    "description": "+10% Science, can build Hindu missionaries faster",
     "name": "Hindu Monastery",
     "cost": 60,
     "required_tech": "",
-    "required_religion": "hinduism"
+    "required_religion": "hinduism",
+    "effects": {
+      "science_percent": 0.1
+    }
   },
   "hindu_shrine": {
-    "description": "+1 Gold per city with Hinduism",
     "era": "ancient",
+    "description": "+1 Gold per city with Hinduism",
     "name": "Hindu Shrine",
     "cost": -1,
     "required_tech": "",
@@ -893,8 +1129,8 @@
     }
   },
   "buddhist_temple": {
-    "description": "+1 Culture, +1 Happiness from Buddhism",
     "era": "ancient",
+    "description": "+1 Culture, +1 Happiness from Buddhism",
     "name": "Buddhist Temple",
     "cost": 80,
     "required_tech": "",
@@ -905,27 +1141,34 @@
     }
   },
   "buddhist_cathedral": {
-    "description": "+4 Culture, +2 Happiness from Buddhism",
     "era": "medieval",
+    "description": "+4 Culture, +2 Happiness from Buddhism",
     "name": "Buddhist Cathedral",
     "cost": 300,
     "required_tech": "",
     "required_religion": "buddhism",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "incense": 1
+      },
       "priest_slots": 2
     }
   },
   "buddhist_monastery": {
-    "description": "+10% Science, can build Buddhist missionaries faster",
     "era": "medieval",
+    "description": "+10% Science, can build Buddhist missionaries faster",
     "name": "Buddhist Monastery",
     "cost": 60,
     "required_tech": "",
-    "required_religion": "buddhism"
+    "required_religion": "buddhism",
+    "effects": {
+      "science_percent": 0.1
+    }
   },
   "buddhist_shrine": {
-    "description": "+1 Gold per city with Buddhism",
     "era": "ancient",
+    "description": "+1 Gold per city with Buddhism",
     "name": "Buddhist Shrine",
     "cost": -1,
     "required_tech": "",
@@ -936,8 +1179,8 @@
     }
   },
   "confucian_temple": {
-    "description": "+1 Culture, +1 Happiness from Confucianism",
     "era": "ancient",
+    "description": "+1 Culture, +1 Happiness from Confucianism",
     "name": "Confucian Temple",
     "cost": 80,
     "required_tech": "",
@@ -948,27 +1191,34 @@
     }
   },
   "confucian_cathedral": {
-    "description": "+4 Culture, +2 Happiness from Confucianism",
     "era": "medieval",
+    "description": "+4 Culture, +2 Happiness from Confucianism",
     "name": "Confucian Cathedral",
     "cost": 300,
     "required_tech": "",
     "required_religion": "confucianism",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "incense": 1
+      },
       "priest_slots": 2
     }
   },
   "confucian_monastery": {
-    "description": "+10% Science, can build Confucian missionaries faster",
     "era": "medieval",
+    "description": "+10% Science, can build Confucian missionaries faster",
     "name": "Confucian Monastery",
     "cost": 60,
     "required_tech": "",
-    "required_religion": "confucianism"
+    "required_religion": "confucianism",
+    "effects": {
+      "science_percent": 0.1
+    }
   },
   "confucian_shrine": {
-    "description": "+1 Gold per city with Confucianism",
     "era": "ancient",
+    "description": "+1 Gold per city with Confucianism",
     "name": "Confucian Shrine",
     "cost": -1,
     "required_tech": "",
@@ -979,8 +1229,8 @@
     }
   },
   "taoist_temple": {
-    "description": "+1 Culture, +1 Happiness from Taoism",
     "era": "ancient",
+    "description": "+1 Culture, +1 Happiness from Taoism",
     "name": "Taoist Temple",
     "cost": 80,
     "required_tech": "",
@@ -991,27 +1241,34 @@
     }
   },
   "taoist_cathedral": {
-    "description": "+4 Culture, +2 Happiness from Taoism",
     "era": "medieval",
+    "description": "+4 Culture, +2 Happiness from Taoism",
     "name": "Taoist Cathedral",
     "cost": 300,
     "required_tech": "",
     "required_religion": "taoism",
     "effects": {
+      "culture_percent": 0.5,
+      "happiness_from_resources": {
+        "incense": 1
+      },
       "priest_slots": 2
     }
   },
   "taoist_monastery": {
-    "description": "+10% Science, can build Taoist missionaries faster",
     "era": "medieval",
+    "description": "+10% Science, can build Taoist missionaries faster",
     "name": "Taoist Monastery",
     "cost": 60,
     "required_tech": "",
-    "required_religion": "taoism"
+    "required_religion": "taoism",
+    "effects": {
+      "science_percent": 0.1
+    }
   },
   "taoist_shrine": {
-    "description": "+1 Gold per city with Taoism",
     "era": "ancient",
+    "description": "+1 Gold per city with Taoism",
     "name": "Taoist Shrine",
     "cost": -1,
     "required_tech": "",
@@ -1022,8 +1279,8 @@
     }
   },
   "heroic_epic": {
-    "description": "+100% Military unit production",
     "era": "classical",
+    "description": "+100% Military unit production",
     "name": "Heroic Epic",
     "cost": 200,
     "required_tech": "literature",
@@ -1037,8 +1294,8 @@
     }
   },
   "national_epic": {
-    "description": "+100% Great People birth rate",
     "era": "classical",
+    "description": "+100% Great People birth rate",
     "name": "National Epic",
     "cost": 250,
     "required_tech": "literature",
@@ -1051,8 +1308,8 @@
     }
   },
   "globe_theatre": {
-    "description": "No unhappiness in this city",
     "era": "renaissance",
+    "description": "No unhappiness in this city",
     "name": "Globe Theatre",
     "cost": 300,
     "required_tech": "drama",
@@ -1075,19 +1332,20 @@
     }
   },
   "hermitage": {
-    "description": "+100% Culture in this city",
     "era": "renaissance",
+    "description": "+100% Culture in this city",
     "name": "Hermitage",
     "cost": 300,
     "required_tech": "nationalism",
     "wonder_type": "national",
     "effects": {
+      "culture_percent": 1.0,
       "great_artist_points": 1
     }
   },
   "oxford_university": {
-    "description": "Grants a free tech, +100% Science",
     "era": "medieval",
+    "description": "Grants a free tech, +100% Science",
     "name": "Oxford University",
     "cost": 400,
     "required_tech": "education",
@@ -1096,13 +1354,14 @@
       "university"
     ],
     "effects": {
+      "science_percent": 1.0,
       "great_scientist_points": 1,
       "scientist_slots": 3
     }
   },
   "wall_street": {
-    "description": "+100% Gold",
     "era": "modern",
+    "description": "+100% Gold",
     "name": "Wall Street",
     "cost": 600,
     "required_tech": "corporation",
@@ -1111,6 +1370,7 @@
       "bank"
     ],
     "effects": {
+      "gold_percent": 1.0,
       "great_merchant_points": 1,
       "merchant_slots": 3
     }
@@ -1130,8 +1390,8 @@
     }
   },
   "west_point": {
-    "description": "+4 XP for units built here",
     "era": "industrial",
+    "description": "+4 XP for units built here",
     "name": "West Point",
     "cost": 800,
     "required_tech": "military_tradition",
@@ -1141,8 +1401,8 @@
     }
   },
   "mt_rushmore": {
-    "description": "-25% War weariness",
     "era": "industrial",
+    "description": "-25% War weariness",
     "name": "Mt Rushmore",
     "cost": 500,
     "required_tech": "fascism",
@@ -1152,8 +1412,8 @@
     }
   },
   "red_cross": {
-    "description": "+10% heal rate for all units",
     "era": "industrial",
+    "description": "+10% heal rate for all units",
     "name": "Red Cross",
     "cost": 600,
     "required_tech": "medicine",
@@ -1166,11 +1426,14 @@
     }
   },
   "scotland_yard": {
-    "description": "+4 Espionage in all cities, +25% Spy success",
     "era": "industrial",
+    "description": "+4 Espionage in all cities, +25% Spy success",
     "name": "Scotland Yard",
     "cost": -1,
-    "required_tech": ""
+    "required_tech": "",
+    "effects": {
+      "espionage_percent": 1.0
+    }
   },
   "pyramid": {
     "name": "Pyramid",
@@ -1182,8 +1445,8 @@
     }
   },
   "stonehenge": {
-    "description": "Free Monument in all cities",
     "era": "ancient",
+    "description": "Free Monument in all cities",
     "name": "Stonehenge",
     "cost": 120,
     "required_tech": "mysticism",
@@ -1265,8 +1528,8 @@
     }
   },
   "angkor_wat": {
-    "description": "+1 Free Priest in all cities",
     "era": "medieval",
+    "description": "+1 Free Priest in all cities",
     "name": "Angkor Wat",
     "cost": 500,
     "required_tech": "philosophy",
@@ -1288,8 +1551,8 @@
     }
   },
   "chichen_itza": {
-    "description": "+25% Defense in all cities",
     "era": "medieval",
+    "description": "+25% Defense in all cities",
     "name": "Chichen Itza",
     "cost": 500,
     "required_tech": "code_of_laws",
@@ -1300,8 +1563,8 @@
     }
   },
   "sistine_chapel": {
-    "description": "+5 Culture in cities with state religion",
     "era": "medieval",
+    "description": "+5 Culture in cities with state religion",
     "name": "Sistine Chapel",
     "cost": 600,
     "required_tech": "music",
@@ -1321,8 +1584,8 @@
     }
   },
   "notre_dame": {
-    "description": "+1 Happiness in all cities",
     "era": "medieval",
+    "description": "+1 Happiness in all cities",
     "name": "Notre Dame",
     "cost": 550,
     "required_tech": "engineering",
@@ -1333,8 +1596,8 @@
     }
   },
   "taj_mahal": {
-    "description": "Starts a Golden Age",
     "era": "renaissance",
+    "description": "Starts a Golden Age",
     "name": "Taj Mahal",
     "cost": 700,
     "required_tech": "nationalism",
@@ -1356,8 +1619,8 @@
     }
   },
   "eiffel_tower": {
-    "description": "Free Broadcast Tower in all cities",
     "era": "industrial",
+    "description": "Free Broadcast Tower in all cities",
     "name": "Eiffel Tower",
     "cost": 1250,
     "required_tech": "radio",
@@ -1370,8 +1633,8 @@
     }
   },
   "statue_of_liberty": {
-    "description": "+1 Free Specialist in all cities",
     "era": "industrial",
+    "description": "+1 Free Specialist in all cities",
     "name": "Statue Of Liberty",
     "cost": 1500,
     "required_tech": "democracy",
@@ -1384,13 +1647,14 @@
     }
   },
   "broadway": {
-    "description": "+3 Free Artist specialist slots",
     "era": "modern",
+    "description": "+3 Free Artist specialist slots",
     "name": "Broadway",
     "cost": 800,
     "required_tech": "electricity",
     "wonder_type": "world",
     "effects": {
+      "culture_percent": 0.5,
       "great_artist_points": 2
     }
   },
@@ -1400,17 +1664,19 @@
     "required_tech": "radio",
     "wonder_type": "world",
     "effects": {
+      "culture_percent": 0.5,
       "great_artist_points": 2
     }
   },
   "hollywood": {
-    "description": "+100% Culture in this city",
     "era": "modern",
+    "description": "+100% Culture in this city",
     "name": "Hollywood",
     "cost": 1000,
     "required_tech": "mass_media",
     "wonder_type": "world",
     "effects": {
+      "culture_percent": 0.5,
       "great_artist_points": 2
     }
   },
@@ -1433,8 +1699,8 @@
     }
   },
   "united_nations": {
-    "description": "Enables Diplomatic Victory votes",
     "era": "modern",
+    "description": "Enables Diplomatic Victory votes",
     "name": "United Nations",
     "cost": 1000,
     "required_tech": "mass_media",
@@ -1444,8 +1710,8 @@
     }
   },
   "space_elevator": {
-    "description": "+50% Spaceship production in all cities",
     "era": "future",
+    "description": "+50% Spaceship production in all cities",
     "name": "Space Elevator",
     "cost": 2000,
     "required_tech": "robotics",
@@ -1455,8 +1721,8 @@
     }
   },
   "military_academy": {
-    "description": "+2 XP to new military units (built by Great General)",
     "era": "ancient",
+    "description": "+2 XP to new military units (built by Great General)",
     "name": "Military Academy",
     "cost": -1,
     "required_tech": "military_science",
@@ -1535,6 +1801,7 @@
     "required_tech": "sailing",
     "wonder_type": "national",
     "effects": {
+      "sea_production": 1,
       "great_prophet_points": 1
     }
   },
@@ -1602,8 +1869,8 @@
     }
   },
   "apostolic_palace": {
-    "description": "Enables Apostolic Palace votes. +2 Production in cities with state religion",
     "era": "medieval",
+    "description": "Enables Apostolic Palace votes. +2 Production in cities with state religion",
     "name": "Apostolic Palace",
     "cost": 400,
     "required_tech": "theology",

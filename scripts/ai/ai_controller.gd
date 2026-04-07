@@ -1135,8 +1135,8 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if u.can_found_city():
 			settlers_out += 1
 
-	# Early expansion: settler from capital when only 1 city (need escort available)
-	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 2:
+	# Early expansion: settler from capital when only 1 city (need at least 1 escort)
+	if num_cities <= 1 and settlers_out == 0 and city.population >= 3 and military_units >= 1:
 		if city.can_build_unit("settler"):
 			city.set_production("settler")
 			return
@@ -1206,17 +1206,16 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 			return
 
-	# Need settler? Strict conditions to avoid settler spam:
+	# Need settler? Build when:
 	# - No settlers already out or in production
-	# - Have enough military to escort (at least 1 per city)
-	# - Don't build more than 1 settler per 3 cities
-	# - City must have population to spare
+	# - Have at least 1 military per city for garrison
+	# - City has population to spare (pop 3+)
 	var settlers_in_production = 0
 	for c in player.cities:
 		if c.current_production == "settler":
 			settlers_in_production += 1
 	if num_cities < max_cities and settlers_out == 0 and settlers_in_production == 0:
-		if city.population >= 3 and military_units >= num_cities * 2:
+		if city.population >= 3 and military_units >= num_cities:
 			if city.can_build_unit("settler"):
 				city.set_production("settler")
 				return
@@ -1352,8 +1351,8 @@ func _manage_science_rate(player) -> void:
 	else:
 		player.culture_rate = 0.0
 
-	# Espionage slider — allocate small amount if at war and have espionage flavor
-	if not player.at_war_with.is_empty() and player.met_players.size() > 0:
+	# Espionage slider — only allocate when player has espionage tech and at war
+	if not player.at_war_with.is_empty() and player.has_tech("alphabet"):
 		player.espionage_rate = 0.1
 	else:
 		player.espionage_rate = 0.0
@@ -1361,33 +1360,22 @@ func _manage_science_rate(player) -> void:
 	# Science gets the rest minus culture and espionage
 	var max_science = 1.0 - player.culture_rate - player.espionage_rate
 
-	# Estimate current gold per turn at current science rate
-	player.science_rate = min(player.science_rate, max_science)
+	# BTS-style science management: maximize science, only drop when going bankrupt.
+	# Start at max science, then reduce if we can't afford it.
+	player.science_rate = max_science
 	for city in player.cities:
 		city.calculate_yields()
 	var est_gpt = _estimate_gold_per_turn(player)
 
-	if player.gold <= 10 or est_gpt < -5:
-		# Need more gold — reduce science to break even
+	# Only reduce science if we're actually going broke (gold negative or about to be)
+	if est_gpt < 0 and player.gold + est_gpt < 0:
+		# Reduce science until we break even or hit minimum
 		while player.science_rate > 0.0:
 			player.science_rate = max(0.0, player.science_rate - 0.1)
 			for city in player.cities:
 				city.calculate_yields()
 			est_gpt = _estimate_gold_per_turn(player)
 			if est_gpt >= 0 or player.science_rate <= 0.01:
-				break
-	elif player.science_rate < max_science:
-		# Try to maximize science while staying solvent
-		while player.science_rate < max_science:
-			var old_rate = player.science_rate
-			player.science_rate = min(max_science, player.science_rate + 0.1)
-			for city in player.cities:
-				city.calculate_yields()
-			est_gpt = _estimate_gold_per_turn(player)
-			if est_gpt < 0:
-				player.science_rate = old_rate
-				for city in player.cities:
-					city.calculate_yields()
 				break
 
 ## Estimate gold per turn based on current city yields and known costs
