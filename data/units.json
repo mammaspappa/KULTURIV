@@ -1019,7 +1019,7 @@
     "upgrades_to": "pikeman",
     "replaces": "axeman",
     "civilization": "greece",
-    "description": "Greek unique unit. Stronger than Spearman."
+    "description": "Greek unique unit. Replaces Axeman. +50% vs Melee units."
   },
   "war_chariot": {
     "name": "War Chariot",
