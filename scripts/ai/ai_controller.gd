@@ -1837,9 +1837,23 @@ func _get_best_military_unit(city, player, military_flavor: int, needs_siege: bo
 		if unit_class not in ["melee", "mounted", "gunpowder", "archery", "armor", "siege"]:
 			continue
 
-		# Strongly prefer higher-strength units (strength^1.5 makes axeman 5.0 >> warrior 2.0)
+		# Prefer higher-strength units (strength^2 makes axeman >> warrior decisively)
 		var cost = unit_data.get("cost", 30)
-		var score = pow(strength, 1.5) * 10.0 / max(cost, 10)
+		var score = pow(strength, 2.0) * 5.0 / max(cost, 10)
+
+		# Penalty for building weak units when better are available in same class
+		var dominated = false
+		for other_id in DataManager.units:
+			if other_id == unit_id or not city.can_build_unit(other_id):
+				continue
+			var other_data = DataManager.get_unit(other_id)
+			if other_data.get("unit_class", "") == unit_class:
+				var other_str = DataManager.get_unit_strength(other_id)
+				if other_str > strength:
+					dominated = true
+					break
+		if dominated:
+			score *= 0.1  # Heavily penalize obsolete units
 
 		# Counter bonuses: prefer units that counter enemy composition
 		if not enemy_classes.is_empty():
