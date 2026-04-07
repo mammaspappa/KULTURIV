@@ -30,6 +30,7 @@ func refresh_visibility(player) -> void:
 	for city in player.cities:
 		_reveal_city_territory(city, player_id)
 
+
 ## Get extra visibility range beyond cultural borders for a city
 func get_city_extra_visibility(city) -> int:
 	# Base visibility is 2 tiles beyond cultural border
@@ -76,21 +77,68 @@ func _fog_visible_tiles(player_id: int) -> void:
 				if current_vis == GameTileClass.VisibilityState.VISIBLE:
 					tile.visibility[player_id] = GameTileClass.VisibilityState.FOGGED
 
-## Reveal tiles around a position
+## Reveal tiles around a position with line-of-sight checks (BTS rules)
 func _reveal_tiles_around(center: Vector2i, sight_range: int, player_id: int) -> void:
 	var grid = GameManager.hex_grid
 	if grid == null:
 		return
 
-	var visible_tiles = GridUtils.get_tiles_in_range(center, sight_range)
-	visible_tiles.append(center)
+	# Always reveal the center tile
+	var center_tile = grid.get_tile(center)
+	if center_tile != null:
+		center_tile.visibility[player_id] = GameTileClass.VisibilityState.VISIBLE
 
+	# Determine if viewer is on a hill (can see over forests/jungles)
+	var on_hill = center_tile != null and center_tile.is_hills()
+
+	var visible_tiles = GridUtils.get_tiles_in_range(center, sight_range)
 	for tile_pos in visible_tiles:
-		# Wrap position for cylindrical maps
 		var wrapped_pos = GridUtils.wrap_position(tile_pos, grid.width, grid.height)
 		var tile = grid.get_tile(wrapped_pos)
-		if tile != null:
+		if tile == null:
+			continue
+
+		var dx = tile_pos.x - center.x
+		var dy = tile_pos.y - center.y
+		var dist = max(abs(dx), abs(dy))  # Chebyshev distance
+
+		# Adjacent tiles (distance 1) are always visible
+		if dist <= 1:
 			tile.visibility[player_id] = GameTileClass.VisibilityState.VISIBLE
+			continue
+
+		# For distance 2+, check line of sight
+		if _has_line_of_sight(center, tile_pos, on_hill, grid):
+			tile.visibility[player_id] = GameTileClass.VisibilityState.VISIBLE
+
+## Check line of sight between two tiles using Bresenham-like trace
+## Returns true if there is clear LOS
+func _has_line_of_sight(from: Vector2i, to: Vector2i, viewer_on_hill: bool, grid) -> bool:
+	var dx = to.x - from.x
+	var dy = to.y - from.y
+	var steps = max(abs(dx), abs(dy))
+	if steps <= 1:
+		return true
+
+	# Check intermediate tiles along the line (exclude start and end)
+	for i in range(1, steps):
+		var t = float(i) / float(steps)
+		var mid_x = from.x + roundi(dx * t)
+		var mid_y = from.y + roundi(dy * t)
+		var mid_pos = GridUtils.wrap_position(Vector2i(mid_x, mid_y), grid.width, grid.height)
+		var mid_tile = grid.get_tile(mid_pos)
+		if mid_tile == null:
+			continue
+
+		# Mountains always block LOS
+		if mid_tile.is_mountains():
+			return false
+
+		# Forests and jungles block LOS unless viewer is on a hill
+		if not viewer_on_hill and mid_tile.feature_id in ["forest", "jungle"]:
+			return false
+
+	return true
 
 ## Reveal tiles for a unit (called when unit moves)
 func reveal_for_unit(unit) -> void:
