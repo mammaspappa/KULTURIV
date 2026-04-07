@@ -197,15 +197,18 @@ func _is_tile_passable(tile) -> bool:
 func _get_movement_cost(tile, source_tile = null) -> float:
 	var base_cost = float(tile.get_total_movement_cost())
 
-	# Road-to-road movement costs 1/3 movement point
+	# Road-to-road movement: 1/2 base, 1/3 with Engineering, railroads nearly free
 	if source_tile != null and source_tile.road_level >= 1 and tile.road_level >= 1:
-		# Both tiles have roads - reduced movement cost
 		if tile.road_level >= 2 and source_tile.road_level >= 2:
 			# Railroad-to-railroad is essentially free
 			base_cost = 0.1
 		else:
-			# Road-to-road costs 1/3 movement point
-			base_cost = 1.0 / 3.0
+			# BTS: roads cost 1/2 movement, Engineering reduces to 1/3
+			var has_engineering = unit != null and unit.player_owner != null and unit.player_owner.has_tech("engineering")
+			if has_engineering:
+				base_cost = 1.0 / 3.0
+			else:
+				base_cost = 0.5
 
 	# Unit-specific modifiers
 	if unit != null:
