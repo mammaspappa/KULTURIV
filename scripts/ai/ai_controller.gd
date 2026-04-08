@@ -1772,8 +1772,22 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	var inflight_settlers = settlers_out + settlers_in_production
 	var slots_remaining = max_cities - num_cities
 	var max_inflight = clampi(slots_remaining, 0, 2)  # Up to 2 settlers in flight at once
-	# Economic distress: don't queue new settlers when going broke. New cities add
-	# maintenance and worsen the spiral; let courthouses/markets stabilize first.
+	# Progressive expansion brake based on science slider — same logic as
+	# ai_strategy.update_strategy. Below 70% science we scale parallel settler
+	# builds down so the empire stops adding cities before bankruptcy hits.
+	if player.science_rate < 0.70:
+		if player.science_rate <= 0.30:
+			max_inflight = 0
+		elif player.science_rate <= 0.50:
+			max_inflight = min(max_inflight, 1)
+	# Preemptive gpt-margin brake — even when slider is still high, refuse to
+	# add another city if our income margin can't absorb the maintenance hit.
+	if player.gold_per_turn < 10:
+		if player.gold_per_turn <= 0:
+			max_inflight = 0
+		elif player.gold_per_turn < 5:
+			max_inflight = min(max_inflight, 1)
+	# Hard stop when actually broke
 	if player.gold_per_turn < 0 and player.gold < 30:
 		max_inflight = 0
 	if inflight_settlers < max_inflight and city.population >= 3:

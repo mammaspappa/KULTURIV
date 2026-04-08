@@ -453,17 +453,49 @@ func _process_gold(player) -> void:
 		# Allow 5 turns of grace — science slider should drop to 0 in that time
 		# and stabilize the economy before we start disbanding.
 		if player.bankrupt_turns >= 5:
-			var weakest_unit = null
-			var weakest_strength = 999
+			# Avoid culling the last defenders. Sims showed America perpetually
+			# building warriors that wandered 1 tile out of Washington and got
+			# disbanded, leaving the empire with 3 mil for 5 cities while all
+			# production was wasted on the treadmill. Only disband combat units
+			# if we have *more* than the minimum garrison floor; otherwise pick
+			# non-military units (scouts, surplus workers).
+			# Reuse military_count from the supply calculation above.
+			var min_garrison = player.cities.size()
+
+			# Prefer disbanding non-combat units first (scouts/workers) since
+			# losing them doesn't cripple defense. Among combat units, pick the
+			# weakest, and only if we're above the garrison floor.
+			var victim = null
+			# First pass: a non-combat unit outside cities (worker/scout — but
+			# don't kill the only worker, that's the next death spiral).
+			var worker_count = 0
 			for unit in player.units:
-				var strength = DataManager.get_unit_strength(unit.unit_id)
-				if strength > 0 and strength < weakest_strength:
-					# Don't disband units in cities (garrison)
-					if GameManager.get_city_at(unit.grid_position) == null:
-						weakest_strength = strength
-						weakest_unit = unit
-			if weakest_unit:
-				weakest_unit.die()
+				if unit.can_build_improvements():
+					worker_count += 1
+			for unit in player.units:
+				if GameManager.get_city_at(unit.grid_position) != null:
+					continue
+				var ustrength = DataManager.get_unit_strength(unit.unit_id)
+				if ustrength > 0:
+					continue  # Combat handled below
+				# Skip the last worker — we need someone improving tiles
+				if unit.can_build_improvements() and worker_count <= 1:
+					continue
+				victim = unit
+				break
+
+			# Second pass: combat unit, but only if we're above garrison floor
+			if victim == null and military_count > min_garrison:
+				var weakest_strength = 999
+				for unit in player.units:
+					var s = DataManager.get_unit_strength(unit.unit_id)
+					if s > 0 and s < weakest_strength:
+						if GameManager.get_city_at(unit.grid_position) == null:
+							weakest_strength = s
+							victim = unit
+
+			if victim != null:
+				victim.die()
 				EventBus.notification_added.emit("%s disbanded a unit due to bankruptcy!" % player.player_name)
 		player.gold = 0
 	else:

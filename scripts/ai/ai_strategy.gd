@@ -67,9 +67,36 @@ static func update_strategy(player, flavor: Dictionary) -> void:
 	var raw_desired = max(0, unassigned_sites - existing_settlers)
 	var desired = min(raw_desired, slots_remaining)
 
-	# Economic distress check — never queue more settlers when going broke. Each new
-	# city adds maintenance and worsens the spiral. Wait until courthouses/markets
-	# bring gpt back to neutral before resuming expansion.
+	# Progressive expansion brake based on science slider. The premise: a healthy
+	# Civ4 economy keeps the science slider at >=70%. Below that, every additional
+	# city pushes the slider further down because of maintenance, so expansion
+	# becomes self-defeating. We scale desired settlers down as the slider drops:
+	#   science_rate >= 0.70  → full expansion
+	#   science_rate == 0.50  → ~half
+	#   science_rate == 0.30  → ~quarter
+	#   science_rate <= 0.10  → no new settlers
+	# This is gentler than the gpt<0 hard-stop: it kicks in *before* bankruptcy,
+	# preventing the death spiral instead of just halting once it starts.
+	var science_rate = player.science_rate if player.science_rate != null else 1.0
+	if science_rate < 0.70:
+		var brake = clamp((science_rate - 0.10) / 0.60, 0.0, 1.0)
+		desired = int(desired * brake)
+
+	# Preemptive gpt-margin brake. The slider brake above only fires once the
+	# AI's commerce is already shifted away from science — by then the cities
+	# are founded and the damage is locked in. This second brake reads gpt
+	# directly: if our margin is too thin to absorb another city's maintenance
+	# (~3-8 gold), pump the brakes *before* the settler is queued.
+	#   gpt >= 10  → full expansion
+	#   gpt ==  5  → ~half
+	#   gpt <=  0  → no new settlers
+	if player.gold_per_turn < 10:
+		var margin_brake = clamp(player.gold_per_turn / 10.0, 0.0, 1.0)
+		desired = int(desired * margin_brake)
+
+	# Hard stop: never queue more settlers when going broke. Each new city adds
+	# maintenance and worsens the spiral. Wait until courthouses/markets bring
+	# gpt back to neutral before resuming expansion.
 	if player.gold_per_turn < 0 and player.gold < 30:
 		desired = 0
 
