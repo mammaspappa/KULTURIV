@@ -346,11 +346,13 @@ func _process_gold(player) -> void:
 			if effects.get("second_palace", false):
 				palace_positions.append(city.grid_position)
 
-	# BTS: maintenance scales inversely with map size (larger maps = lower per-tile cost)
-	# Reference map is 80x50 = 4000 tiles. Scale maintenance so it's proportional.
+	# Map-size scaling: smaller maps have shorter inter-city distances anyway,
+	# so the scale factor only adjusts modestly. Previously this used an
+	# uncapped sqrt(reference/map_tiles) which produced 4x multipliers on
+	# tiny maps, bankrupting any AI that built more than 3 cities.
 	var map_tiles = float(GameManager.map_width * GameManager.map_height)
-	var reference_tiles = 4000.0  # Standard map size
-	var map_scale = sqrt(reference_tiles / max(map_tiles, 100.0))  # Smaller maps = higher maintenance
+	var reference_tiles = 4000.0  # Standard map size (80x50)
+	var map_scale = clamp(sqrt(reference_tiles / max(map_tiles, 100.0)), 0.7, 1.4)
 
 	var city_maintenance = 0
 	for city in player.cities:
@@ -439,22 +441,33 @@ func _process_gold(player) -> void:
 	# Add to player's gold treasury
 	player.gold += player.gold_per_turn
 
-	# Gold deficit handling: disband excess military units if bankrupt
+	# Gold deficit handling: track consecutive bankrupt turns and only disband
+	# after a grace period. The previous code disbanded a unit every turn the
+	# instant gold went negative — combined with high small-map maintenance,
+	# this created a death spiral where the AI built warriors that got
+	# disbanded the same turn (visible as "Rome lost a warrior at HP=100"
+	# every other turn). The AI's science-slider auto-drop needs a few turns
+	# to react before we start culling units.
 	if player.gold < 0:
-		# Disband cheapest military unit to recover
-		var weakest_unit = null
-		var weakest_strength = 999
-		for unit in player.units:
-			var strength = DataManager.get_unit_strength(unit.unit_id)
-			if strength > 0 and strength < weakest_strength:
-				# Don't disband units in cities (garrison)
-				if GameManager.get_city_at(unit.grid_position) == null:
-					weakest_strength = strength
-					weakest_unit = unit
-		if weakest_unit:
-			weakest_unit.die()
-			EventBus.notification_added.emit("%s disbanded a unit due to bankruptcy!" % player.player_name)
+		player.bankrupt_turns = player.bankrupt_turns + 1
+		# Allow 5 turns of grace — science slider should drop to 0 in that time
+		# and stabilize the economy before we start disbanding.
+		if player.bankrupt_turns >= 5:
+			var weakest_unit = null
+			var weakest_strength = 999
+			for unit in player.units:
+				var strength = DataManager.get_unit_strength(unit.unit_id)
+				if strength > 0 and strength < weakest_strength:
+					# Don't disband units in cities (garrison)
+					if GameManager.get_city_at(unit.grid_position) == null:
+						weakest_strength = strength
+						weakest_unit = unit
+			if weakest_unit:
+				weakest_unit.die()
+				EventBus.notification_added.emit("%s disbanded a unit due to bankruptcy!" % player.player_name)
 		player.gold = 0
+	else:
+		player.bankrupt_turns = 0
 
 ## Get AI difficulty bonuses (cached per round)
 var _ai_bonus_cache: Dictionary = {}

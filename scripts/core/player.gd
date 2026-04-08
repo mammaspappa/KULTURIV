@@ -51,6 +51,10 @@ var golden_ages_count: int = 0  # Number of golden ages this player has had
 # War Weariness
 var war_weariness: int = 0
 
+# Bankrupt grace counter — consecutive turns at gold=0 with negative gpt.
+# Used by turn_manager._process_gold to delay forced unit disbands.
+var bankrupt_turns: int = 0
+
 # Civics
 var civics: Dictionary = {}
 var anarchy_turns: int = 0
