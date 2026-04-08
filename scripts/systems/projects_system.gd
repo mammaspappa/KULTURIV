@@ -179,7 +179,7 @@ func _apply_project_effects(project_id: String, project: Dictionary, player, cit
 
 func _apply_tech_share(player, threshold: int) -> void:
 	# Grant techs that at least 'threshold' other civs have
-	var all_players = GameManager.get_all_players() if GameManager else []
+	var all_players = GameManager.players if GameManager else []
 	var tech_counts = {}
 
 	for other_player in all_players:

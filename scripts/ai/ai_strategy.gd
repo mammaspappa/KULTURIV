@@ -440,12 +440,18 @@ static func get_production_advice(player, city, flavor: Dictionary) -> String:
 		return ""
 
 	# Need settlers for expansion?
+	# Defense-in-depth economy guard. update_strategy already zeroes
+	# desired_settlers when broke, but the brake there reads gpt at strategy
+	# eval time. By the time get_production_advice is called from inside a
+	# city's turn, gpt may have shifted. Re-check here so we never *advise*
+	# a settler when the empire can't afford another city.
 	# Allow multiple settlers in flight in parallel — the previous "one settler
 	# in production at a time" guard meant only one city could expand at a time,
 	# leaving large gaps where the AI built warriors instead. Cap parallelism so
 	# we don't drain food/gold from every city at once.
+	var economy_ok = player.gold_per_turn > 0 and player.gold >= 50
 	var desired_settlers = strategy.get("desired_settlers", 0)
-	if desired_settlers > 0:
+	if economy_ok and desired_settlers > 0:
 		var settlers_in_production = 0
 		for c in player.cities:
 			if c.current_production == "settler":

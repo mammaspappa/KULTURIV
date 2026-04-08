@@ -37,7 +37,7 @@ var _cached_has_spies: int = -1
 # War/peace cooldown: "player_id:other_id" -> turn when peace was last made
 # Prevents rapid war cycling (declare → peace → declare loop)
 var peace_cooldown: Dictionary = {}  # String -> int (turn number)
-const PEACE_COOLDOWN_TURNS = 20  # Must wait 20 turns after peace before redeclaring war
+const PEACE_COOLDOWN_TURNS = 35  # Must wait 35 turns after peace before redeclaring war (was 20 — sims showed Aztec re-declaring on Mongolia 3 times in 100 turns with no territorial gain, just churning units)
 
 ## Execute a full turn for an AI player
 func execute_turn(player) -> void:

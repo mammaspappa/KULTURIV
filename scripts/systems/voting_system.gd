@@ -70,7 +70,7 @@ func _activate_vote_source(source_id: String, city) -> void:
 		return  # Already active
 
 	active_vote_sources[source_id] = {
-		"owner": city.owner_id,
+		"owner": city.player_owner.player_id if city.player_owner else -1,
 		"city": city
 	}
 
@@ -129,7 +129,7 @@ func _get_religion_votes(player_id: int, source_id: String) -> int:
 
 	var total = 0
 	for city in player.cities:
-		if city.has_religion(ap_religion):
+		if ap_religion in city.religions:
 			total += city.population
 	return total
 
@@ -147,7 +147,7 @@ func _get_apostolic_palace_religion() -> String:
 # Get total vote power across all eligible voters
 func get_total_votes(source_id: String) -> int:
 	var total = 0
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id):
@@ -208,7 +208,7 @@ func _initiate_secretary_election(source_id: String) -> void:
 	EventBus.secretary_election_started.emit(source_id, candidates)
 
 	# AI players vote immediately in elections
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	for player in players:
 		if not player.is_human and _is_eligible_voter(player.player_id, source_id):
 			var candidate = _ai_choose_secretary_candidate(player.player_id, candidates, source_id)
@@ -265,7 +265,7 @@ func _ai_choose_secretary_candidate(player_id: int, candidates: Array, source_id
 
 func _get_secretary_candidates(source_id: String) -> Array:
 	# Top 2 vote power players are candidates
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	var candidates = []
 
 	for player in players:
@@ -294,7 +294,7 @@ func start_vote(source_id: String, resolution_id: String, proposer_id: int, targ
 	EventBus.vote_started.emit(source_id, resolution_id, proposer_id)
 
 	# AI players vote immediately
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	for player in players:
 		if not player.is_human and _is_eligible_voter(player.player_id, source_id):
 			var vote = _ai_decide_vote(player.player_id, resolution_id, proposer_id, target)
@@ -316,7 +316,7 @@ func cast_vote(player_id: int, vote_for: bool) -> void:
 	}
 
 	# Check if all votes are in
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	var all_voted = true
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id):
@@ -343,7 +343,7 @@ func cast_secretary_vote(player_id: int, candidate_id: int) -> void:
 	}
 
 	# Check if all votes are in
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	var all_voted = true
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id):
@@ -534,14 +534,14 @@ func _apply_resolution(resolution_id: String, source_id: String, target) -> void
 		_assign_city(target)
 
 func _force_all_civics(civic_id: String, source_id: String) -> void:
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id):
 			if CivicsSystem:
 				CivicsSystem.change_civic(player, civic_id)
 
 func _force_open_borders(source_id: String) -> void:
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	var eligible = []
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id):
@@ -556,7 +556,7 @@ func _force_open_borders(source_id: String) -> void:
 				p2.set_open_borders(eligible[i], true)
 
 func _force_defensive_pacts(source_id: String) -> void:
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	var eligible = []
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id):
@@ -572,20 +572,20 @@ func _force_defensive_pacts(source_id: String) -> void:
 
 func _force_peace(target) -> void:
 	# Force peace with all players at war with target
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	for player in players:
 		if player.is_at_war_with(target.player_id):
 			player.make_peace_with(target.player_id)
 			EventBus.peace_declared.emit(player, target)
 
 func _force_embargo(target, source_id: String) -> void:
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id) and player.player_id != target.player_id:
 			player.set_trade_embargo(target.player_id, true)
 
 func _force_war(target, source_id: String) -> void:
-	var players = GameManager.get_all_players() if GameManager else []
+	var players = GameManager.players if GameManager else []
 	for player in players:
 		if _is_eligible_voter(player.player_id, source_id) and player.player_id != target.player_id:
 			if not player.is_at_war_with(target.player_id):
