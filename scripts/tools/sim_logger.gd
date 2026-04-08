@@ -18,9 +18,40 @@ var empty_production_turns: Dictionary = {}
 var _log_file: FileAccess = null
 var _log_path: String = ""
 
+# Trace mode — focus on one type of unit at a time.
+# Set via SIM_TRACE env var. Valid values:
+#   "settler"  — only trace settler decisions
+#   "worker"   — only trace worker decisions
+#   "combat"   — only trace military unit decisions
+#   "all"      — trace every unit
+#   "" (unset) — no trace output (default)
+# Multiple comma-separated values allowed: "settler,worker"
+var _trace_filter: Array[String] = []
+var _trace_to_stdout: bool = true
+var _trace_player_filter: String = ""  # Optional: only trace one player by name
+var _trace_count: int = 0
+
 func _ready() -> void:
 	_open_log_file()
+	_init_trace_filter()
 	_connect_events()
+
+func _init_trace_filter() -> void:
+	var raw = OS.get_environment("SIM_TRACE")
+	if raw == "":
+		return
+	for token in raw.to_lower().split(","):
+		var t = token.strip_edges()
+		if t != "":
+			_trace_filter.append(t)
+	_trace_player_filter = OS.get_environment("SIM_TRACE_PLAYER")
+	var stdout_env = OS.get_environment("SIM_TRACE_STDOUT")
+	if stdout_env == "0" or stdout_env.to_lower() == "false":
+		_trace_to_stdout = false
+	if not _trace_filter.is_empty():
+		print("[trace] Filter active: %s%s" % [
+			", ".join(_trace_filter),
+			" (player=" + _trace_player_filter + ")" if _trace_player_filter != "" else ""])
 
 func _open_log_file() -> void:
 	var dir = DirAccess.open("res://")
@@ -79,6 +110,67 @@ func log_decision(player_name: String, category: String, action: String, detail:
 		"detail": detail,
 		"reason": reason
 	})
+
+# --- Trace mode (focused single-unit-type debugging) ---
+
+## Returns the trace role(s) a unit qualifies as.
+## A unit may be both a settler and a worker (e.g., great person variants).
+func _classify_unit(unit) -> Array[String]:
+	var roles: Array[String] = []
+	if unit == null:
+		return roles
+	if unit.can_found_city():
+		roles.append("settler")
+	if unit.can_build_improvements():
+		roles.append("worker")
+	if unit.get_strength() > 0 and not unit.can_found_city() and not unit.can_build_improvements():
+		roles.append("combat")
+	return roles
+
+func _trace_matches(unit) -> bool:
+	if _trace_filter.is_empty():
+		return false
+	if "all" in _trace_filter:
+		return true
+	if _trace_player_filter != "" and unit.player_owner and unit.player_owner.player_name != _trace_player_filter:
+		return false
+	for role in _classify_unit(unit):
+		if role in _trace_filter:
+			return true
+	return false
+
+## Emit a trace entry for a single unit. Only outputs if the trace filter matches.
+## Use at any decision point: assignment, movement, combat, build, idle, etc.
+func trace_unit(unit, action: String, detail: String = "", extra: Dictionary = {}) -> void:
+	if unit == null or not _trace_matches(unit):
+		return
+	_trace_count += 1
+	var owner_name = unit.player_owner.player_name if unit.player_owner else "?"
+	var pos = unit.grid_position
+	var entry = {
+		"type": "trace",
+		"unit_id": unit.get_instance_id(),
+		"unit_type": unit.unit_id,
+		"role": ",".join(_classify_unit(unit)),
+		"player": owner_name,
+		"pos": [pos.x, pos.y],
+		"hp": unit.health,
+		"mp": unit.movement_remaining,
+		"order": str(unit.current_order),
+		"action": action,
+		"detail": detail,
+	}
+	for k in extra.keys():
+		entry[k] = extra[k]
+	log_entry(entry)
+	if _trace_to_stdout:
+		var line = "[T%d %s] %s %s @(%d,%d) hp=%d mp=%.1f -> %s" % [
+			TurnManager.current_turn, owner_name, unit.unit_id,
+			entry.role, pos.x, pos.y, unit.health, unit.movement_remaining,
+			action]
+		if detail != "":
+			line += " | " + detail
+		print(line)
 
 func _log_event(event_name: String, description: String, extra: Dictionary = {}) -> void:
 	var data = extra.duplicate()
@@ -385,3 +477,7 @@ func write_summary(elapsed_seconds: float) -> void:
 	print("\nErrors: %d" % errors.size())
 	for e in errors.slice(0, 10):
 		print("  %s" % e)
+
+	if not _trace_filter.is_empty():
+		print("\nTrace mode: %s — %d trace entries written" % [
+			", ".join(_trace_filter), _trace_count])
