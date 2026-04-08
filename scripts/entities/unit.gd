@@ -438,6 +438,11 @@ func move_to(target: Vector2i) -> bool:
 	if movement_remaining < move_cost and movement_remaining < 1:
 		return false
 
+	# Normalize target on wrapping axes — otherwise raw negative coordinates
+	# accumulate forever and break pathfinding (each non-normalized position
+	# looks unique to A*'s closed set, blowing up the search space).
+	target = grid._wrap_position(target)
+
 	var old_pos = grid_position
 	grid_position = target
 

@@ -278,6 +278,9 @@ func _restore_map_data(map_data: Dictionary) -> void:
 			tile.from_dict(tile_data)
 
 func _on_turn_completed(turn: int) -> void:
+	# Skip autosave when running headless sims — wastes time and clutters logs
+	if OS.get_environment("SIM_NO_AUTOSAVE") in ["1", "true", "yes", "on"]:
+		return
 	# Autosave every 5 turns
 	if turn % 5 == 0:
 		autosave()

@@ -52,6 +52,10 @@ func _ready() -> void:
 	EventBus.game_started.connect(_on_game_started)
 
 func _on_game_started() -> void:
+	# Respect "no barbarians" game setting — skip player creation and initial camps
+	if GameManager.no_barbarians:
+		return
+
 	# Find or create barbarian player
 	_ensure_barbarian_player()
 
@@ -59,6 +63,10 @@ func _on_game_started() -> void:
 	_spawn_initial_camps()
 
 func _on_turn_ended(_turn_number: int, player) -> void:
+	# Respect "no barbarians" game setting — disable all spawning and AI processing
+	if GameManager.no_barbarians:
+		return
+
 	# Only process at end of all player turns
 	if player != null and player != barbarian_player:
 		return

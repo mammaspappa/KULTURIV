@@ -31,6 +31,11 @@ var _trace_to_stdout: bool = true
 var _trace_player_filter: String = ""  # Optional: only trace one player by name
 var _trace_count: int = 0
 
+# Settler-only output mode: when true, log_entry() drops everything except
+# settler trace entries and settler-related ai_decision entries. Set via
+# SIM_SETTLER_ONLY=1 to keep logs tightly focused for troubleshooting.
+var _settler_only: bool = false
+
 func _ready() -> void:
 	_open_log_file()
 	_init_trace_filter()
@@ -48,6 +53,13 @@ func _init_trace_filter() -> void:
 	var stdout_env = OS.get_environment("SIM_TRACE_STDOUT")
 	if stdout_env == "0" or stdout_env.to_lower() == "false":
 		_trace_to_stdout = false
+	var settler_only_env = OS.get_environment("SIM_SETTLER_ONLY").to_lower()
+	if settler_only_env in ["1", "true", "yes", "on"]:
+		_settler_only = true
+		# Force settler trace if no filter specified, so settler-only mode is meaningful
+		if _trace_filter.is_empty():
+			_trace_filter.append("settler")
+		print("[settler_only] Output filtered to settler entries only")
 	if not _trace_filter.is_empty():
 		print("[trace] Filter active: %s%s" % [
 			", ".join(_trace_filter),
@@ -93,6 +105,19 @@ func _connect_events() -> void:
 # --- Core logging ---
 
 func log_entry(data: Dictionary) -> void:
+	# Settler-only mode: drop everything that isn't a settler trace or
+	# settler ai_decision. Keeps the JSONL log tightly scoped for troubleshooting.
+	if _settler_only:
+		var t = data.get("type", "")
+		var keep = false
+		if t == "trace" and data.get("role", "").find("settler") != -1:
+			keep = true
+		elif t == "ai_decision" and data.get("category", "") == "settler":
+			keep = true
+		elif t == "anomaly":
+			keep = true
+		if not keep:
+			return
 	data["turn"] = TurnManager.current_turn
 	data["year"] = TurnManager.get_year_string()
 	log_entries.append(data)

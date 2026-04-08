@@ -822,8 +822,10 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 					"target=(%d,%d)" % [fresh_site.x, fresh_site.y])
 			_move_toward(unit, fresh_site)
 		else:
+			# No explored site available — walk into fog to expand visibility
 			if sim_logger:
-				sim_logger.trace_unit(unit, "no_target_found", "no fresh site after stuck")
+				sim_logger.trace_unit(unit, "no_target_found", "no fresh site after stuck — exploring fog")
+			_walk_toward_fog(unit, player)
 		return
 
 	# --- Safety check: real danger (actual enemy UNITS, not just borders) ---
@@ -966,8 +968,55 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 				sim_logger.trace_unit(unit, "found_city", "fallback at neighbor")
 			GameManager.game_world.found_city(unit)
 			return
-	if sim_logger:
-		sim_logger.trace_unit(unit, "idle", "no settleable site reachable")
+
+	# Last resort: no settleable site found anywhere reachable. The most likely
+	# cause is that _find_best_city_location only checks explored tiles, and the
+	# settler is sitting in its capital surrounded by fog. Walk OUTWARD toward
+	# the most-fogged neighbor so the settler expands its own visibility instead
+	# of idling for ~10 turns waiting on the warrior to scout.
+	_walk_toward_fog(unit, player)
+
+
+## Move the settler one step toward the neighbor with the lowest visibility, so
+## it expands its own field of view and can eventually discover a settleable site.
+## Skips neighbors it can't legally enter, and avoids backtracking when possible.
+func _walk_toward_fog(unit, player) -> void:
+	if GameManager.hex_grid == null:
+		return
+	var best_pos = unit.grid_position
+	var best_score = -1
+	var recent = unit.get_recent_positions()
+	for n_pos in GridUtils.get_neighbors(unit.grid_position):
+		if not unit.can_move_to(n_pos):
+			continue
+		var n_tile = GameManager.hex_grid.get_tile(n_pos)
+		if n_tile == null:
+			continue
+		# Score: prefer neighbors with the most fog in THEIR neighborhood,
+		# so each step reveals fresh tiles.
+		var fog_score = 0
+		for nn_pos in GridUtils.get_tiles_in_range(n_pos, 2):
+			var nn_tile = GameManager.hex_grid.get_tile(nn_pos)
+			if nn_tile == null:
+				continue
+			if nn_tile.get_visibility_for_player(player.player_id) == 0:
+				fog_score += 1
+		# Penalize tiles we just visited to avoid oscillating
+		if n_pos in recent:
+			fog_score -= 5
+		if fog_score > best_score:
+			best_score = fog_score
+			best_pos = n_pos
+	if best_pos != unit.grid_position:
+		var pos_before = unit.grid_position
+		unit.move_to(best_pos)
+		if sim_logger:
+			sim_logger.trace_unit(unit, "explore_fog",
+				"from (%d,%d) to (%d,%d) fog_score=%d" % [
+					pos_before.x, pos_before.y, best_pos.x, best_pos.y, best_score])
+	else:
+		if sim_logger:
+			sim_logger.trace_unit(unit, "idle", "no settleable site, no fog to explore")
 
 func _get_assigned_site(unit, player) -> Dictionary:
 	var uid = unit.get_instance_id()

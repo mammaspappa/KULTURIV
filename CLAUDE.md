@@ -162,6 +162,45 @@ KULTURIV/
 - `cycle_unit` - TAB key (cycle to next unit needing orders)
 - `skip_and_cycle` - PERIOD key (skip current unit and cycle to next)
 
+## Headless AI Simulations
+
+Self-play sims for balance/AI troubleshooting. Run via:
+```bash
+./godot --headless scenes/tools/ai_simulation.tscn
+```
+
+Configure with environment variables (`scripts/tools/ai_simulation.gd`):
+
+| Var | Default | Purpose |
+|---|---|---|
+| `SIM_SEED` | random | Deterministic map/RNG (use to reproduce a bug) |
+| `SIM_MAX_TURNS` | 500 | Hard turn cap |
+| `SIM_MAP_W` / `SIM_MAP_H` | 84/52 | Map dimensions |
+| `SIM_MAP_TYPE` | pangaea | fractal/pangaea/continents/archipelago |
+| `SIM_PLAYERS` | 2 | Total players (all AI) |
+| `SIM_DIFFICULTY` | 4 | 0-8 (Prince=4) |
+| `SIM_SPEED` | 0 | 0=Quick 1=Normal 2=Epic 3=Marathon |
+| `SIM_AGGRESSION` | normal | peaceful/normal/aggressive/high |
+| `SIM_NO_BARBARIANS` | 0 | Set `1` to disable all barbarian spawning |
+| `SIM_TRACE` | (off) | Per-unit decision tracing: `settler`, `worker`, `combat`, `all`, or comma-list |
+| `SIM_TRACE_PLAYER` | (any) | Restrict trace to one player by name |
+| `SIM_TRACE_STDOUT` | 1 | Set `0` to suppress trace lines on stdout (still goes to JSONL) |
+| `SIM_SETTLER_ONLY` | 0 | Drop everything from JSONL except settler trace + settler `ai_decision` entries |
+
+**Workflow for AI troubleshooting:**
+1. Start small + fast: `SIM_MAP_W=20 SIM_MAP_H=12 SIM_MAX_TURNS=60 SIM_SPEED=0 SIM_NO_BARBARIANS=1` to isolate one system without noise.
+2. Set `SIM_SEED` so failures are reproducible across iterations.
+3. Use `SIM_TRACE=<role>` plus `SIM_SETTLER_ONLY=1` (or equivalent for the role) to keep the JSONL log scoped to the system you're debugging.
+4. Run sims **in pairs** (background tasks) — Godot is single-threaded per process, so two parallel headless sims comfortably saturate without contention.
+5. Once a fix passes on small/fast sims, scale up to larger maps and longer turn caps.
+
+Logs are written to `sim_output/sim_<timestamp>.jsonl` (one JSON per line) and a final summary is printed to stdout. Trace entries have shape:
+```json
+{"type":"trace","unit_id":...,"player":"Rome","role":"settler","pos":[8,5],"action":"explore_fog","detail":"..."}
+```
+
+`scripts/tools/run_sim_batch.sh` runs a fixed 13-scenario batch (baseline 1v1, 6p stress, archipelago naval, deity, marathon, etc.) for broader regression checks.
+
 ## Common Tasks
 
 ### Adding a new unit type

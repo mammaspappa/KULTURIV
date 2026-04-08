@@ -1091,6 +1091,13 @@ func _assign_continents() -> void:
 # =============================================================================
 
 func get_tile(pos: Vector2i) -> GameTile:
+	# Reject out-of-bounds queries on non-wrapping axes. Returning the clamped
+	# edge tile here would let units "step" off the edge — can_move_to() relies
+	# on get_tile() returning null to refuse the move.
+	if not wrap_x and (pos.x < 0 or pos.x >= width):
+		return null
+	if not wrap_y and (pos.y < 0 or pos.y >= height):
+		return null
 	var wrapped_pos = _wrap_position(pos)
 	return tiles.get(wrapped_pos, null)
 

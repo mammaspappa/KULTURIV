@@ -22,9 +22,26 @@ func _env_str(key: String, fallback: String) -> String:
 	var val = OS.get_environment(key)
 	return val if val != "" else fallback
 
+func _env_bool(key: String, fallback: bool) -> bool:
+	var val = OS.get_environment(key).to_lower()
+	if val == "":
+		return fallback
+	return val in ["1", "true", "yes", "on"]
+
 func _ready() -> void:
 	start_time = Time.get_ticks_msec()
 	max_turns = _env_int("SIM_MAX_TURNS", max_turns)
+
+	# Optional deterministic seed for reproducible map generation / AI flavor rolls
+	var sim_seed = _env_int("SIM_SEED", -1)
+	if sim_seed >= 0:
+		seed(sim_seed)
+		print("SIM_SEED=%d (deterministic)" % sim_seed)
+
+	# Default to disabling autosave when sim is headless — caller can override
+	# explicitly with SIM_NO_AUTOSAVE=0 if they want autosaves.
+	if OS.get_environment("SIM_NO_AUTOSAVE") == "":
+		OS.set_environment("SIM_NO_AUTOSAVE", "1")
 
 	# Create logger
 	logger = SimLoggerClass.new()
@@ -38,10 +55,11 @@ func _ready() -> void:
 	var settings = _get_settings()
 
 	print("=== AI SIMULATION STARTING ===")
-	print("Map: %dx%d (%s), Players: %d, Difficulty: %d, Speed: %s" % [
+	print("Map: %dx%d (%s), Players: %d, Difficulty: %d, Speed: %s, Barbarians: %s" % [
 		settings.map_width, settings.map_height, settings.map_type,
 		settings.num_players, settings.difficulty,
-		["Quick", "Normal", "Epic", "Marathon"][settings.game_speed]])
+		["Quick", "Normal", "Epic", "Marathon"][settings.game_speed],
+		"OFF" if settings.no_barbarians else "ON"])
 
 	# Initialize game
 	GameManager.start_new_game(settings)
@@ -99,6 +117,7 @@ func _get_settings() -> Dictionary:
 		"human_leader": "julius_caesar",
 		"player_name": "Rome",
 		"ai_aggressiveness": _env_str("SIM_AGGRESSION", "normal"),
+		"no_barbarians": _env_bool("SIM_NO_BARBARIANS", false),
 	}
 
 func _on_round_complete(turn: int) -> void:

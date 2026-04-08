@@ -27,6 +27,7 @@ var difficulty: int = 4  # Prince difficulty (0-8 scale)
 var game_speed: int = 1  # 0=Quick, 1=Normal, 2=Epic, 3=Marathon
 var map_type: String = "fractal"  # fractal, pangaea, continents, archipelago
 var ai_aggressiveness: String = "normal"  # peaceful, normal, aggressive, random
+var no_barbarians: bool = false  # If true, disables all barbarian spawning
 
 # Wonder tracking
 var world_wonders_built: Dictionary = {}  # wonder_id -> player_id who built it
@@ -64,6 +65,7 @@ func start_new_game(settings: Dictionary) -> void:
 	tech_brokering = settings.get("tech_brokering", false)
 	map_type = settings.get("map_type", "fractal")
 	ai_aggressiveness = settings.get("ai_aggressiveness", "normal")
+	no_barbarians = settings.get("no_barbarians", false)
 
 	# Initialize game state
 	current_game_state = GameStateClass.new()

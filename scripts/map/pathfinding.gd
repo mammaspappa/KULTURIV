@@ -23,6 +23,11 @@ func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 	if grid == null:
 		return path
 
+	# Normalize start and goal so wrapping maps don't produce non-canonical
+	# coordinates that A* can't recognize as equal to the goal.
+	start = grid._wrap_position(start)
+	goal = grid._wrap_position(goal)
+
 	if start == goal:
 		return path
 
@@ -54,14 +59,15 @@ func find_path(start: Vector2i, goal: Vector2i) -> Array[Vector2i]:
 
 		closed_set[current] = true
 
-		# Check neighbors
+		# Check neighbors — normalize each so wrapping maps don't blow up the
+		# closed/open sets with multiple keys for the same effective tile.
 		var neighbors = GridUtils.get_neighbors(current)
 		var current_tile = grid.get_tile(current)
-		for neighbor in neighbors:
-			if neighbor in closed_set:
+		for raw_neighbor in neighbors:
+			if not grid.is_valid_position(raw_neighbor):
 				continue
-
-			if not grid.is_valid_position(neighbor):
+			var neighbor = grid._wrap_position(raw_neighbor)
+			if neighbor in closed_set:
 				continue
 
 			var neighbor_tile = grid.get_tile(neighbor)
