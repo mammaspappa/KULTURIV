@@ -264,7 +264,9 @@ func _on_unit_destroyed(unit) -> void:
 	if unit == null:
 		return
 	var owner_name = unit.player_owner.player_name if unit.player_owner else "Unknown"
-	log_entry({"type": "game_event", "event": "unit_destroyed", "description": "%s lost a %s" % [owner_name, unit.unit_id]})
+	var pos = unit.grid_position
+	log_entry({"type": "game_event", "event": "unit_destroyed",
+		"description": "%s lost a %s at (%d,%d) hp=%.0f" % [owner_name, unit.unit_id, pos.x, pos.y, unit.health]})
 
 func _on_player_eliminated(player) -> void:
 	_log_event("player_eliminated", "%s has been eliminated!" % player.player_name)

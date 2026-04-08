@@ -774,8 +774,12 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 		var danger_now = false
 		for check_pos in GridUtils.get_tiles_in_range(unit.grid_position, 4):
 			var enemy_u = GameManager.get_unit_at(check_pos)
-			if enemy_u and enemy_u.player_owner != player and enemy_u.get_strength() > 0:
-				if TurnManager.current_year >= -2000 or enemy_u.player_owner.civilization_id != "barbarian":
+			if enemy_u and enemy_u.player_owner != null and enemy_u.player_owner != player and enemy_u.get_strength() > 0:
+				var is_barbarian = enemy_u.player_owner.civilization_id == "barbarian"
+				if is_barbarian and TurnManager.current_year < -2000:
+					continue
+				# Peaceful neighbors aren't a threat — only barbs or actual war.
+				if is_barbarian or player.is_at_war_with(enemy_u.player_owner.player_id):
 					danger_now = true
 					break
 
@@ -836,14 +840,23 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 			has_escort = true
 			break
 
-	# Only check for actual military units nearby — NOT just enemy borders
-	# Radius 3 so we don't keep oscillating into a tile where an enemy will catch us next turn
+	# Only check for actual military units nearby — NOT just enemy borders.
+	# Radius 3 so we don't keep oscillating into a tile where an enemy will catch us next turn.
+	# Peaceful neighbors are NOT a threat — only actual at-war units and barbarians
+	# trigger retreat. Treating any non-friendly unit as danger created an infinite
+	# retreat loop where settlers bounced between their capital and the border whenever
+	# a peaceful AI's military patrolled nearby.
 	var nearby_danger = false
 	for check_pos in GridUtils.get_tiles_in_range(unit.grid_position, 3):
 		var enemy = GameManager.get_unit_at(check_pos)
-		if enemy and enemy.player_owner != player and enemy.get_strength() > 0:
-			# Only real danger from non-animal units (during animal era, animals are weak)
-			if TurnManager.current_year >= -2000 or enemy.player_owner.civilization_id != "barbarian":
+		if enemy and enemy.player_owner != null and enemy.player_owner != player and enemy.get_strength() > 0:
+			var is_barbarian = enemy.player_owner.civilization_id == "barbarian"
+			var at_war = player.is_at_war_with(enemy.player_owner.player_id)
+			# Animal era barbarians are weak — ignore them.
+			if is_barbarian and TurnManager.current_year < -2000:
+				continue
+			# Only retreat from units we'd actually fight: barbarians or active enemies.
+			if is_barbarian or at_war:
 				nearby_danger = true
 				break
 
@@ -1697,6 +1710,29 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(building_to_build)
 			return
 
+	# AGGRESSIVE EXPANSION: build settler before general military buildup.
+	# Civ4 BTS doctrine — expand first, fight later. The previous check ran
+	# AFTER need_military, which meant the AI burned 30+ turns building extra
+	# warriors past garrison_minimum and never got around to a 2nd settler.
+	#
+	# Allow multiple settlers in flight (capped) so two cities can pump out
+	# colonists in parallel while new sites are still available.
+	var settlers_in_production = 0
+	for c in player.cities:
+		if c.current_production == "settler":
+			settlers_in_production += 1
+	var inflight_settlers = settlers_out + settlers_in_production
+	var slots_remaining = max_cities - num_cities
+	var max_inflight = clampi(slots_remaining, 0, 2)  # Up to 2 settlers in flight at once
+	if inflight_settlers < max_inflight and city.population >= 3:
+		# Garrison: 1 military per city is enough; we don't need a spare
+		# escort here because the urgent-escort path above handles that
+		# when the settler actually starts walking.
+		if military_units >= num_cities and city.can_build_unit("settler"):
+			city.set_production("settler")
+			city.set_meta("needs_escort", true)
+			return
+
 	# More military if needed — but interleave with buildings (40% chance to build instead)
 	if need_military:
 		# Check if a building would be more valuable (especially early game)
@@ -1710,22 +1746,6 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
 			return
-
-	# Need settler? Build when:
-	# - No settlers already out or in production
-	# - Have at least 1 military per city for garrison
-	# - City has population to spare (pop 3+)
-	var settlers_in_production = 0
-	for c in player.cities:
-		if c.current_production == "settler":
-			settlers_in_production += 1
-	if num_cities < max_cities and settlers_out == 0 and settlers_in_production == 0:
-		# Need garrison (1/city) + at least 1 spare for escort
-		if city.population >= 3 and military_units >= num_cities + 1:
-			if city.can_build_unit("settler"):
-				city.set_production("settler")
-				city.set_meta("needs_escort", true)
-				return
 
 	# Need more workers? (1 per city, more when expanding)
 	var desired_workers = max(1, num_cities)

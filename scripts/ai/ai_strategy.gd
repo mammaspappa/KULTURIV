@@ -389,15 +389,21 @@ static func get_production_advice(player, city, flavor: Dictionary) -> String:
 		return ""
 
 	# Need settlers for expansion?
+	# Allow multiple settlers in flight in parallel — the previous "one settler
+	# in production at a time" guard meant only one city could expand at a time,
+	# leaving large gaps where the AI built warriors instead. Cap parallelism so
+	# we don't drain food/gold from every city at once.
 	var desired_settlers = strategy.get("desired_settlers", 0)
 	if desired_settlers > 0:
-		# Check no other city is already building settler
-		var settler_in_production = false
+		var settlers_in_production = 0
 		for c in player.cities:
 			if c.current_production == "settler":
-				settler_in_production = true
-				break
-		if not settler_in_production:
+				settlers_in_production += 1
+		# Allow up to ceil(desired_settlers / 2), capped at 2 simultaneous
+		# settler builds across the civ (so an empire of 4+ cities can pump
+		# out two colonists in parallel, but a 1-city empire still queues them).
+		var max_parallel = clampi(int(ceil(desired_settlers / 2.0)), 1, 2)
+		if settlers_in_production < max_parallel:
 			return "settler"
 
 	# Need military for war targets?
