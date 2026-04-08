@@ -1566,7 +1566,21 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		var helps_economy = bld_effects.has("gold") or bld_effects.has("gold_percent") \
 			or bld_effects.has("maintenance_reduction") or bld_effects.has("trade_routes") \
 			or bld_effects.has("science") or bld_effects.has("science_percent")
-		if is_unit_prod or not helps_economy:
+		# Don't switch away from a cheap defender if we're below minimum garrison —
+		# otherwise the city loops "build warrior → switch to library → next city
+		# loops the same way → garrison stays at 0 → bankruptcy disbands what we
+		# do have." Let the warrior actually finish first.
+		var protect_cheap_mil = false
+		if is_unit_prod:
+			var pmil_count = 0
+			for u in player.units:
+				if u.get_strength() > 0:
+					pmil_count += 1
+			var prod_strength = prod_unit_data.get("strength", 0)
+			var prod_cost = prod_unit_data.get("cost", 999)
+			if prod_strength > 0 and prod_cost <= 35 and pmil_count < player.cities.size():
+				protect_cheap_mil = true
+		if (is_unit_prod or not helps_economy) and not protect_cheap_mil:
 			var rescue_bld = _get_economic_rescue_building(city, player)
 			if rescue_bld != "" and rescue_bld != prod:
 				if sim_logger:
@@ -1660,10 +1674,17 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 
 	# Hard cap: scale with cities but don't over-build
 	var max_military = num_cities * 3 + 3
-	# Economic cap: don't build more military if going broke
+	# Economic cap: don't build more military if going broke. We react earlier
+	# than the previous gold<=0 check — by the time gold hits 0, units are
+	# already disbanding to bankruptcy and the AI was still queueing more.
 	var free_supply = num_cities + 2
-	if player.gold <= 0 and military_units > free_supply:
-		max_military = military_units  # Don't add more when bankrupt
+	var bankrupt = player.gold_per_turn < 0 and player.gold < 50
+	if bankrupt:
+		# Only allow more military if we're below the absolute floor (1 per city).
+		# Above that, freeze at current count until economy recovers.
+		max_military = max(num_cities, military_units)
+	elif player.gold <= 0 and military_units > free_supply:
+		max_military = military_units  # Legacy guard
 	var need_military = military_units < desired_military and military_units < max_military
 
 	# Calculate army composition — ensure 30% siege when at war
@@ -1704,7 +1725,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	# Urgent military: if below minimum garrison (1 per city), build military first
 	var garrison_minimum = num_cities
 	if need_military and military_units < garrison_minimum:
-		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege)
+		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege, bankrupt)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
 			return
@@ -1773,7 +1794,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			if alt_building != "":
 				city.set_production(alt_building)
 				return
-		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege)
+		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege, bankrupt)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
 			return
@@ -2627,7 +2648,7 @@ func _has_siege_units_near(pos: Vector2i, player, search_range: int) -> bool:
 				return true
 	return false
 
-func _get_best_military_unit(city, player, military_flavor: int, needs_siege: bool = false) -> String:
+func _get_best_military_unit(city, player, military_flavor: int, needs_siege: bool = false, prefer_cheap: bool = false) -> String:
 	# Analyze enemy army composition to build counters
 	var enemy_classes = {}
 	for other in GameManager.players:
@@ -2654,7 +2675,14 @@ func _get_best_military_unit(city, player, military_flavor: int, needs_siege: bo
 
 		# Prefer higher-strength units (strength^2 makes axeman >> warrior decisively)
 		var cost = unit_data.get("cost", 30)
-		var score = pow(strength, 2.0) * 5.0 / max(cost, 10)
+		var score
+		if prefer_cheap:
+			# Bankruptcy mode: build the cheapest viable defender. Strength still
+			# matters slightly so we'd take an archer over a warrior, but the
+			# cubic cost penalty makes catapults a non-starter.
+			score = strength * 10.0 / pow(max(cost, 10), 1.5)
+		else:
+			score = pow(strength, 2.0) * 5.0 / max(cost, 10)
 
 		# Penalty for building weak units when better are available in same class
 		var dominated = false
