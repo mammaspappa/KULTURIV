@@ -761,6 +761,16 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 	# in/out of the city as the enemy creeps around at distance 3.
 	var city_here = GameManager.get_city_at(unit.grid_position)
 	if city_here != null and city_here.player_owner == player:
+		# Cooldown: if we recently retreated, stay put for a few turns even if we
+		# can't currently see the threat. Otherwise we leave the city, get spooked
+		# again, and oscillate forever.
+		var cooldown_until = unit.get_meta("retreat_cooldown_until", 0)
+		var has_escort_in_city = false
+		for u in GameManager.get_units_at(unit.grid_position):
+			if u != unit and u.player_owner == player and u.get_strength() > 0:
+				has_escort_in_city = true
+				break
+
 		var danger_now = false
 		for check_pos in GridUtils.get_tiles_in_range(unit.grid_position, 4):
 			var enemy_u = GameManager.get_unit_at(check_pos)
@@ -768,20 +778,16 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 				if TurnManager.current_year >= -2000 or enemy_u.player_owner.civilization_id != "barbarian":
 					danger_now = true
 					break
-		if danger_now:
-			# Check if we have an escort in this city
-			var escort_here = false
-			for u in GameManager.get_units_at(unit.grid_position):
-				if u != unit and u.player_owner == player and u.get_strength() > 0:
-					escort_here = true
-					break
-			if not escort_here:
-				if sim_logger:
-					sim_logger.trace_unit(unit, "wait_in_city", "danger nearby, no escort")
-				# Mark city as urgently needing an escort built
-				if not city_here.has_meta("needs_escort"):
-					city_here.set_meta("needs_escort", true)
-				return
+
+		var should_wait = (danger_now or TurnManager.current_turn < cooldown_until) and not has_escort_in_city
+		if should_wait:
+			if sim_logger:
+				sim_logger.trace_unit(unit, "wait_in_city",
+					"danger=%s cooldown_until=%d no_escort" % [str(danger_now), cooldown_until])
+			# Mark city as urgently needing an escort built
+			if not city_here.has_meta("needs_escort"):
+				city_here.set_meta("needs_escort", true)
+			return
 
 	# --- Oscillation/stuck detection: if oscillating or stuck, force a decision ---
 	if unit.is_oscillating() or unit.is_stuck(3):
@@ -853,6 +859,8 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 			if sim_logger:
 				sim_logger.trace_unit(unit, "retreat", "to (%d,%d) dist=%d, danger nearby" % [
 					nearest_city_pos.x, nearest_city_pos.y, best_dist])
+			# Cooldown: don't leave the city again for 4 turns even if danger fades
+			unit.set_meta("retreat_cooldown_until", TurnManager.current_turn + 4)
 			_move_toward(unit, nearest_city_pos)
 		return
 
@@ -1426,6 +1434,51 @@ func _pick_best_target(unit, enemies: Array, military_flavor: int):
 	return best_target
 
 func _process_city_ai(city, player, flavor: Dictionary) -> void:
+	# === URGENT OVERRIDES (ignore current production) ===
+	# These override what the city is already building because the situation has
+	# changed enough that the previous plan is no longer viable.
+
+	# Override 1: settler stranded here without escort — build a military unit NOW.
+	var stranded_settler_here = false
+	for u in GameManager.get_units_at(city.grid_position):
+		if u.player_owner == player and u.can_found_city():
+			var has_mil = false
+			for u2 in GameManager.get_units_at(city.grid_position):
+				if u2 != u and u2.player_owner == player and u2.get_strength() > 0:
+					has_mil = true
+					break
+			if not has_mil:
+				stranded_settler_here = true
+				break
+	if stranded_settler_here:
+		var escort_unit = _get_best_military_unit(city, player, flavor.get("military", 5), false)
+		if escort_unit != "" and city.current_production != escort_unit:
+			city.set_production(escort_unit)
+			return
+
+	# Override 2: war emergency — at war, dangerously under-defended, and currently
+	# building something that doesn't help. Switch to military immediately.
+	if not player.at_war_with.is_empty() and city.current_production != "":
+		var mil_count = 0
+		for u in player.units:
+			if u.get_strength() > 0:
+				mil_count += 1
+		var min_garrison = player.cities.size()
+		if mil_count < min_garrison + 1:
+			# Is the current production a military unit?
+			var prod = city.current_production
+			var prod_data = DataManager.get_unit(prod)
+			var is_military = not prod_data.is_empty() and prod_data.get("strength", 0) > 0
+			if not is_military:
+				var emergency_unit = _get_best_military_unit(city, player, flavor.get("military", 5), false)
+				if emergency_unit != "" and emergency_unit != prod:
+					if sim_logger:
+						sim_logger.log_decision(player.player_name, "production", "war_emergency_switch",
+							"%s -> %s" % [prod, emergency_unit],
+							"at war, mil=%d, garrison_need=%d" % [mil_count, min_garrison + 1])
+					city.set_production(emergency_unit)
+					return
+
 	# Consider whipping current production to completion (Slavery civic)
 	if city.current_production != "":
 		_consider_whipping(city, player)
@@ -1437,26 +1490,6 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		var escort = _get_best_military_unit(city, player, flavor.get("military", 5), false)
 		if escort != "":
 			city.set_production(escort)
-			return
-
-	# If a settler is sitting in this city with no escort, build one NOW.
-	# This handles the case where escort was lost or never built.
-	var stranded_settler_here = false
-	for u in GameManager.get_units_at(city.grid_position):
-		if u.player_owner == player and u.can_found_city():
-			# Check if any military unit is here
-			var has_mil = false
-			for u2 in GameManager.get_units_at(city.grid_position):
-				if u2 != u and u2.player_owner == player and u2.get_strength() > 0:
-					has_mil = true
-					break
-			if not has_mil:
-				stranded_settler_here = true
-				break
-	if stranded_settler_here:
-		var escort_unit = _get_best_military_unit(city, player, flavor.get("military", 5), false)
-		if escort_unit != "":
-			city.set_production(escort_unit)
 			return
 
 	# Check strategic production advice first
@@ -2153,19 +2186,29 @@ func _find_best_worker_target(unit, player) -> Vector2i:
 			var tile = GameManager.hex_grid.get_tile(tile_pos)
 			if tile == null or tile.is_water():
 				continue
+			# Skip our own tile — if we couldn't do anything here, going back is pointless
+			if tile_pos == unit.grid_position:
+				continue
 
 			var dist = GridUtils.chebyshev_distance(unit.grid_position, tile_pos)
 			var score = -INF
 
 			# Unimproved resource tile — TOP PRIORITY (connects resource to trade network)
+			# BUT only if we can actually build the required improvement; otherwise the
+			# worker would walk all the way there and just sit, looping forever.
 			if tile.resource_id != "" and tile.improvement_id == "":
-				score = 200.0 - dist * 3.0
-				# Bonus for strategic resources the player needs
 				var res = DataManager.get_resource(tile.resource_id)
-				if res.get("type", "") == "strategic":
-					score += 30
-				elif res.get("type", "") == "luxury":
-					score += 20
+				var required_imp = res.get("improvement", "")
+				var can_improve_now = true
+				if required_imp != "":
+					var avail = ImprovementSystem.get_available_improvements(unit, tile)
+					can_improve_now = required_imp in avail
+				if can_improve_now:
+					score = 200.0 - dist * 3.0
+					if res.get("type", "") == "strategic":
+						score += 30
+					elif res.get("type", "") == "luxury":
+						score += 20
 
 			# Unimproved non-resource tile
 			elif tile.improvement_id == "":
