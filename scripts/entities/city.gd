@@ -930,6 +930,10 @@ func get_settled_gp_bonuses() -> Dictionary:
 
 # Production
 func set_production(item: String) -> void:
+	# No-op if already producing this item — otherwise we'd wipe accumulated progress
+	# every turn the AI re-affirms its choice, leaving cities stuck at 0/cost forever.
+	if current_production == item:
+		return
 	current_production = item
 	production_progress = 0
 	production_changed.emit(item)
