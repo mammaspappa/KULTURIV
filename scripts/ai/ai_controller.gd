@@ -1551,6 +1551,31 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 					city.set_production(emergency_unit)
 					return
 
+	# Override 3: economic distress — going bankrupt and currently producing something
+	# expensive that won't help (settler/wonder/military). Switch to a building that
+	# fixes the economy: courthouse (maintenance reduction), market (+gold), library.
+	# Sims showed all 3 civs collapsing to 0% science by T100 with -30 to -99 gpt because
+	# nothing in the production tree responded to running deficits — cities kept queuing
+	# settlers and military as fast as they finished, never reaching the building scorer.
+	if player.gold_per_turn < -3 and player.gold < 50 and city.current_production != "":
+		var prod = city.current_production
+		var prod_unit_data = DataManager.get_unit(prod)
+		var is_unit_prod = not prod_unit_data.is_empty()
+		var prod_bld_data = DataManager.get_building(prod) if not is_unit_prod else {}
+		var bld_effects = prod_bld_data.get("effects", {})
+		var helps_economy = bld_effects.has("gold") or bld_effects.has("gold_percent") \
+			or bld_effects.has("maintenance_reduction") or bld_effects.has("trade_routes") \
+			or bld_effects.has("science") or bld_effects.has("science_percent")
+		if is_unit_prod or not helps_economy:
+			var rescue_bld = _get_economic_rescue_building(city, player)
+			if rescue_bld != "" and rescue_bld != prod:
+				if sim_logger:
+					sim_logger.log_decision(player.player_name, "production", "economic_rescue_switch",
+						"%s -> %s" % [prod, rescue_bld],
+						"gpt=%d, gold=%d" % [player.gold_per_turn, player.gold])
+				city.set_production(rescue_bld)
+				return
+
 	# Consider whipping current production to completion (Slavery civic)
 	if city.current_production != "":
 		_consider_whipping(city, player)
@@ -1602,7 +1627,9 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if p.civilization_id != "barbarian":
 			num_real_players += 1
 	var land_per_player = map_tiles / max(num_real_players, 1)
-	var max_cities = clampi(land_per_player / 120 + expansion_flavor / 3, 3, 10)
+	# Tighter cap (was /120, max 10) — sims showed civs sprawling to 10 cities and
+	# collapsing economically. Match the formula in ai_strategy.gd.
+	var max_cities = clampi(land_per_player / 150 + expansion_flavor / 4, 3, 7)
 
 	# Count settlers already in production or in the field
 	var settlers_out = 0
@@ -1724,6 +1751,10 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	var inflight_settlers = settlers_out + settlers_in_production
 	var slots_remaining = max_cities - num_cities
 	var max_inflight = clampi(slots_remaining, 0, 2)  # Up to 2 settlers in flight at once
+	# Economic distress: don't queue new settlers when going broke. New cities add
+	# maintenance and worsen the spiral; let courthouses/markets stabilize first.
+	if player.gold_per_turn < 0 and player.gold < 30:
+		max_inflight = 0
 	if inflight_settlers < max_inflight and city.population >= 3:
 		# Garrison: 1 military per city is enough; we don't need a spare
 		# escort here because the urgent-escort path above handles that
@@ -3051,6 +3082,49 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 func _get_best_building(city, player, flavor: Dictionary) -> String:
 	# Fallback version without specialization
 	return _get_best_building_for_specialization(city, player, flavor, CitySpecialization.HYBRID)
+
+## Pick a building that will fix a failing economy. Strongly prefers
+## maintenance_reduction (courthouse), then gold (market/grocer/bank), then
+## science (library — frees commerce by reducing the slider drop the AI
+## otherwise has to apply). Returns "" if nothing buildable.
+func _get_economic_rescue_building(city, player) -> String:
+	var best_id = ""
+	var best_score = -1.0
+	for building_id in DataManager.buildings:
+		if not city.can_build_building(building_id):
+			continue
+		var building = DataManager.get_building(building_id)
+		# Skip wonders — too expensive to be a rescue
+		if building.get("wonder_type", "") != "":
+			continue
+		# Skip special / great-person-only buildings (cost -1, e.g. academy, scotland yard)
+		var bcost = building.get("cost", 0)
+		if bcost <= 0:
+			continue
+		var effects = building.get("effects", {})
+		var score = 0.0
+		# Maintenance reduction is the single biggest lever — courthouse halves
+		# distance maintenance which is the dominant cost on small maps.
+		var maint_red = effects.get("maintenance_reduction", 0.0)
+		if maint_red > 0:
+			score += 200.0 * maint_red * max(player.cities.size(), 1)
+		# Direct gold and gold_percent (percent values are 0..1, scale up heavily)
+		score += effects.get("gold", 0) * 30
+		score += effects.get("gold_percent", 0) * 100
+		# Trade routes (markets/grocer adjacent)
+		score += effects.get("trade_routes", 0) * 30
+		# Science_percent — library frees commerce later
+		score += effects.get("science_percent", 0) * 50
+		# Granary helps growth → more workable tiles → more commerce
+		if effects.has("food_stored_on_growth"):
+			score += 20
+		# Very light cost preference (not a hard penalty — courthouses cost a lot
+		# but still pay back, so don't drown them out)
+		score -= bcost * 0.05
+		if score > best_score:
+			best_score = score
+			best_id = building_id
+	return best_id if best_score > 0 else ""
 
 ## Process civics adoption based on leader preferences
 func _process_civics(player, flavor: Dictionary) -> void:

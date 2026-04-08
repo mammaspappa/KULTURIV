@@ -49,7 +49,31 @@ static func update_strategy(player, flavor: Dictionary) -> void:
 	for unit in player.units:
 		if unit.can_found_city():
 			existing_settlers += 1
-	strategy["desired_settlers"] = max(0, unassigned_sites - existing_settlers)
+
+	# Cap by remaining max_cities slots — don't request settlers we can't profitably found.
+	# Mirrors the formula used in ai_controller._process_city_ai but tighter cap (7) to
+	# avoid economic collapse on small/medium maps. Sims showed Rome reaching 10 cities
+	# and going -99 gpt because max_cities=10 was too generous.
+	var map_tiles_local = GameManager.map_width * GameManager.map_height
+	var num_real_players = 0
+	for p in GameManager.players:
+		if p.civilization_id != "barbarian":
+			num_real_players += 1
+	var land_per_player = map_tiles_local / max(num_real_players, 1)
+	var expansion_flavor = flavor.get("expansion", 5)
+	var max_cities = clampi(land_per_player / 150 + expansion_flavor / 4, 3, 7)
+	var slots_remaining = max(0, max_cities - player.cities.size())
+
+	var raw_desired = max(0, unassigned_sites - existing_settlers)
+	var desired = min(raw_desired, slots_remaining)
+
+	# Economic distress check — never queue more settlers when going broke. Each new
+	# city adds maintenance and worsens the spiral. Wait until courthouses/markets
+	# bring gpt back to neutral before resuming expansion.
+	if player.gold_per_turn < 0 and player.gold < 30:
+		desired = 0
+
+	strategy["desired_settlers"] = desired
 
 # ============ CITY SETTLEMENT ============
 
