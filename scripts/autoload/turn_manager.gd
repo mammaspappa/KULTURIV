@@ -297,15 +297,22 @@ func _process_city_turn_start(city) -> void:
 			if city.current_production in ["settler", "worker"]:
 				production = int(production * 1.5)
 
-		# Apply AI difficulty production bonus
+		# Apply AI difficulty production bonus.
+		# Use round() not int() — int(1 * 0.95) = 0, which would zero out production
+		# at higher difficulties and leave low-yield cities stuck forever. And ensure
+		# at least 1 if the city had any production at all (the difficulty modifier
+		# should never make AI strictly worse than the raw yield).
 		if city.player_owner and not city.player_owner.is_human:
 			var ai_bonuses = _get_ai_difficulty_bonuses()
 			var train_pct = ai_bonuses.get("train_percent", 100) / 100.0
 			var construct_pct = ai_bonuses.get("construct_percent", 100) / 100.0
+			var raw_prod = production
 			if is_unit:
-				production = int(production * train_pct)
+				production = int(round(production * train_pct))
 			else:
-				production = int(production * construct_pct)
+				production = int(round(production * construct_pct))
+			if raw_prod > 0 and production < 1:
+				production = 1
 		city.production_progress += production
 		var cost = city.get_production_cost()
 		if city.production_progress >= cost:

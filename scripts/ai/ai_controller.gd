@@ -1456,15 +1456,25 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(escort_unit)
 			return
 
-	# Override 2: war emergency — at war, dangerously under-defended, and currently
-	# building something that doesn't help. Switch to military immediately.
-	if not player.at_war_with.is_empty() and city.current_production != "":
+	# Override 2: war emergency — at war with a non-barb civ, dangerously under-defended,
+	# and currently building something that doesn't help. Switch to military immediately.
+	# Threshold: below 1 garrison per city (not "1 + spare"), so we don't lock cities
+	# into perpetual military build mode and starve them of workers/settlers.
+	# Also: barb-only wars don't count as emergencies — barbs are localized threats
+	# better handled by the per-city barbs_near_borders check.
+	var has_real_war = false
+	for enemy_id in player.at_war_with:
+		var enemy_p = GameManager.get_player(enemy_id)
+		if enemy_p and enemy_p.civilization_id != "barbarian":
+			has_real_war = true
+			break
+	if has_real_war and city.current_production != "":
 		var mil_count = 0
 		for u in player.units:
 			if u.get_strength() > 0:
 				mil_count += 1
 		var min_garrison = player.cities.size()
-		if mil_count < min_garrison + 1:
+		if mil_count < min_garrison:
 			# Is the current production a military unit?
 			var prod = city.current_production
 			var prod_data = DataManager.get_unit(prod)
@@ -1475,7 +1485,7 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 					if sim_logger:
 						sim_logger.log_decision(player.player_name, "production", "war_emergency_switch",
 							"%s -> %s" % [prod, emergency_unit],
-							"at war, mil=%d, garrison_need=%d" % [mil_count, min_garrison + 1])
+							"real_war, mil=%d, garrison=%d" % [mil_count, min_garrison])
 					city.set_production(emergency_unit)
 					return
 
