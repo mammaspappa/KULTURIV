@@ -198,13 +198,32 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim):
 
     Each variant is assigned to one civ per sim. We rotate pairings so every
     variant plays against several others. Returns a list of (variant_idx, fitness).
+    Ensures every variant is sampled at least once per evaluation.
     """
     fitness_totals = [0.0] * len(pool)
     fitness_counts = [0] * len(pool)
 
-    # For each sim, pick civs_per_sim variants at random and run them
+    # Build an assignment schedule — round-robin to guarantee coverage
+    assignments = []  # list of lists of variant indices per sim
+    pending = list(range(len(pool)))
+    random.shuffle(pending)
     for sim_i in range(sims_per_eval):
-        picks = random.sample(range(len(pool)), civs_per_sim)
+        picks = []
+        for _ in range(civs_per_sim):
+            if not pending:
+                pending = list(range(len(pool)))
+                random.shuffle(pending)
+            # Try to avoid duplicates within a single sim
+            for candidate in list(pending):
+                if candidate not in picks:
+                    picks.append(candidate)
+                    pending.remove(candidate)
+                    break
+            else:
+                picks.append(random.randrange(len(pool)))
+        assignments.append(picks)
+
+    for sim_i, picks in enumerate(assignments):
         civs = random.sample(EVAL_CIVS, civs_per_sim)
         overrides = {}
         for variant_idx, civ_id in zip(picks, civs):
@@ -220,7 +239,20 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim):
         winner = result.get("winner", "-") if result else "ERR"
         print(f"    sim {sim_i+1}/{sims_per_eval}: civs={civs}, winner={winner}, dt={dt:.1f}s")
 
-    return [(i, fitness_totals[i] / max(1, fitness_counts[i])) for i in range(len(pool))]
+    scores = []
+    for i in range(len(pool)):
+        if fitness_counts[i] == 0:
+            # Force-run one more sim for any unsampled variants
+            civ_id = random.choice(EVAL_CIVS)
+            overrides = {civ_id: variant_to_overrides(pool[i])}
+            result = run_sim(overrides, [civ_id] + random.sample(
+                [c for c in EVAL_CIVS if c != civ_id], min(civs_per_sim - 1, len(EVAL_CIVS) - 1)
+            ), base_seed + 999999, max_turns=max_turns)
+            f = fitness(result, civ_id)
+            scores.append((i, f))
+        else:
+            scores.append((i, fitness_totals[i] / fitness_counts[i]))
+    return scores
 
 
 def main():
