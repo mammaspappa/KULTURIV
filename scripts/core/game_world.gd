@@ -536,9 +536,10 @@ func _on_unit_moved(unit: Unit, _from: Vector2i, to: Vector2i) -> void:
 	if unit.get_strength() <= 0:  # workers/settlers don't capture
 		return
 	var city = GameManager.get_city_at(to)
-	if city == null or city.player_owner == unit.player_owner:
+	if city == null:
 		return
-	# Must be at war (or a barb, which is always hostile)
+	if city.player_owner == unit.player_owner:
+		return
 	var is_barb = unit.player_owner.is_barbarian()
 	var at_war = city.player_owner != null and unit.player_owner.is_at_war_with(city.player_owner.player_id)
 	if not (is_barb or at_war):
@@ -546,7 +547,7 @@ func _on_unit_moved(unit: Unit, _from: Vector2i, to: Vector2i) -> void:
 	# Verify no enemy defenders still on the tile
 	for u in GameManager.get_units_at(to):
 		if u != unit and u.player_owner == city.player_owner and u.get_strength() > 0:
-			return  # still defended, nothing to capture
+			return  # still defended
 	# Capture (or raze for barbs if small)
 	if is_barb and city.population <= 2 and city.can_be_razed():
 		raze_city(city)

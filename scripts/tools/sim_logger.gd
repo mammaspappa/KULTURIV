@@ -490,9 +490,34 @@ func write_summary(elapsed_seconds: float) -> void:
 					city.city_name, city.population, prod_str, bld_count,
 					city.food_yield, city.production_yield, city.commerce_yield, city.culture_yield])
 
+	# Always show ALL city captures and eliminations — they're the highlights
+	# of any game and trimming them to "last 25" hides early-game drama
+	# (e.g. Barbarians capturing your capital at T37).
+	var captures = []
+	var eliminations = []
+	for ev in key_events:
+		if "captured" in ev.text or "razed" in ev.text:
+			captures.append(ev)
+		if "eliminated" in ev.text or "ELIMINATED" in ev.text:
+			eliminations.append(ev)
+
+	if not captures.is_empty():
+		print("\nCity Captures (%d total):" % captures.size())
+		for ev in captures:
+			print("  Turn %d: %s" % [ev.turn, ev.text])
+
+	if not eliminations.is_empty():
+		print("\nEliminations (%d total):" % eliminations.size())
+		for ev in eliminations:
+			print("  Turn %d: %s" % [ev.turn, ev.text])
+
 	if not key_events.is_empty():
-		print("\nKey Events (last 25):")
-		var events_to_show = key_events.slice(max(0, key_events.size() - 25))
+		print("\nOther Key Events (last 25):")
+		var other_events = []
+		for ev in key_events:
+			if "captured" not in ev.text and "razed" not in ev.text and "eliminated" not in ev.text:
+				other_events.append(ev)
+		var events_to_show = other_events.slice(max(0, other_events.size() - 25))
 		for ev in events_to_show:
 			print("  Turn %d: %s" % [ev.turn, ev.text])
 
