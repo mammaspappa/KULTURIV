@@ -471,11 +471,14 @@ func _apply_resolution(resolution_id: String, source_id: String, target) -> void
 	var resolution = resolutions.get(resolution_id, {})
 	var effects = resolution.get("effects", {})
 
-	# Victory
+	# Victory — label by source type (apostolic_palace = religious, united_nations = diplomatic)
 	if effects.get("victory", false):
 		var secretary_id = secretaries.get(source_id, -1)
-		if secretary_id >= 0:
-			VictorySystem.check_diplomatic_victory(secretary_id) if VictorySystem else null
+		if secretary_id >= 0 and VictorySystem:
+			if source_id == "apostolic_palace":
+				VictorySystem.check_religious_victory(secretary_id)
+			else:
+				VictorySystem.check_diplomatic_victory(secretary_id)
 
 	# Trade routes
 	var trade_routes = effects.get("trade_routes", 0)

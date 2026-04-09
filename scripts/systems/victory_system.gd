@@ -188,6 +188,13 @@ func _get_highest_score_player():
 
 ## Called by VotingSystem when a diplomatic victory vote passes
 func check_diplomatic_victory(player_id: int) -> void:
+	_apply_vote_victory(player_id, "diplomatic")
+
+## Called by VotingSystem when a religious (Apostolic Palace) victory vote passes
+func check_religious_victory(player_id: int) -> void:
+	_apply_vote_victory(player_id, "religious")
+
+func _apply_vote_victory(player_id: int, victory_type: String) -> void:
 	var player = null
 	for p in GameManager.players:
 		if p.player_id == player_id:
@@ -199,10 +206,10 @@ func check_diplomatic_victory(player_id: int) -> void:
 
 	if GameManager.current_game_state:
 		GameManager.current_game_state.victory_achieved = true
-		GameManager.current_game_state.victory_type = "diplomatic"
+		GameManager.current_game_state.victory_type = victory_type
 		GameManager.current_game_state.winner_player_id = player_id
-	EventBus.victory_achieved.emit(player, "diplomatic")
-	EventBus.game_over.emit(player, "diplomatic")
+	EventBus.victory_achieved.emit(player, victory_type)
+	EventBus.game_over.emit(player, victory_type)
 
 ## Get victory progress for UI display
 func get_victory_progress(player) -> Dictionary:

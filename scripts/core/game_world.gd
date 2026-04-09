@@ -567,11 +567,23 @@ func found_city(settler: Unit) -> City:
 	var pos = settler.grid_position
 	var owner = settler.player_owner
 
-	# Get city name
+	# Get city name — pick the first name from the civ's list that isn't already
+	# in use. The old code used `cities.size() % names.size()` which repeated a
+	# name whenever a city was lost (e.g., Germany ending with two "Munich"
+	# cities after losing Berlin to barbs).
 	var civ_data = DataManager.get_civ(owner.civilization_id)
 	var city_names = civ_data.get("city_names", ["City"])
-	var city_count = owner.cities.size()
-	var city_name = city_names[city_count % city_names.size()]
+	var used_names: Dictionary = {}
+	for c in owner.cities:
+		used_names[c.city_name] = true
+	var city_name = ""
+	for name in city_names:
+		if not used_names.has(name):
+			city_name = name
+			break
+	if city_name == "":
+		# All names used — fall back to numbered variant
+		city_name = "%s %d" % [city_names[0], owner.cities.size() + 1]
 
 	# Create city
 	var city = City.new(pos, city_name)
