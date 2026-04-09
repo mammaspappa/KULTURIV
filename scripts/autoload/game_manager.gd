@@ -29,6 +29,20 @@ var map_type: String = "fractal"  # fractal, pangaea, continents, archipelago
 var ai_aggressiveness: String = "normal"  # peaceful, normal, aggressive, random
 var no_barbarians: bool = false  # If true, disables all barbarian spawning
 
+# Per-civ AI tunable overrides — used by evolutionary tuner.
+# Structure: { civ_id: { "ai.path.to.key": value, ... } }
+# Set before start_new_game() to apply variant thresholds per player.
+var ai_overrides: Dictionary = {}
+
+## Read an AI tunable with optional per-civ override lookup.
+## Falls back to DataManager.get_tunable if no override exists.
+func get_ai_tunable(civ_id: String, path: String, default):
+	if civ_id != "" and ai_overrides.has(civ_id):
+		var civ_overrides = ai_overrides[civ_id]
+		if civ_overrides.has(path):
+			return civ_overrides[path]
+	return DataManager.get_tunable("ai." + path, default)
+
 # Wonder tracking
 var world_wonders_built: Dictionary = {}  # wonder_id -> player_id who built it
 var national_wonders_built: Dictionary = {}  # player_id -> Array of wonder_ids
@@ -98,15 +112,19 @@ func _create_players(settings: Dictionary) -> void:
 		_create_singleplayer_players(settings, num_players)
 
 func _create_singleplayer_players(settings: Dictionary, num_players: int) -> void:
+	# Optional explicit civ list overrides the random picker (used by evo tuner)
+	var forced_civs: Array = settings.get("civs", [])
 	var human_civ = settings.get("human_civ", "rome")
 	var human_leader = settings.get("human_leader", "julius_caesar")
+	if not forced_civs.is_empty():
+		human_civ = forced_civs[0]
 
 	# Create human player
 	human_player = PlayerClass.new()
 	human_player.player_id = 0
 	human_player.player_name = settings.get("player_name", "Player")
 	human_player.civilization_id = human_civ
-	human_player.leader_id = human_leader
+	human_player.leader_id = _get_leader_for_civ(human_civ) if not forced_civs.is_empty() else human_leader
 	human_player.is_human = true
 	human_player.team = 0
 	human_player.color = _get_player_color(0)
@@ -116,7 +134,11 @@ func _create_singleplayer_players(settings: Dictionary, num_players: int) -> voi
 	players.append(human_player)
 
 	# Create AI players
-	var ai_civs = _get_available_civs([human_civ])
+	var ai_civs: Array
+	if not forced_civs.is_empty():
+		ai_civs = forced_civs.slice(1)
+	else:
+		ai_civs = _get_available_civs([human_civ])
 	for i in range(1, num_players):
 		var ai_player = PlayerClass.new()
 		ai_player.player_id = i

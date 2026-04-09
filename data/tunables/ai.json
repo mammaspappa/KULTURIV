@@ -1,0 +1,86 @@
+{
+	"_description": "AI strategic thresholds. All values are read via DataManager.get_tunable('ai.<path>', default). Can be overridden per-civ by writing to GameManager.ai_overrides before game start (see ai_tuner.py).",
+
+	"expansion": {
+		"_comment": "Settler production brakes and max city targeting",
+		"max_cities_divisor": 150,
+		"max_cities_expansion_divisor": 4,
+		"max_cities_hard_min": 3,
+		"max_cities_hard_max": 7,
+		"max_inflight_settlers": 2,
+		"freeze_max_cities_at_gpt": -10,
+		"soft_brake_gpt": -3,
+		"soft_brake_science_rate": 0.5,
+		"science_brake_low": 0.30,
+		"science_brake_mid": 0.50,
+		"science_brake_high": 0.70,
+		"gpt_brake_severe_gpt": -5,
+		"gpt_brake_severe_gold": 50,
+		"gpt_brake_minor_gpt": 0,
+		"gpt_brake_minor_gold": 20,
+		"settler_min_pop": 3
+	},
+
+	"military": {
+		"_comment": "Army sizing and composition",
+		"desired_per_city_base": 1,
+		"desired_per_city_flavor_divisor": 5,
+		"max_per_city_mult": 3,
+		"max_military_base": 3,
+		"siege_ratio_target": 0.3,
+		"siege_min_military": 3,
+		"late_game_floor_turn_1": 150,
+		"late_game_floor_per_city_1": 2,
+		"late_game_floor_turn_2": 250,
+		"late_game_floor_per_city_2": 3,
+		"early_game_floor_turn": 50,
+		"early_game_floor_count": 2,
+		"build_unit_prob_default": 40,
+		"interleave_building_prob": 0.4,
+		"comfort_garrison_per_city": 2,
+		"peacetime_disband_fraction": 0.5
+	},
+
+	"economy": {
+		"_comment": "Gold/science slider and deficit response",
+		"gold_floor_drop_science": 80,
+		"gold_floor_recover_science": 150,
+		"severe_deficit_gpt": -10,
+		"near_bankrupt_gpt": -3,
+		"near_bankrupt_gold": 50,
+		"bankrupt_gpt": 0,
+		"bankrupt_gold": 50,
+		"bankrupt_turns_grace": 5
+	},
+
+	"research": {
+		"_comment": "Tech scoring priorities",
+		"infra_agriculture_bonus": 55,
+		"infra_wheel_bonus": 50,
+		"infra_mining_bonus": 45,
+		"infra_animal_husbandry_bonus": 30,
+		"deficit_currency_bonus": 40,
+		"deficit_code_of_laws_bonus": 35,
+		"deficit_guilds_bonus": 30,
+		"deficit_banking_bonus": 30,
+		"deficit_economics_bonus": 25,
+		"deficit_pottery_bonus": 20,
+		"wide_empire_currency_bonus": 25,
+		"wide_empire_code_of_laws_bonus": 20,
+		"resource_match_bonus_per_tile": 20,
+		"resource_match_bonus_max": 60
+	},
+
+	"whip": {
+		"_comment": "Slavery whip gating",
+		"min_population": 4,
+		"min_settler_population": 5,
+		"min_food_surplus": 1,
+		"cooldown_turns": 15
+	},
+
+	"flavor_bonus": {
+		"_comment": "Multipliers applied per personality flavor (military/science/etc.)",
+		"high_flavor_threshold": 7
+	}
+}

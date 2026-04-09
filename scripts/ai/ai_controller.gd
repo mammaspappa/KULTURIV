@@ -1673,11 +1673,18 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if p.civilization_id != "barbarian":
 			num_real_players += 1
 	var land_per_player = map_tiles / max(num_real_players, 1)
-	var max_cities = clampi(land_per_player / 150 + expansion_flavor / 4, 3, 7)
+	var max_c_div = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_divisor", 150)
+	var max_c_ediv = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_expansion_divisor", 4)
+	var max_c_min = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_hard_min", 3)
+	var max_c_max = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_hard_max", 7)
+	var max_cities = clampi(land_per_player / int(max_c_div) + expansion_flavor / int(max_c_ediv), int(max_c_min), int(max_c_max))
 	# Dynamic cap: reduce max if economy is struggling — don't expand into bankruptcy
-	if player.gold_per_turn < -10:
+	var freeze_gpt = GameManager.get_ai_tunable(player.civilization_id, "expansion.freeze_max_cities_at_gpt", -10)
+	var soft_brake_gpt = GameManager.get_ai_tunable(player.civilization_id, "expansion.soft_brake_gpt", -3)
+	var soft_brake_sci = GameManager.get_ai_tunable(player.civilization_id, "expansion.soft_brake_science_rate", 0.5)
+	if player.gold_per_turn < freeze_gpt:
 		max_cities = num_cities  # Hard freeze at current
-	elif player.gold_per_turn < -3 and player.science_rate < 0.5:
+	elif player.gold_per_turn < soft_brake_gpt and player.science_rate < soft_brake_sci:
 		max_cities = mini(max_cities, num_cities + 1)  # Allow at most 1 more
 
 	# Count settlers already in production or in the field
@@ -1702,20 +1709,27 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 
 	# Calculate desired military based on flavor, specialization, and personality
 	var personality = _get_leader_personality(player)
-	var build_unit_prob = personality.get("build_unit_prob", 40)
-	var desired_military = num_cities * (1 + military_flavor / 5) * (build_unit_prob / 40.0)
+	var build_unit_prob_default = GameManager.get_ai_tunable(player.civilization_id, "military.build_unit_prob_default", 40)
+	var build_unit_prob = personality.get("build_unit_prob", build_unit_prob_default)
+	var mil_base = GameManager.get_ai_tunable(player.civilization_id, "military.desired_per_city_base", 1)
+	var mil_div = GameManager.get_ai_tunable(player.civilization_id, "military.desired_per_city_flavor_divisor", 5)
+	var desired_military = num_cities * (mil_base + military_flavor / float(mil_div)) * (build_unit_prob / float(build_unit_prob_default))
 	if specialization == CitySpecialization.MILITARY:
 		desired_military *= 1.5
-	# Late-game threat scaling: after turn 150, barbs spawn advanced units and
-	# real civs grow aggressive. Require 2+ per city minimum so cities don't fall
-	# to single raids. Sims showed Rome losing cities at T243+ with only 6 mil/3c.
-	if TurnManager.current_turn >= 150:
-		desired_military = max(desired_military, num_cities * 2)
-	if TurnManager.current_turn >= 250:
-		desired_military = max(desired_military, num_cities * 3)
+	# Late-game threat scaling: after turn X, increase desired military per city.
+	var late_turn_1 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_turn_1", 150)
+	var late_mult_1 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_per_city_1", 2)
+	var late_turn_2 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_turn_2", 250)
+	var late_mult_2 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_per_city_2", 3)
+	if TurnManager.current_turn >= late_turn_1:
+		desired_military = max(desired_military, num_cities * late_mult_1)
+	if TurnManager.current_turn >= late_turn_2:
+		desired_military = max(desired_military, num_cities * late_mult_2)
 
 	# Hard cap: scale with cities but don't over-build
-	var max_military = num_cities * 3 + 3
+	var max_per_city = GameManager.get_ai_tunable(player.civilization_id, "military.max_per_city_mult", 3)
+	var max_base = GameManager.get_ai_tunable(player.civilization_id, "military.max_military_base", 3)
+	var max_military = num_cities * max_per_city + max_base
 	# Economic cap: don't build more military if going broke. We react earlier
 	# than the previous gold<=0 check — by the time gold hits 0, units are
 	# already disbanding to bankruptcy and the AI was still queueing more.
