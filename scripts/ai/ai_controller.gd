@@ -1101,7 +1101,7 @@ func _worker_ai(unit, player, flavor: Dictionary) -> void:
 					return
 
 		# Tile has improvement but no road — build road to connect
-		if tile.road_level == 0 and ImprovementSystem.can_build_road(unit, tile):
+		if tile.improvement_id != "" and tile.road_level == 0 and ImprovementSystem.can_build_road(unit, tile):
 			if sim_logger:
 				sim_logger.trace_unit(unit, "build_road",
 					"on improved tile imp=%s" % tile.improvement_id)
@@ -2095,9 +2095,20 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 
 			score += 5  # Base building value
 
-	# Value improvements
+	# Value improvements — bonus if we have resources matching those improvements
 	if unlocks.has("improvements"):
-		score += unlocks.improvements.size() * 3
+		for imp_id in unlocks.improvements:
+			score += 3
+			# Check if we have resources in our territory that need this improvement
+			var imp_data = DataManager.get_improvement(imp_id)
+			var requires_resource = imp_data.get("requires_resource", [])
+			if not requires_resource.is_empty():
+				for city in player.cities:
+					for tile_pos in city.territory:
+						var t = GameManager.hex_grid.get_tile(tile_pos) if GameManager.hex_grid else null
+						if t and t.resource_id in requires_resource and t.improvement_id == "":
+							score += 25  # Big bonus: we have a resource waiting for this tech!
+							break
 
 	# Religion techs
 	if unlocks.has("religions"):
@@ -2116,6 +2127,23 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 		match tech_id:
 			"archery": score += 50  # URGENT: need archers for defense
 			"bronze_working": score += 50  # URGENT: need axemen
+
+	# === CORE INFRASTRUCTURE TECHS ===
+	# These unlock fundamental worker abilities. Without them the worker sits idle.
+	# BTS AI researches these first — before any beelining. Scored high enough
+	# to beat the military emergency bonus so workers can actually DO something.
+	if not player.has_tech("agriculture"):
+		if tech_id == "agriculture":
+			score += 55  # Farms — essential for city growth, top priority
+	if not player.has_tech("the_wheel"):
+		if tech_id == "the_wheel":
+			score += 50  # Roads! Workers need this ASAP
+	if not player.has_tech("mining"):
+		if tech_id == "mining":
+			score += 45  # Mines — basic production on hills
+	if not player.has_tech("animal_husbandry"):
+		if tech_id == "animal_husbandry":
+			score += 30  # Pastures for cattle/sheep/horse
 
 	# Early game priorities (< 10 techs researched)
 	if num_techs < 10:
@@ -2161,6 +2189,29 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 		if religion_flavor >= HIGH_FLAVOR:
 			match tech_id:
 				"monotheism", "theology": score += int(religion_bonus * 0.5)
+
+	# === RESOURCE-MOTIVATED RESEARCH ===
+	# If we have resources in our borders that need a specific tech, prioritize it.
+	# E.g., marble in borders → boost Masonry; stone → boost Masonry; horses → Animal Husbandry
+	if GameManager.hex_grid:
+		var resources_in_borders: Dictionary = {}  # resource_id → count
+		for city in player.cities:
+			for tile_pos in city.territory:
+				var res_tile = GameManager.hex_grid.get_tile(tile_pos)
+				if res_tile and res_tile.resource_id != "":
+					resources_in_borders[res_tile.resource_id] = resources_in_borders.get(res_tile.resource_id, 0) + 1
+
+		# For each resource in our borders, check if the improvement tech is this tech
+		for res_id in resources_in_borders.keys():
+			var res_data = DataManager.get_resource(res_id)
+			var required_imp = res_data.get("improvement", "")
+			if required_imp == "":
+				continue
+			var imp_data = DataManager.get_improvement(required_imp)
+			var required_tech = imp_data.get("required_tech", "")
+			if required_tech != "" and required_tech == tech_id and not player.has_tech(required_tech):
+				var bonus = 20 * resources_in_borders[res_id]  # More copies = higher urgency
+				score += min(bonus, 60)  # Cap at 60
 
 	# Bonus for techs that reveal strategic resources on tiles we own
 	var reveals = tech.get("reveals_resource", "")
