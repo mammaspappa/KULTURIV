@@ -88,11 +88,12 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 	_apply_coast_detection()
 	_apply_terrain_transitions()
 
-	# Stage 5: Rivers (watershed)
+	# Stage 5: Rivers (watershed). Tile-level flow directions are still needed by lake
+	# creation, but rivers themselves are traced over the *vertex* grid (the corners where
+	# four tiles meet) so that each river segment lies along an actual tile boundary.
 	_compute_flow_directions()
 	_fill_sinks()
 	_create_lakes()
-	_compute_flow_accumulation()
 	_extract_rivers()
 
 	# Stage 6: Features
@@ -875,38 +876,281 @@ func _compute_flow_accumulation() -> void:
 			_flow_accumulation[_idx(nx, ny)] += _flow_accumulation[idx]
 
 func _extract_rivers() -> void:
-	var river_threshold = maxf(12.0, float(width * height) / 500.0)
+	# Vertex-based river generation.
+	#
+	# A river is a sequence of segments along tile boundaries. The endpoints of each segment
+	# are *vertices* — the corners where four tiles meet. Working in vertex space (instead of
+	# tile-flow space) means a river that flows east is naturally a horizontal line along a
+	# row boundary, not a row of disconnected vertical edges as in the previous tile-based
+	# implementation.
+	#
+	# Vertex coordinate system:
+	#   Vertex (vx, vy) sits at the top-left corner of tile (vx, vy).
+	#   vx ∈ [0, width) (wraps), vy ∈ [0, height] (one extra row for the bottom edge).
+	#   Tiles surrounding vertex (vx, vy): (vx-1, vy-1), (vx, vy-1), (vx-1, vy), (vx, vy).
+	#
+	# Pipeline:
+	#   1. Build vertex elevation, moisture, water-adjacency, and downhill-flow maps.
+	#   2. Pick high-elevation, above-median-moisture vertices as sources.
+	#   3. Trace each source downhill via vertex flow until it meets water (or merges with an
+	#      already-committed river). Discard traces that loop or dead-end on land.
+	#   4. Convert each successful path of vertices into per-tile river_edges entries — both
+	#      tiles flanking each segment record the shared boundary, matching the existing data
+	#      model so freshwater and yield queries continue to work unchanged.
+	_compute_vertex_data()
+	_compute_vertex_flow()
 
-	for y in range(height):
-		for x in range(width):
-			var idx = _idx(x, y)
-			if _flow_accumulation[idx] < river_threshold:
-				continue
-			if _elevation_map[idx] < _sea_level:
-				continue
+	var sources: Array = _pick_river_source_vertices()
+	var committed_vertices: Dictionary = {}  # Vector2i (vertex) -> true
 
-			var tile = tiles[Vector2i(x, y)]
+	# Trace highest sources first so longer rivers form before shorter tributaries can merge.
+	for src in sources:
+		_trace_river_from_vertex(src, committed_vertices)
 
-			# Outgoing edge
-			var out_dir = _flow_direction[idx]
-			if out_dir >= 0 and out_dir not in tile.river_edges:
-				tile.river_edges.append(out_dir)
+# ---- Vertex grid helpers ----
 
-			# Incoming edges from river neighbors (cardinal only)
-			for dir in [0, 2, 4, 6]:
-				var nx = _wrap_x(x + DIR_DX[dir])
-				var ny = y + DIR_DY[dir]
-				if ny < 0 or ny >= height:
+# Vertex storage uses 1D index: vy * width + vx.
+# vy ranges 0..height (inclusive — height+1 rows total).
+var _vertex_elevation: PackedFloat32Array
+var _vertex_moisture: PackedFloat32Array
+var _vertex_at_water: PackedByteArray  # 1 if any of the 4 surrounding tiles is water
+var _vertex_flow_dir: PackedInt32Array  # 0=N(-y), 1=E(+x), 2=S(+y), 3=W(-x), -1=none
+
+func _v_idx(vx: int, vy: int) -> int:
+	return vy * width + vx
+
+func _compute_vertex_data() -> void:
+	var total = width * (height + 1)
+	_vertex_elevation = PackedFloat32Array(); _vertex_elevation.resize(total)
+	_vertex_moisture = PackedFloat32Array(); _vertex_moisture.resize(total)
+	_vertex_at_water = PackedByteArray(); _vertex_at_water.resize(total)
+
+	# Tile offsets for the four tiles meeting at each vertex (top-left corner of tile vy,vx).
+	var tile_offsets = [Vector2i(-1, -1), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(0, 0)]
+	for vy in range(height + 1):
+		for vx in range(width):
+			var elev_sum = 0.0
+			var moist_sum = 0.0
+			var count = 0
+			var has_water = false
+			for off in tile_offsets:
+				var tx = _wrap_x(vx + off.x)
+				var ty = vy + off.y
+				if ty < 0 or ty >= height:
 					continue
-				var nidx = _idx(nx, ny)
-				if _flow_accumulation[nidx] < river_threshold:
-					continue
-				# Check if neighbor flows INTO this tile
-				var n_dir = _flow_direction[nidx]
-				var opposite = (dir + 4) % 8
-				if n_dir == opposite:
-					if dir not in tile.river_edges:
-						tile.river_edges.append(dir)
+				var tidx = _idx(tx, ty)
+				var e = _elevation_map[tidx]
+				elev_sum += e
+				moist_sum += _moisture_map[tidx]
+				count += 1
+				if e < _sea_level:
+					has_water = true
+			var idx = _v_idx(vx, vy)
+			if count > 0:
+				_vertex_elevation[idx] = elev_sum / float(count)
+				_vertex_moisture[idx] = moist_sum / float(count)
+			else:
+				_vertex_elevation[idx] = 1.0
+				_vertex_moisture[idx] = 0.0
+			_vertex_at_water[idx] = 1 if has_water else 0
+
+func _compute_vertex_flow() -> void:
+	var total = width * (height + 1)
+	_vertex_flow_dir = PackedInt32Array(); _vertex_flow_dir.resize(total)
+	for vy in range(height + 1):
+		for vx in range(width):
+			var idx = _v_idx(vx, vy)
+			if _vertex_at_water[idx] == 1:
+				_vertex_flow_dir[idx] = -1  # Already at the destination — don't keep flowing.
+				continue
+			var my_elev = _vertex_elevation[idx]
+			var best_dir = -1
+			var best_drop = 0.0
+			# 4 cardinal vertex neighbors. Order: N (-y), E (+x), S (+y), W (-x)
+			var nbrs = _vertex_neighbors(vx, vy)
+			for n in nbrs:
+				var nx: int = n[0]
+				var ny: int = n[1]
+				var ndir: int = n[2]
+				var drop = my_elev - _vertex_elevation[_v_idx(nx, ny)]
+				if drop > best_drop:
+					best_drop = drop
+					best_dir = ndir
+			_vertex_flow_dir[idx] = best_dir
+
+func _vertex_neighbors(vx: int, vy: int) -> Array:
+	# Returns Array of [nx, ny, dir] for the (up to 4) cardinal neighbor vertices.
+	var result: Array = []
+	if vy > 0:
+		result.append([vx, vy - 1, 0])           # N
+	result.append([_wrap_x(vx + 1), vy, 1])      # E
+	if vy < height:
+		result.append([vx, vy + 1, 2])           # S
+	result.append([_wrap_x(vx - 1), vy, 3])      # W
+	return result
+
+# ---- Source selection ----
+
+func _pick_river_source_vertices() -> Array:
+	# Candidates: vertices whose averaged tile elevation is above the hill threshold but
+	# below the mountain threshold (so sources sit in wet hills, not on bare peaks), and
+	# which are not already adjacent to water.
+	var candidates: Array = []
+	var moist_samples: Array = []
+	for vy in range(height + 1):
+		for vx in range(width):
+			var idx = _v_idx(vx, vy)
+			if _vertex_at_water[idx] == 1:
+				continue
+			var elev = _vertex_elevation[idx]
+			if elev < _hill_threshold or elev >= _mountain_threshold:
+				continue
+			# Must have a downhill flow — otherwise tracing immediately dead-ends.
+			if _vertex_flow_dir[idx] < 0:
+				continue
+			candidates.append(Vector2i(vx, vy))
+			moist_samples.append(_vertex_moisture[idx])
+
+	if candidates.is_empty():
+		return []
+
+	# Above-median moisture filter so the rivers we keep are biased toward wet regions.
+	moist_samples.sort()
+	var median_moist: float = moist_samples[moist_samples.size() / 2]
+	var filtered: Array = []
+	for v in candidates:
+		if _vertex_moisture[_v_idx(v.x, v.y)] >= median_moist:
+			filtered.append(v)
+
+	# Cap source count: ~1 per 250 tiles is a reasonable density across map sizes.
+	var max_sources: int = maxi(4, (width * height) / 250)
+
+	# Highest first so the longest rivers form before tributaries can merge into them.
+	filtered.sort_custom(func(a, b):
+		return _vertex_elevation[_v_idx(a.x, a.y)] > _vertex_elevation[_v_idx(b.x, b.y)])
+
+	# Enforce minimum spacing between sources so we don't get clusters of parallel streams.
+	var min_spacing: int = clampi(width / 12, 2, 6)
+	var picked: Array = []
+	for v in filtered:
+		if picked.size() >= max_sources:
+			break
+		var too_close := false
+		for other in picked:
+			var dx = absi(other.x - v.x)
+			var dy = absi(other.y - v.y)
+			if maxi(dx, dy) < min_spacing:
+				too_close = true
+				break
+		if too_close:
+			continue
+		picked.append(v)
+
+	return picked
+
+# ---- Tracing & commit ----
+
+func _trace_river_from_vertex(start: Vector2i, committed: Dictionary) -> void:
+	# Walk vertex-by-vertex downhill until we either:
+	#   - reach a vertex adjacent to a water tile (success — river meets the sea/lake)
+	#   - merge into an already-committed river (success — inherits termination)
+	#   - revisit a vertex from this trace (loop — abort, no commit)
+	#   - reach a vertex with no downhill neighbor (dead end — abort)
+	#
+	# Steps are stored as {vx, vy, dir} so the commit phase doesn't have to re-derive the
+	# direction across map-wrap boundaries.
+	var steps: Array = []
+	var visited: Dictionary = {}
+	var vx = start.x
+	var vy = start.y
+	var success := false
+	var max_steps: int = width + height  # Sanity bound
+
+	for _i in range(max_steps):
+		var key = Vector2i(vx, vy)
+		if key in visited:
+			break
+		visited[key] = true
+
+		if committed.has(key):
+			success = true
+			break
+
+		var idx = _v_idx(vx, vy)
+		if _vertex_at_water[idx] == 1:
+			success = true
+			break
+
+		var dir = _vertex_flow_dir[idx]
+		if dir < 0:
+			break  # No downhill — dead end on land.
+
+		steps.append({"vx": vx, "vy": vy, "dir": dir})
+
+		match dir:
+			0: vy -= 1                    # N
+			1: vx = _wrap_x(vx + 1)       # E
+			2: vy += 1                    # S
+			3: vx = _wrap_x(vx - 1)       # W
+
+	if not success or steps.is_empty():
+		return
+
+	for s in steps:
+		_add_river_segment(s.vx, s.vy, s.dir)
+		# Mark both endpoints of the segment as committed so future traces can merge here.
+		committed[Vector2i(s.vx, s.vy)] = true
+		var ex = s.vx
+		var ey = s.vy
+		match s.dir:
+			0: ey -= 1
+			1: ex = _wrap_x(ex + 1)
+			2: ey += 1
+			3: ex = _wrap_x(ex - 1)
+		committed[Vector2i(ex, ey)] = true
+
+## Convert one vertex segment into per-tile river_edges entries on the two tiles flanking it.
+##
+## A segment travelling N or S is *vertical* (along a column of tile boundaries) — its two
+## flanking tiles are the column to the west (this segment is its E edge) and the column to
+## the east (this segment is its W edge).
+##
+## A segment travelling E or W is *horizontal* (along a row of tile boundaries) — its two
+## flanking tiles are the row above (S edge) and the row below (N edge).
+##
+## Edge index legend (game_tile.gd): 0=N, 2=E, 4=S, 6=W. Diagonals are never used by rivers.
+func _add_river_segment(vx: int, vy: int, dir: int) -> void:
+	match dir:
+		0:  # N — vertical segment from (vx, vy) up to (vx, vy-1)
+			var row_y = vy - 1
+			if row_y >= 0:
+				_mark_river_edge(_wrap_x(vx - 1), row_y, 2)  # tile west of segment, E edge
+				_mark_river_edge(vx, row_y, 6)               # tile east of segment, W edge
+		1:  # E — horizontal segment from (vx, vy) east to (vx+1, vy)
+			var col_x = vx
+			if vy - 1 >= 0:
+				_mark_river_edge(col_x, vy - 1, 4)           # tile above, S edge
+			if vy < height:
+				_mark_river_edge(col_x, vy, 0)               # tile below, N edge
+		2:  # S — vertical segment from (vx, vy) down to (vx, vy+1)
+			var row_y = vy
+			if row_y < height:
+				_mark_river_edge(_wrap_x(vx - 1), row_y, 2)  # tile west, E edge
+				_mark_river_edge(vx, row_y, 6)               # tile east, W edge
+		3:  # W — horizontal segment from (vx, vy) west to (vx-1, vy)
+			var col_x = _wrap_x(vx - 1)
+			if vy - 1 >= 0:
+				_mark_river_edge(col_x, vy - 1, 4)           # tile above, S edge
+			if vy < height:
+				_mark_river_edge(col_x, vy, 0)               # tile below, N edge
+
+func _mark_river_edge(tile_x: int, tile_y: int, edge: int) -> void:
+	var pos = Vector2i(tile_x, tile_y)
+	if not tiles.has(pos):
+		return
+	var tile = tiles[pos]
+	if edge not in tile.river_edges:
+		tile.river_edges.append(edge)
 
 # =============================================================================
 # STAGE 6: FEATURES

@@ -455,18 +455,26 @@ func _draw_rivers() -> void:
 	if river_edges.is_empty():
 		return
 
-	var river_color = Color(0.2, 0.5, 0.9, 0.8)
-	var width = 4.0
-	var center = Vector2(TILE_SIZE / 2, TILE_SIZE / 2)
-
-	# Draw line from center to each river edge midpoint
+	# Rivers live ON the boundary between two tiles — not inside either one. We render each
+	# cardinal river edge as a line drawn along the full tile-edge corner-to-corner. Since
+	# both adjacent tiles record the shared boundary, the line gets drawn twice (once per
+	# tile), but they overlap exactly so the visual is identical to a single stroke.
+	#
+	# Diagonal edges (NE/SE/SW/NW) are not rivers in this game — flow generation only emits
+	# cardinal directions — but we silently skip them here for safety.
+	var river_color = Color(0.2, 0.5, 0.9, 0.95)
+	var line_width = 3.0
+	var ts := float(TILE_SIZE)
 	for edge in river_edges:
-		if edge in EDGE_MIDPOINTS:
-			draw_line(center, EDGE_MIDPOINTS[edge], river_color, width, true)
-
-	# Draw a circle at center if 2+ edges (river confluence)
-	if river_edges.size() >= 2:
-		draw_circle(center, width * 0.8, river_color)
+		match edge:
+			0:  # N — top edge
+				draw_line(Vector2(0, 0), Vector2(ts, 0), river_color, line_width, true)
+			2:  # E — right edge
+				draw_line(Vector2(ts, 0), Vector2(ts, ts), river_color, line_width, true)
+			4:  # S — bottom edge
+				draw_line(Vector2(0, ts), Vector2(ts, ts), river_color, line_width, true)
+			6:  # W — left edge
+				draw_line(Vector2(0, 0), Vector2(0, ts), river_color, line_width, true)
 
 func _draw_goody_hut() -> void:
 	if not has_goody_hut:
