@@ -430,7 +430,7 @@ func _apply_defiance_penalties(source_id: String, votes: Dictionary) -> void:
 			var source = vote_sources.get(source_id, {})
 			var source_name = source.get("name", source_id)
 			EventBus.notification_added.emit(
-				defier.civ_name + " defied the " + source_name + " resolution!",
+				defier.player_name + " defied the " + source_name + " resolution!",
 				"diplomacy"
 			)
 
@@ -461,7 +461,7 @@ func _tally_secretary_election() -> void:
 	var player = GameManager.get_player(winner) if GameManager else null
 	if player:
 		EventBus.notification_added.emit(
-			player.civ_name + " has been elected " + source.get("secretary_title", "Secretary") + "!",
+			player.player_name + " has been elected " + source.get("secretary_title", "Secretary") + "!",
 			"diplomacy"
 		)
 

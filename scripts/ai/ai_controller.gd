@@ -1528,19 +1528,32 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(escort_unit)
 			return
 
-	# Override 2: war emergency — at war with a non-barb civ, dangerously under-defended,
-	# and currently building something that doesn't help. Switch to military immediately.
+	# Override 2: war emergency — at war and dangerously under-defended, currently
+	# building something that doesn't help. Switch to military immediately.
 	# Threshold: below 1 garrison per city (not "1 + spare"), so we don't lock cities
 	# into perpetual military build mode and starve them of workers/settlers.
-	# Also: barb-only wars don't count as emergencies — barbs are localized threats
-	# better handled by the per-city barbs_near_borders check.
+	# Applies to BOTH civ wars and barb wars with imminent threat:
+	# - Real civ war: always an emergency if under garrison
+	# - Barb war: only an emergency if a barb unit is actually adjacent to this city
+	#   (the per-city barbs_near_borders check handles distant threats)
 	var has_real_war = false
 	for enemy_id in player.at_war_with:
 		var enemy_p = GameManager.get_player(enemy_id)
 		if enemy_p and enemy_p.civilization_id != "barbarian":
 			has_real_war = true
 			break
-	if has_real_war and city.current_production != "":
+	var barb_at_doorstep = false
+	if not has_real_war and not player.at_war_with.is_empty():
+		# Check for any enemy unit within 4 tiles of this city — give the AI time
+		# to respond before the threat reaches the gates. Mongolia was getting
+		# eliminated at T93 because the narrower check (2 tiles) only tripped once
+		# a barb was already adjacent.
+		for check_pos in GridUtils.get_tiles_in_range(city.grid_position, 4):
+			var u = GameManager.get_unit_at(check_pos)
+			if u and u.player_owner and u.player_owner != player and u.get_strength() > 0:
+				barb_at_doorstep = true
+				break
+	if (has_real_war or barb_at_doorstep) and city.current_production != "":
 		var mil_count = 0
 		for u in player.units:
 			if u.get_strength() > 0:
