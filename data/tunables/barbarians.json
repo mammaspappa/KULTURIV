@@ -14,5 +14,10 @@
 		"score_bonus_per_point": 0.005,
 		"max_civs_base": 3
 	},
+	"uprising": {
+		"_comment": "When the core barb player captures a player city, chance to evolve into a new civ-barb with the captured city as capital. capital_multiplier triples chance for player capitals.",
+		"base_chance": 0.30,
+		"capital_multiplier": 3.0
+	},
 	"fallback_unit": "warrior"
 }

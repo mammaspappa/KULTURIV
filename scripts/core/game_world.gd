@@ -797,9 +797,21 @@ func _ai_capture_decision(city, new_owner) -> void:
 ## Capture a city (transfer ownership)
 func capture_city(city, new_owner) -> void:
 	var old_owner = city.player_owner
+	var was_capital = city.is_capital() if city.has_method("is_capital") else false
 	city.transfer_to(new_owner)
 	EventBus.city_captured.emit(city, old_owner, new_owner)
 	EventBus.notification_added.emit("%s has captured %s!" % [new_owner.player_name, city.city_name])
+
+	# BTS-style barbarian uprising: when the core barb player captures a player's
+	# city, there's a chance the rabble organize themselves into a new barbarian
+	# civilization with the captured city as its capital. Capturing a player
+	# capital triples the chance.
+	if new_owner.is_barbarian() and new_owner.player_id == -1 and BarbarianSystem:
+		var base_chance = float(DataManager.get_tunable("barbarians.uprising.base_chance", 0.30))
+		var capital_mult = float(DataManager.get_tunable("barbarians.uprising.capital_multiplier", 3.0))
+		var chance = base_chance * (capital_mult if was_capital else 1.0)
+		if randf() < chance:
+			BarbarianSystem.uprising_from_captured_city(city)
 
 ## Raze (destroy) a captured city
 func raze_city(city) -> void:

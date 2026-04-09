@@ -805,6 +805,77 @@ func _score_barbarian_city_site(pos: Vector2i) -> int:
 	return max(0, score)
 
 ## Create a new aggressive barbarian civilization from a camp
+## BTS-style barb uprising: when the core barb player captures a player city,
+## the rabble may organize themselves into a new civ-barb. The captured city
+## (already owned by the core barb player at this point) becomes the capital
+## of the new barb civ. Called from game_world.capture_city.
+func uprising_from_captured_city(city) -> void:
+	if city == null:
+		return
+	# Don't exceed the cap
+	if barbarian_civ_count >= _get_max_barbarian_civs():
+		return
+	if barbarian_player == null:
+		return
+
+	# Create new barb civ player (mirrors _create_barbarian_civilization)
+	var new_player = PlayerClass.new()
+	new_player.player_id = GameManager.players.size()
+	new_player.civilization_id = "barbarian"
+	new_player.is_human = false
+	new_player.team = new_player.player_id
+	new_player.color = _get_barbarian_color()
+	var civ_name = BARBARIAN_CIV_NAMES[barbarian_civ_count % BARBARIAN_CIV_NAMES.size()]
+	new_player.player_name = civ_name
+	new_player.ai_personality = {
+		"base_peace_weight": 0,
+		"warmonger_respect": 0,
+		"max_war_rand": 10,
+		"make_peace_rand": 200,
+		"dogpile_war_rand": 5,
+		"raze_city_prob": 80,
+		"build_unit_prob": 60,
+		"wonder_construct_rand": 0,
+		"espionage_weight": 0,
+		"base_attitude": -5,
+	}
+	_grant_era_techs(new_player)
+	new_player.gold = 50 + TurnManager.current_turn
+	new_player.civics = CivicsSystem.get_default_civics() if CivicsSystem else {}
+	GameManager.players.append(new_player)
+
+	# Transfer the captured city from the core barb player to the new civ-barb.
+	# The city keeps its existing buildings, population, and tile ownership.
+	city.transfer_to(new_player)
+
+	# Make it the capital — give it a palace if it doesn't have one
+	if "palace" not in city.buildings:
+		city.buildings.append("palace")
+	city.calculate_yields()
+
+	# Spawn extra garrison units for the new uprising
+	var num_units = 2 + randi() % 3  # 2-4 starting units
+	var unit_type = _get_barbarian_unit_type()
+	for _i in range(num_units):
+		var spawn_pos = _find_spawn_position(city.grid_position)
+		if spawn_pos != Vector2i(-1, -1) and GameManager.game_world:
+			GameManager.game_world.spawn_unit(unit_type, spawn_pos, new_player)
+
+	# Hostile to all known players
+	for player in GameManager.players:
+		if player == new_player or player == barbarian_player:
+			continue
+		GameManager.declare_war(new_player, player)
+		new_player.met_players.append(player.player_id)
+		if new_player.player_id not in player.met_players:
+			player.met_players.append(new_player.player_id)
+
+	barbarian_civ_count += 1
+	barbarian_civ_spawned.emit(new_player, city)
+	EventBus.notification_added.emit(
+		"The %s have risen from the ashes of %s!" % [civ_name, city.city_name],
+		"warning")
+
 func _create_barbarian_civilization(camp_pos: Vector2i, site_score: int) -> void:
 	# Remove camp
 	barbarian_camps.erase(camp_pos)
