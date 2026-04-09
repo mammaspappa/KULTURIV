@@ -318,8 +318,8 @@ func _pick_strategy(player, flavor: Dictionary) -> void:
 			best_score = current_score
 
 	player.active_strategy = best
-	# Sticky: hold this strategy for at least 15 turns (was 10 — too short)
-	player.active_strategy_sticky_turns = 15
+	# Sticky: hold this strategy for at least N turns (scaled by speed + map size)
+	player.active_strategy_sticky_turns = GameManager.scaled_turn(15)
 
 	if prev != best and sim_logger:
 		sim_logger.log_decision(player.player_name, "strategy", "switch",
@@ -478,7 +478,7 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 	# Don't consider any peace (including capitulation) in the first 10 turns of war
 	var war_key = "%d:%d" % [player.player_id, other.player_id]
 	var war_start = peace_cooldown.get("war_start_" + war_key, 0)
-	var min_war_turns = int(10 * GameManager.get_speed_multiplier())
+	var min_war_turns = GameManager.scaled_turn(10)
 	if TurnManager.current_turn - war_start < min_war_turns:
 		return
 
@@ -602,14 +602,14 @@ func _consider_war(player, other, flavor: Dictionary) -> void:
 	var personality = _get_leader_personality(player)
 
 	# BTS: No wars in the very early game — players need time to settle
-	var min_war_turn = int(40 * GameManager.get_speed_multiplier())
+	var min_war_turn = GameManager.scaled_turn(40)
 	if TurnManager.current_turn < min_war_turn:
 		return
 
 	# Check peace cooldown — cannot redeclare war too soon after making peace
 	var cooldown_key = "%d:%d" % [player.player_id, other.player_id]
 	var last_peace_turn = peace_cooldown.get(cooldown_key, -999)
-	var scaled_cooldown = int(PEACE_COOLDOWN_TURNS * GameManager.get_speed_multiplier())
+	var scaled_cooldown = GameManager.scaled_turn(PEACE_COOLDOWN_TURNS)
 	if TurnManager.current_turn - last_peace_turn < scaled_cooldown:
 		return  # Still in cooldown period
 
@@ -1097,8 +1097,8 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 			if sim_logger:
 				sim_logger.trace_unit(unit, "retreat", "to (%d,%d) dist=%d, danger nearby" % [
 					nearest_city_pos.x, nearest_city_pos.y, best_dist])
-			# Cooldown: don't leave the city again for 4 turns even if danger fades
-			unit.set_meta("retreat_cooldown_until", TurnManager.current_turn + 4)
+			# Cooldown: don't leave the city again for 4 turns (scaled) even if danger fades
+			unit.set_meta("retreat_cooldown_until", TurnManager.current_turn + GameManager.scaled_turn(4))
 			_move_toward(unit, nearest_city_pos)
 		return
 
@@ -1934,10 +1934,10 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	var desired_military = num_cities * (mil_base + military_flavor / float(mil_div)) * (build_unit_prob / float(build_unit_prob_default))
 	if specialization == CitySpecialization.MILITARY:
 		desired_military *= 1.5
-	# Late-game threat scaling: after turn X, increase desired military per city.
-	var late_turn_1 = _ai_tun(player, "military.late_game_floor_turn_1", 150)
+	# Late-game threat scaling: after turn X (scaled), increase desired military per city.
+	var late_turn_1 = GameManager.scaled_turn(_ai_tun(player, "military.late_game_floor_turn_1", 150))
 	var late_mult_1 = _ai_tun(player, "military.late_game_floor_per_city_1", 2)
-	var late_turn_2 = _ai_tun(player, "military.late_game_floor_turn_2", 250)
+	var late_turn_2 = GameManager.scaled_turn(_ai_tun(player, "military.late_game_floor_turn_2", 250))
 	var late_mult_2 = _ai_tun(player, "military.late_game_floor_per_city_2", 3)
 	if TurnManager.current_turn >= late_turn_1:
 		desired_military = max(desired_military, num_cities * late_mult_1)
@@ -2014,10 +2014,12 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(econ_bld)
 			return
 
-	# Early game military floor: ensure at least 2 military units before T50
-	# regardless of garrison minimum. Civs with 1 warrior get eliminated by
-	# first contact with barbarians or aggressive neighbors.
-	if military_units < 2 and TurnManager.current_turn < 50 and workers >= 1:
+	# Early game military floor: ensure minimum military units before the early
+	# game cutoff (scaled by speed + map size). Civs with 1 warrior get
+	# eliminated by first contact with barbarians or aggressive neighbors.
+	var early_floor_turn = GameManager.scaled_turn(_ai_tun(player, "military.early_game_floor_turn", 50))
+	var early_floor_count = _ai_tun(player, "military.early_game_floor_count", 2)
+	if military_units < early_floor_count and TurnManager.current_turn < early_floor_turn and workers >= 1:
 		var early_mil = _get_best_military_unit(city, player, military_flavor, false)
 		if early_mil != "":
 			city.set_production(early_mil)
@@ -2221,8 +2223,9 @@ func _consider_whipping(city, player) -> void:
 		return
 
 	# Don't whip if the city recently whipped (cooldown beyond the anger window)
+	var whip_cooldown = GameManager.scaled_turn(_ai_tun(player, "whip.cooldown_turns", 15))
 	var last_whip_turn = city.get_meta("last_whip_turn", -100)
-	if TurnManager.current_turn - last_whip_turn < 15:
+	if TurnManager.current_turn - last_whip_turn < whip_cooldown:
 		return
 
 	var should_whip = false

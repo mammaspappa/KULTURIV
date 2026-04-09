@@ -67,14 +67,15 @@ func get_ai_tunable(civ_id: String, path: String, default, strategy: String = ""
 	return DataManager.get_tunable("ai." + path, default)
 
 ## Compute the current game phase based on turn number.
-## Uses ai.phases.early_turn_end and ai.phases.mid_turn_end from tunables.
+## Uses ai.phases.early_turn_end and ai.phases.mid_turn_end from tunables,
+## scaled by game speed + map size via scaled_turn().
 func get_current_phase() -> String:
 	var turn = TurnManager.current_turn if TurnManager else 0
-	var early_end = DataManager.get_tunable("ai.phases.early_turn_end", 100)
-	var mid_end = DataManager.get_tunable("ai.phases.mid_turn_end", 250)
-	if turn <= int(early_end):
+	var early_end = scaled_turn(int(DataManager.get_tunable("ai.phases.early_turn_end", 100)))
+	var mid_end = scaled_turn(int(DataManager.get_tunable("ai.phases.mid_turn_end", 250)))
+	if turn <= early_end:
 		return "early"
-	if turn <= int(mid_end):
+	if turn <= mid_end:
 		return "mid"
 	return "late"
 
@@ -334,6 +335,24 @@ func get_player_by_civ(civ_id: String):
 
 func get_speed_multiplier() -> float:
 	return SPEED_MULTIPLIERS.get(game_speed, 1.0)
+
+## Get combined scaling factor for turn-based thresholds.
+## Considers game speed (Quick=0.67, Normal=1.0, Epic=1.5, Marathon=3.0)
+## AND map size (standard 80x50 = 4000 tiles; larger maps stretch timelines).
+## Returns a multiplier to apply to a baseline Normal-speed standard-map turn count.
+func get_turn_scale() -> float:
+	var speed_mult = get_speed_multiplier()
+	var map_tiles = float(map_width * map_height)
+	var standard_tiles = 4000.0
+	# Map scale: sqrt so tiny maps don't collapse to zero and huge maps don't explode
+	var map_scale = clamp(sqrt(map_tiles / standard_tiles), 0.7, 1.5)
+	return speed_mult * map_scale
+
+## Scale a baseline turn threshold to the current game speed + map size.
+## Use this for ALL hardcoded turn-based comparisons in AI code so that
+## Marathon/Quick and huge/tiny maps get appropriate phase transitions.
+func scaled_turn(base_turn: int) -> int:
+	return int(round(base_turn * get_turn_scale()))
 
 func is_at_war(player1, player2) -> bool:
 	if player1 == null or player2 == null:
