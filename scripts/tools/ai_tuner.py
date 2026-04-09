@@ -2,24 +2,27 @@
 """
 Evolutionary AI parameter tuner for KulturIV.
 
-Runs generations of simulations where each civ uses a different variant of
-AI thresholds. Top performers are selected and mutated to produce the next
-generation. Over time, the tuner converges on parameter sets that perform
-better than the baseline.
+Evolves AI strategy parameters through head-to-head simulation. Can run in two
+modes:
+
+  1. SINGLE mode (default): Evolves one unified parameter set across all
+     strategies. Fast convergence, but all archetypes share the same tuning.
+
+  2. PER-STRATEGY mode (--per-strategy): Runs a separate evolution for each
+     strategy archetype (wide, tall, warmonger, builder, science). Civs are
+     force-locked into the target strategy during eval so variants compete
+     on equal strategic footing. Produces a best variant per strategy, which
+     can be merged back into ai.json.
+
+Fitness = final_score + 5*techs + 10*cities + 3*pop + 50*win_bonus - 50*elim
 
 Usage:
-    python3 scripts/tools/ai_tuner.py [--generations N] [--pool-size N]
-                                      [--sims-per-eval N] [--output file.json]
+    # Single-strategy (default):
+    python3 scripts/tools/ai_tuner.py --generations 5 --pool-size 6
 
-The script calls the Godot binary directly and reads structured JSON results
-emitted by the sim (via SIM_RESULTS_OUT). Each variant is tested by running
-several sims with different seeds and averaging its fitness.
-
-Fitness is a weighted score: final_score + 5*techs + 10*cities + 3*pop
-                               + 50*win_bonus - 50*eliminated_penalty
-
-Variants are mutated by adjusting numeric parameters by ±10% (configurable)
-with some probability of larger jumps. Non-numeric values are left alone.
+    # Per-strategy (much slower, one evolution per archetype):
+    python3 scripts/tools/ai_tuner.py --per-strategy --generations 4 \
+                                      --output per_strategy.json
 """
 
 import argparse
@@ -125,9 +128,14 @@ def crossover(parent_a, parent_b):
     return child
 
 
-def variant_to_overrides(variant):
-    """Return the subset of variant that's actually in MUTABLE_PARAMS."""
-    return {path: variant[path] for path, *_ in MUTABLE_PARAMS if path in variant}
+def variant_to_overrides(variant, force_strategy=None):
+    """Return the subset of variant in MUTABLE_PARAMS. If force_strategy is
+    set, also include a __force_strategy marker that locks the civ into that
+    archetype for the duration of the eval sim."""
+    out = {path: variant[path] for path, *_ in MUTABLE_PARAMS if path in variant}
+    if force_strategy:
+        out["__force_strategy"] = force_strategy
+    return out
 
 
 def run_sim(civ_overrides, civs, seed, max_turns=200, map_w=24, map_h=16,
@@ -193,12 +201,16 @@ def fitness(result, civ_id):
     return -500  # civ not found in results
 
 
-def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim):
+def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim,
+                  force_strategy=None):
     """Run head-to-head sims pitting pool variants against each other.
 
     Each variant is assigned to one civ per sim. We rotate pairings so every
     variant plays against several others. Returns a list of (variant_idx, fitness).
     Ensures every variant is sampled at least once per evaluation.
+
+    If force_strategy is set, all civs are locked into that strategy archetype
+    so variants compete on equal strategic footing — used in per-strategy mode.
     """
     fitness_totals = [0.0] * len(pool)
     fitness_counts = [0] * len(pool)
@@ -227,7 +239,7 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim):
         civs = random.sample(EVAL_CIVS, civs_per_sim)
         overrides = {}
         for variant_idx, civ_id in zip(picks, civs):
-            overrides[civ_id] = variant_to_overrides(pool[variant_idx])
+            overrides[civ_id] = variant_to_overrides(pool[variant_idx], force_strategy)
         seed = base_seed + sim_i * 1000
         t0 = time.time()
         result = run_sim(overrides, civs, seed, max_turns=max_turns)
@@ -244,7 +256,7 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim):
         if fitness_counts[i] == 0:
             # Force-run one more sim for any unsampled variants
             civ_id = random.choice(EVAL_CIVS)
-            overrides = {civ_id: variant_to_overrides(pool[i])}
+            overrides = {civ_id: variant_to_overrides(pool[i], force_strategy)}
             result = run_sim(overrides, [civ_id] + random.sample(
                 [c for c in EVAL_CIVS if c != civ_id], min(civs_per_sim - 1, len(EVAL_CIVS) - 1)
             ), base_seed + 999999, max_turns=max_turns)
@@ -253,6 +265,69 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim):
         else:
             scores.append((i, fitness_totals[i] / fitness_counts[i]))
     return scores
+
+
+def evolve_single(args, baseline, force_strategy=None):
+    """Run one evolutionary loop, optionally locked to a single strategy.
+    Returns (history, final_best_variant)."""
+    pool = [dict(baseline)]
+    for _ in range(args.pool_size - 1):
+        pool.append(mutate(baseline, mutation_rate=args.mutation_rate, step=args.mutation_step))
+
+    history = []
+    for gen in range(args.generations):
+        label = f"[{force_strategy}] " if force_strategy else ""
+        print(f"\n=== {label}Generation {gen + 1}/{args.generations} ===")
+        t0 = time.time()
+        scores = evaluate_pool(pool, args.sims_per_eval,
+                               args.base_seed + gen * 100000,
+                               args.max_turns, args.civs_per_sim,
+                               force_strategy=force_strategy)
+        scores.sort(key=lambda x: -x[1])
+        gen_time = time.time() - t0
+        print(f"  Generation scores (gen took {gen_time:.0f}s):")
+        for rank, (idx, fit) in enumerate(scores):
+            marker = " <- BASELINE" if idx == 0 and gen == 0 else ""
+            print(f"    #{rank+1} variant[{idx}]: fitness={fit:.1f}{marker}")
+        history.append({
+            "generation": gen + 1,
+            "best_fitness": scores[0][1],
+            "avg_fitness": sum(f for _, f in scores) / len(scores),
+            "best_variant": variant_to_overrides(pool[scores[0][0]]),
+        })
+
+        # Select top half, crossover + mutate the rest
+        keep = max(2, args.pool_size // 2)
+        parents = [pool[idx] for idx, _ in scores[:keep]]
+        new_pool = list(parents)
+        while len(new_pool) < args.pool_size:
+            a, b = random.sample(parents, 2)
+            child = crossover(a, b)
+            child = mutate(child, mutation_rate=args.mutation_rate, step=args.mutation_step)
+            new_pool.append(child)
+        pool = new_pool
+
+    # Best variant after final gen
+    final_scores = evaluate_pool(pool, args.sims_per_eval,
+                                 args.base_seed + 777777,
+                                 args.max_turns, args.civs_per_sim,
+                                 force_strategy=force_strategy)
+    final_scores.sort(key=lambda x: -x[1])
+    best = variant_to_overrides(pool[final_scores[0][0]])
+    return history, best
+
+
+STRATEGIES = ["wide", "tall", "warmonger", "builder", "science"]
+
+
+def print_best(label, best, baseline):
+    print(f"\n=== {label} best variant ===")
+    for k, v in best.items():
+        if k.startswith("__"):
+            continue
+        baseline_v = baseline.get(k, "?")
+        marker = "  (changed)" if v != baseline_v else ""
+        print(f"  {k}: {baseline_v} -> {v}{marker}")
 
 
 def main():
@@ -266,68 +341,41 @@ def main():
     ap.add_argument("--mutation-step", type=float, default=0.15)
     ap.add_argument("--output", type=str, default="tuner_results.json")
     ap.add_argument("--base-seed", type=int, default=10000)
+    ap.add_argument("--per-strategy", action="store_true",
+                    help="Run separate evolution per strategy archetype")
+    ap.add_argument("--strategies", type=str, default=",".join(STRATEGIES),
+                    help="Comma-separated list of strategies to evolve (per-strategy mode only)")
     args = ap.parse_args()
 
     print(f"Loading baseline from {AI_TUNABLES}")
     baseline = load_baseline()
     print(f"  {len(baseline)} baseline parameters, {len(MUTABLE_PARAMS)} mutable")
 
-    # Initial pool: baseline + mutants
-    pool = [dict(baseline)]
-    for _ in range(args.pool_size - 1):
-        pool.append(mutate(baseline, mutation_rate=args.mutation_rate, step=args.mutation_step))
-
-    history = []
-    for gen in range(args.generations):
-        print(f"\n=== Generation {gen + 1}/{args.generations} ===")
-        t0 = time.time()
-        scores = evaluate_pool(pool, args.sims_per_eval, args.base_seed + gen * 100000,
-                               args.max_turns, args.civs_per_sim)
-        scores.sort(key=lambda x: -x[1])
-        gen_time = time.time() - t0
-        print(f"  Generation scores (gen took {gen_time:.0f}s):")
-        for rank, (idx, fit) in enumerate(scores):
-            marker = " <- BASELINE" if idx == 0 and gen == 0 else ""
-            print(f"    #{rank+1} variant[{idx}]: fitness={fit:.1f}{marker}")
-
-        # Record history
-        history.append({
-            "generation": gen + 1,
-            "best_fitness": scores[0][1],
-            "avg_fitness": sum(f for _, f in scores) / len(scores),
-            "best_variant": variant_to_overrides(pool[scores[0][0]]),
-        })
-
-        # Select top half as parents for next gen
-        keep = max(2, args.pool_size // 2)
-        parents = [pool[idx] for idx, _ in scores[:keep]]
-
-        # Next generation: keep parents, fill rest with crossover + mutation
-        new_pool = list(parents)
-        while len(new_pool) < args.pool_size:
-            a, b = random.sample(parents, 2)
-            child = crossover(a, b)
-            child = mutate(child, mutation_rate=args.mutation_rate, step=args.mutation_step)
-            new_pool.append(child)
-        pool = new_pool
-
-    # Save final results
-    final = {
+    results = {
+        "mode": "per-strategy" if args.per_strategy else "single",
         "generations": args.generations,
         "pool_size": args.pool_size,
         "sims_per_eval": args.sims_per_eval,
-        "history": history,
-        "final_best": variant_to_overrides(pool[0]),
+        "runs": {},
     }
+
+    if args.per_strategy:
+        strats = [s.strip() for s in args.strategies.split(",") if s.strip()]
+        print(f"\nEvolving per-strategy for: {strats}")
+        for strat in strats:
+            print(f"\n{'='*60}\nStrategy: {strat}\n{'='*60}")
+            history, best = evolve_single(args, baseline, force_strategy=strat)
+            results["runs"][strat] = {"history": history, "final_best": best}
+            print_best(strat, best, baseline)
+    else:
+        history, best = evolve_single(args, baseline, force_strategy=None)
+        results["runs"]["single"] = {"history": history, "final_best": best}
+        print_best("single", best, baseline)
+
     out_path = Path(args.output)
     with open(out_path, "w") as f:
-        json.dump(final, f, indent=2)
-    print(f"\nResults written to {out_path}")
-    print("\n=== Best variant ===")
-    for k, v in final["final_best"].items():
-        baseline_v = baseline.get(k, "?")
-        marker = "  (changed)" if v != baseline_v else ""
-        print(f"  {k}: {baseline_v} -> {v}{marker}")
+        json.dump(results, f, indent=2)
+    print(f"\nAll results written to {out_path}")
 
 
 if __name__ == "__main__":

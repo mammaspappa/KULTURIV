@@ -59,6 +59,10 @@ func execute_turn(player) -> void:
 	# Get leader flavor values for personality-based decisions
 	var flavor = _get_leader_flavor(player)
 
+	# Pick / update active strategy (tall/wide/warmonger/builder/science/balanced)
+	# Strategy is sticky — only changes every few turns to avoid thrashing.
+	_pick_strategy(player, flavor)
+
 	# Process diplomacy first (skip unmet players handled internally)
 	_process_diplomacy(player, flavor)
 
@@ -108,6 +112,153 @@ func execute_turn(player) -> void:
 	_process_great_people(player, flavor)
 
 ## Get leader flavor values (cached per turn)
+## Convenience wrapper: read an AI tunable with the player's active strategy
+## and current game phase as layers. Use this from all AI decision code
+## instead of calling GameManager.get_ai_tunable directly.
+func _ai_tun(player, path: String, default):
+	return GameManager.get_ai_tunable(
+		player.civilization_id, path, default,
+		player.active_strategy, GameManager.get_current_phase())
+
+## Pick the active strategy for this player based on leader flavor, game phase,
+## current economy, and neighbor threats. Strategy is sticky (changes at most
+## every N turns) to prevent thrashing.
+##
+## Strategy options: balanced, wide, tall, warmonger, builder, science
+##
+## Each archetype biases the parameter resolution layer — see ai.json strategies.
+func _pick_strategy(player, flavor: Dictionary) -> void:
+	# Per-civ forced strategy override (used by the evo tuner to lock civs
+	# into a specific archetype for eval). Set via GameManager.ai_overrides[civ_id]["__force_strategy"].
+	var civ_overrides = GameManager.ai_overrides.get(player.civilization_id, {})
+	if civ_overrides is Dictionary and civ_overrides.has("__force_strategy"):
+		player.active_strategy = civ_overrides["__force_strategy"]
+		player.active_strategy_sticky_turns = 9999
+		return
+
+	# Hysteresis: don't reconsider for at least 10 turns after last switch
+	if player.active_strategy_sticky_turns > 0:
+		player.active_strategy_sticky_turns -= 1
+		return
+
+	var mil = flavor.get("military", 5)
+	var sci = flavor.get("science", 5)
+	var gold = flavor.get("gold", 5)
+	var growth = flavor.get("growth", 5)
+	var expansion = flavor.get("expansion", 5)
+	var culture = flavor.get("culture", 5)
+
+	# Count real-civ wars and threats
+	var real_wars = 0
+	for enemy_id in player.at_war_with:
+		var e = GameManager.get_player(enemy_id)
+		if e and not e.is_barbarian():
+			real_wars += 1
+
+	# Count neighbors (real civs we've met) within proximity as threat gauge
+	var nearby_threats = 0
+	if not player.cities.is_empty():
+		var my_pos = player.cities[0].grid_position
+		for other in GameManager.players:
+			if other == player or other.is_barbarian():
+				continue
+			if other.player_id not in player.met_players:
+				continue
+			if other.cities.is_empty():
+				continue
+			var d = GridUtils.chebyshev_distance(my_pos, other.cities[0].grid_position)
+			if d < 15:
+				nearby_threats += 1
+
+	var num_cities = player.cities.size()
+	var gpt = player.gold_per_turn
+	var phase = GameManager.get_current_phase()
+
+	# Score each strategy. Higher score wins.
+	var scores := {
+		"balanced": 10.0,
+		"wide": 0.0,
+		"tall": 0.0,
+		"warmonger": 0.0,
+		"builder": 0.0,
+		"science": 0.0,
+	}
+
+	# ---- Warmonger: high military flavor, active wars, or many threats ----
+	scores["warmonger"] += mil * 2.0
+	scores["warmonger"] += real_wars * 15.0
+	scores["warmonger"] += nearby_threats * 3.0
+	if phase == "early":
+		scores["warmonger"] += 5.0  # early warmonger rush
+	if gpt < -5:
+		scores["warmonger"] -= 20.0  # can't afford war
+
+	# ---- Wide: high expansion flavor, low threats, early game ----
+	scores["wide"] += expansion * 2.0
+	scores["wide"] += growth * 1.0
+	if phase == "early":
+		scores["wide"] += 10.0
+	if nearby_threats == 0:
+		scores["wide"] += 8.0
+	if real_wars > 0:
+		scores["wide"] -= 15.0
+	if gpt < 0:
+		scores["wide"] -= 10.0
+
+	# ---- Tall: few cities by choice, high growth, mid game ----
+	scores["tall"] += growth * 2.0
+	scores["tall"] += gold * 1.5
+	if num_cities <= 4:
+		scores["tall"] += 8.0
+	if phase == "mid":
+		scores["tall"] += 5.0
+	if real_wars == 0 and nearby_threats <= 1:
+		scores["tall"] += 5.0
+
+	# ---- Builder: high production/gold flavor, no wars, economy focus ----
+	scores["builder"] += (gold + growth) * 1.5
+	scores["builder"] += culture * 1.0
+	if real_wars == 0 and nearby_threats <= 1:
+		scores["builder"] += 10.0
+	if phase == "mid" or phase == "late":
+		scores["builder"] += 5.0
+
+	# ---- Science: high science flavor, peaceful, low military ----
+	scores["science"] += sci * 2.5
+	if real_wars == 0:
+		scores["science"] += 8.0
+	if nearby_threats <= 1:
+		scores["science"] += 5.0
+	if mil > 7:
+		scores["science"] -= 10.0  # warmonger leaders don't science
+
+	# Emergency override: if a war is on and we're under-garrisoned, force warmonger
+	if real_wars > 0:
+		var mil_count = 0
+		for u in player.units:
+			if u.get_strength() > 0:
+				mil_count += 1
+		if mil_count < num_cities * 2:
+			scores["warmonger"] += 30.0
+
+	# Pick highest-scoring strategy
+	var best = "balanced"
+	var best_score = scores["balanced"]
+	for k in scores.keys():
+		if scores[k] > best_score:
+			best_score = scores[k]
+			best = k
+
+	var prev = player.active_strategy
+	player.active_strategy = best
+	# Sticky: hold this strategy for at least 10 turns
+	player.active_strategy_sticky_turns = 10
+
+	if prev != best and sim_logger:
+		sim_logger.log_decision(player.player_name, "strategy", "switch",
+			"%s -> %s" % [prev, best],
+			"scores=" + JSON.stringify(scores))
+
 func _get_leader_flavor(player) -> Dictionary:
 	if not _cached_flavor.is_empty() and _cached_player_id == player.player_id:
 		return _cached_flavor
@@ -1673,15 +1824,15 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if p.civilization_id != "barbarian":
 			num_real_players += 1
 	var land_per_player = map_tiles / max(num_real_players, 1)
-	var max_c_div = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_divisor", 150)
-	var max_c_ediv = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_expansion_divisor", 4)
-	var max_c_min = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_hard_min", 3)
-	var max_c_max = GameManager.get_ai_tunable(player.civilization_id, "expansion.max_cities_hard_max", 7)
+	var max_c_div = _ai_tun(player, "expansion.max_cities_divisor", 150)
+	var max_c_ediv = _ai_tun(player, "expansion.max_cities_expansion_divisor", 4)
+	var max_c_min = _ai_tun(player, "expansion.max_cities_hard_min", 3)
+	var max_c_max = _ai_tun(player, "expansion.max_cities_hard_max", 7)
 	var max_cities = clampi(land_per_player / int(max_c_div) + expansion_flavor / int(max_c_ediv), int(max_c_min), int(max_c_max))
 	# Dynamic cap: reduce max if economy is struggling — don't expand into bankruptcy
-	var freeze_gpt = GameManager.get_ai_tunable(player.civilization_id, "expansion.freeze_max_cities_at_gpt", -10)
-	var soft_brake_gpt = GameManager.get_ai_tunable(player.civilization_id, "expansion.soft_brake_gpt", -3)
-	var soft_brake_sci = GameManager.get_ai_tunable(player.civilization_id, "expansion.soft_brake_science_rate", 0.5)
+	var freeze_gpt = _ai_tun(player, "expansion.freeze_max_cities_at_gpt", -10)
+	var soft_brake_gpt = _ai_tun(player, "expansion.soft_brake_gpt", -3)
+	var soft_brake_sci = _ai_tun(player, "expansion.soft_brake_science_rate", 0.5)
 	if player.gold_per_turn < freeze_gpt:
 		max_cities = num_cities  # Hard freeze at current
 	elif player.gold_per_turn < soft_brake_gpt and player.science_rate < soft_brake_sci:
@@ -1709,26 +1860,26 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 
 	# Calculate desired military based on flavor, specialization, and personality
 	var personality = _get_leader_personality(player)
-	var build_unit_prob_default = GameManager.get_ai_tunable(player.civilization_id, "military.build_unit_prob_default", 40)
+	var build_unit_prob_default = _ai_tun(player, "military.build_unit_prob_default", 40)
 	var build_unit_prob = personality.get("build_unit_prob", build_unit_prob_default)
-	var mil_base = GameManager.get_ai_tunable(player.civilization_id, "military.desired_per_city_base", 1)
-	var mil_div = GameManager.get_ai_tunable(player.civilization_id, "military.desired_per_city_flavor_divisor", 5)
+	var mil_base = _ai_tun(player, "military.desired_per_city_base", 1)
+	var mil_div = _ai_tun(player, "military.desired_per_city_flavor_divisor", 5)
 	var desired_military = num_cities * (mil_base + military_flavor / float(mil_div)) * (build_unit_prob / float(build_unit_prob_default))
 	if specialization == CitySpecialization.MILITARY:
 		desired_military *= 1.5
 	# Late-game threat scaling: after turn X, increase desired military per city.
-	var late_turn_1 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_turn_1", 150)
-	var late_mult_1 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_per_city_1", 2)
-	var late_turn_2 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_turn_2", 250)
-	var late_mult_2 = GameManager.get_ai_tunable(player.civilization_id, "military.late_game_floor_per_city_2", 3)
+	var late_turn_1 = _ai_tun(player, "military.late_game_floor_turn_1", 150)
+	var late_mult_1 = _ai_tun(player, "military.late_game_floor_per_city_1", 2)
+	var late_turn_2 = _ai_tun(player, "military.late_game_floor_turn_2", 250)
+	var late_mult_2 = _ai_tun(player, "military.late_game_floor_per_city_2", 3)
 	if TurnManager.current_turn >= late_turn_1:
 		desired_military = max(desired_military, num_cities * late_mult_1)
 	if TurnManager.current_turn >= late_turn_2:
 		desired_military = max(desired_military, num_cities * late_mult_2)
 
 	# Hard cap: scale with cities but don't over-build
-	var max_per_city = GameManager.get_ai_tunable(player.civilization_id, "military.max_per_city_mult", 3)
-	var max_base = GameManager.get_ai_tunable(player.civilization_id, "military.max_military_base", 3)
+	var max_per_city = _ai_tun(player, "military.max_per_city_mult", 3)
+	var max_base = _ai_tun(player, "military.max_military_base", 3)
 	var max_military = num_cities * max_per_city + max_base
 	# Economic cap: don't build more military if going broke. We react earlier
 	# than the previous gold<=0 check — by the time gold hits 0, units are

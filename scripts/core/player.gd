@@ -82,6 +82,11 @@ var ai_personality: Dictionary = {}
 # AI strategic state (persists across turns, used by AIStrategy)
 var ai_strategy: Dictionary = {}
 
+# Active strategy archetype (one of: balanced, wide, tall, warmonger, builder, science).
+# Picked per-turn by ai_controller._pick_strategy(). Used as a tunable layer.
+var active_strategy: String = "balanced"
+var active_strategy_sticky_turns: int = 0  # hysteresis — don't flip every turn
+
 func _init() -> void:
 	pass
 

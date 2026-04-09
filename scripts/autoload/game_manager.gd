@@ -34,14 +34,49 @@ var no_barbarians: bool = false  # If true, disables all barbarian spawning
 # Set before start_new_game() to apply variant thresholds per player.
 var ai_overrides: Dictionary = {}
 
-## Read an AI tunable with optional per-civ override lookup.
-## Falls back to DataManager.get_tunable if no override exists.
-func get_ai_tunable(civ_id: String, path: String, default):
+## Read an AI tunable, resolving through all layers:
+##   1. Per-civ override (ai_overrides[civ_id][path])
+##   2. Per-strategy override (ai.strategies.<strategy>.<path>)
+##   3. Per-phase override (ai.phases.<phase>.<path>)
+##   4. Base tunable (ai.<path>)
+##   5. Provided default
+##
+## Pass empty string for civ_id / strategy / phase to skip that layer.
+## This is the canonical AI parameter reader — always use this instead of
+## DataManager.get_tunable directly for AI logic.
+func get_ai_tunable(civ_id: String, path: String, default, strategy: String = "", phase: String = ""):
+	# Layer 1: per-civ override (takes absolute priority)
 	if civ_id != "" and ai_overrides.has(civ_id):
 		var civ_overrides = ai_overrides[civ_id]
 		if civ_overrides.has(path):
 			return civ_overrides[path]
+
+	# Layer 2: strategy override
+	if strategy != "":
+		var strat_val = DataManager.get_tunable("ai.strategies." + strategy + "." + path, null)
+		if strat_val != null:
+			return strat_val
+
+	# Layer 3: phase override
+	if phase != "":
+		var phase_val = DataManager.get_tunable("ai.phases." + phase + "." + path, null)
+		if phase_val != null:
+			return phase_val
+
+	# Layer 4: base tunable
 	return DataManager.get_tunable("ai." + path, default)
+
+## Compute the current game phase based on turn number.
+## Uses ai.phases.early_turn_end and ai.phases.mid_turn_end from tunables.
+func get_current_phase() -> String:
+	var turn = TurnManager.current_turn if TurnManager else 0
+	var early_end = DataManager.get_tunable("ai.phases.early_turn_end", 100)
+	var mid_end = DataManager.get_tunable("ai.phases.mid_turn_end", 250)
+	if turn <= int(early_end):
+		return "early"
+	if turn <= int(mid_end):
+		return "mid"
+	return "late"
 
 # Wonder tracking
 var world_wonders_built: Dictionary = {}  # wonder_id -> player_id who built it
