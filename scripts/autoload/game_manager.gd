@@ -354,6 +354,19 @@ func get_turn_scale() -> float:
 func scaled_turn(base_turn: int) -> int:
 	return int(round(base_turn * get_turn_scale()))
 
+## Map-size scale for counts (cities, units, etc). Normal = standard 80x50.
+## Returns a multiplier to apply to baseline counts so huge maps allow more.
+## Unlike turn_scale, this doesn't include the game speed multiplier.
+func get_map_scale() -> float:
+	var map_tiles = float(map_width * map_height)
+	var standard_tiles = 4000.0
+	# Linear scale capped so tiny maps don't collapse and huge maps don't explode
+	return clamp(sqrt(map_tiles / standard_tiles), 0.5, 2.5)
+
+## Scale a baseline count (cities, units) to the current map size.
+func scaled_count(base_count: int) -> int:
+	return int(round(base_count * get_map_scale()))
+
 func is_at_war(player1, player2) -> bool:
 	if player1 == null or player2 == null:
 		return false

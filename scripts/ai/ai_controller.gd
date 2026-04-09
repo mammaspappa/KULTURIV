@@ -1895,7 +1895,9 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	var max_c_ediv = _ai_tun(player, "expansion.max_cities_expansion_divisor", 4)
 	var max_c_min = _ai_tun(player, "expansion.max_cities_hard_min", 3)
 	var max_c_max = _ai_tun(player, "expansion.max_cities_hard_max", 7)
-	var max_cities = clampi(land_per_player / int(max_c_div) + expansion_flavor / int(max_c_ediv), int(max_c_min), int(max_c_max))
+	# Scale hard_max by map size — on huge maps the default 7 is too tight
+	var scaled_max = GameManager.scaled_count(int(max_c_max))
+	var max_cities = clampi(land_per_player / int(max_c_div) + expansion_flavor / int(max_c_ediv), int(max_c_min), scaled_max)
 	# Dynamic cap: reduce max if economy is struggling — don't expand into bankruptcy
 	var freeze_gpt = _ai_tun(player, "expansion.freeze_max_cities_at_gpt", -10)
 	var soft_brake_gpt = _ai_tun(player, "expansion.soft_brake_gpt", -3)

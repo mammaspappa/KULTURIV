@@ -61,7 +61,14 @@ static func update_strategy(player, flavor: Dictionary) -> void:
 			num_real_players += 1
 	var land_per_player = map_tiles_local / max(num_real_players, 1)
 	var expansion_flavor = flavor.get("expansion", 5)
-	var max_cities = clampi(land_per_player / 150 + expansion_flavor / 4, 3, 7)
+	# Match the formula in ai_controller._process_city_ai, including the
+	# map-size-scaled hard_max so huge maps allow more cities.
+	var max_c_div = DataManager.get_tunable("ai.expansion.max_cities_divisor", 150)
+	var max_c_ediv = DataManager.get_tunable("ai.expansion.max_cities_expansion_divisor", 4)
+	var max_c_min = DataManager.get_tunable("ai.expansion.max_cities_hard_min", 3)
+	var max_c_max = DataManager.get_tunable("ai.expansion.max_cities_hard_max", 7)
+	var scaled_max = GameManager.scaled_count(int(max_c_max))
+	var max_cities = clampi(land_per_player / int(max_c_div) + expansion_flavor / int(max_c_ediv), int(max_c_min), scaled_max)
 	var slots_remaining = max(0, max_cities - player.cities.size())
 
 	var raw_desired = max(0, unassigned_sites - existing_settlers)

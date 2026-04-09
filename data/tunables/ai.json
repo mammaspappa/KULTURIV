@@ -1,6 +1,5 @@
 {
-	"_description": "AI strategic thresholds. Resolution order (highest priority first): per-civ override → active strategy → game phase modifier → defaults. Read via GameManager.get_ai_tunable(civ_id, path, default).",
-
+	"_description": "AI strategic thresholds. Resolution order (highest priority first): per-civ override \u2192 active strategy \u2192 game phase modifier \u2192 defaults. Read via GameManager.get_ai_tunable(civ_id, path, default).",
 	"expansion": {
 		"_comment": "Settler production brakes and max city targeting",
 		"max_cities_divisor": 150,
@@ -11,16 +10,15 @@
 		"freeze_max_cities_at_gpt": -10,
 		"soft_brake_gpt": -3,
 		"soft_brake_science_rate": 0.5,
-		"science_brake_low": 0.30,
-		"science_brake_mid": 0.50,
-		"science_brake_high": 0.70,
+		"science_brake_low": 0.3,
+		"science_brake_mid": 0.5,
+		"science_brake_high": 0.7,
 		"gpt_brake_severe_gpt": -5,
 		"gpt_brake_severe_gold": 50,
 		"gpt_brake_minor_gpt": 0,
 		"gpt_brake_minor_gold": 20,
 		"settler_min_pop": 3
 	},
-
 	"military": {
 		"_comment": "Army sizing and composition",
 		"desired_per_city_base": 1,
@@ -40,7 +38,6 @@
 		"comfort_garrison_per_city": 2,
 		"peacetime_disband_fraction": 0.5
 	},
-
 	"economy": {
 		"gold_floor_drop_science": 80,
 		"gold_floor_recover_science": 150,
@@ -51,7 +48,6 @@
 		"bankrupt_gold": 50,
 		"bankrupt_turns_grace": 5
 	},
-
 	"research": {
 		"infra_agriculture_bonus": 55,
 		"infra_wheel_bonus": 50,
@@ -68,108 +64,108 @@
 		"resource_match_bonus_per_tile": 20,
 		"resource_match_bonus_max": 60
 	},
-
 	"whip": {
 		"min_population": 4,
 		"min_settler_population": 5,
 		"min_food_surplus": 1,
 		"cooldown_turns": 15
 	},
-
 	"flavor_bonus": {
 		"high_flavor_threshold": 7
 	},
-
 	"strategies": {
 		"_comment": "Strategy archetypes. Each lists overrides layered on top of defaults. The active strategy is picked per-turn by _pick_strategy() in ai_controller based on leader flavor, neighbors, economy, and game phase. Paths use dot-notation relative to the top of ai.json.",
-
 		"balanced": {
-			"_description": "Default — mild preferences, adapts to situation. Used when no other strategy strongly matches."
+			"_description": "Default \u2014 mild preferences, adapts to situation. Used when no other strategy strongly matches."
 		},
-
 		"wide": {
 			"_description": "Many smaller cities. Emphasize expansion, settlers, low per-city garrison.",
-			"expansion.max_cities_hard_max": 10,
-			"expansion.max_cities_divisor": 120,
-			"expansion.max_inflight_settlers": 3,
-			"expansion.soft_brake_gpt": -5,
-			"expansion.freeze_max_cities_at_gpt": -15,
-			"military.desired_per_city_base": 1,
-			"military.comfort_garrison_per_city": 1
-		},
-
-		"tall": {
-			"_description": "Few large cities. Cap city count early, focus on growth/buildings in each.",
+			"expansion.max_cities_divisor": 121,
+			"expansion.max_cities_hard_min": 2,
 			"expansion.max_cities_hard_max": 5,
-			"expansion.max_cities_hard_min": 3,
-			"expansion.max_inflight_settlers": 1,
+			"expansion.max_inflight_settlers": 3,
+			"expansion.freeze_max_cities_at_gpt": -7,
 			"expansion.soft_brake_gpt": -1,
 			"military.desired_per_city_base": 2,
-			"military.comfort_garrison_per_city": 2,
-			"research.deficit_currency_bonus": 50,
-			"research.deficit_banking_bonus": 40
+			"military.desired_per_city_flavor_divisor": 3,
+			"military.max_per_city_mult": 2,
+			"military.late_game_floor_per_city_1": 1,
+			"military.late_game_floor_per_city_2": 4,
+			"military.build_unit_prob_default": 41
 		},
-
+		"tall": {
+			"_description": "Few large cities. Cap city count early, focus on growth/buildings in each.",
+			"expansion.max_cities_expansion_divisor": 3,
+			"expansion.max_cities_hard_max": 5,
+			"expansion.freeze_max_cities_at_gpt": -11,
+			"expansion.soft_brake_gpt": -4,
+			"expansion.soft_brake_science_rate": 0.606,
+			"military.max_military_base": 2,
+			"military.late_game_floor_per_city_2": 2,
+			"military.build_unit_prob_default": 35,
+			"military.comfort_garrison_per_city": 1
+		},
 		"warmonger": {
 			"_description": "Military buildup, aggressive wars. More units, higher floors.",
+			"expansion.max_cities_divisor": 145,
+			"expansion.max_cities_expansion_divisor": 6,
+			"expansion.max_cities_hard_min": 4,
+			"expansion.max_cities_hard_max": 8,
+			"expansion.max_inflight_settlers": 1,
+			"expansion.soft_brake_gpt": -2,
 			"military.desired_per_city_base": 2,
-			"military.desired_per_city_flavor_divisor": 4,
-			"military.max_per_city_mult": 5,
-			"military.max_military_base": 5,
-			"military.build_unit_prob_default": 60,
-			"military.late_game_floor_per_city_1": 3,
+			"military.desired_per_city_flavor_divisor": 6,
+			"military.max_military_base": 2,
+			"military.late_game_floor_per_city_1": 1,
 			"military.late_game_floor_per_city_2": 4,
-			"military.comfort_garrison_per_city": 3,
-			"military.interleave_building_prob": 0.2,
-			"expansion.max_cities_hard_max": 8
+			"military.build_unit_prob_default": 33,
+			"military.comfort_garrison_per_city": 1
 		},
-
 		"builder": {
 			"_description": "Economy/wonders. Strong buildings, minimal military, maximize science.",
-			"military.desired_per_city_base": 0,
+			"expansion.max_cities_divisor": 153,
+			"expansion.max_cities_expansion_divisor": 3,
+			"expansion.max_cities_hard_min": 2,
+			"expansion.max_cities_hard_max": 9,
+			"expansion.max_inflight_settlers": 1,
+			"expansion.freeze_max_cities_at_gpt": -14,
+			"expansion.soft_brake_science_rate": 0.527,
 			"military.max_per_city_mult": 2,
-			"military.max_military_base": 2,
-			"military.build_unit_prob_default": 25,
-			"military.interleave_building_prob": 0.6,
-			"military.comfort_garrison_per_city": 1,
-			"expansion.max_cities_hard_max": 6,
-			"expansion.max_inflight_settlers": 1
+			"military.max_military_base": 5,
+			"military.late_game_floor_per_city_1": 3,
+			"military.late_game_floor_per_city_2": 4,
+			"military.build_unit_prob_default": 29,
+			"military.comfort_garrison_per_city": 3
 		},
-
 		"science": {
 			"_description": "Rush tech. Fewer cities, libraries/universities priority, low military.",
-			"expansion.max_cities_hard_max": 5,
-			"expansion.max_inflight_settlers": 1,
-			"military.desired_per_city_base": 1,
-			"military.max_per_city_mult": 2,
-			"military.build_unit_prob_default": 30,
-			"military.interleave_building_prob": 0.55,
-			"research.deficit_currency_bonus": 35,
-			"research.infra_agriculture_bonus": 60,
-			"research.infra_wheel_bonus": 55
+			"expansion.max_cities_divisor": 131,
+			"expansion.max_cities_expansion_divisor": 7,
+			"expansion.max_cities_hard_min": 2,
+			"expansion.max_cities_hard_max": 8,
+			"expansion.max_inflight_settlers": 3,
+			"expansion.soft_brake_gpt": -1,
+			"expansion.soft_brake_science_rate": 0.499,
+			"military.max_per_city_mult": 4
 		}
 	},
-
 	"phases": {
 		"_comment": "Game phase modifiers. early_turn_end/mid_turn_end gate which phase is active. Values at each phase layer on top of strategy + defaults.",
 		"early_turn_end": 100,
 		"mid_turn_end": 250,
-
 		"early": {
-			"_description": "First 100 turns — prioritize expansion, basic infrastructure, cheap military.",
+			"_description": "First 100 turns \u2014 prioritize expansion, basic infrastructure, cheap military.",
 			"military.desired_per_city_base": 1,
 			"military.max_per_city_mult": 2,
 			"expansion.max_inflight_settlers": 2
 		},
-
 		"mid": {
-			"_description": "T100-250 — consolidate, build economy, scale military with threats.",
+			"_description": "T100-250 \u2014 consolidate, build economy, scale military with threats.",
 			"military.late_game_floor_per_city_1": 2,
 			"expansion.max_inflight_settlers": 2
 		},
-
 		"late": {
-			"_description": "T250+ — maximize wonders/tech, strong military cap, slow expansion.",
+			"_description": "T250+ \u2014 maximize wonders/tech, strong military cap, slow expansion.",
 			"military.late_game_floor_per_city_2": 3,
 			"expansion.max_inflight_settlers": 1,
 			"expansion.soft_brake_gpt": -2

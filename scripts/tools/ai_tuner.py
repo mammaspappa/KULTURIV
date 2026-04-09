@@ -51,12 +51,16 @@ EVAL_CIVS = [
 
 # Parameters that we'll mutate. Each entry: (path, min, max, type)
 # The path matches the dot-notation key used in GameManager.get_ai_tunable.
+# Ranges are intentionally broad — per-strategy hard bounds are enforced
+# by STRATEGY_CONSTRAINTS below so the evolution can't drift away from
+# the strategy's core identity (e.g. "wide" can't evolve to have
+# max_cities_hard_max=5, which is less wide than baseline).
 MUTABLE_PARAMS = [
     # Expansion
     ("expansion.max_cities_divisor", 80, 250, int),
     ("expansion.max_cities_expansion_divisor", 2, 8, int),
     ("expansion.max_cities_hard_min", 2, 5, int),
-    ("expansion.max_cities_hard_max", 5, 12, int),
+    ("expansion.max_cities_hard_max", 4, 12, int),
     ("expansion.max_inflight_settlers", 1, 4, int),
     ("expansion.freeze_max_cities_at_gpt", -30, -5, int),
     ("expansion.soft_brake_gpt", -10, 0, int),
@@ -71,6 +75,55 @@ MUTABLE_PARAMS = [
     ("military.build_unit_prob_default", 20, 60, int),
     ("military.comfort_garrison_per_city", 1, 4, int),
 ]
+
+# Per-strategy hard floors/ceilings. Each entry is (path, min_or_None, max_or_None).
+# After mutation, if the value falls outside this range for the target strategy,
+# it gets clamped. Prevents strategies from evolving AWAY from their core identity.
+STRATEGY_CONSTRAINTS = {
+    "wide": {
+        "expansion.max_cities_hard_max": (7, None),     # must stay wide
+        "expansion.max_inflight_settlers": (2, None),   # parallel expansion
+        "military.comfort_garrison_per_city": (None, 2), # don't over-garrison
+    },
+    "tall": {
+        "expansion.max_cities_hard_max": (None, 5),     # cap low
+        "expansion.max_inflight_settlers": (None, 2),   # slow expansion
+        "military.max_military_base": (None, 4),        # modest military
+    },
+    "warmonger": {
+        "military.desired_per_city_base": (2, None),    # lots of units
+        "military.late_game_floor_per_city_2": (3, None),
+        "military.build_unit_prob_default": (40, None), # high unit prob
+        "military.max_per_city_mult": (3, None),
+    },
+    "builder": {
+        "military.build_unit_prob_default": (None, 35), # low unit prob
+        "military.desired_per_city_base": (None, 1),    # modest military
+        "expansion.max_inflight_settlers": (None, 2),
+    },
+    "science": {
+        "expansion.max_cities_hard_max": (None, 6),     # stay compact
+        "military.desired_per_city_base": (None, 1),    # minimal mil
+        "military.build_unit_prob_default": (None, 35),
+    },
+}
+
+
+def apply_strategy_constraints(variant, strategy):
+    """Clamp variant parameters to strategy-specific ranges."""
+    if not strategy or strategy not in STRATEGY_CONSTRAINTS:
+        return variant
+    out = dict(variant)
+    for path, (lo, hi) in STRATEGY_CONSTRAINTS[strategy].items():
+        if path not in out:
+            continue
+        v = out[path]
+        if lo is not None and v < lo:
+            v = lo
+        if hi is not None and v > hi:
+            v = hi
+        out[path] = v
+    return out
 
 # Fitness weights
 FITNESS_SCORE_WEIGHT = 1.0
@@ -129,10 +182,11 @@ def crossover(parent_a, parent_b):
 
 
 def variant_to_overrides(variant, force_strategy=None):
-    """Return the subset of variant in MUTABLE_PARAMS. If force_strategy is
-    set, also include a __force_strategy marker that locks the civ into that
-    archetype for the duration of the eval sim."""
+    """Return the subset of variant in MUTABLE_PARAMS, clamped to strategy
+    constraints. If force_strategy is set, also include a __force_strategy
+    marker that locks the civ into that archetype during eval."""
     out = {path: variant[path] for path, *_ in MUTABLE_PARAMS if path in variant}
+    out = apply_strategy_constraints(out, force_strategy)
     if force_strategy:
         out["__force_strategy"] = force_strategy
     return out
@@ -270,9 +324,11 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim,
 def evolve_single(args, baseline, force_strategy=None):
     """Run one evolutionary loop, optionally locked to a single strategy.
     Returns (history, final_best_variant)."""
-    pool = [dict(baseline)]
+    # Seed pool with baseline clamped to strategy, plus mutated variants.
+    pool = [apply_strategy_constraints(dict(baseline), force_strategy)]
     for _ in range(args.pool_size - 1):
-        pool.append(mutate(baseline, mutation_rate=args.mutation_rate, step=args.mutation_step))
+        m = mutate(baseline, mutation_rate=args.mutation_rate, step=args.mutation_step)
+        pool.append(apply_strategy_constraints(m, force_strategy))
 
     history = []
     for gen in range(args.generations):
@@ -304,6 +360,7 @@ def evolve_single(args, baseline, force_strategy=None):
             a, b = random.sample(parents, 2)
             child = crossover(a, b)
             child = mutate(child, mutation_rate=args.mutation_rate, step=args.mutation_step)
+            child = apply_strategy_constraints(child, force_strategy)
             new_pool.append(child)
         pool = new_pool
 

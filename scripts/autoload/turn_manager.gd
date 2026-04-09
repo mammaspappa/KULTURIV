@@ -237,6 +237,18 @@ func _advance_year() -> void:
 	current_year += years_to_add
 
 func _process_city_turn_start(city) -> void:
+	# AI cities re-evaluate tile assignments periodically so that new
+	# tiles (border expansion, improvements) get worked and starving cities
+	# shift citizens to food tiles. The human player manages their own
+	# assignments via the city screen.
+	if city.player_owner and not city.player_owner.is_human:
+		# Re-assign citizens when: (a) food starving, or (b) every 5 turns
+		var should_reassign = city.food_surplus <= 0
+		if not should_reassign and current_turn % 5 == city.player_owner.player_id % 5:
+			should_reassign = true
+		if should_reassign:
+			city.reassign_citizens()
+
 	# Calculate yields
 	city.calculate_yields()
 
