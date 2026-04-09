@@ -195,7 +195,7 @@ func _pick_strategy(player, flavor: Dictionary) -> void:
 			if other.cities.is_empty():
 				continue
 			var d = GridUtils.chebyshev_distance(my_pos, other.cities[0].grid_position)
-			if d < 15:
+			if d < GameManager.scaled_distance(15):
 				nearby_threats += 1
 
 	var num_cities = player.cities.size()
@@ -437,11 +437,12 @@ func _process_diplomacy(player, flavor: Dictionary) -> void:
 				var target_power = DiplomacySystem._calculate_power(other)
 				# Limit active wars to 2 (don't fight everyone at once)
 				if player.at_war_with.size() < 2 and barb_power > target_power * 0.5:
-					# Check proximity — only attack nearby civs
+					# Check proximity — only attack nearby civs (scaled by map size)
 					var close_enough = false
+					var attack_range = GameManager.scaled_distance(15)
 					for city in player.cities:
 						for other_city in other.cities:
-							if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) < 15:
+							if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) < attack_range:
 								close_enough = true
 								break
 						if close_enough:
@@ -1671,10 +1672,11 @@ func _find_nearby_barbarian(unit, player):
 				var btile = GameManager.hex_grid.get_tile(barb_unit.grid_position)
 				if btile and btile.get_visibility_for_player(player.player_id) < 2:
 					continue  # Not currently visible
-			# Must be near one of our cities
+			# Must be near one of our cities (range scaled by map size)
 			var near_our_city = false
+			var barb_range = GameManager.scaled_distance(8)
 			for city in player.cities:
-				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= 8:
+				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= barb_range:
 					near_our_city = true
 					break
 			if not near_our_city:
@@ -1686,9 +1688,10 @@ func _find_nearby_barbarian(unit, player):
 
 	return best_barb
 
-## Count barbarian units within 8 tiles of any owned city (visible only)
+## Count barbarian units within ~8 tiles (scaled) of any owned city (visible only)
 func _count_barbs_near_cities(player) -> int:
 	var count = 0
+	var barb_range = GameManager.scaled_distance(8)
 	for other_player in GameManager.players:
 		if other_player.civilization_id != "barbarian":
 			continue
@@ -1701,7 +1704,7 @@ func _count_barbs_near_cities(player) -> int:
 				if btile and btile.get_visibility_for_player(player.player_id) < 2:
 					continue
 			for city in player.cities:
-				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= 8:
+				if GridUtils.chebyshev_distance(barb_unit.grid_position, city.grid_position) <= barb_range:
 					count += 1
 					break
 	return count
@@ -2068,7 +2071,9 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			settlers_in_production += 1
 	var inflight_settlers = settlers_out + settlers_in_production
 	var slots_remaining = max_cities - num_cities
-	var max_inflight = clampi(slots_remaining, 0, 2)  # Up to 2 settlers in flight at once
+	# Use the strategy/civ-tunable max inflight, capped by remaining slots
+	var max_inflight_tun = _ai_tun(player, "expansion.max_inflight_settlers", 2)
+	var max_inflight = clampi(slots_remaining, 0, int(max_inflight_tun))
 	# Progressive expansion brake based on science slider — same logic as
 	# ai_strategy.update_strategy. Below 70% science we scale parallel settler
 	# builds down so the empire stops adding cities before bankruptcy hits.
@@ -3274,7 +3279,7 @@ func _determine_city_specialization(city, player, flavor: Dictionary) -> CitySpe
 			continue
 		if GameManager.is_at_war(player, other) or DiplomacySystem.calculate_attitude(player, other) < -2:
 			for other_city in other.cities:
-				if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) < 8:
+				if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) < GameManager.scaled_distance(8):
 					near_border = true
 					break
 
@@ -4188,12 +4193,13 @@ func _get_highest_production_city(player):
 
 func _get_border_city(player):
 	# Find a city near foreign borders (benefits most from culture bomb)
+	var border_range = GameManager.scaled_distance(6)
 	for city in player.cities:
 		for other in GameManager.players:
 			if other == player:
 				continue
 			for other_city in other.cities:
-				if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) <= 6:
+				if GridUtils.chebyshev_distance(city.grid_position, other_city.grid_position) <= border_range:
 					return city
 	return null
 

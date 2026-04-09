@@ -367,6 +367,13 @@ func get_map_scale() -> float:
 func scaled_count(base_count: int) -> int:
 	return int(round(base_count * get_map_scale()))
 
+## Scale a baseline distance (tile count) to the current map size.
+## Uses sqrt of the map scale so distances grow more conservatively than counts.
+## Use for "nearby threat" / "in range" distance comparisons. Don't use for
+## hard gameplay rules (city spacing, adjacency, sight range — those stay fixed).
+func scaled_distance(base_distance: int) -> int:
+	return int(round(base_distance * sqrt(get_map_scale())))
+
 func is_at_war(player1, player2) -> bool:
 	if player1 == null or player2 == null:
 		return false
