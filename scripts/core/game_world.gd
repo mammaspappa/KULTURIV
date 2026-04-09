@@ -593,7 +593,8 @@ func found_city(settler: Unit) -> City:
 	entity_layer.add_child(city)
 
 	# First city for non-barbarians gets a free palace (becomes capital)
-	if city_count == 0 and owner.civilization_id != "barbarian":
+	# owner.cities.size() == 1 now because add_city() above already added it
+	if owner.cities.size() == 1 and owner.civilization_id != "barbarian":
 		city.buildings.append("palace")
 		city.calculate_yields()
 

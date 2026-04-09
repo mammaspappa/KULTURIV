@@ -1400,6 +1400,27 @@ func transfer_to(new_owner) -> void:
 	if new_owner:
 		new_owner.cities.append(self)
 
+		# Rename if the city name already exists in the new owner's empire
+		# (e.g. Greece recaptures Athens but already founded a new Athens after losing the original)
+		var name_collision = false
+		for other in new_owner.cities:
+			if other != self and other.city_name == city_name:
+				name_collision = true
+				break
+		if name_collision:
+			var civ_data = DataManager.get_civ(new_owner.civilization_id)
+			var city_names = civ_data.get("city_names", ["City"])
+			var used: Dictionary = {}
+			for c in new_owner.cities:
+				used[c.city_name] = true
+			for n in city_names:
+				if not used.has(n):
+					city_name = n
+					break
+			if city_name in used and city_name == used.keys()[0]:
+				# Still a collision — use numbered variant
+				city_name = "%s %d" % [city_names[0], new_owner.cities.size() + 1]
+
 	# Set resistance proportional to population
 	resistance_turns = max(1, population / 2)
 
