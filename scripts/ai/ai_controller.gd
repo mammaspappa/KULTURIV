@@ -1790,15 +1790,13 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			max_inflight = 0
 		elif player.science_rate <= 0.50:
 			max_inflight = min(max_inflight, 1)
-	# Preemptive gpt-margin brake — even when slider is still high, refuse to
-	# add another city if our income margin can't absorb the maintenance hit.
-	if player.gold_per_turn < 10:
-		if player.gold_per_turn <= 0:
-			max_inflight = 0
-		elif player.gold_per_turn < 5:
-			max_inflight = min(max_inflight, 1)
-	# Hard stop when actually broke
-	if player.gold_per_turn < 0 and player.gold < 30:
+	# Preemptive gpt-margin brake — only when truly bleeding gold.
+	# Old thresholds were too strict: gpt=0 (balanced budget) blocked ALL settlers,
+	# causing civs to sit on 400+ gold at 1 city for 100+ turns.
+	# Now: only block if actively losing money AND low on reserves.
+	if player.gold_per_turn < -5 and player.gold < 50:
+		max_inflight = 0
+	elif player.gold_per_turn < 0 and player.gold < 20:
 		max_inflight = 0
 	if inflight_settlers < max_inflight and city.population >= 3:
 		# Garrison: 1 military per city is enough; we don't need a spare
