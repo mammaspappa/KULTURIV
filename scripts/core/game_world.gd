@@ -756,9 +756,10 @@ func _ai_capture_decision(city, new_owner) -> void:
 	elif city.population >= 6:
 		raze_prob -= 15
 
-	# Cities close to own territory are kept
+	# Cities close to own territory are kept (range scales with map size)
+	var keep_range = GameManager.scaled_distance(4)
 	for c in new_owner.cities:
-		if GridUtils.chebyshev_distance(city.grid_position, c.grid_position) <= 4:
+		if GridUtils.chebyshev_distance(city.grid_position, c.grid_position) <= keep_range:
 			raze_prob -= 20
 			break
 

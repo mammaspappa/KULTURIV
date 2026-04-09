@@ -1015,7 +1015,8 @@ func _add_resources() -> void:
 				continue
 			if tile.terrain_id in valid_terrains or tile.feature_id in valid_terrains:
 				if cluster_center != Vector2i(-1, -1) and placed > 0:
-					if GridUtils.chebyshev_distance(pos, cluster_center) > 5:
+					# Cluster radius scales with map size — larger maps get bigger clusters
+					if GridUtils.chebyshev_distance(pos, cluster_center) > GameManager.scaled_distance(5):
 						continue
 				tile.resource_id = resource_id
 				if cluster_center == Vector2i(-1, -1):
@@ -1318,8 +1319,9 @@ func find_starting_location(avoid_positions: Array[Vector2i], min_distance: int 
 				var score = _score_start_location(pos)
 				if score > best_score:
 					var ok = true
+					var avoid_dist = GameManager.scaled_distance(4)
 					for avoid_pos in avoid_positions:
-						if GridUtils.chebyshev_distance(pos, avoid_pos) < 4:
+						if GridUtils.chebyshev_distance(pos, avoid_pos) < avoid_dist:
 							ok = false
 							break
 					if ok:

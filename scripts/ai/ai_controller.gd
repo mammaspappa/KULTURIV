@@ -76,14 +76,25 @@ func execute_turn(player) -> void:
 	# Strategic planning (city sites, war targets, defense — runs once before units)
 	AIStrategyClass.update_strategy(player, flavor)
 
-	# Process units in two passes:
+	# Process units in three passes:
 	# Pass 1: Assign military escorts to settlers/workers outside cities
 	var escort_assignments = _assign_escorts(player)
 
-	# Pass 2: Process all units (escorts move with their charges)
+	# Pass 2: Process civilians (settlers, workers) FIRST so they reach their
+	# final positions before escorts try to follow them. Otherwise escorts move
+	# to the civilian's old position and lag one tile behind every turn.
 	for unit in player.units.duplicate():
 		if unit == null or not is_instance_valid(unit):
 			continue
+		if unit.can_found_city() or unit.can_build_improvements():
+			_process_unit_ai(unit, player, flavor, escort_assignments)
+
+	# Pass 3: Process military units (including escorts now matching final civ pos)
+	for unit in player.units.duplicate():
+		if unit == null or not is_instance_valid(unit):
+			continue
+		if unit.can_found_city() or unit.can_build_improvements():
+			continue  # already processed
 		_process_unit_ai(unit, player, flavor, escort_assignments)
 
 	# Peacetime disband: if no active wars and we're losing gold, disband excess
@@ -903,9 +914,17 @@ func _process_unit_ai(unit, player, flavor: Dictionary, escort_assignments: Dict
 		for civ_unit in player.units:
 			if is_instance_valid(civ_unit) and civ_unit.get_instance_id() == escort_target_id:
 				found_civilian = true
-				# Move toward the civilian's position (follow them)
-				if unit.grid_position != civ_unit.grid_position:
+				# Move ONTO the civilian's tile if possible — escorts share a tile
+				# with the civilian they're protecting (Civ4 BTS stack mechanic).
+				# Use up all movement to catch up.
+				while unit.grid_position != civ_unit.grid_position and unit.movement_remaining > 0:
+					var pos_before = unit.grid_position
 					_move_toward(unit, civ_unit.grid_position)
+					if unit.grid_position == pos_before:
+						# Couldn't advance — try greedy
+						_greedy_move_toward(unit, civ_unit.grid_position)
+					if unit.grid_position == pos_before:
+						break  # blocked, give up
 				# If on same tile and enemies nearby, fight them
 				if is_instance_valid(unit) and unit.movement_remaining > 0:
 					var threats = _find_nearby_enemies(unit, player, 1)
@@ -1408,10 +1427,59 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 	var unit_data = DataManager.get_unit(unit.unit_id)
 	var unit_class = unit_data.get("unit_class", "")
 
+	# Wounded units heal first — don't move while damaged unless adjacent enemy
+	# threatens (then we may need to fight or retreat). Heal threshold is 70%.
+	# Skip if unit has March promotion (heals while moving anyway).
+	if unit.health < 70 and not ("march" in unit.promotions):
+		var enemies_adjacent = _find_nearby_enemies(unit, player, 1)
+		if enemies_adjacent.is_empty():
+			# Safe to heal — fortify (skip turn so movement_remaining stays full)
+			if not unit.is_fortified:
+				unit.fortify()
+			return
+
 	# Stuck/oscillation breaker: if unit is going nowhere, try random move
 	if unit.is_oscillating() or unit.is_stuck(2):
 		_random_explore(unit)
 		return
+
+	# After year -2000: if any of our cities is empty (no garrison), and we're
+	# not currently the only defender of our own city, head back to garrison
+	# the empty one. Cities without defenders fall to single barb units.
+	if TurnManager.current_year >= -2000 and not player.cities.is_empty():
+		# Are we currently the sole defender here?
+		var here_city = GameManager.get_city_at(unit.grid_position)
+		var sole_defender = false
+		if here_city and here_city.player_owner == player:
+			var others_here = 0
+			for u in GameManager.get_units_at(unit.grid_position):
+				if u != unit and u.player_owner == player and u.get_strength() > 0:
+					others_here += 1
+			sole_defender = others_here == 0
+		# Find nearest empty city
+		if not sole_defender:
+			var empty_city_pos = Vector2i(-1, -1)
+			var best_dist = 9999
+			for c in player.cities:
+				var has_def = false
+				for u in GameManager.get_units_at(c.grid_position):
+					if u.player_owner == player and u.get_strength() > 0:
+						has_def = true
+						break
+				if not has_def:
+					var d = GridUtils.chebyshev_distance(unit.grid_position, c.grid_position)
+					if d < best_dist:
+						best_dist = d
+						empty_city_pos = c.grid_position
+			if empty_city_pos != Vector2i(-1, -1):
+				# Don't abandon active combat — only return if no enemies adjacent
+				var enemies_here = _find_nearby_enemies(unit, player, 1)
+				if enemies_here.is_empty():
+					if unit.grid_position == empty_city_pos:
+						unit.fortify()
+						return
+					_move_toward(unit, empty_city_pos)
+					return
 
 	# Animal era (before 2000 BC): no real threat to cities, so explore aggressively
 	# Kill animals we bump into, but don't need to garrison
@@ -2011,6 +2079,21 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
 			return
+
+	# After year -2000 (when real barb threats begin), every city MUST have a
+	# defender. If THIS city currently has no military unit on it, build one
+	# right now regardless of total military count.
+	if TurnManager.current_year >= -2000:
+		var has_garrison = false
+		for u in GameManager.get_units_at(city.grid_position):
+			if u.player_owner == player and u.get_strength() > 0:
+				has_garrison = true
+				break
+		if not has_garrison:
+			var garrison_unit = _get_best_military_unit(city, player, military_flavor, false, bankrupt)
+			if garrison_unit != "":
+				city.set_production(garrison_unit)
+				return
 
 	# ECONOMY FIX: when running a deficit, prioritize economic buildings in EVERY city
 	# before building more settlers/military. This prevents the common pattern of

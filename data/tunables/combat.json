@@ -1,10 +1,8 @@
 {
-	"_description": "Combat system tunables (combat_system.gd). Damage formula and combat behavior constants.",
+	"_description": "Combat system tunables (combat_system.gd). BTS-style: per-round one side hits the other (hit_chance = own_str/(own+other)). Per-hit damage uses BTS strength-ratio formula 20*(3*own+other)/(own+3*other), clamped to [damage.min, damage.max]. Strong vs weak ~50dmg, equal ~20, weak vs strong ~6.",
 	"damage": {
-		"base": 20.0,
-		"strength_multiplier": 3.0,
-		"min": 12.0,
-		"max": 40.0
+		"min": 6.0,
+		"max": 60.0
 	},
 	"max_combat_rounds": 100,
 	"withdraw_threshold": 0.30,

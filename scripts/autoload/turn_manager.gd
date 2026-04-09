@@ -643,6 +643,14 @@ func _process_unit_healing(unit) -> void:
 	if unit.health >= unit.max_health:
 		return
 
+	# BTS rule: a unit only heals if it didn't move or attack this turn.
+	# Exception: the "march" promotion lets a unit heal while moving.
+	var moved_this_turn = unit.movement_remaining < unit.get_base_movement()
+	var attacked_this_turn = unit.has_acted
+	var has_march = "march" in unit.promotions
+	if (moved_this_turn or attacked_this_turn) and not has_march:
+		return
+
 	var heal_amount = 0
 
 	# Check if in city
