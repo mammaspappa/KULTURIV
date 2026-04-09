@@ -120,6 +120,34 @@ func _ai_tun(player, path: String, default):
 		player.civilization_id, path, default,
 		player.active_strategy, GameManager.get_current_phase())
 
+## Leader-trait → strategy bias table. Based on Civ4 BTS trait guides.
+## Each trait adds these scores to the strategy picker, leaning leaders
+## toward playstyles their traits enable.
+##   Aggressive (+combat I melee/gunpowder): warmonger
+##   Imperialistic (+settler speed, great generals): wide
+##   Expansive (+3 health, cheap workers/granary): wide
+##   Creative (+2 culture, cheap theatre/coliseum): wide (border pops)
+##   Organized (-50% civic upkeep, cheap lighthouse/courthouse): wide/tall
+##   Industrious (+50% wonder prod, cheap forge): builder
+##   Philosophical (+100% GPP): science
+##   Financial (+1c on 2c tiles, cheap bank): builder
+##   Spiritual (no anarchy, cheap temples): flexible — no strong bias
+##   Protective (+drill I archery/gunpowder, cheap walls/castle): tall
+##   Charismatic (+1 happy, -25% XP promote): wide
+const TRAIT_STRATEGY_BIAS = {
+	"aggressive":    {"warmonger": 15, "builder": -5, "science": -5},
+	"imperialistic": {"wide": 15, "warmonger": 3},
+	"expansive":     {"wide": 12, "tall": 3},
+	"creative":      {"wide": 10, "builder": 3},
+	"organized":     {"wide": 8, "tall": 5},
+	"industrious":   {"builder": 15, "science": 3},
+	"philosophical": {"science": 15, "builder": 3},
+	"financial":     {"builder": 12, "science": 5, "tall": 3},
+	"spiritual":     {"builder": 3, "warmonger": 3},  # flexible
+	"protective":    {"tall": 12, "builder": 3},
+	"charismatic":   {"wide": 8, "warmonger": 3},
+}
+
 ## Pick the active strategy for this player based on leader flavor, game phase,
 ## current economy, and neighbor threats. Strategy is sticky (changes at most
 ## every N turns) to prevent thrashing.
@@ -183,6 +211,36 @@ func _pick_strategy(player, flavor: Dictionary) -> void:
 		"builder": 0.0,
 		"science": 0.0,
 	}
+
+	# ---- Leader trait bias: the strongest single factor in strategy selection ----
+	# Per Civ4 BTS guides, leaders' traits heavily shape their natural playstyle.
+	var leader_data = DataManager.get_leader(player.leader_id)
+	var traits = leader_data.get("traits", [])
+	for trait_id in traits:
+		var bias = TRAIT_STRATEGY_BIAS.get(trait_id, {})
+		for strat in bias.keys():
+			if strat in scores:
+				scores[strat] += bias[strat]
+
+	# ---- Favorite civic hints at preferred playstyle ----
+	# Vassalage/Theocracy → warmonger, Bureaucracy → tall, Free Speech → builder/science,
+	# Free Religion → flexible, Emancipation → wide.
+	var fav_civic = leader_data.get("favorite_civic", "")
+	match fav_civic:
+		"vassalage", "theocracy", "nationhood":
+			scores["warmonger"] += 8
+		"bureaucracy":
+			scores["tall"] += 8
+		"representation":
+			scores["science"] += 6
+			scores["tall"] += 3
+		"free_speech", "mercantilism":
+			scores["builder"] += 6
+		"emancipation", "universal_suffrage":
+			scores["wide"] += 6
+		"pacifism":
+			scores["science"] += 8
+			scores["warmonger"] -= 10
 
 	# ---- Warmonger: high military flavor, active wars, or many threats ----
 	scores["warmonger"] += mil * 2.0
@@ -250,9 +308,18 @@ func _pick_strategy(player, flavor: Dictionary) -> void:
 			best = k
 
 	var prev = player.active_strategy
+	# Require a significant margin to SWITCH away from current strategy.
+	# Prevents thrashing between close-scoring options (e.g. Aztec oscillating
+	# warmonger↔tall every 10 turns as threats wax and wane).
+	if prev != "" and prev in scores and prev != "balanced":
+		var current_score = scores[prev]
+		if best_score < current_score + 8:
+			best = prev
+			best_score = current_score
+
 	player.active_strategy = best
-	# Sticky: hold this strategy for at least 10 turns
-	player.active_strategy_sticky_turns = 10
+	# Sticky: hold this strategy for at least 15 turns (was 10 — too short)
+	player.active_strategy_sticky_turns = 15
 
 	if prev != best and sim_logger:
 		sim_logger.log_decision(player.player_name, "strategy", "switch",
