@@ -80,59 +80,39 @@
 		},
 		"wide": {
 			"_description": "Many smaller cities. Emphasize expansion, settlers, low per-city garrison.",
-			"expansion.freeze_max_cities_at_gpt": -7,
-			"expansion.soft_brake_gpt": -1,
-			"military.desired_per_city_base": 0,
-			"military.desired_per_city_flavor_divisor": 4,
-			"military.max_per_city_mult": 2,
-			"military.late_game_floor_per_city_1": 1,
-			"military.late_game_floor_per_city_2": 2,
-			"military.build_unit_prob_default": 45
+			"expansion.freeze_max_cities_at_gpt": -14,
+			"expansion.soft_brake_science_rate": 0.406,
+			"military.desired_per_city_flavor_divisor": 6,
+			"military.max_per_city_mult": 4,
+			"military.max_military_base": 2,
+			"military.build_unit_prob_default": 42
 		},
 		"tall": {
 			"_description": "Few large cities. Cap city count early, focus on growth/buildings in each.",
-			"expansion.max_cities_divisor": 167,
-			"expansion.max_cities_expansion_divisor": 3,
+			"expansion.max_cities_divisor": 123,
 			"expansion.max_cities_hard_max": 5,
-			"expansion.max_inflight_settlers": 1,
-			"expansion.freeze_max_cities_at_gpt": -5,
-			"expansion.soft_brake_gpt": -1,
-			"expansion.soft_brake_science_rate": 0.399,
-			"military.max_per_city_mult": 2,
-			"military.max_military_base": 2,
-			"military.late_game_floor_per_city_1": 1,
-			"military.build_unit_prob_default": 35,
-			"military.comfort_garrison_per_city": 1
+			"expansion.soft_brake_science_rate": 0.57,
+			"military.late_game_floor_per_city_1": 1
 		},
 		"warmonger": {
 			"_description": "Military buildup, aggressive wars. More units, higher floors.",
-			"expansion.max_cities_divisor": 169,
-			"expansion.max_cities_expansion_divisor": 2,
-			"expansion.max_cities_hard_min": 2,
-			"expansion.max_inflight_settlers": 3,
-			"expansion.freeze_max_cities_at_gpt": -17,
-			"expansion.soft_brake_science_rate": 0.526,
-			"military.desired_per_city_base": 2,
-			"military.max_military_base": 4,
+			"expansion.max_cities_expansion_divisor": 3,
+			"expansion.max_cities_hard_max": 6,
+			"military.desired_per_city_base": 3,
 			"military.comfort_garrison_per_city": 1
 		},
 		"builder": {
 			"_description": "Economy/wonders. Strong buildings, minimal military, maximize science.",
-			"expansion.max_cities_divisor": 175,
-			"expansion.max_inflight_settlers": 1,
-			"expansion.soft_brake_gpt": -2,
-			"military.late_game_floor_per_city_1": 4,
-			"military.late_game_floor_per_city_2": 2,
-			"military.build_unit_prob_default": 35
+			"expansion.max_cities_hard_min": 2,
+			"expansion.max_cities_hard_max": 5,
+			"military.desired_per_city_flavor_divisor": 6,
+			"military.max_military_base": 2,
+			"military.build_unit_prob_default": 35,
+			"military.comfort_garrison_per_city": 3
 		},
 		"science": {
 			"_description": "Rush tech. Fewer cities, libraries/universities priority, low military.",
-			"expansion.max_cities_expansion_divisor": 3,
-			"expansion.max_cities_hard_max": 5,
-			"expansion.freeze_max_cities_at_gpt": -5,
-			"expansion.soft_brake_gpt": -1,
-			"expansion.soft_brake_science_rate": 0.635,
-			"military.max_per_city_mult": 2,
+			"expansion.max_cities_hard_max": 6,
 			"military.build_unit_prob_default": 35
 		}
 	},
