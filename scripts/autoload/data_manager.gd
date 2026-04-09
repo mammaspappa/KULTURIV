@@ -348,8 +348,6 @@ func _validate_data() -> void:
 
 	# Tunables files
 	total += SchemaValidatorClass.validate_tunables("combat.json", tunables.get("combat", {}), {
-		"damage.base": TYPE_FLOAT,
-		"damage.strength_multiplier": TYPE_FLOAT,
 		"damage.min": TYPE_FLOAT,
 		"damage.max": TYPE_FLOAT,
 		"max_combat_rounds": TYPE_INT,

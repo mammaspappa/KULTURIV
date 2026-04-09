@@ -4,7 +4,7 @@
 		"min": 6.0,
 		"max": 60.0
 	},
-	"max_combat_rounds": 100,
+	"max_combat_rounds": 200,
 	"withdraw_threshold": 0.30,
 	"barbarian_bonus": 1.25,
 	"win_chance_clamp": {

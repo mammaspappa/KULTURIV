@@ -82,10 +82,14 @@ func resolve_combat(attacker, defender) -> Dictionary:
 	if defender.health <= 0 or attacker.health <= 0:
 		return _finalize_combat(attacker, defender)
 
-	# Main combat rounds — ONE hit per round based on hit chance (BTS rule)
-	var max_rounds: int = int(DataManager.get_tunable("combat.max_combat_rounds", 100))
+	# Main combat rounds — ONE hit per round based on hit chance (BTS rule).
+	# BTS combat is fought TO THE DEATH: one unit always dies. The only exception
+	# is when the attacker has a withdraw chance and rolls successfully after
+	# being damaged below the withdraw threshold (typical: mounted units).
+	var max_rounds: int = int(DataManager.get_tunable("combat.max_combat_rounds", 200))
 	var withdraw_threshold: float = float(DataManager.get_tunable("combat.withdraw_threshold", 0.30))
 	var rounds = 0
+	var attacker_withdrew = false
 
 	while attacker.health > 0 and defender.health > 0 and rounds < max_rounds:
 		rounds += 1
@@ -95,15 +99,29 @@ func resolve_combat(attacker, defender) -> Dictionary:
 			defender.take_damage(damage_to_defender)
 			EventBus.combat_round.emit(attacker, defender, damage_to_defender, 0)
 		else:
-			# Defender landed a hit
+			# Defender landed a hit on the attacker
 			attacker.take_damage(damage_to_attacker)
 			EventBus.combat_round.emit(attacker, defender, 0, damage_to_attacker)
 
-		# Withdrawal check for attacker when below the configured HP fraction
-		if attacker.health > 0 and attacker.health < attacker.max_health * withdraw_threshold:
-			if randf() < attacker.get_withdraw_chance():
-				EventBus.unit_withdrew.emit(attacker)
-				break
+			# Withdrawal check fires only when the attacker JUST took damage and
+			# fell below the withdraw threshold. Typical BTS mounted units have
+			# withdraw chances of 10-30%; rolling here means they break off
+			# before being killed, taking no further damage.
+			if attacker.health > 0 and attacker.health < attacker.max_health * withdraw_threshold:
+				if randf() < attacker.get_withdraw_chance():
+					attacker_withdrew = true
+					EventBus.unit_withdrew.emit(attacker)
+					break
+
+	# BTS rule: combat MUST conclude with a death (or successful withdraw).
+	# If we hit max_rounds with both still alive (extreme edge case — shouldn't
+	# happen with damage min=6 and HP=100), force the lower-HP unit to die so
+	# combat resolves cleanly.
+	if not attacker_withdrew and attacker.health > 0 and defender.health > 0:
+		if attacker.health <= defender.health:
+			attacker.take_damage(attacker.health)  # bring to 0
+		else:
+			defender.take_damage(defender.health)
 
 	return _finalize_combat(attacker, defender)
 
