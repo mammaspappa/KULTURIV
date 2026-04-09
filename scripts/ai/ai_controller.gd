@@ -894,6 +894,47 @@ func _process_unit_ai(unit, player, flavor: Dictionary, escort_assignments: Dict
 	if unit.has_acted or unit.movement_remaining <= 0:
 		return
 
+	# STRICT OSCILLATION GUARD: if this unit is bouncing between the same
+	# 2 tiles for several turns, fortify in place and skip AI for a cooldown
+	# period. Just escaping for one turn doesn't help because the next turn
+	# the AI re-targets the same place and loop resumes. Multi-turn fortify
+	# definitively breaks the cycle and lets the situation change.
+	var oscillation_cooldown_until = unit.get_meta("oscillation_cooldown_until", 0)
+	if TurnManager.current_turn < oscillation_cooldown_until:
+		# Already in oscillation cooldown — fortify and skip
+		if not unit.is_fortified:
+			unit.fortify()
+		if is_instance_valid(unit):
+			unit.record_position()
+		return
+	if unit.is_oscillating():
+		# Clear ANY persistent assignment that might be driving the loop
+		AIStrategyClass.clear_assignment(player, unit)
+		if unit.has_meta("escort_target"):
+			unit.remove_meta("escort_target")
+		if unit.has_meta("retreat_cooldown_until"):
+			unit.remove_meta("retreat_cooldown_until")
+		# Escalating cooldown: each consecutive oscillation doubles the
+		# fortify duration (5 → 10 → 20 → 40 turns scaled). Resets when
+		# the unit goes a full multiple of the cooldown without triggering.
+		var prev_count = unit.get_meta("oscillation_count", 0)
+		var new_count = prev_count + 1
+		var base_cd = 5 * (1 << min(new_count - 1, 3))  # 5,10,20,40
+		var cooldown_turns = GameManager.scaled_turn(base_cd)
+		unit.set_meta("oscillation_count", new_count)
+		unit.set_meta("oscillation_cooldown_until", TurnManager.current_turn + cooldown_turns)
+		# Also clear position history so the next set of moves doesn't
+		# immediately re-trip the A-B-A-B detector
+		unit._position_history.clear()
+		if not unit.is_fortified:
+			unit.fortify()
+		if sim_logger:
+			sim_logger.trace_unit(unit, "anti_oscillation_fortify",
+				"oscillating x%d — fortify %d turns" % [new_count, cooldown_turns])
+		if is_instance_valid(unit):
+			unit.record_position()
+		return
+
 	# Auto-promote units with available promotions
 	_auto_promote(unit, player)
 

@@ -53,19 +53,62 @@ func record_position() -> void:
 	else:
 		_stuck_turns = 0
 
-## Detect if unit is oscillating between 2-3 positions
+## Detect if unit is oscillating between 2-3 positions.
+## Requires a clear A-B-A-B pattern (4 turns of strict swapping) — workers
+## legitimately revisit tiles for chained improvements so a one-off A-B-A
+## is NOT enough. The strict guard in ai_controller relies on this firing
+## only when the unit is genuinely stuck in a loop.
 func is_oscillating() -> bool:
-	if _position_history.size() < 4:
-		return false
-	# Check for A-B-A-B pattern (last 4 positions)
 	var h = _position_history
 	var n = h.size()
-	if h[n-1] == h[n-3] and h[n-2] == h[n-4]:
+	if n < 4:
+		return false
+	# Strict A-B-A-B pattern (4 turns, alternating exactly 2 positions)
+	if h[n-1] == h[n-3] and h[n-2] == h[n-4] and h[n-1] != h[n-2]:
 		return true
-	# Check for A-B-C-A-B-C pattern
+	# A-B-C-A-B-C pattern (3-position cycle)
 	if n >= 6 and h[n-1] == h[n-4] and h[n-2] == h[n-5] and h[n-3] == h[n-6]:
 		return true
 	return false
+
+## Pick a random non-recent neighbor tile to break oscillation.
+## Returns Vector2i(-1,-1) if no valid escape exists.
+func pick_anti_oscillation_target() -> Vector2i:
+	var grid = GameManager.hex_grid if GameManager else null
+	if grid == null:
+		return Vector2i(-1, -1)
+	var recent = {}
+	for p in _position_history:
+		recent[p] = true
+	var neighbors = GridUtils.get_neighbors(grid_position)
+	neighbors.shuffle()
+	# First pass: find a passable neighbor we haven't been to
+	for n_pos in neighbors:
+		if recent.has(n_pos):
+			continue
+		var tile = grid.get_tile(n_pos)
+		if tile == null or not tile.is_passable():
+			continue
+		if tile.is_water() and get_unit_class() != "naval":
+			continue
+		if not tile.is_water() and get_unit_class() == "naval":
+			continue
+		return n_pos
+	# Second pass: any passable neighbor (even recent), as long as it's not
+	# the position we were on last turn
+	var last = _position_history[-1] if _position_history.size() >= 1 else grid_position
+	for n_pos in neighbors:
+		if n_pos == last:
+			continue
+		var tile = grid.get_tile(n_pos)
+		if tile == null or not tile.is_passable():
+			continue
+		if tile.is_water() and get_unit_class() != "naval":
+			continue
+		if not tile.is_water() and get_unit_class() == "naval":
+			continue
+		return n_pos
+	return Vector2i(-1, -1)
 
 ## Check if unit has been stuck (same position) for N turns
 func is_stuck(turns: int = 3) -> bool:
