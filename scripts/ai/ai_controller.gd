@@ -1108,11 +1108,18 @@ func _settler_ai(unit, player, flavor: Dictionary) -> void:
 		return
 
 	# --- Safety check: real danger (actual enemy UNITS, not just borders) ---
+	# Escort detection considers same tile AND adjacent tiles. If we only
+	# checked same-tile, the settler would think it's alone whenever its
+	# escort is one step behind (e.g. just after the settler moved), causing
+	# a retreat → escort catches up → settler advances → escort follows pattern
+	# that swapped positions every turn.
 	var has_escort = false
-	var units_here = GameManager.get_units_at(unit.grid_position)
-	for u in units_here:
-		if u != unit and u.player_owner == player and u.get_strength() > 0:
-			has_escort = true
+	for check_pos in GridUtils.get_tiles_in_range(unit.grid_position, 1):
+		for u in GameManager.get_units_at(check_pos):
+			if u != unit and u.player_owner == player and u.get_strength() > 0:
+				has_escort = true
+				break
+		if has_escort:
 			break
 
 	# Only check for actual military units nearby — NOT just enemy borders.
@@ -1492,6 +1499,15 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 					defenders_here += 1
 			# If removing me would drop below the required count, stay put
 			needed_here = (defenders_here - 1) < required
+		# If needed here, fortify and STOP — don't fall through to combat AI
+		# which could random-explore us off the city.
+		if needed_here:
+			# Only abandon garrison if there are enemies adjacent (we need to fight)
+			var enemies_adjacent = _find_nearby_enemies(unit, player, 1)
+			if enemies_adjacent.is_empty():
+				if not unit.is_fortified:
+					unit.fortify()
+				return
 		# Find nearest under-garrisoned city
 		if not needed_here:
 			var empty_city_pos = Vector2i(-1, -1)

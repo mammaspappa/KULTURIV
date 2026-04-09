@@ -528,6 +528,20 @@ func _get_capital():
 
 # Diplomacy methods
 func is_at_war_with(other_id: int) -> bool:
+	# Barbarians are implicitly at war with everyone non-barbarian.
+	# Without this, the explicit at_war_with array would have to track war
+	# against every civ for every barb, and the core barb player (id=-1)
+	# never declares wars. Result: barbs couldn't enter foreign territory or
+	# capture undefended cities.
+	if is_barbarian():
+		var other = GameManager.get_player(other_id) if GameManager else null
+		if other and not other.is_barbarian():
+			return true
+	# Symmetric: a real civ is implicitly at war with any barbarian
+	if other_id != player_id:
+		var other = GameManager.get_player(other_id) if GameManager else null
+		if other and other.is_barbarian() and not is_barbarian():
+			return true
 	return other_id in at_war_with
 
 func declare_war_on(other_id: int) -> void:

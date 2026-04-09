@@ -611,7 +611,12 @@ func _find_nearby_target(unit) -> Vector2i:
 
 	return best_target
 
-## Move unit toward a target position
+## Move unit toward a target position.
+## Uses unit.move_to() so EventBus.unit_moved fires — required for the
+## capture-on-walk-in handler in game_world to detect barbs entering empty
+## enemy cities. Direct grid_position assignment was bypassing the event
+## and that's why barbs couldn't take undefended cities even after they
+## targeted them.
 func _move_toward(unit, target_pos: Vector2i) -> void:
 	var pathfinder = PathfindingClass.new(GameManager.hex_grid, unit)
 	var path = pathfinder.find_path(unit.grid_position, target_pos)
@@ -620,13 +625,12 @@ func _move_toward(unit, target_pos: Vector2i) -> void:
 		var next_pos = path[1]
 		var tile = GameManager.hex_grid.get_tile(next_pos)
 		if tile and tile.is_passable():
-			var cost = tile.get_total_movement_cost()
-			if unit.movement_remaining >= cost:
-				unit.grid_position = next_pos
-				unit.movement_remaining -= cost
-				unit.position = GridUtils.grid_to_pixel(next_pos)
+			# Use move_to so unit_moved signal fires (capture detection)
+			unit.move_to(next_pos)
 
-## Random movement for idle barbarians (handles both land and naval units)
+## Random movement for idle barbarians (handles both land and naval units).
+## Uses unit.move_to() so EventBus.unit_moved fires (needed for capture
+## detection when barbs randomly stumble onto an undefended city).
 func _random_move(unit) -> void:
 	var is_naval = unit.get_unit_class() == "naval"
 	var neighbors = GridUtils.get_neighbors(unit.grid_position)
@@ -646,14 +650,9 @@ func _random_move(unit) -> void:
 		if not is_naval and tile.is_water():
 			continue
 
-		if GameManager.get_unit_at(neighbor_pos) != null:
-			continue
-
-		var cost = tile.get_total_movement_cost()
-		if unit.movement_remaining >= cost:
-			unit.grid_position = neighbor_pos
-			unit.movement_remaining -= cost
-			unit.position = GridUtils.grid_to_pixel(neighbor_pos)
+		# Don't blindly stack onto ANY unit — but enemy units block via
+		# can_move_to. unit.move_to handles the rules.
+		if unit.move_to(neighbor_pos):
 			return
 
 ## Destroy a barbarian camp (called when captured)
@@ -694,9 +693,9 @@ func _get_scaled_interval() -> int:
 ## Get max barbarian civs scaled by map size
 func _get_max_barbarian_civs() -> int:
 	var map_tiles = GameManager.map_width * GameManager.map_height
-	# Standard map ~4000 tiles = 3 civs, larger maps get more, smaller get fewer
-	var scale = float(map_tiles) / 4000.0
-	return clampi(int(_max_barbarian_civs_base() * scale), 1, 6)
+	# Standard map ~4000 tiles = 3 civs (sqrt scale so small maps don't collapse to 1)
+	var scale = sqrt(float(map_tiles) / 4000.0)
+	return clampi(int(round(_max_barbarian_civs_base() * scale)), 2, 8)
 
 ## Try to found a barbarian city from an eligible camp
 func _try_found_barbarian_city() -> void:
