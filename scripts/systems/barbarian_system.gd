@@ -667,9 +667,11 @@ func get_camp_positions() -> Array:
 
 ## Get min turn scaled by game speed (Marathon=3x more turns, Quick=0.67x)
 func _get_scaled_min_turn() -> int:
-	return int(_city_founding_base_min_turn() * GameManager.get_speed_multiplier())
+	# Scale by both game speed and map size — bigger maps need more lead time
+	return GameManager.scaled_turn(_city_founding_base_min_turn())
 
-## Get check interval scaled by game speed
+## Get check interval scaled by game speed (intervals don't need map scaling —
+## they describe how often we check, not when something starts).
 func _get_scaled_interval() -> int:
 	return max(1, int(_city_founding_base_interval() * GameManager.get_speed_multiplier()))
 

@@ -100,7 +100,7 @@ func execute_turn(player) -> void:
 				"%s -> %s" % [city.city_name, city.current_production], "")
 
 	# Process civics adoption (scaled by game speed)
-	var civics_interval = max(1, int(10 * GameManager.get_speed_multiplier()))
+	var civics_interval = max(1, GameManager.scaled_turn(10))
 	if TurnManager.current_turn % civics_interval == player.player_id % civics_interval:
 		_process_civics(player, flavor)
 
@@ -506,9 +506,12 @@ func _consider_peace(player, other, military_flavor: int) -> void:
 	# BTS make_peace_rand: lower values = more stubborn. Scale to ~5-20% chance per turn.
 	# Original was 1/make_peace_rand chance (~1%). Too low — wars never end.
 	var peace_roll = 10.0 / max(float(personality.make_peace_rand), 1.0)
-	# Boost peace chance based on war duration (wars get stale)
+	# Boost peace chance based on war duration (wars get stale).
+	# Fatigue rate is per "Normal-speed turn", so divide by turn_scale to keep
+	# the same wall-clock-feel across speeds.
 	var war_duration = TurnManager.current_turn - war_start
-	var fatigue_bonus = min(war_duration * 0.002, 0.15)  # Up to +15% after 75 turns
+	var fatigue_per_turn = 0.002 / GameManager.get_turn_scale()
+	var fatigue_bonus = min(war_duration * fatigue_per_turn, 0.15)
 	peace_roll += fatigue_bonus
 
 	if randf() > peace_roll:
@@ -2177,7 +2180,8 @@ func _consider_peacetime_disband(player) -> void:
 			mil_units.append(u)
 
 	var num_cities = player.cities.size()
-	var comfort_garrison = num_cities * 2
+	var per_city = _ai_tun(player, "military.comfort_garrison_per_city", 2)
+	var comfort_garrison = num_cities * int(per_city)
 	var excess = mil_units.size() - comfort_garrison
 	if excess <= 0:
 		return

@@ -389,11 +389,12 @@ func calculate_war_score(player, enemy) -> int:
 	var enemy_cities = enemy.cities.size()
 	score += (player_cities - enemy_cities) * 10
 
-	# Check if enemy is near capital
+	# Check if enemy is near capital (scaled by map size)
+	var threat_range = GameManager.scaled_distance(5)
 	for city in player.cities:
 		if city.is_capital():
 			for enemy_unit in enemy.units:
-				if GridUtils.chebyshev_distance(city.grid_position, enemy_unit.grid_position) < 5:
+				if GridUtils.chebyshev_distance(city.grid_position, enemy_unit.grid_position) < threat_range:
 					score -= 20  # Enemy near capital is very bad
 			break
 

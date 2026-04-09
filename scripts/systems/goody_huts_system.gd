@@ -90,8 +90,8 @@ func _pick_reward(player, unit) -> GoodyReward:
 				continue
 
 		elif reward == GoodyReward.BARBARIANS:
-			# More likely in early game
-			var early_cutoff = int(50 * GameManager.get_speed_multiplier())
+			# More likely in early game (scaled by speed + map size)
+			var early_cutoff = GameManager.scaled_turn(50)
 			if TurnManager.current_turn < early_cutoff:
 				weight = int(weight * 1.5)
 

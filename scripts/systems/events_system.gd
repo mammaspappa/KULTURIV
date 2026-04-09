@@ -178,7 +178,9 @@ func _get_valid_global_events() -> Array:
 
 func _check_global_triggers(triggers: Dictionary, current_turn: int) -> bool:
 	# Minimum turn requirement
-	if triggers.get("min_turn", 0) > current_turn:
+	# min_turn from event JSON is a Normal-speed standard-map baseline; scale it
+	var min_turn = GameManager.scaled_turn(int(triggers.get("min_turn", 0))) if GameManager else int(triggers.get("min_turn", 0))
+	if min_turn > current_turn:
 		return false
 
 	# Era requirement
@@ -291,7 +293,9 @@ func _get_valid_events(player, city) -> Array:
 
 func _check_triggers(triggers: Dictionary, player, city, current_turn: int) -> bool:
 	# Minimum turn requirement
-	if triggers.get("min_turn", 0) > current_turn:
+	# min_turn from event JSON is a Normal-speed standard-map baseline; scale it
+	var min_turn = GameManager.scaled_turn(int(triggers.get("min_turn", 0))) if GameManager else int(triggers.get("min_turn", 0))
+	if min_turn > current_turn:
 		return false
 
 	# Population requirements

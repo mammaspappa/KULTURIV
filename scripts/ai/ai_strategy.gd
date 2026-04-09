@@ -25,10 +25,11 @@ static func update_strategy(player, flavor: Dictionary) -> void:
 	# Defense needs — every turn (cheap)
 	_evaluate_defense_needs(player)
 
-	# City sites — every 5 turns or when city count changes
+	# City sites — re-evaluate every N turns (scaled) or when city count changes
 	var city_count_changed = player.cities.size() != strategy.get("last_city_count", 0)
 	var turns_since_eval = TurnManager.current_turn - strategy.get("last_full_eval", 0)
-	if turns_since_eval >= 5 or city_count_changed or strategy.city_sites.is_empty():
+	var eval_interval = GameManager.scaled_turn(5)
+	if turns_since_eval >= eval_interval or city_count_changed or strategy.city_sites.is_empty():
 		_evaluate_city_sites(player, flavor)
 		strategy["last_full_eval"] = TurnManager.current_turn
 		strategy["last_city_count"] = player.cities.size()
