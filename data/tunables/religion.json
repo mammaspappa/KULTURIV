@@ -1,0 +1,17 @@
+{
+	"_description": "Religion system tunables (religion_system.gd). Spread chance, happiness bonuses, founding tech map.",
+	"base_spread_chance": 0.05,
+	"happiness": {
+		"holy_city": 1,
+		"with_building": 1
+	},
+	"founding_techs": {
+		"meditation": "buddhism",
+		"polytheism": "hinduism",
+		"monotheism": "judaism",
+		"theology": "christianity",
+		"code_of_laws": "confucianism",
+		"philosophy": "taoism",
+		"divine_right": "islam"
+	}
+}

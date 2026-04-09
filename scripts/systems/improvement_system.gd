@@ -1,28 +1,11 @@
 extends Node
 ## Handles worker improvements on tiles.
+##
+## Build times are read from improvements.json (`build_turns` field), not hardcoded.
 
 const UnitClass = preload("res://scripts/entities/unit.gd")
 
-# Build times in turns (keys must match improvements.json)
-# Note: hamlet, village, town are cottage growth stages, not directly buildable
-const BUILD_TIMES = {
-	"farm": 5,
-	"mine": 6,
-	"road": 3,
-	"railroad": 3,
-	"cottage": 4,
-	"lumbermill": 6,
-	"plantation": 5,
-	"camp": 4,
-	"pasture": 5,
-	"quarry": 7,
-	"well": 5,
-	"winery": 5,
-	"fort": 6,
-	"fishing_boats": 4,
-	"workshop": 5,
-	"watermill": 5
-}
+const DEFAULT_BUILD_TURNS := 5
 
 ## Check if a worker can build a specific improvement on a tile
 func can_build(worker, tile, improvement_id: String) -> bool:
@@ -168,7 +151,8 @@ func process_build(worker) -> bool:
 	if worker.player_owner and worker.player_owner.has_trait("organized"):
 		build_rate = 2
 	worker.build_progress += build_rate
-	var time_needed = BUILD_TIMES.get(worker.order_target_improvement, 5)
+	var imp_data := DataManager.get_improvement(worker.order_target_improvement)
+	var time_needed: int = int(imp_data.get("build_turns", DEFAULT_BUILD_TURNS))
 
 	if worker.build_progress >= time_needed:
 		_complete_build(worker)
@@ -183,15 +167,15 @@ func _complete_build(worker) -> void:
 		return
 
 	var improvement_id = worker.order_target_improvement
+	var improvement = DataManager.get_improvement(improvement_id)
 
-	# Handle road/railroad separately
-	if improvement_id == "road":
-		tile.road_level = 1
-	elif improvement_id == "railroad":
-		tile.road_level = 2
+	# Improvements with a `road_level` field upgrade the tile's road instead of becoming a normal
+	# improvement. road = 1, railroad = 2, etc. — entirely data-driven.
+	var road_level: int = int(improvement.get("road_level", 0))
+	if road_level > 0:
+		tile.road_level = road_level
 	else:
 		# Check if we need to remove feature first (e.g., chopping forest)
-		var improvement = DataManager.get_improvement(improvement_id)
 		var removes_feature = improvement.get("removes_feature", [])
 		if tile.feature_id in removes_feature:
 			tile.feature_id = ""
@@ -200,8 +184,8 @@ func _complete_build(worker) -> void:
 
 	tile.update_visuals()
 
-	# Neighboring road tiles need to redraw their connections
-	if improvement_id in ["road", "railroad"] and GameManager.hex_grid:
+	# Neighboring tiles need to redraw their road connections
+	if road_level > 0 and GameManager.hex_grid:
 		for n_pos in GridUtils.get_neighbors(tile.grid_position):
 			var n_tile = GameManager.hex_grid.get_tile(n_pos)
 			if n_tile and n_tile.road_level >= 1:
@@ -221,17 +205,24 @@ func _clear_build_order(worker) -> void:
 func cancel_build(worker) -> void:
 	_clear_build_order(worker)
 
-## Get list of available improvements for a worker at a tile
+## Get list of available improvements for a worker at a tile.
+## Iterates every entry in improvements.json that has a build_turns field — road/railroad are
+## handled by dedicated build flows so we skip them here.
 func get_available_improvements(worker, tile) -> Array:
 	var available = []
 
 	if tile == null or not worker.can_build_improvements():
 		return available
 
-	# Check each known improvement
-	for imp_id in BUILD_TIMES.keys():
-		if imp_id == "road" or imp_id == "railroad":
-			continue  # Handle separately
+	for imp_id in DataManager.improvements.keys():
+		var entry = DataManager.improvements[imp_id]
+		if not (entry is Dictionary):
+			continue
+		if not entry.has("build_turns"):
+			continue
+		# Skip road-type improvements; they have dedicated build flows (start_build_road etc.).
+		if int(entry.get("road_level", 0)) > 0:
+			continue
 		if can_build(worker, tile, imp_id):
 			available.append(imp_id)
 
@@ -239,12 +230,12 @@ func get_available_improvements(worker, tile) -> Array:
 
 ## Get build time for an improvement
 func get_build_time(improvement_id: String) -> int:
-	return BUILD_TIMES.get(improvement_id, 5)
+	var entry := DataManager.get_improvement(improvement_id)
+	return int(entry.get("build_turns", DEFAULT_BUILD_TURNS))
 
 ## Get remaining turns for current build
 func get_remaining_turns(worker) -> int:
 	if worker.current_order != UnitClass.UnitOrder.BUILD:
 		return 0
-
-	var time_needed = BUILD_TIMES.get(worker.order_target_improvement, 5)
+	var time_needed := get_build_time(worker.order_target_improvement)
 	return max(0, time_needed - worker.build_progress)

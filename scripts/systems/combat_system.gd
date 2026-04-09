@@ -15,6 +15,14 @@ func _ensure_war_declared(attacker, defender) -> void:
 		def_player.declare_war_on(att_player.player_id)
 		EventBus.war_declared.emit(att_player, def_player)
 
+## Compute the BTS damage formula from tunables for the given strength differential.
+func _damage_from_diff(str_diff: float) -> float:
+	var base: float = float(DataManager.get_tunable("combat.damage.base", 20.0))
+	var mult: float = float(DataManager.get_tunable("combat.damage.strength_multiplier", 3.0))
+	var lo: float = float(DataManager.get_tunable("combat.damage.min", 12.0))
+	var hi: float = float(DataManager.get_tunable("combat.damage.max", 40.0))
+	return clamp(base + str_diff * mult, lo, hi)
+
 ## Resolve combat between attacker and defender (BTS-authentic damage formula)
 func resolve_combat(attacker, defender) -> Dictionary:
 	if attacker == null or defender == null:
@@ -27,12 +35,9 @@ func resolve_combat(attacker, defender) -> Dictionary:
 	var att_strength = _get_effective_strength(attacker, true, defender)
 	var def_strength = _get_effective_strength(defender, false, attacker)
 
-	# BTS damage formula: damage = 20 + (my_str - their_str) * 3, clamped [12, 40]
-	# damage_to_defender is based on attacker's strength advantage
-	var str_diff_att = att_strength - def_strength
-	var str_diff_def = def_strength - att_strength
-	var damage_to_defender = clamp(20.0 + str_diff_att * 3.0, 12.0, 40.0)
-	var damage_to_attacker = clamp(20.0 + str_diff_def * 3.0, 12.0, 40.0)
+	# BTS damage formula via tunables (combat.damage.{base,strength_multiplier,min,max})
+	var damage_to_defender = _damage_from_diff(att_strength - def_strength)
+	var damage_to_attacker = _damage_from_diff(def_strength - att_strength)
 
 	# First strikes: attacker deals full damage rounds before defender can respond
 	var att_first_strikes = attacker.get_first_strikes()
@@ -59,7 +64,8 @@ func resolve_combat(attacker, defender) -> Dictionary:
 		return _finalize_combat(attacker, defender)
 
 	# Main combat rounds — alternating damage until one side reaches 0 HP
-	var max_rounds = 100  # Safety limit (100 HP / 12 min damage = ~8 rounds max)
+	var max_rounds: int = int(DataManager.get_tunable("combat.max_combat_rounds", 100))
+	var withdraw_threshold: float = float(DataManager.get_tunable("combat.withdraw_threshold", 0.30))
 	var rounds = 0
 
 	while attacker.health > 0 and defender.health > 0 and rounds < max_rounds:
@@ -76,8 +82,8 @@ func resolve_combat(attacker, defender) -> Dictionary:
 		attacker.take_damage(damage_to_attacker)
 		EventBus.combat_round.emit(attacker, defender, 0, damage_to_attacker)
 
-		# Withdrawal check for attacker when below 30% HP
-		if attacker.health > 0 and attacker.health < attacker.max_health * 0.3:
+		# Withdrawal check for attacker when below the configured HP fraction
+		if attacker.health > 0 and attacker.health < attacker.max_health * withdraw_threshold:
 			if randf() < attacker.get_withdraw_chance():
 				EventBus.unit_withdrew.emit(attacker)
 				break
@@ -88,10 +94,10 @@ func _get_effective_strength(unit, is_attacking: bool, opponent) -> float:
 	var tile = GameManager.hex_grid.get_tile(unit.grid_position) if GameManager.hex_grid else null
 	var strength = unit.get_combat_strength(is_attacking, tile, opponent)
 
-	# BTS: all civilizations get +25% combat bonus vs barbarian units
-	if opponent and opponent.player_owner and opponent.player_owner.civilization_id == "barbarian":
-		if unit.player_owner and unit.player_owner.civilization_id != "barbarian":
-			strength *= 1.25
+	# BTS: all civilizations get a combat bonus vs barbarian units (configurable in combat.json)
+	if opponent and opponent.player_owner and opponent.player_owner.is_barbarian():
+		if unit.player_owner and not unit.player_owner.is_barbarian():
+			strength *= float(DataManager.get_tunable("combat.barbarian_bonus", 1.25))
 
 	return strength
 
@@ -176,9 +182,9 @@ func calculate_odds(attacker, defender) -> Dictionary:
 	var att_strength = _get_effective_strength(attacker, true, defender)
 	var def_strength = _get_effective_strength(defender, false, attacker)
 
-	# BTS damage formula
-	var dmg_to_def = clamp(20.0 + (att_strength - def_strength) * 3.0, 12.0, 40.0)
-	var dmg_to_att = clamp(20.0 + (def_strength - att_strength) * 3.0, 12.0, 40.0)
+	# BTS damage formula via tunables
+	var dmg_to_def = _damage_from_diff(att_strength - def_strength)
+	var dmg_to_att = _damage_from_diff(def_strength - att_strength)
 
 	# Simulate: how many rounds to kill each side
 	var rounds_to_kill_def = ceil(defender.health / dmg_to_def)
@@ -195,13 +201,17 @@ func calculate_odds(attacker, defender) -> Dictionary:
 	rounds_to_kill_att = ceil(att_hp_after_fs / dmg_to_att)
 
 	# Win chance approximation based on rounds needed
+	var win_min: float = float(DataManager.get_tunable("combat.win_chance_clamp.min", 0.05))
+	var win_max: float = float(DataManager.get_tunable("combat.win_chance_clamp.max", 0.95))
+	var win_certain: float = float(DataManager.get_tunable("combat.win_chance_clamp.certain_win", 0.99))
+	var loss_certain: float = float(DataManager.get_tunable("combat.win_chance_clamp.certain_loss", 0.01))
 	var win_chance: float
 	if rounds_to_kill_def <= 0:
-		win_chance = 0.99
+		win_chance = win_certain
 	elif rounds_to_kill_att <= 0:
-		win_chance = 0.01
+		win_chance = loss_certain
 	else:
-		win_chance = clamp(float(rounds_to_kill_att) / (rounds_to_kill_att + rounds_to_kill_def), 0.05, 0.95)
+		win_chance = clamp(float(rounds_to_kill_att) / (rounds_to_kill_att + rounds_to_kill_def), win_min, win_max)
 
 	return {
 		"win_chance": win_chance,
@@ -308,9 +318,11 @@ func air_strike(air_unit, target_pos: Vector2i) -> Dictionary:
 	var target_tile = GameManager.hex_grid.get_tile(target_pos) if GameManager.hex_grid else null
 	if target_tile:
 		var units_at_target = GameManager.get_units_at(target_pos)
+		var bomb_var_min: float = float(DataManager.get_tunable("combat.air.bomb_damage_variance_min", 0.7))
+		var bomb_var_max: float = float(DataManager.get_tunable("combat.air.bomb_damage_variance_max", 1.0))
 		for target_unit in units_at_target:
 			if target_unit.player_owner != air_unit.player_owner:
-				var damage = bomb_damage * randf_range(0.7, 1.0)
+				var damage = bomb_damage * randf_range(bomb_var_min, bomb_var_max)
 				target_unit.take_damage(damage)
 				result["damage_dealt"] += damage
 				result["targets_hit"].append(target_unit)
@@ -322,7 +334,8 @@ func air_strike(air_unit, target_pos: Vector2i) -> Dictionary:
 		var city = GameManager.get_city_at(target_pos)
 		if city and city.player_owner != air_unit.player_owner:
 			# Reduce city defenses
-			city.set_meta("defense_damage", city.get_meta("defense_damage", 0) + bomb_damage * 0.5)
+			var defense_factor: float = float(DataManager.get_tunable("combat.air.city_bomb_defense_damage_factor", 0.5))
+			city.set_meta("defense_damage", city.get_meta("defense_damage", 0) + bomb_damage * defense_factor)
 			result["city_damaged"] = true
 
 	air_unit.has_acted = true
@@ -354,10 +367,11 @@ func _find_interceptor(air_unit, target_pos: Vector2i):
 		return null
 
 	# Pick best interceptor (highest intercept chance)
+	var default_chance: float = float(DataManager.get_tunable("combat.air.default_intercept_chance", 0.4))
 	var best = potential_interceptors[0]
-	var best_chance = DataManager.get_unit(best.unit_id).get("intercept_chance", 0.4)
+	var best_chance = DataManager.get_unit(best.unit_id).get("intercept_chance", default_chance)
 	for interceptor in potential_interceptors:
-		var chance = DataManager.get_unit(interceptor.unit_id).get("intercept_chance", 0.4)
+		var chance = DataManager.get_unit(interceptor.unit_id).get("intercept_chance", default_chance)
 		if chance > best_chance:
 			best = interceptor
 			best_chance = chance
@@ -381,10 +395,14 @@ func _resolve_air_intercept(interceptor, attacker) -> Dictionary:
 	var int_strength = int_data.get("air_strength", 16.0)
 	var att_strength = att_data.get("air_strength", 16.0)
 
-	# Interceptor has advantage
+	# Interceptor has advantage. Base damages and variance window are configurable.
+	var att_base: float = float(DataManager.get_tunable("combat.air.intercept_damage_to_attacker_base", 25.0))
+	var int_base: float = float(DataManager.get_tunable("combat.air.intercept_damage_to_interceptor_base", 15.0))
+	var var_min: float = float(DataManager.get_tunable("combat.air.intercept_variance_min", 0.8))
+	var var_max: float = float(DataManager.get_tunable("combat.air.intercept_variance_max", 1.2))
 	var ratio = int_strength / max(att_strength, 1.0)
-	var damage_to_attacker = 25.0 * ratio * randf_range(0.8, 1.2)
-	var damage_to_interceptor = 15.0 / max(ratio, 0.5) * randf_range(0.8, 1.2)
+	var damage_to_attacker = att_base * ratio * randf_range(var_min, var_max)
+	var damage_to_interceptor = int_base / max(ratio, 0.5) * randf_range(var_min, var_max)
 
 	attacker.take_damage(damage_to_attacker)
 	interceptor.take_damage(damage_to_interceptor)
@@ -470,7 +488,7 @@ func launch_nuke(nuke_unit, target_pos: Vector2i) -> Dictionary:
 	if target_tile and target_tile.owner_id != -1:
 		var defender = GameManager.get_player(target_tile.owner_id)
 		if defender and defender.has_project("sdi"):
-			var intercept_chance = 0.75  # SDI has 75% intercept chance
+			var intercept_chance: float = float(DataManager.get_tunable("combat.nuke.sdi_intercept_chance", 0.75))
 			if randf() < intercept_chance:
 				result["intercepted"] = true
 				result["success"] = false
@@ -488,7 +506,8 @@ func launch_nuke(nuke_unit, target_pos: Vector2i) -> Dictionary:
 			continue
 
 		var distance_from_center = GridUtils.chebyshev_distance(target_pos, tile_pos)
-		var damage_multiplier = 1.0 - (float(distance_from_center) / float(nuke_radius + 1)) * 0.5
+		var falloff: float = float(DataManager.get_tunable("combat.nuke.distance_falloff_factor", 0.5))
+		var damage_multiplier = 1.0 - (float(distance_from_center) / float(nuke_radius + 1)) * falloff
 
 		# Destroy units on tile
 		var units_on_tile = GameManager.get_units_at(tile_pos)
@@ -525,13 +544,17 @@ func _nuke_city_damage(city, damage_multiplier: float, is_ground_zero: bool) -> 
 	var pop_killed = 0
 
 	if is_ground_zero:
-		# Ground zero: kill 30-70% of population
-		var kill_percent = randf_range(0.3, 0.7)
+		# Ground zero: kill a configurable population fraction
+		var gz_min: float = float(DataManager.get_tunable("combat.nuke.ground_zero_pop_kill_min", 0.3))
+		var gz_max: float = float(DataManager.get_tunable("combat.nuke.ground_zero_pop_kill_max", 0.7))
+		var kill_percent = randf_range(gz_min, gz_max)
 		pop_killed = int(city.population * kill_percent)
 		city.population = max(1, city.population - pop_killed)
 
 		# Destroy random buildings
-		var buildings_to_destroy = min(city.buildings.size(), randi_range(2, 5))
+		var b_min: int = int(DataManager.get_tunable("combat.nuke.ground_zero_buildings_min", 2))
+		var b_max: int = int(DataManager.get_tunable("combat.nuke.ground_zero_buildings_max", 5))
+		var buildings_to_destroy = min(city.buildings.size(), randi_range(b_min, b_max))
 		for i in range(buildings_to_destroy):
 			if city.buildings.size() > 0:
 				var idx = randi() % city.buildings.size()
@@ -540,21 +563,25 @@ func _nuke_city_damage(city, damage_multiplier: float, is_ground_zero: bool) -> 
 		# Reset production
 		city.production_progress = 0
 	else:
-		# Outer radius: kill 10-30% of population
-		var kill_percent = randf_range(0.1, 0.3) * damage_multiplier
+		# Outer radius: smaller kill fraction, scaled by distance falloff
+		var o_min: float = float(DataManager.get_tunable("combat.nuke.outer_pop_kill_min", 0.1))
+		var o_max: float = float(DataManager.get_tunable("combat.nuke.outer_pop_kill_max", 0.3))
+		var kill_percent = randf_range(o_min, o_max) * damage_multiplier
 		pop_killed = int(city.population * kill_percent)
 		city.population = max(1, city.population - pop_killed)
 
 	# Cause unhappiness
-	city.set_meta("nuke_unhappiness", city.get_meta("nuke_unhappiness", 0) + 3)
-	city.set_meta("nuke_unhappiness_turns", 10)
+	var unhappy: int = int(DataManager.get_tunable("combat.nuke.unhappiness_per_strike", 3))
+	var unhappy_turns: int = int(DataManager.get_tunable("combat.nuke.unhappiness_turns", 10))
+	city.set_meta("nuke_unhappiness", city.get_meta("nuke_unhappiness", 0) + unhappy)
+	city.set_meta("nuke_unhappiness_turns", unhappy_turns)
 
 	return pop_killed
 
 ## Create fallout on a tile
 func _create_fallout(tile) -> void:
 	tile.set_meta("fallout", true)
-	tile.set_meta("fallout_turns", 20)  # Fallout lasts 20 turns
+	tile.set_meta("fallout_turns", int(DataManager.get_tunable("combat.nuke.fallout_duration_turns", 20)))
 
 	# Fallout destroys improvements
 	if tile.improvement != "":
@@ -568,12 +595,13 @@ func _create_fallout(tile) -> void:
 
 ## Apply diplomatic penalty for using nukes
 func _apply_nuke_diplomacy_penalty(attacker_player) -> void:
+	var penalty: int = int(DataManager.get_tunable("combat.nuke.diplomacy_penalty", -5))
 	for player in GameManager.players:
 		if player.player_id == attacker_player.player_id:
 			continue
 
-		# -5 relations with everyone for using nukes
-		player.add_diplomacy_memory(attacker_player.player_id, "used_nuke", -5)
+		# Configurable diplomacy hit with everyone for using nukes
+		player.add_diplomacy_memory(attacker_player.player_id, "used_nuke", penalty)
 
 	EventBus.diplomacy_modifier_changed.emit(attacker_player, "used_nuke")
 
@@ -607,8 +635,9 @@ func bombard_city(attacker, target_pos: Vector2i) -> Dictionary:
 	var unit_data = DataManager.get_unit(attacker.unit_id)
 	var bombard_str = unit_data.get("bombard_strength", 5)
 
-	# Reduce city defense
-	var defense_reduction = bombard_str * 0.02  # Each point reduces 2%
+	# Reduce city defense (per-point reduction is configurable)
+	var per_point: float = float(DataManager.get_tunable("combat.bombard.defense_reduction_per_point", 0.02))
+	var defense_reduction = bombard_str * per_point
 	city.defense_damage = min(city.defense_damage + defense_reduction, 1.0)  # Cap at 100% damaged
 
 	result["success"] = true
@@ -616,13 +645,15 @@ func bombard_city(attacker, target_pos: Vector2i) -> Dictionary:
 	result["total_damage"] = city.defense_damage
 
 	# Collateral damage to defending units
+	var default_limit: float = float(DataManager.get_tunable("combat.bombard.default_collateral_limit", 0.5))
+	var max_targets: int = int(DataManager.get_tunable("combat.bombard.max_collateral_targets", 4))
 	var collateral = unit_data.get("collateral_damage", 0)
-	var collateral_limit = unit_data.get("collateral_limit", 0.5)
+	var collateral_limit = unit_data.get("collateral_limit", default_limit)
 	if collateral > 0:
 		var defenders = GameManager.get_units_at(target_pos)
 		var damaged_count = 0
 		for defender in defenders:
-			if defender.player_owner != attacker.player_owner and damaged_count < 4:
+			if defender.player_owner != attacker.player_owner and damaged_count < max_targets:
 				var dmg = defender.max_health * collateral * 0.01
 				var min_health = defender.max_health * (1.0 - collateral_limit)
 				defender.health = max(min_health, defender.health - dmg)

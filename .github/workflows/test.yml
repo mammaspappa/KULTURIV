@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gut:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-4.6.2-stable-linux
+
+      - name: Download Godot 4.6.2
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -L -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.6.2-stable/Godot_v4.6.2-stable_linux.x86_64.zip
+          unzip -o /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v4.6.2-stable_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+
+      - name: Import project (resolves class_name registry)
+        run: ~/godot/godot --headless --import || true
+
+      - name: Run GUT tests
+        run: |
+          ~/godot/godot --headless \
+            -s addons/gut/gut_cmdln.gd \
+            -gdir=res://tests/unit \
+            -gdir=res://tests/integration \
+            -gexit

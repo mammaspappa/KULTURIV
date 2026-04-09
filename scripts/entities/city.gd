@@ -93,8 +93,15 @@ var trade_route_income: int = 0
 const TILE_SIZE: int = 64
 var is_selected: bool = false
 
-# Culture thresholds for expansion
-const CULTURE_THRESHOLDS = [0, 10, 100, 500, 5000, 50000]
+# Culture thresholds for expansion. Loaded from tunables/cities.json (cities.culture_thresholds);
+# the const is kept as a fallback only.
+const _FALLBACK_CULTURE_THRESHOLDS := [0, 10, 100, 500, 5000, 50000]
+
+func _culture_thresholds() -> Array:
+	var t = DataManager.get_tunable("cities.culture_thresholds", null)
+	if t is Array and not t.is_empty():
+		return t
+	return _FALLBACK_CULTURE_THRESHOLDS
 
 signal city_selected()
 signal production_changed(item: String)
@@ -163,7 +170,8 @@ func _draw() -> void:
 
 	# Culture progress bar (thin)
 	var culture_y = prod_y
-	var next_threshold = CULTURE_THRESHOLDS[min(culture_level + 1, CULTURE_THRESHOLDS.size() - 1)]
+	var thresholds := _culture_thresholds()
+	var next_threshold = thresholds[min(culture_level + 1, thresholds.size() - 1)]
 	if next_threshold > 0:
 		var culture_ratio = clampf(float(culture) / next_threshold, 0.0, 1.0)
 		draw_rect(Rect2(bar_x, culture_y, bar_width, 3), Color(0.1, 0.1, 0.1))
@@ -1142,7 +1150,8 @@ func check_border_expansion() -> void:
 	# culture_level 0 = Poor (initial 3x3), expands to level 1 at 10 culture
 	# culture_level 1 = Fledgling (Fat Cross), expands to level 2 at 100 culture
 	# etc.
-	while culture_level + 1 < CULTURE_THRESHOLDS.size() and culture >= CULTURE_THRESHOLDS[culture_level + 1]:
+	var thresholds := _culture_thresholds()
+	while culture_level + 1 < thresholds.size() and culture >= thresholds[culture_level + 1]:
 		culture_level += 1
 		_expand_borders()
 		EventBus.city_borders_expanded.emit(self)
@@ -1204,10 +1213,14 @@ func get_defense_strength() -> float:
 # CONSCRIPTION (Draft)
 # =============================================================================
 
-## Maximum drafts per turn based on city population
-const DRAFT_ANGER_TURNS = 10
-const DRAFT_POP_COST = 1
-const MAX_DRAFTS_PER_TURN = 3
+## Draft tunables — see data/tunables/cities.json (cities.draft.*).
+func _draft_anger_turns() -> int: return int(DataManager.get_tunable("cities.draft.anger_turns", 10))
+func _draft_pop_cost() -> int: return int(DataManager.get_tunable("cities.draft.pop_cost", 1))
+func _max_drafts_per_turn() -> int: return int(DataManager.get_tunable("cities.draft.max_per_turn", 3))
+func _draft_min_pop() -> int: return int(DataManager.get_tunable("cities.draft.min_population", 2))
+func _draft_required_tech() -> String: return String(DataManager.get_tunable("cities.draft.required_tech", "nationalism"))
+func _draft_required_civic_legal() -> String: return String(DataManager.get_tunable("cities.draft.required_civic_legal", "nationhood"))
+func _fallback_unit_id() -> String: return String(DataManager.get_tunable("cities.fallback_unit", "warrior"))
 
 var drafts_this_turn: int = 0
 var draft_anger_turns: int = 0
@@ -1217,39 +1230,44 @@ func can_conscript() -> bool:
 	if player_owner == null:
 		return false
 
-	# Need Nationalism tech
-	if not player_owner.has_tech("nationalism"):
+	# Need the configured tech
+	if not player_owner.has_tech(_draft_required_tech()):
 		return false
 
-	# Need Nationhood civic
-	if player_owner.civics.get("legal", "") != "nationhood":
+	# Need the configured legal civic
+	if player_owner.civics.get("legal", "") != _draft_required_civic_legal():
 		return false
 
 	# Need minimum population
-	if population < 2:
+	if population < _draft_min_pop():
 		return false
 
 	# Check draft limit this turn
-	if drafts_this_turn >= MAX_DRAFTS_PER_TURN:
+	if drafts_this_turn >= _max_drafts_per_turn():
 		return false
 
 	return true
 
-## Get the unit type that can be drafted
+## Get the unit type that can be drafted.
+## Tries the priority list in tunables (cities.draft.priority_list); falls back to a hard list
+## if the tunable is missing. The list is searched in order until a unit whose required tech is
+## already researched is found.
 func get_draft_unit() -> String:
-	# Draft the best infantry-type unit available
-	var draft_units = ["mechanized_infantry", "infantry", "rifleman", "musketman", "pikeman", "spearman", "warrior"]
-
-	for unit_id in draft_units:
+	var priority := _draft_priority_list()
+	for unit_id in priority:
 		var unit_data = DataManager.get_unit(unit_id)
 		if unit_data.is_empty():
 			continue
-
 		var required_tech = unit_data.get("required_tech", "")
 		if required_tech == "" or player_owner.has_tech(required_tech):
 			return unit_id
+	return _fallback_unit_id()
 
-	return "warrior"  # Fallback
+func _draft_priority_list() -> Array:
+	var t = DataManager.get_tunable("cities.draft.priority_list", null)
+	if t is Array and not t.is_empty():
+		return t
+	return ["mechanized_infantry", "infantry", "rifleman", "musketman", "pikeman", "spearman", "warrior"]
 
 ## Perform conscription
 func conscript() -> bool:
@@ -1259,7 +1277,7 @@ func conscript() -> bool:
 	var draft_unit = get_draft_unit()
 
 	# Reduce population
-	population -= DRAFT_POP_COST
+	population -= _draft_pop_cost()
 	if population < 1:
 		population = 1
 
@@ -1268,7 +1286,7 @@ func conscript() -> bool:
 		GameManager.game_world.spawn_unit(draft_unit, grid_position, player_owner)
 
 	# Increase draft anger
-	draft_anger_turns = DRAFT_ANGER_TURNS
+	draft_anger_turns = _draft_anger_turns()
 	drafts_this_turn += 1
 
 	EventBus.city_drafted.emit(self, draft_unit)
@@ -1287,9 +1305,9 @@ func reset_drafts() -> void:
 	if draft_anger_turns > 0:
 		draft_anger_turns -= 1
 
-# Whipping (Slavery civic)
-const WHIP_PRODUCTION = 30  # Hammers per population sacrificed
-const WHIP_ANGER_TURNS = 10
+# Whipping (Slavery civic) — tunables in cities.json (cities.whip.*)
+func _whip_production() -> int: return int(DataManager.get_tunable("cities.whip.production_per_pop", 30))
+func _whip_anger_turns() -> int: return int(DataManager.get_tunable("cities.whip.anger_turns", 10))
 
 func can_whip() -> bool:
 	if player_owner == null or population <= 1:
@@ -1305,8 +1323,8 @@ func whip() -> bool:
 	if not can_whip():
 		return false
 	population -= 1
-	production_progress += WHIP_PRODUCTION
-	set_meta("whip_anger_turns", WHIP_ANGER_TURNS)
+	production_progress += _whip_production()
+	set_meta("whip_anger_turns", _whip_anger_turns())
 	# Check if production completed
 	var cost = get_production_cost()
 	if production_progress >= cost:
@@ -1417,62 +1435,9 @@ func transfer_to(new_owner) -> void:
 	if old_owner and old_owner.is_eliminated():
 		EventBus.player_eliminated.emit(old_owner)
 
+## Save / load delegated to CitySerializer (Phase 5 extraction).
 func to_dict() -> Dictionary:
-	return {
-		"city_name": city_name,
-		"owner_id": player_owner.player_id if player_owner else -1,
-		"grid_position": {"x": grid_position.x, "y": grid_position.y},
-		"population": population,
-		"food_stockpile": food_stockpile,
-		"current_production": current_production,
-		"production_progress": production_progress,
-		"production_queue": production_queue,
-		"buildings": buildings,
-		"territory": territory.map(func(v): return {"x": v.x, "y": v.y}),
-		"worked_tiles": worked_tiles.map(func(v): return {"x": v.x, "y": v.y}),
-		"culture": culture,
-		"culture_level": culture_level,
-		"religions": religions,
-		"holy_city_of": holy_city_of,
-		"specialists": specialists,
-		"city_focus": city_focus,
-		"locked_tiles": locked_tiles.map(func(v): return {"x": v.x, "y": v.y}),
-		"original_owner_id": original_owner_id,
-		"founder_civ_id": founder_civ_id,
-		"resistance_turns": resistance_turns,
-	}
+	return CitySerializer.to_dict(self)
 
 func from_dict(data: Dictionary) -> void:
-	city_name = data.get("city_name", "City")
-	grid_position = Vector2i(data.grid_position.x, data.grid_position.y)
-	population = data.get("population", 1)
-	food_stockpile = data.get("food_stockpile", 0.0)
-	current_production = data.get("current_production", "")
-	production_progress = data.get("production_progress", 0)
-	production_queue.assign(data.get("production_queue", []))
-	buildings.assign(data.get("buildings", []))
-
-	territory.clear()
-	for t in data.get("territory", []):
-		territory.append(Vector2i(t.x, t.y))
-
-	worked_tiles.clear()
-	for t in data.get("worked_tiles", []):
-		worked_tiles.append(Vector2i(t.x, t.y))
-
-	culture = data.get("culture", 0)
-	culture_level = data.get("culture_level", 1)
-	religions.assign(data.get("religions", []))
-	holy_city_of = data.get("holy_city_of", "")
-	specialists = data.get("specialists", {})
-	city_focus = data.get("city_focus", "")
-	original_owner_id = data.get("original_owner_id", -1)
-	founder_civ_id = data.get("founder_civ_id", "")
-	resistance_turns = data.get("resistance_turns", 0)
-	locked_tiles.clear()
-	for t in data.get("locked_tiles", []):
-		locked_tiles.append(Vector2i(t.x, t.y))
-
-	position = GridUtils.grid_to_pixel(grid_position)
-	calculate_yields()
-	update_visual()
+	CitySerializer.from_dict(self, data)

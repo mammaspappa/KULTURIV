@@ -1,0 +1,18 @@
+{
+	"_description": "City system tunables (city.gd). Culture expansion, draft, whip, and other city-level constants.",
+	"culture_thresholds": [0, 10, 100, 500, 5000, 50000],
+	"draft": {
+		"anger_turns": 10,
+		"pop_cost": 1,
+		"max_per_turn": 3,
+		"min_population": 2,
+		"required_tech": "nationalism",
+		"required_civic_legal": "nationhood"
+	},
+	"whip": {
+		"production_per_pop": 30,
+		"anger_turns": 10,
+		"min_population": 2
+	},
+	"fallback_unit": "warrior"
+}

@@ -827,7 +827,7 @@ func _update_scoreboard() -> void:
 	# Collect players for scoreboard (exclude barbarians)
 	var entries = []
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian":
+		if player.is_barbarian():
 			continue
 		if GameManager.spectator_mode:
 			# Spectator sees all players

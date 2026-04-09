@@ -1,0 +1,47 @@
+{
+	"_description": "Combat system tunables (combat_system.gd). Damage formula and combat behavior constants.",
+	"damage": {
+		"base": 20.0,
+		"strength_multiplier": 3.0,
+		"min": 12.0,
+		"max": 40.0
+	},
+	"max_combat_rounds": 100,
+	"withdraw_threshold": 0.30,
+	"barbarian_bonus": 1.25,
+	"win_chance_clamp": {
+		"min": 0.05,
+		"max": 0.95,
+		"certain_win": 0.99,
+		"certain_loss": 0.01
+	},
+	"air": {
+		"bomb_damage_variance_min": 0.7,
+		"bomb_damage_variance_max": 1.0,
+		"intercept_damage_to_attacker_base": 25.0,
+		"intercept_damage_to_interceptor_base": 15.0,
+		"intercept_variance_min": 0.8,
+		"intercept_variance_max": 1.2,
+		"city_bomb_defense_damage_factor": 0.5,
+		"default_intercept_chance": 0.4
+	},
+	"nuke": {
+		"sdi_intercept_chance": 0.75,
+		"distance_falloff_factor": 0.5,
+		"ground_zero_pop_kill_min": 0.3,
+		"ground_zero_pop_kill_max": 0.7,
+		"outer_pop_kill_min": 0.1,
+		"outer_pop_kill_max": 0.3,
+		"ground_zero_buildings_min": 2,
+		"ground_zero_buildings_max": 5,
+		"unhappiness_per_strike": 3,
+		"unhappiness_turns": 10,
+		"diplomacy_penalty": -5,
+		"fallout_duration_turns": 20
+	},
+	"bombard": {
+		"defense_reduction_per_point": 0.02,
+		"max_collateral_targets": 4,
+		"default_collateral_limit": 0.5
+	}
+}

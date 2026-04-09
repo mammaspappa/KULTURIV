@@ -196,7 +196,7 @@ func _place_starting_units(start_positions: Array[Vector2i] = []) -> void:
 	var pos_index = 0
 
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian":
+		if player.is_barbarian():
 			continue  # Barbarians don't get starting units
 
 		# Use pre-computed position or fallback to legacy finder

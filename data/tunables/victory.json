@@ -1,0 +1,8 @@
+{
+	"_description": "Victory condition tunables (victory_system.gd). Turn limits and victory thresholds.",
+	"max_turns": 500,
+	"domination_land_percent": 0.55,
+	"domination_pop_percent": 0.55,
+	"cultural_threshold": 50000,
+	"cultural_cities_needed": 3
+}

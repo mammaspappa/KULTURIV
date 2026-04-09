@@ -1,0 +1,9 @@
+{
+	"_description": "Unit-level global tunables (unit.gd). Constants that apply to all units rather than specific unit types.",
+	"position_history_length": 6,
+	"stuck_detection_default_turns": 3,
+	"great_general": {
+		"combat_bonus": 0.20,
+		"xp_bonus": 0.50
+	}
+}

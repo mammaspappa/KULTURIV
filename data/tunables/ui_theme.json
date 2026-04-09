@@ -1,0 +1,27 @@
+{
+	"_description": "Semantic color and style slots for UI elements. Replaces hardcoded Color.GREEN / Color.RED literals scattered through unit.gd, city.gd, event_popup.gd, etc. Colors are in hex string form (#RRGGBB or #RRGGBBAA).",
+	"colors": {
+		"unit_friendly": "#3CCB3C",
+		"unit_enemy": "#E14545",
+		"unit_neutral": "#C0C0C0",
+		"culture_border": "#FFD700",
+		"health_good": "#3CCB3C",
+		"health_warn": "#FFD700",
+		"health_danger": "#E14545",
+		"health_thresholds": {
+			"warn": 0.5,
+			"danger": 0.25
+		},
+		"production_progress": "#E6B324",
+		"growth_progress": "#3CCB3C",
+		"bg_panel": "#000000A0",
+		"bg_overlay": "#26262640",
+		"text_primary": "#FFFFFF",
+		"text_dimmed": "#A0A0A0",
+		"event_economy": "#FFA500",
+		"event_diplomacy": "#FFD700",
+		"event_disaster": "#9400D3",
+		"event_religion": "#FFFFFF",
+		"event_general": "#C0C0C0"
+	}
+}

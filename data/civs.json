@@ -217,6 +217,7 @@
 		"city_names": ["Barbarian Camp"],
 		"color_primary": "#8B4513",
 		"color_secondary": "#000000",
-		"is_playable": false
+		"is_playable": false,
+		"traits": ["barbarian", "minor"]
 	}
 }

@@ -1,5 +1,8 @@
 extends Node
 ## Handles great people generation and abilities.
+##
+## Tunables live in data/tunables/great_people.json — accessed via
+## DataManager.get_tunable("great_people.*"). Building->GP-type mapping is data-driven.
 
 const UnitClass = preload("res://scripts/entities/unit.gd")
 
@@ -13,9 +16,20 @@ enum GreatPersonType {
 	GREAT_GENERAL
 }
 
-# Great person point requirements (increases with each GP born)
-const BASE_GP_THRESHOLD = 100
-const GP_THRESHOLD_INCREASE = 50
+func _base_gp_threshold() -> int:
+	return int(DataManager.get_tunable("great_people.base_threshold", 100))
+
+func _gp_threshold_increase() -> int:
+	return int(DataManager.get_tunable("great_people.threshold_increase_per_birth", 50))
+
+func _settled_gp_bonus() -> int:
+	return int(DataManager.get_tunable("great_people.settled_gp_points_per_settled", 2))
+
+func _philosophical_multiplier() -> float:
+	return float(DataManager.get_tunable("great_people.philosophical_trait_multiplier", 2.0))
+
+func _building_gp_map() -> Dictionary:
+	return DataManager.get_tunable("great_people.building_gp_map", {}) as Dictionary
 
 # Track great people born per player
 var great_people_born: Dictionary = {}  # player_id -> count
@@ -72,11 +86,11 @@ func _calculate_gp_points(city) -> int:
 	# Settled great people bonus
 	if city.has_meta("settled_great_people"):
 		var settled = city.get_meta("settled_great_people")
-		points += settled.size() * 2
+		points += settled.size() * _settled_gp_bonus()
 
-	# BTS Philosophical trait: +100% Great People birth rate
+	# BTS Philosophical trait: +100% Great People birth rate (configurable multiplier)
 	if city.player_owner and city.player_owner.has_trait("philosophical"):
-		points = points * 2
+		points = int(points * _philosophical_multiplier())
 
 	# Civic modifier (Pacifism: +100% GP rate in cities with state religion)
 	if city.player_owner:
@@ -96,29 +110,23 @@ func _add_gp_weights(city, weights: Dictionary, _points: int) -> void:
 	for gp_type in gp_breakdown:
 		weights[gp_type] = weights.get(gp_type, 0) + gp_breakdown[gp_type]
 
-	# Also add building-based weights for buildings without specific GP types
+	# Also add building-based weights for buildings without specific GP types.
+	# The mapping (building_id -> GP type) is data-driven via great_people.building_gp_map.
+	var bldg_map := _building_gp_map()
 	for building_id in city.buildings:
 		var effects = DataManager.get_building_effects(building_id)
 		var building_gp = effects.get("great_person_points", 0)
 		var building_gp_type = effects.get("great_person_type", "")
 
-		# If building doesn't specify a type, infer from building category
 		if building_gp > 0 and building_gp_type == "":
-			if building_id in ["library", "university", "academy", "oxford_university"]:
-				weights["scientist"] = weights.get("scientist", 0) + building_gp
-			elif building_id in ["market", "bank", "grocer", "wall_street"]:
-				weights["merchant"] = weights.get("merchant", 0) + building_gp
-			elif building_id in ["forge", "factory", "ironworks"]:
-				weights["engineer"] = weights.get("engineer", 0) + building_gp
-			elif building_id in ["monument", "theater", "colosseum"]:
-				weights["artist"] = weights.get("artist", 0) + building_gp
-			elif building_id in ["temple", "monastery", "cathedral"]:
-				weights["prophet"] = weights.get("prophet", 0) + building_gp
+			var inferred = bldg_map.get(building_id, "")
+			if inferred != "":
+				weights[inferred] = weights.get(inferred, 0) + building_gp
 
 func _get_threshold(player) -> int:
 	var player_id = player.player_id
 	var born_count = great_people_born.get(player_id, 0)
-	return BASE_GP_THRESHOLD + (born_count * GP_THRESHOLD_INCREASE)
+	return _base_gp_threshold() + (born_count * _gp_threshold_increase())
 
 func _birth_great_person(city, weights: Dictionary) -> void:
 	if city == null or city.player_owner == null:

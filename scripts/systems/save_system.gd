@@ -1,15 +1,21 @@
 extends Node
 ## Handles saving and loading game state to files.
+##
+## Save format versioning: SAVE_VERSION is an integer. Loaded files are passed through
+## scripts/core/save_migrator.gd, which walks registered migrators step-by-step until the
+## file matches the current SAVE_VERSION. Legacy "1.0" string saves are detected as v1 and
+## upgraded transparently.
 
 const GameStateClass = preload("res://scripts/core/game_state.gd")
 const PlayerClass = preload("res://scripts/core/player.gd")
 const UnitClass = preload("res://scripts/entities/unit.gd")
 const CityClass = preload("res://scripts/entities/city.gd")
+const SaveMigratorClass = preload("res://scripts/core/save_migrator.gd")
 
 const SAVE_DIR = "user://saves/"
 const AUTOSAVE_FILE = "autosave.json"
 const QUICKSAVE_FILE = "quicksave.json"
-const SAVE_VERSION = "1.0"
+const SAVE_VERSION := 2  # bump and add a SaveMigrator step when changing the on-disk shape
 
 func _ready() -> void:
 	# Ensure save directory exists
@@ -29,14 +35,14 @@ func save_game(filename: String = "") -> bool:
 	var full_path = SAVE_DIR + filename
 	var file = FileAccess.open(full_path, FileAccess.WRITE)
 	if file == null:
-		push_error("SaveSystem: Failed to save game: " + str(FileAccess.get_open_error()))
+		GameLog.error("save", "failed to save game: %s" % str(FileAccess.get_open_error()))
 		return false
 
 	file.store_string(json_string)
 	file.close()
 
 	EventBus.game_saved.emit()
-	print("SaveSystem: Game saved to " + full_path)
+	GameLog.info("save", "game saved to %s" % full_path)
 	return true
 
 ## Load a game from a file
@@ -44,7 +50,7 @@ func load_game(filename: String) -> bool:
 	var full_path = SAVE_DIR + filename
 	var file = FileAccess.open(full_path, FileAccess.READ)
 	if file == null:
-		push_error("SaveSystem: Failed to load game: " + str(FileAccess.get_open_error()))
+		GameLog.error("save", "failed to load game: %s" % str(FileAccess.get_open_error()))
 		return false
 
 	var json_string = file.get_as_text()
@@ -53,13 +59,20 @@ func load_game(filename: String) -> bool:
 	var json = JSON.new()
 	var error = json.parse(json_string)
 	if error != OK:
-		push_error("SaveSystem: Failed to parse save file: " + json.get_error_message())
+		GameLog.error("save", "failed to parse save file: %s" % json.get_error_message())
 		return false
 
-	var success = _restore_save_data(json.data)
+	# Run migration before restore. SaveMigrator detects the file version and walks
+	# step-by-step migrators until the data matches SAVE_VERSION.
+	var migrated = SaveMigratorClass.migrate(json.data, SAVE_VERSION)
+	if migrated == null:
+		GameLog.error("save", "save migration failed for %s" % full_path)
+		return false
+
+	var success = _restore_save_data(migrated)
 	if success:
 		EventBus.game_loaded.emit()
-		print("SaveSystem: Game loaded from " + full_path)
+		GameLog.info("save", "game loaded from %s" % full_path)
 	return success
 
 ## Quick save
@@ -108,7 +121,7 @@ func delete_save(filename: String) -> bool:
 ## Collect all game data for saving
 func _collect_save_data() -> Dictionary:
 	var data = {
-		"version": SAVE_VERSION,
+		"save_version": SAVE_VERSION,
 		"save_time": Time.get_datetime_string_from_system(),
 		"settings": {
 			"map_width": GameManager.map_width,
@@ -178,12 +191,11 @@ func _collect_map_data() -> Dictionary:
 
 	return map_data
 
-## Restore game data from save
+## Restore game data from save. Migration has already happened by this point.
 func _restore_save_data(data: Dictionary) -> bool:
-	# Check version
-	var version = data.get("version", "")
+	var version = int(data.get("save_version", 0))
 	if version != SAVE_VERSION:
-		push_warning("SaveSystem: Save version mismatch. Expected %s, got %s" % [SAVE_VERSION, version])
+		GameLog.warn("save", "version mismatch after migration: expected %d, got %d" % [SAVE_VERSION, version])
 
 	# Restore settings
 	var settings = data.get("settings", {})

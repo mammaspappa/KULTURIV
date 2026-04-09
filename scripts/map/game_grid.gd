@@ -14,10 +14,16 @@ var wrap_y: bool = false
 # Tile storage
 var tiles: Dictionary = {}  # Vector2i -> GameTile
 
-# Generation thresholds (computed during generation)
+# Generation thresholds (initialized from tunables/mapgen.json at generate time;
+# the inline defaults match the historic hardcoded values).
 var _sea_level: float = 0.4
 var _mountain_threshold: float = 0.82
 var _hill_threshold: float = 0.68
+
+func _refresh_thresholds_from_tunables() -> void:
+	_sea_level = float(DataManager.get_tunable("mapgen.thresholds.sea_level", 0.4))
+	_mountain_threshold = float(DataManager.get_tunable("mapgen.thresholds.mountain", 0.82))
+	_hill_threshold = float(DataManager.get_tunable("mapgen.thresholds.hill", 0.68))
 
 # Intermediate buffers (allocated during generation, freed after)
 var _plate_map: PackedInt32Array
@@ -63,6 +69,7 @@ func generate_map(w: int = 80, h: int = 50) -> void:
 
 	_noise.seed = randi()
 	var map_type = GameManager.map_type if GameManager else "fractal"
+	_refresh_thresholds_from_tunables()
 
 	_allocate_buffers()
 
@@ -154,32 +161,28 @@ func _wrap_x(x: int) -> int:
 # =============================================================================
 
 func _generate_plates(map_type: String) -> void:
-	var continental_count: int
-	var oceanic_count: int
-	var continental_weight_range: Vector2i  # min, max growth weight
-	var oceanic_weight_range: Vector2i
+	# Plate counts and growth weights are looked up in tunables (mapgen.plates.<map_type>).
+	# An unrecognized map_type falls back to the "fractal" entry.
+	var preset: Dictionary = DataManager.get_tunable("mapgen.plates." + map_type, {}) as Dictionary
+	if preset.is_empty():
+		preset = DataManager.get_tunable("mapgen.plates.fractal", {}) as Dictionary
 
-	match map_type:
-		"pangaea":
-			continental_count = randi_range(1, 2)
-			oceanic_count = randi_range(4, 6)
-			continental_weight_range = Vector2i(7, 9)
-			oceanic_weight_range = Vector2i(2, 4)
-		"continents":
-			continental_count = randi_range(3, 5)
-			oceanic_count = randi_range(6, 8)
-			continental_weight_range = Vector2i(4, 6)
-			oceanic_weight_range = Vector2i(3, 5)
-		"archipelago":
-			continental_count = randi_range(8, 12)
-			oceanic_count = randi_range(5, 7)
-			continental_weight_range = Vector2i(2, 3)
-			oceanic_weight_range = Vector2i(5, 7)
-		_:  # fractal
-			continental_count = randi_range(4, 7)
-			oceanic_count = randi_range(5, 8)
-			continental_weight_range = Vector2i(3, 6)
-			oceanic_weight_range = Vector2i(3, 5)
+	var continental_count: int = randi_range(
+		int(preset.get("continental_count_min", 4)),
+		int(preset.get("continental_count_max", 7))
+	)
+	var oceanic_count: int = randi_range(
+		int(preset.get("oceanic_count_min", 5)),
+		int(preset.get("oceanic_count_max", 8))
+	)
+	var continental_weight_range := Vector2i(
+		int(preset.get("continental_weight_min", 3)),
+		int(preset.get("continental_weight_max", 6))
+	)
+	var oceanic_weight_range := Vector2i(
+		int(preset.get("oceanic_weight_min", 3)),
+		int(preset.get("oceanic_weight_max", 5))
+	)
 
 	_plate_count = continental_count + oceanic_count
 	_plate_is_continental.resize(_plate_count)

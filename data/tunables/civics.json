@@ -1,0 +1,17 @@
+{
+	"_description": "Civic system tunables (civics_system.gd). Upkeep cost levels, anarchy, and starting civics.",
+	"upkeep_costs": {
+		"none": 0,
+		"low": 1,
+		"medium": 2,
+		"high": 3
+	},
+	"base_anarchy_turns": 1,
+	"default_civics": {
+		"government": "despotism",
+		"legal": "barbarism",
+		"labor": "tribalism",
+		"economy": "decentralization",
+		"religion": "paganism"
+	}
+}

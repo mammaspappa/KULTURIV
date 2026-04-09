@@ -1,0 +1,11 @@
+{
+	"_description": "Year progression schedule (turn_manager.gd). BTS-style year-per-turn at Normal speed; scaled by game speed multiplier. Designed so 4000 BC reaches ~2050 AD at turn 500.",
+	"progression": [
+		{"until_turn": 50, "years_per_turn": 60, "label": "Ancient (4000 BC -> 1000 BC)"},
+		{"until_turn": 100, "years_per_turn": 25, "label": "Classical (1000 BC -> 250 AD)"},
+		{"until_turn": 200, "years_per_turn": 10, "label": "Medieval (250 AD -> 1250 AD)"},
+		{"until_turn": 300, "years_per_turn": 5, "label": "Renaissance (1250 AD -> 1750 AD)"},
+		{"until_turn": 400, "years_per_turn": 2, "label": "Industrial (1750 AD -> 1950 AD)"},
+		{"until_turn": 9999, "years_per_turn": 1, "label": "Modern/Future (1950 AD -> 2050+ AD)"}
+	]
+}

@@ -85,10 +85,10 @@ func _ready() -> void:
 	# Auto-introduce all non-barbarian players to each other
 	# (In actual games, exploration handles this; in sims we want diplomacy to work)
 	for p in GameManager.players:
-		if p.civilization_id == "barbarian":
+		if p.is_barbarian():
 			continue
 		for other in GameManager.players:
-			if other == p or other.civilization_id == "barbarian":
+			if other == p or other.is_barbarian():
 				continue
 			if other.player_id not in p.met_players:
 				p.met_players.append(other.player_id)

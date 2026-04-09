@@ -1,0 +1,17 @@
+{
+	"_description": "Goody hut (tribal village) reward tunables (goody_huts_system.gd).",
+	"map_reveal": {
+		"radius_min": 3,
+		"radius_max": 5
+	},
+	"experience": {
+		"xp_min": 10,
+		"xp_max": 20
+	},
+	"unit_reward": {
+		"primary_id": "warrior",
+		"primary_chance": 0.7,
+		"alternate_id": "scout"
+	},
+	"settler_id": "settler"
+}

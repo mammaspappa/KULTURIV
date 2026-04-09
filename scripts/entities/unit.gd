@@ -34,15 +34,18 @@ var order_target: Vector2i = Vector2i.ZERO
 var order_target_improvement: String = ""
 var build_progress: int = 0
 
-# AI position history — for detecting oscillation and stuck units
-var _position_history: Array[Vector2i] = []  # Last 6 positions (end-of-turn)
-const MAX_HISTORY = 6
+# AI position history — for detecting oscillation and stuck units.
+# Length is configurable via tunables/units.json (units.position_history_length).
+var _position_history: Array[Vector2i] = []
 var _stuck_turns: int = 0  # Consecutive turns at same position
+
+func _max_history() -> int:
+	return int(DataManager.get_tunable("units.position_history_length", 6))
 
 ## Record position at end of AI turn. Call after AI processes this unit.
 func record_position() -> void:
 	_position_history.append(grid_position)
-	if _position_history.size() > MAX_HISTORY:
+	if _position_history.size() > _max_history():
 		_position_history.pop_front()
 	# Track stuck turns
 	if _position_history.size() >= 2 and _position_history[-1] == _position_history[-2]:
@@ -79,10 +82,14 @@ var transport: Node2D = null  # Reference to transport unit if loaded
 # Promotions
 var promotions: Array[String] = []
 
-# Great General attachment
+# Great General attachment. Bonuses are configured in tunables/units.json (units.great_general.*).
 var attached_great_general: Node2D = null  # Reference to attached Great General unit
-const GREAT_GENERAL_COMBAT_BONUS = 0.20  # +20% combat strength when attached
-const GREAT_GENERAL_XP_BONUS = 0.50  # +50% experience gain when attached
+
+func _great_general_combat_bonus() -> float:
+	return float(DataManager.get_tunable("units.great_general.combat_bonus", 0.20))
+
+func _great_general_xp_bonus() -> float:
+	return float(DataManager.get_tunable("units.great_general.xp_bonus", 0.50))
 
 # Visual
 const TILE_SIZE: int = 64
@@ -592,98 +599,19 @@ func _check_first_contact_at(tile_pos: Vector2i) -> void:
 			EventBus.first_contact.emit(player_owner, other_player)
 
 # Combat
+## Combat math has been extracted to UnitCombatHelper. This method remains as a thin
+## façade so existing call sites (`unit.get_combat_strength(...)`) continue to work.
 func get_combat_strength(is_attacking: bool, target_tile = null, defender = null) -> float:
-	var strength = get_strength()
-
-	# Health penalty
-	strength *= (health / max_health)
-
-	# Fortification bonus (defense only)
-	if not is_attacking and is_fortified:
-		strength *= (1.0 + fortify_bonus)
-
-	# Terrain defense bonus
-	if not is_attacking and target_tile != null:
-		strength *= (1.0 + target_tile.get_defense_bonus())
-
-	# Promotion bonuses vs specific unit types
-	if defender != null:
-		var defender_class = defender.get_unit_class()
-		for promo in promotions:
-			var effects = DataManager.get_promotion_effects(promo)
-			var bonus_key = "bonus_vs_" + defender_class
-			strength *= (1.0 + effects.get(bonus_key, 0.0))
-
-	# Unit type bonuses
-	var unit_data = DataManager.get_unit(unit_id)
-	if defender != null:
-		var defender_class = defender.get_unit_class()
-		var bonus_vs = unit_data.get("bonus_vs", {})
-		if defender_class in bonus_vs:
-			strength *= (1.0 + bonus_vs[defender_class])
-
-	# BTS Aggressive trait: +10% combat for melee/gunpowder units
-	if player_owner and player_owner.has_trait("aggressive"):
-		var uc = get_unit_class()
-		if uc in ["melee", "gunpowder", "mounted"]:
-			strength *= 1.1
-
-	# BTS Protective trait: +25% city defense
-	if not is_attacking and player_owner and player_owner.has_trait("protective"):
-		var city_at = GameManager.get_city_at(grid_position)
-		if city_at != null and city_at.player_owner == player_owner:
-			strength *= 1.25
-
-	# Great General attachment bonus
-	if attached_great_general != null:
-		strength *= (1.0 + GREAT_GENERAL_COMBAT_BONUS)
-
-	# River crossing penalty (attacker only, -25%)
-	if is_attacking and defender != null and GameManager.hex_grid:
-		var att_tile = GameManager.hex_grid.get_tile(grid_position)
-		if att_tile and not att_tile.river_edges.is_empty():
-			var dx = defender.grid_position.x - grid_position.x
-			var dy = defender.grid_position.y - grid_position.y
-			# Check if the edge toward the defender has a river
-			var edge = _direction_to_edge(dx, dy)
-			if edge >= 0 and edge in att_tile.river_edges:
-				# Check for Amphibious promotion (negates river penalty)
-				var has_amphibious = false
-				for promo in promotions:
-					var eff = DataManager.get_promotion_effects(promo)
-					if eff.get("no_river_penalty", false):
-						has_amphibious = true
-						break
-				if not has_amphibious:
-					strength *= 0.75  # -25% river crossing penalty
-
-	return strength
+	return UnitCombatHelper.get_combat_strength(self, is_attacking, target_tile, defender)
 
 func _direction_to_edge(dx: int, dy: int) -> int:
-	# Map dx/dy direction to edge index (0=N,1=NE,2=E,3=SE,4=S,5=SW,6=W,7=NW)
-	if dx == 0 and dy == -1: return 0
-	elif dx == 1 and dy == -1: return 1
-	elif dx == 1 and dy == 0: return 2
-	elif dx == 1 and dy == 1: return 3
-	elif dx == 0 and dy == 1: return 4
-	elif dx == -1 and dy == 1: return 5
-	elif dx == -1 and dy == 0: return 6
-	elif dx == -1 and dy == -1: return 7
-	return -1
+	return UnitCombatHelper.direction_to_edge(dx, dy)
 
 func get_first_strikes() -> int:
-	var base = DataManager.get_unit(unit_id).get("first_strikes", 0)
-	for promo in promotions:
-		var effects = DataManager.get_promotion_effects(promo)
-		base += effects.get("first_strikes", 0)
-	return base
+	return UnitCombatHelper.get_first_strikes(self)
 
 func get_withdraw_chance() -> float:
-	var base = DataManager.get_unit(unit_id).get("withdraw_chance", 0.0)
-	for promo in promotions:
-		var effects = DataManager.get_promotion_effects(promo)
-		base += effects.get("withdraw_increase", 0.0)
-	return min(base, 0.9)  # Cap at 90%
+	return UnitCombatHelper.get_withdraw_chance(self)
 
 func can_attack(target) -> bool:
 	if has_acted:
@@ -750,7 +678,7 @@ func gain_experience(amount: int) -> void:
 	var xp_amount = amount
 	# Great General attachment gives bonus XP
 	if attached_great_general != null:
-		xp_amount = int(amount * (1.0 + GREAT_GENERAL_XP_BONUS))
+		xp_amount = int(amount * (1.0 + _great_general_xp_bonus()))
 	experience += xp_amount
 	_check_level_up()
 
@@ -1535,39 +1463,10 @@ func deselect() -> void:
 	EventBus.unit_deselected.emit(self)
 
 # Serialization
+## Save / load delegated to UnitSerializer (Phase 5 extraction).
+## Wrapper methods preserve the public API (`unit.to_dict()` / `unit.from_dict(data)`).
 func to_dict() -> Dictionary:
-	return {
-		"unit_id": unit_id,
-		"owner_id": player_owner.player_id if player_owner else -1,
-		"grid_position": {"x": grid_position.x, "y": grid_position.y},
-		"health": health,
-		"experience": experience,
-		"level": level,
-		"movement_remaining": movement_remaining,
-		"is_fortified": is_fortified,
-		"fortify_bonus": fortify_bonus,
-		"promotions": promotions,
-		"current_order": current_order,
-		"order_target_improvement": order_target_improvement,
-		"build_progress": build_progress,
-		"has_attached_general": attached_great_general != null,
-	}
+	return UnitSerializer.to_dict(self)
 
 func from_dict(data: Dictionary) -> void:
-	unit_id = data.get("unit_id", "warrior")
-	grid_position = Vector2i(data.grid_position.x, data.grid_position.y)
-	health = data.get("health", 100.0)
-	experience = data.get("experience", 0)
-	level = data.get("level", 1)
-	movement_remaining = data.get("movement_remaining", 0.0)
-	is_fortified = data.get("is_fortified", false)
-	fortify_bonus = data.get("fortify_bonus", 0.0)
-	promotions.assign(data.get("promotions", []))
-	current_order = data.get("current_order", UnitOrder.NONE)
-	order_target_improvement = data.get("order_target_improvement", "")
-	build_progress = data.get("build_progress", 0)
-	# For attached general, we use a placeholder since the actual general was consumed
-	if data.get("has_attached_general", false):
-		attached_great_general = self  # Non-null marker (actual general was consumed)
-	position = GridUtils.grid_to_pixel(grid_position)
-	update_visual()
+	UnitSerializer.from_dict(self, data)

@@ -1,0 +1,18 @@
+{
+	"_description": "Barbarian system tunables (barbarian_system.gd). Camp spawning, unit spawning, and barbarian civilization founding.",
+	"camp": {
+		"spawn_interval": 10,
+		"min_distance": 8,
+		"city_distance": 6,
+		"max_camps": 15,
+		"unit_spawn_interval": 5
+	},
+	"city_founding": {
+		"base_min_turn": 75,
+		"base_interval": 5,
+		"base_chance": 0.08,
+		"score_bonus_per_point": 0.005,
+		"max_civs_base": 3
+	},
+	"fallback_unit": "warrior"
+}

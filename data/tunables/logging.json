@@ -1,0 +1,11 @@
+{
+	"_description": "Logger autoload configuration. Per-category levels override default_level. Levels: TRACE/DEBUG/INFO/WARN/ERROR.",
+	"default_level": "INFO",
+	"categories": {
+		"data": "INFO",
+		"save": "INFO",
+		"combat": "INFO",
+		"ai": "INFO",
+		"barbarian": "INFO"
+	}
+}

@@ -45,7 +45,7 @@ func execute_turn(player) -> void:
 		return
 	# The base barbarian player (id=-1) uses its own simple AI (BarbarianSystem)
 	# Spawned barbarian civilizations (id >= 0) use the full civ AI
-	if player.civilization_id == "barbarian" and player.player_id == -1:
+	if player.is_barbarian() and player.player_id == -1:
 		return
 
 	# Clear per-turn caches
@@ -108,7 +108,7 @@ func _get_leader_flavor(player) -> Dictionary:
 		return _cached_flavor
 
 	# Spawned barbarian civs: hardcoded aggressive flavor (no leader)
-	if player.civilization_id == "barbarian" and player.player_id >= 0:
+	if player.is_barbarian() and player.player_id >= 0:
 		_cached_flavor = {
 			"military": 9, "gold": 2, "science": 2, "culture": 1,
 			"religion": 0, "expansion": 3, "growth": 3, "production": 7
@@ -136,7 +136,7 @@ func _get_leader_personality(player) -> Dictionary:
 		return _cached_personality
 
 	# Spawned barbarian civs: use the personality stored on player object
-	if player.civilization_id == "barbarian" and player.player_id >= 0 and not player.ai_personality.is_empty():
+	if player.is_barbarian() and player.player_id >= 0 and not player.ai_personality.is_empty():
 		_cached_personality = player.ai_personality
 		return _cached_personality
 
@@ -196,7 +196,7 @@ func _has_coastal_cities(player) -> bool:
 ## Process AI diplomacy decisions
 func _process_diplomacy(player, flavor: Dictionary) -> void:
 	var military_flavor = flavor.get("military", 5)
-	var is_barb_civ = player.civilization_id == "barbarian" and player.player_id >= 0
+	var is_barb_civ = player.is_barbarian() and player.player_id >= 0
 	var met_count = 0
 
 	for other in GameManager.players:
@@ -2749,7 +2749,6 @@ func _get_best_project(city, player, flavor: Dictionary, specialization) -> Stri
 		return ""
 
 	var science_flavor = flavor.get("science", 5)
-	var military_flavor = flavor.get("military", 5)
 
 	var best_project = ""
 	var best_score = 0
@@ -2761,28 +2760,23 @@ func _get_best_project(city, player, flavor: Dictionary, specialization) -> Stri
 
 		var project = ProjectsSystem.projects[project_id]
 		var score = 0
-		var project_type = project.get("type", "")
 
-		# Spaceship parts - prioritize if going for space victory
+		# Spaceship parts get a flat bonus on top of any data-driven score.
 		if project.get("spaceship_part", false):
 			score = 100 + science_flavor * 10
-
-		# Apollo Program - high priority for science-focused AI
-		elif project_id == "apollo_program":
-			score = 80 + science_flavor * 8
-
-		# Manhattan Project - military AI wants nukes
-		elif project_id == "manhattan_project":
-			score = 50 + military_flavor * 10
-
-		# SDI - defensive, prioritize if nukes exist
-		elif project_id == "sdi":
-			if ProjectsSystem.global_projects.has("manhattan_project"):
-				score = 70
-
-		# The Internet - science AI loves this
-		elif project_id == "the_internet":
-			score = 60 + science_flavor * 8
+		else:
+			# Data-driven scoring: each project may carry an `ai_score` block in projects.json:
+			#   {"base": 80, "flavor": "science", "flavor_weight": 8, "requires_global_project": "..."}
+			# This replaces the per-project hardcoded if-elif chain that used to live here.
+			var ai_score = project.get("ai_score", null)
+			if ai_score is Dictionary:
+				var required_global = ai_score.get("requires_global_project", "")
+				if required_global == "" or ProjectsSystem.global_projects.has(required_global):
+					score = int(ai_score.get("base", 0))
+					var flavor_name = ai_score.get("flavor", "")
+					var flavor_weight = int(ai_score.get("flavor_weight", 0))
+					if flavor_weight > 0 and flavor_name != "":
+						score += int(flavor.get(flavor_name, 0)) * flavor_weight
 
 		if score > best_score:
 			best_score = score

@@ -126,7 +126,8 @@
 		"movement_bonus": 0.5,
 		"required_tech": "the_wheel",
 		"valid_terrains": ["grassland", "plains", "desert", "tundra", "snow", "hills"],
-		"build_turns": 2,
+		"road_level": 1,
+		"build_turns": 3,
 		"pillage_turns": 1
 	},
 	"railroad": {
@@ -138,6 +139,7 @@
 		"required_tech": "railroad",
 		"valid_terrains": ["grassland", "plains", "desert", "tundra", "snow", "hills"],
 		"requires_improvement": "road",
+		"road_level": 2,
 		"build_turns": 3,
 		"pillage_turns": 1
 	},
@@ -148,7 +150,7 @@
 		"defense_bonus": 0.5,
 		"required_tech": "masonry",
 		"valid_terrains": ["grassland", "plains", "desert", "tundra", "snow", "hills"],
-		"build_turns": 8,
+		"build_turns": 6,
 		"pillage_turns": 2
 	},
 	"well": {
@@ -159,7 +161,7 @@
 		"required_tech": "combustion",
 		"valid_terrains": ["desert", "tundra", "coast", "ocean"],
 		"requires_resource": ["oil"],
-		"build_turns": 8,
+		"build_turns": 5,
 		"pillage_turns": 2
 	},
 	"winery": {

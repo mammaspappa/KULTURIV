@@ -1,13 +1,24 @@
 extends Node
 ## Handles victory condition checking.
+##
+## Tunables live in data/tunables/victory.json — accessed via DataManager.get_tunable("victory.*").
+## Turn limit is the Normal speed base (BTS: Quick=330, Normal=500, Epic=750, Marathon=1500),
+## scaled by game speed multiplier at check time.
 
-# BTS turn limits: Quick=330, Normal=500, Epic=750, Marathon=1500
-# This is the Normal speed limit; scaled by game speed multiplier
-const MAX_TURNS = 500
-const DOMINATION_LAND_PERCENT = 0.55  # 55% of total land mass (BTS-adjusted for smaller maps)
-const DOMINATION_POP_PERCENT = 0.55   # 55% of total population
-const CULTURAL_THRESHOLD = 50000
-const CULTURAL_CITIES_NEEDED = 3
+func _max_turns_base() -> int:
+	return int(DataManager.get_tunable("victory.max_turns", 500))
+
+func _domination_land_percent() -> float:
+	return float(DataManager.get_tunable("victory.domination_land_percent", 0.55))
+
+func _domination_pop_percent() -> float:
+	return float(DataManager.get_tunable("victory.domination_pop_percent", 0.55))
+
+func _cultural_threshold() -> int:
+	return int(DataManager.get_tunable("victory.cultural_threshold", 50000))
+
+func _cultural_cities_needed() -> int:
+	return int(DataManager.get_tunable("victory.cultural_cities_needed", 3))
 
 # Cached land tile count (recalculated when map changes)
 var _total_land_tiles: int = 0
@@ -39,7 +50,7 @@ func check_victory() -> Dictionary:
 			return {"achieved": true, "player": player, "type": "space"}
 
 	# Score victory at turn limit (scaled by game speed)
-	var max_turns = int(MAX_TURNS * GameManager.get_speed_multiplier())
+	var max_turns = int(_max_turns_base() * GameManager.get_speed_multiplier())
 	if TurnManager.current_turn >= max_turns:
 		var winner = _get_highest_score_player()
 		return {"achieved": true, "player": winner, "type": "score"}
@@ -47,7 +58,7 @@ func check_victory() -> Dictionary:
 	return {}
 
 func _is_barbarian_civ(p) -> bool:
-	return p.player_id == -1 or p.civilization_id == "barbarian"
+	return p.player_id == -1 or p.is_barbarian()
 
 func _check_conquest(player) -> bool:
 	# All other non-barbarian civs must be eliminated
@@ -80,15 +91,16 @@ func _check_domination(player) -> bool:
 
 	var pop_percent = float(player_pop) / total_pop
 
-	return land_percent >= DOMINATION_LAND_PERCENT and pop_percent >= DOMINATION_POP_PERCENT
+	return land_percent >= _domination_land_percent() and pop_percent >= _domination_pop_percent()
 
 func _check_cultural(player) -> bool:
+	var threshold := _cultural_threshold()
 	var legendary_cities = 0
 	for city in player.cities:
-		if city.culture >= CULTURAL_THRESHOLD:
+		if city.culture >= threshold:
 			legendary_cities += 1
 
-	return legendary_cities >= CULTURAL_CITIES_NEEDED
+	return legendary_cities >= _cultural_cities_needed()
 
 func _check_space_race(player) -> bool:
 	# Check for spaceship parts (simplified - check for specific buildings/wonders)
@@ -229,24 +241,25 @@ func get_victory_progress(player) -> Dictionary:
 	progress["domination"] = {
 		"land_percent": land_percent,
 		"pop_percent": pop_percent,
-		"land_needed": DOMINATION_LAND_PERCENT,
-		"pop_needed": DOMINATION_POP_PERCENT,
+		"land_needed": _domination_land_percent(),
+		"pop_needed": _domination_pop_percent(),
 		"total_land_tiles": _get_total_land_tiles(),
 		"player_land_tiles": _get_player_owned_tiles(player)
 	}
 
 	# Cultural progress
+	var cultural_threshold := _cultural_threshold()
 	var legendary = 0
 	var highest_culture = 0
 	for city in player.cities:
-		if city.culture >= CULTURAL_THRESHOLD:
+		if city.culture >= cultural_threshold:
 			legendary += 1
 		highest_culture = max(highest_culture, city.culture)
 	progress["cultural"] = {
 		"legendary_cities": legendary,
-		"needed": CULTURAL_CITIES_NEEDED,
+		"needed": _cultural_cities_needed(),
 		"highest_culture": highest_culture,
-		"threshold": CULTURAL_THRESHOLD
+		"threshold": cultural_threshold
 	}
 
 	# Space race progress
@@ -267,7 +280,7 @@ func get_victory_progress(player) -> Dictionary:
 
 	# Score
 	player.calculate_score()
-	var scaled_max_turns = int(MAX_TURNS * GameManager.get_speed_multiplier())
+	var scaled_max_turns = int(_max_turns_base() * GameManager.get_speed_multiplier())
 	progress["score"] = {
 		"current": player.score,
 		"turns_remaining": scaled_max_turns - TurnManager.current_turn

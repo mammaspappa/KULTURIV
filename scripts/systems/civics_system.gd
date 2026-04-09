@@ -1,19 +1,18 @@
 extends Node
 ## Handles civic management and effects for all players.
+##
+## Tunables live in data/tunables/civics.json — accessed via DataManager.get_tunable("civics.*").
 
 # Civic categories
 const CIVIC_CATEGORIES = ["government", "legal", "labor", "economy", "religion"]
 
-# Upkeep costs per level
-const UPKEEP_COSTS = {
-	"none": 0,
-	"low": 1,
-	"medium": 2,
-	"high": 3
-}
+func _upkeep_costs() -> Dictionary:
+	return DataManager.get_tunable("civics.upkeep_costs", {
+		"none": 0, "low": 1, "medium": 2, "high": 3
+	}) as Dictionary
 
-# Anarchy turns when changing civics
-const BASE_ANARCHY_TURNS = 1
+func _base_anarchy_turns() -> int:
+	return int(DataManager.get_tunable("civics.base_anarchy_turns", 1))
 
 func _ready() -> void:
 	# Connect to turn events
@@ -21,13 +20,13 @@ func _ready() -> void:
 
 ## Get the default civics for a new player
 func get_default_civics() -> Dictionary:
-	return {
+	return DataManager.get_tunable("civics.default_civics", {
 		"government": "despotism",
 		"legal": "barbarism",
 		"labor": "tribalism",
 		"economy": "decentralization",
 		"religion": "paganism"
-	}
+	}) as Dictionary
 
 ## Check if a player can adopt a civic
 func can_adopt_civic(player, civic_id: String) -> bool:
@@ -141,13 +140,10 @@ func change_civics(player, new_civics: Dictionary) -> bool:
 
 ## Calculate anarchy turns for civic change
 func _calculate_anarchy_turns(player) -> int:
-	var base_turns = BASE_ANARCHY_TURNS
-
-	# Spiritual trait reduces anarchy
+	# Spiritual trait reduces anarchy to zero
 	if player.has_trait("spiritual"):
 		return 0
-
-	return base_turns
+	return _base_anarchy_turns()
 
 ## Start anarchy period for a player
 func _start_anarchy(player, turns: int) -> void:
@@ -173,12 +169,13 @@ func get_civic_upkeep(player) -> int:
 		return 0
 
 	var total_upkeep = 0
+	var costs := _upkeep_costs()
 
 	for category in player.civics:
 		var civic_id = player.civics[category]
 		var civic = DataManager.get_civic(civic_id)
 		var upkeep_level = civic.get("upkeep", "none")
-		total_upkeep += UPKEEP_COSTS.get(upkeep_level, 0)
+		total_upkeep += int(costs.get(upkeep_level, 0))
 
 	# Scale by number of cities
 	total_upkeep *= player.cities.size()

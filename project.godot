@@ -25,6 +25,7 @@ config/icon="res://icon.svg"
 
 GridUtils="*res://scripts/map/grid_utils.gd"
 EventBus="*res://scripts/autoload/event_bus.gd"
+GameLog="*res://scripts/autoload/logger.gd"
 DataManager="*res://scripts/autoload/data_manager.gd"
 GameManager="*res://scripts/autoload/game_manager.gd"
 CombatSystem="*res://scripts/systems/combat_system.gd"

@@ -1,6 +1,8 @@
 extends Node
 ## Loads and provides access to all game data from JSON files.
 
+const SchemaValidatorClass = preload("res://scripts/core/schema_validator.gd")
+
 # Data dictionaries
 var terrains: Dictionary = {}
 var features: Dictionary = {}
@@ -23,11 +25,27 @@ var projects: Dictionary = {}
 var random_events: Dictionary = {}
 var votes: Dictionary = {}
 
+# Tunables: balance constants loaded from data/tunables/*.json.
+# Keyed by file basename (without extension): tunables.combat, tunables.cities, etc.
+var tunables: Dictionary = {}
+
 # Data paths
 const DATA_PATH = "res://data/"
+const TUNABLES_PATH = "res://data/tunables/"
+# Mods are loaded from `user://mods/<mod_id>/data/` and `.../data/tunables/`.
+# Each mod's contents are deep-merged on top of the base data — adding new ids extends,
+# overwriting existing ids overrides. The load order is alphabetical by mod_id, so a mod
+# named "z_balance_tweaks" wins over "a_baseline".
+const MODS_PATH = "user://mods/"
+
+# Loaded mod ids in load order, for diagnostics and the optional in-game mod list.
+var loaded_mods: Array[String] = []
 
 func _ready() -> void:
 	_load_all_data()
+	_load_all_tunables()
+	_load_all_mods()
+	_validate_data()
 
 func _load_all_data() -> void:
 	terrains = _load_json("terrains.json")
@@ -52,15 +70,158 @@ func _load_all_data() -> void:
 	votes = _load_json("votes.json")
 	print("DataManager: All data loaded")
 
+func _load_all_tunables() -> void:
+	# Load every *.json file in data/tunables/ as a top-level key in `tunables`.
+	var dir = DirAccess.open(TUNABLES_PATH)
+	if dir == null:
+		push_warning("DataManager: tunables directory not found: " + TUNABLES_PATH)
+		return
+	dir.list_dir_begin()
+	var filename = dir.get_next()
+	while filename != "":
+		if not dir.current_is_dir() and filename.ends_with(".json"):
+			var key = filename.get_basename()
+			tunables[key] = _load_json_at(TUNABLES_PATH + filename, filename)
+		filename = dir.get_next()
+	dir.list_dir_end()
+	print("DataManager: Loaded %d tunables files" % tunables.size())
+
+## Scan user://mods/ for installed mods and merge their data on top of the base.
+## Each mod is a directory containing a `data/` subdirectory mirroring res://data/.
+## Files inside `data/tunables/` are deep-merged into `tunables`; files at `data/` are
+## merged into the corresponding top-level dict (units, buildings, etc.).
+##
+## A simple `mod.json` manifest at the mod root is optional but lets the mod declare a
+## display name and load priority. Without it, the directory name is used as the id.
+func _load_all_mods() -> void:
+	var dir = DirAccess.open(MODS_PATH)
+	if dir == null:
+		# No mods installed — perfectly normal.
+		return
+	var mod_ids: Array[String] = []
+	dir.list_dir_begin()
+	var entry = dir.get_next()
+	while entry != "":
+		if dir.current_is_dir() and not entry.begins_with("."):
+			mod_ids.append(entry)
+		entry = dir.get_next()
+	dir.list_dir_end()
+
+	mod_ids.sort()  # Deterministic alphabetical order; later mods win.
+	for mod_id in mod_ids:
+		_load_single_mod(mod_id)
+	loaded_mods = mod_ids
+	if not loaded_mods.is_empty():
+		GameLog.info("data", "loaded %d mod(s): %s" % [loaded_mods.size(), ", ".join(loaded_mods)])
+
+func _load_single_mod(mod_id: String) -> void:
+	var mod_root = MODS_PATH + mod_id + "/"
+	var data_root = mod_root + "data/"
+
+	# Merge top-level data files.
+	var dir = DirAccess.open(data_root)
+	if dir != null:
+		dir.list_dir_begin()
+		var f = dir.get_next()
+		while f != "":
+			if not dir.current_is_dir() and f.ends_with(".json"):
+				_merge_mod_data_file(mod_id, data_root + f, f)
+			f = dir.get_next()
+		dir.list_dir_end()
+
+	# Merge tunables.
+	var tun_root = data_root + "tunables/"
+	var tun_dir = DirAccess.open(tun_root)
+	if tun_dir != null:
+		tun_dir.list_dir_begin()
+		var f2 = tun_dir.get_next()
+		while f2 != "":
+			if not tun_dir.current_is_dir() and f2.ends_with(".json"):
+				_merge_mod_tunable_file(mod_id, tun_root + f2, f2)
+			f2 = tun_dir.get_next()
+		tun_dir.list_dir_end()
+
+func _merge_mod_data_file(mod_id: String, path: String, filename: String) -> void:
+	var mod_data = _load_json_at(path, "[mod %s] %s" % [mod_id, filename])
+	if mod_data.is_empty():
+		return
+	# Map filename → target dict on this DataManager.
+	var target_dict = _data_dict_for_filename(filename)
+	if target_dict == null:
+		GameLog.warn("data", "[mod %s] %s does not match any known data file" % [mod_id, filename])
+		return
+	for key in mod_data.keys():
+		target_dict[key] = mod_data[key]
+	GameLog.info("data", "[mod %s] merged %d entries from %s" % [mod_id, mod_data.size(), filename])
+
+func _merge_mod_tunable_file(mod_id: String, path: String, filename: String) -> void:
+	var mod_data = _load_json_at(path, "[mod %s] tunables/%s" % [mod_id, filename])
+	if mod_data.is_empty():
+		return
+	var key = filename.get_basename()
+	if not tunables.has(key):
+		tunables[key] = {}
+	tunables[key] = _deep_merge(tunables[key], mod_data)
+	GameLog.info("data", "[mod %s] merged tunables/%s" % [mod_id, filename])
+
+## Deep-merge `overlay` over `base`. Nested dicts are merged recursively;
+## scalars and arrays are replaced wholesale (which is the modders' usual expectation —
+## redefining a list means redefining a list).
+func _deep_merge(base: Dictionary, overlay: Dictionary) -> Dictionary:
+	for k in overlay.keys():
+		var v = overlay[k]
+		if v is Dictionary and base.get(k, null) is Dictionary:
+			base[k] = _deep_merge(base[k], v)
+		else:
+			base[k] = v
+	return base
+
+func _data_dict_for_filename(filename: String):
+	match filename:
+		"terrains.json": return terrains
+		"features.json": return features
+		"resources.json": return resources
+		"improvements.json": return improvements
+		"units.json": return units
+		"buildings.json": return buildings
+		"techs.json": return techs
+		"civs.json": return civs
+		"leaders.json": return leaders
+		"promotions.json": return promotions
+		"religions.json": return religions
+		"victories.json": return victories
+		"civics.json": return civics
+		"specialists.json": return specialists
+		"handicaps.json": return handicaps
+		"corporations.json": return corporations
+		"espionage_missions.json": return espionage_missions
+		"projects.json": return projects
+		"events.json": return random_events
+		"votes.json": return votes
+		_: return null
+
+## Resolve a dot-separated path inside `tunables` (e.g. "combat.damage.base").
+## Returns `default` if the path is missing. Always check the value type at call site.
+func get_tunable(path: String, default = null):
+	var parts = path.split(".")
+	var node = tunables
+	for p in parts:
+		if not (node is Dictionary) or not node.has(p):
+			return default
+		node = node[p]
+	return node
+
 func _load_json(filename: String) -> Dictionary:
-	var path = DATA_PATH + filename
+	return _load_json_at(DATA_PATH + filename, filename)
+
+func _load_json_at(path: String, label: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
-		push_warning("DataManager: File not found: " + path)
+		GameLog.warn("data", "file not found: " + path)
 		return {}
 
 	var file = FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		push_error("DataManager: Failed to open: " + path)
+		GameLog.error("data", "failed to open: " + path)
 		return {}
 
 	var json_text = file.get_as_text()
@@ -69,10 +230,202 @@ func _load_json(filename: String) -> Dictionary:
 	var json = JSON.new()
 	var error = json.parse(json_text)
 	if error != OK:
-		push_error("DataManager: JSON parse error in " + filename + ": " + json.get_error_message())
+		GameLog.error("data", "JSON parse error in %s: %s" % [label, json.get_error_message()])
 		return {}
 
 	return json.data
+
+# Cross-reference resolver used by schema validator's `refs` checks.
+# Given a data set name and a key, returns truthy if the key exists in that set.
+func _resolve_ref(set_name: String, key) -> bool:
+	var key_str := str(key)
+	match set_name:
+		"techs": return techs.has(key_str)
+		"units": return units.has(key_str)
+		"buildings": return buildings.has(key_str)
+		"civs": return civs.has(key_str)
+		"resources": return resources.has(key_str)
+		"terrains": return terrains.has(key_str)
+		"features": return features.has(key_str)
+		"improvements": return improvements.has(key_str)
+		"promotions": return promotions.has(key_str)
+		"religions": return religions.has(key_str)
+		"civics": return civics.has(key_str)
+		"specialists": return specialists.has(key_str)
+		"projects": return projects.has(key_str)
+		"eras": return _eras_data().has(key_str)
+		_:
+			push_warning("DataManager: unknown ref set '%s'" % set_name)
+			return true  # don't flag if we can't resolve
+
+func _eras_data() -> Dictionary:
+	# Eras are stored as part of the project data via DataManager.eras-style accessors below.
+	# Access via the `eras` key if the loader supports it; otherwise fall back to empty.
+	return tunables.get("year_progression", {})
+
+## Run schema validation across all loaded data and tunables.
+## Errors are pushed via push_error() with file:key context. The game continues to run
+## (callers fall back to defaults), but the editor console highlights data bugs loudly.
+func _validate_data() -> void:
+	var resolver := Callable(self, "_resolve_ref")
+	var total := 0
+
+	# Entry-style files
+	total += SchemaValidatorClass.validate_entries("units.json", units, {
+		"required": ["name", "cost"],
+		"types": {
+			"name": TYPE_STRING,
+			"cost": TYPE_INT,
+			"strength": TYPE_FLOAT,
+			"movement": TYPE_INT,
+			"unit_class": TYPE_STRING,
+			"abilities": TYPE_ARRAY,
+			"required_tech": TYPE_STRING
+		},
+		"refs": {
+			"required_tech": "techs"
+		}
+	}, resolver)
+
+	total += SchemaValidatorClass.validate_entries("buildings.json", buildings, {
+		"required": ["name", "cost"],
+		"types": {
+			"name": TYPE_STRING,
+			"cost": TYPE_INT,
+			"required_tech": TYPE_STRING,
+			"effects": TYPE_DICTIONARY
+		},
+		"refs": {
+			"required_tech": "techs"
+		}
+	}, resolver)
+
+	total += SchemaValidatorClass.validate_entries("techs.json", techs, {
+		"required": ["name", "cost"],
+		"types": {
+			"name": TYPE_STRING,
+			"cost": TYPE_INT,
+			"prerequisites": TYPE_ARRAY,
+			"or_prerequisites": TYPE_ARRAY
+		},
+		"refs": {
+			"prerequisites": "techs",
+			"or_prerequisites": "techs"
+		}
+	}, resolver)
+
+	total += SchemaValidatorClass.validate_entries("improvements.json", improvements, {
+		"required": ["name"],
+		"types": {
+			"name": TYPE_STRING,
+			"yields": TYPE_DICTIONARY,
+			"valid_terrains": TYPE_ARRAY,
+			"required_tech": TYPE_STRING
+		},
+		"refs": {
+			"required_tech": "techs"
+		}
+	}, resolver)
+
+	total += SchemaValidatorClass.validate_entries("civs.json", civs, {
+		"required": ["name"],
+		"types": {
+			"name": TYPE_STRING,
+			"unique_unit": TYPE_STRING,
+			"unique_building": TYPE_STRING,
+			"starting_techs": TYPE_ARRAY,
+			"traits": TYPE_ARRAY
+		},
+		"refs": {
+			"starting_techs": "techs"
+		}
+	}, resolver)
+
+	total += SchemaValidatorClass.validate_entries("religions.json", religions, {
+		"required": ["name"],
+		"types": {"name": TYPE_STRING}
+	}, resolver)
+
+	# Tunables files
+	total += SchemaValidatorClass.validate_tunables("combat.json", tunables.get("combat", {}), {
+		"damage.base": TYPE_FLOAT,
+		"damage.strength_multiplier": TYPE_FLOAT,
+		"damage.min": TYPE_FLOAT,
+		"damage.max": TYPE_FLOAT,
+		"max_combat_rounds": TYPE_INT,
+		"withdraw_threshold": TYPE_FLOAT,
+		"barbarian_bonus": TYPE_FLOAT
+	})
+
+	total += SchemaValidatorClass.validate_tunables("cities.json", tunables.get("cities", {}), {
+		"culture_thresholds": TYPE_ARRAY,
+		"draft.anger_turns": TYPE_INT,
+		"draft.pop_cost": TYPE_INT,
+		"draft.max_per_turn": TYPE_INT,
+		"whip.production_per_pop": TYPE_INT,
+		"whip.anger_turns": TYPE_INT
+	})
+
+	total += SchemaValidatorClass.validate_tunables("religion.json", tunables.get("religion", {}), {
+		"base_spread_chance": TYPE_FLOAT,
+		"happiness.holy_city": TYPE_INT,
+		"happiness.with_building": TYPE_INT,
+		"founding_techs": TYPE_DICTIONARY
+	})
+
+	total += SchemaValidatorClass.validate_tunables("barbarians.json", tunables.get("barbarians", {}), {
+		"camp.spawn_interval": TYPE_INT,
+		"camp.min_distance": TYPE_INT,
+		"camp.city_distance": TYPE_INT,
+		"camp.max_camps": TYPE_INT,
+		"camp.unit_spawn_interval": TYPE_INT,
+		"city_founding.base_min_turn": TYPE_INT,
+		"city_founding.base_chance": TYPE_FLOAT,
+		"city_founding.max_civs_base": TYPE_INT
+	})
+
+	total += SchemaValidatorClass.validate_tunables("victory.json", tunables.get("victory", {}), {
+		"max_turns": TYPE_INT,
+		"domination_land_percent": TYPE_FLOAT,
+		"domination_pop_percent": TYPE_FLOAT,
+		"cultural_threshold": TYPE_INT,
+		"cultural_cities_needed": TYPE_INT
+	})
+
+	total += SchemaValidatorClass.validate_tunables("civics.json", tunables.get("civics", {}), {
+		"upkeep_costs": TYPE_DICTIONARY,
+		"base_anarchy_turns": TYPE_INT,
+		"default_civics": TYPE_DICTIONARY
+	})
+
+	total += SchemaValidatorClass.validate_tunables("great_people.json", tunables.get("great_people", {}), {
+		"base_threshold": TYPE_INT,
+		"threshold_increase_per_birth": TYPE_INT,
+		"philosophical_trait_multiplier": TYPE_FLOAT,
+		"building_gp_map": TYPE_DICTIONARY
+	})
+
+	total += SchemaValidatorClass.validate_tunables("mapgen.json", tunables.get("mapgen", {}), {
+		"thresholds.sea_level": TYPE_FLOAT,
+		"thresholds.mountain": TYPE_FLOAT,
+		"thresholds.hill": TYPE_FLOAT,
+		"plates.fractal.continental_count_min": TYPE_INT
+	})
+
+	total += SchemaValidatorClass.validate_tunables("units.json", tunables.get("units", {}), {
+		"position_history_length": TYPE_INT,
+		"great_general.combat_bonus": TYPE_FLOAT,
+		"great_general.xp_bonus": TYPE_FLOAT
+	})
+
+	total += SchemaValidatorClass.validate_tunables("year_progression.json", tunables.get("year_progression", {}), {
+		"progression": TYPE_ARRAY
+	})
+
+	if total > 0:
+		push_warning("DataManager: schema validation found %d issue(s) — see errors above" % total)
+	else:
+		print("DataManager: schema validation passed")
 
 # Terrain accessors
 func get_terrain(terrain_id: String) -> Dictionary:

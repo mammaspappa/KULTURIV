@@ -1,0 +1,50 @@
+{
+	"_description": "Map generation tunables (game_grid.gd). Elevation thresholds, plate parameters per map type.",
+	"thresholds": {
+		"sea_level": 0.4,
+		"mountain": 0.82,
+		"hill": 0.68
+	},
+	"plates": {
+		"pangaea": {
+			"continental_count_min": 1,
+			"continental_count_max": 2,
+			"oceanic_count_min": 4,
+			"oceanic_count_max": 6,
+			"continental_weight_min": 7,
+			"continental_weight_max": 9,
+			"oceanic_weight_min": 2,
+			"oceanic_weight_max": 4
+		},
+		"continents": {
+			"continental_count_min": 3,
+			"continental_count_max": 5,
+			"oceanic_count_min": 6,
+			"oceanic_count_max": 8,
+			"continental_weight_min": 4,
+			"continental_weight_max": 6,
+			"oceanic_weight_min": 3,
+			"oceanic_weight_max": 5
+		},
+		"archipelago": {
+			"continental_count_min": 8,
+			"continental_count_max": 12,
+			"oceanic_count_min": 5,
+			"oceanic_count_max": 7,
+			"continental_weight_min": 2,
+			"continental_weight_max": 3,
+			"oceanic_weight_min": 5,
+			"oceanic_weight_max": 7
+		},
+		"fractal": {
+			"continental_count_min": 4,
+			"continental_count_max": 7,
+			"oceanic_count_min": 5,
+			"oceanic_count_max": 8,
+			"continental_weight_min": 3,
+			"continental_weight_max": 6,
+			"oceanic_weight_min": 3,
+			"oceanic_weight_max": 5
+		}
+	}
+}

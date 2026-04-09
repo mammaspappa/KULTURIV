@@ -128,24 +128,33 @@ func _apply_reward(player, unit, tile, reward_type: GoodyReward):
 			return null
 
 		GoodyReward.MAP:
-			var radius = 3 + randi() % 3  # Reveal 3-5 tiles radius
+			var r_min: int = int(DataManager.get_tunable("goody_huts.map_reveal.radius_min", 3))
+			var r_max: int = int(DataManager.get_tunable("goody_huts.map_reveal.radius_max", 5))
+			var radius = randi_range(r_min, r_max)
 			_reveal_map_area(player, tile.grid_position, radius)
 			return radius
 
 		GoodyReward.EXPERIENCE:
-			var xp = 10 + randi() % 11  # 10-20 XP
+			var xp_min: int = int(DataManager.get_tunable("goody_huts.experience.xp_min", 10))
+			var xp_max: int = int(DataManager.get_tunable("goody_huts.experience.xp_max", 20))
+			var xp = randi_range(xp_min, xp_max)
 			unit.experience += xp
 			return xp
 
 		GoodyReward.UNIT:
-			var unit_type = "warrior" if randf() < 0.7 else "scout"
+			var primary: String = String(DataManager.get_tunable("goody_huts.unit_reward.primary_id", "warrior"))
+			var alternate: String = String(DataManager.get_tunable("goody_huts.unit_reward.alternate_id", "scout"))
+			var primary_chance: float = float(DataManager.get_tunable("goody_huts.unit_reward.primary_chance", 0.7))
+			var unit_type = primary if randf() < primary_chance else alternate
 			_spawn_free_unit(player, tile.grid_position, unit_type)
 			var unit_data = DataManager.get_unit(unit_type)
 			return unit_data.get("name", unit_type)
 
 		GoodyReward.SETTLER:
-			_spawn_free_unit(player, tile.grid_position, "settler")
-			return "Settler"
+			var settler_id: String = String(DataManager.get_tunable("goody_huts.settler_id", "settler"))
+			_spawn_free_unit(player, tile.grid_position, settler_id)
+			var settler_data = DataManager.get_unit(settler_id)
+			return settler_data.get("name", settler_id.capitalize())
 
 		GoodyReward.POPULATION:
 			var city = _get_nearest_city(player, tile.grid_position)
@@ -258,7 +267,7 @@ func _spawn_barbarians_near(pos: Vector2i) -> void:
 	# Get barbarian player
 	var barbarian_player = null
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian":
+		if player.is_barbarian():
 			barbarian_player = player
 			break
 

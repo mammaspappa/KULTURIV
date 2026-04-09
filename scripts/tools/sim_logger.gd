@@ -313,7 +313,7 @@ func _on_unit_created(unit) -> void:
 	if unit == null or unit.player_owner == null:
 		return
 	# Only log non-barbarian unit creation (barb spawns tracked separately)
-	if unit.player_owner.civilization_id == "barbarian":
+	if unit.player_owner.is_barbarian():
 		return
 	log_entry({"type": "game_event", "event": "unit_trained",
 		"description": "%s trained %s" % [unit.player_owner.player_name, unit.unit_id]})
@@ -420,7 +420,7 @@ func check_anomalies() -> void:
 			negative_gold_turns[p.player_id] = 0
 
 		# Empty production (skip base barbarian player — camp cities don't produce)
-		if p.civilization_id == "barbarian" and p.player_id == -1:
+		if p.is_barbarian() and p.player_id == -1:
 			continue
 		for city in p.cities:
 			var key = "%s_%s" % [p.player_name, city.city_name]
@@ -460,7 +460,7 @@ func write_summary(elapsed_seconds: float) -> void:
 
 	print("Player Summary:")
 	for p in GameManager.players:
-		if p.civilization_id == "barbarian" and p.player_id == -1:
+		if p.is_barbarian() and p.player_id == -1:
 			continue
 		p.calculate_score()
 		var marker = " <- WINNER" if p == winner_player else ""

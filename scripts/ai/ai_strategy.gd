@@ -398,7 +398,7 @@ static func _evaluate_defense_needs(player) -> void:
 				if u.player_owner != player and u.get_strength() > 0:
 					if GameManager.is_at_war(player, u.player_owner):
 						threat_level += 2
-					elif u.player_owner.civilization_id == "barbarian":
+					elif u.player_owner.is_barbarian():
 						threat_level += 1
 
 		# Check garrison

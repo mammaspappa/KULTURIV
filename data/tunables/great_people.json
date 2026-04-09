@@ -1,0 +1,26 @@
+{
+	"_description": "Great People system tunables (great_people_system.gd). Thresholds, multipliers, and building->GP-type mapping.",
+	"base_threshold": 100,
+	"threshold_increase_per_birth": 50,
+	"settled_gp_points_per_settled": 2,
+	"philosophical_trait_multiplier": 2.0,
+	"building_gp_map": {
+		"library": "scientist",
+		"university": "scientist",
+		"academy": "scientist",
+		"oxford_university": "scientist",
+		"market": "merchant",
+		"bank": "merchant",
+		"grocer": "merchant",
+		"wall_street": "merchant",
+		"forge": "engineer",
+		"factory": "engineer",
+		"ironworks": "engineer",
+		"monument": "artist",
+		"theater": "artist",
+		"colosseum": "artist",
+		"temple": "prophet",
+		"monastery": "prophet",
+		"cathedral": "prophet"
+	}
+}

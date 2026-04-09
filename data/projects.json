@@ -18,7 +18,8 @@
 		"bonus_production": {
 			"uranium": 100
 		},
-		"spaceship_part": false
+		"spaceship_part": false,
+		"ai_score": {"base": 50, "flavor": "military", "flavor_weight": 10}
 	},
 	"the_internet": {
 		"name": "The Internet",
@@ -34,7 +35,8 @@
 		"bonus_production": {
 			"copper": 100
 		},
-		"spaceship_part": false
+		"spaceship_part": false,
+		"ai_score": {"base": 60, "flavor": "science", "flavor_weight": 8}
 	},
 	"sdi": {
 		"name": "Strategic Defense Initiative",
@@ -51,7 +53,8 @@
 		"bonus_production": {
 			"aluminum": 100
 		},
-		"spaceship_part": false
+		"spaceship_part": false,
+		"ai_score": {"base": 70, "requires_global_project": "manhattan_project"}
 	},
 	"apollo_program": {
 		"name": "Apollo Program",
@@ -68,7 +71,8 @@
 		"bonus_production": {
 			"aluminum": 100
 		},
-		"spaceship_part": false
+		"spaceship_part": false,
+		"ai_score": {"base": 80, "flavor": "science", "flavor_weight": 8}
 	},
 	"ss_cockpit": {
 		"name": "SS Cockpit",

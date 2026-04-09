@@ -106,6 +106,20 @@ func has_tech(tech_id: String) -> bool:
 func has_trait(trait_id: String) -> bool:
 	return trait_id in traits
 
+## Check whether the player's civilization has a tag in its `traits` array (data/civs.json).
+## Use this for civilization-level flags like "barbarian", "minor", "major" — distinct from
+## leader traits checked by has_trait().
+func has_civ_trait(trait_id: String) -> bool:
+	var civ_data := DataManager.get_civ(civilization_id)
+	var civ_traits = civ_data.get("traits", [])
+	if civ_traits is Array:
+		return trait_id in civ_traits
+	return false
+
+## Convenience: is this player a barbarian civilization?
+func is_barbarian() -> bool:
+	return has_civ_trait("barbarian")
+
 func is_in_anarchy() -> bool:
 	return anarchy_turns > 0
 

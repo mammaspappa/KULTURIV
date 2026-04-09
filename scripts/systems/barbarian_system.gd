@@ -2,24 +2,23 @@ extends Node
 ## Handles barbarian spawning and behavior.
 ## BTS mechanic: camps spawn in fog of war, and after ~1000 BC camps may
 ## evolve into aggressive barbarian civilizations.
+##
+## Tunables live in data/tunables/barbarians.json — accessed via DataManager.get_tunable("barbarians.*").
 
 const PlayerClass = preload("res://scripts/core/player.gd")
 const PathfindingClass = preload("res://scripts/map/pathfinding.gd")
 const CityClass = preload("res://scripts/entities/city.gd")
 
-# Barbarian camp properties
-const CAMP_SPAWN_INTERVAL = 10  # Turns between new camp spawn attempts
-const MIN_CAMP_DISTANCE = 8    # Minimum tiles between camps
-const CAMP_CITY_DISTANCE = 6   # Minimum distance from any city
-const MAX_CAMPS = 15           # Maximum number of barbarian camps on map
-const UNIT_SPAWN_INTERVAL = 5  # Turns between unit spawns per camp
-
-# Barbarian city founding (base values for Normal speed, standard map)
-const CITY_FOUNDING_BASE_MIN_TURN = 75  # ~1000 BC on Normal speed
-const CITY_FOUNDING_BASE_INTERVAL = 5   # Check interval on Normal speed
-const CITY_FOUNDING_BASE_CHANCE = 0.08  # 8% base chance per eligible camp
-const CITY_FOUNDING_SCORE_BONUS = 0.005 # Extra chance per city site score point
-const MAX_BARBARIAN_CIVS_BASE = 3       # Max barb civs on standard map
+func _camp_spawn_interval() -> int: return int(DataManager.get_tunable("barbarians.camp.spawn_interval", 10))
+func _min_camp_distance() -> int: return int(DataManager.get_tunable("barbarians.camp.min_distance", 8))
+func _camp_city_distance() -> int: return int(DataManager.get_tunable("barbarians.camp.city_distance", 6))
+func _max_camps() -> int: return int(DataManager.get_tunable("barbarians.camp.max_camps", 15))
+func _unit_spawn_interval() -> int: return int(DataManager.get_tunable("barbarians.camp.unit_spawn_interval", 5))
+func _city_founding_base_min_turn() -> int: return int(DataManager.get_tunable("barbarians.city_founding.base_min_turn", 75))
+func _city_founding_base_interval() -> int: return int(DataManager.get_tunable("barbarians.city_founding.base_interval", 5))
+func _city_founding_base_chance() -> float: return float(DataManager.get_tunable("barbarians.city_founding.base_chance", 0.08))
+func _city_founding_score_bonus() -> float: return float(DataManager.get_tunable("barbarians.city_founding.score_bonus_per_point", 0.005))
+func _max_barbarian_civs_base() -> int: return int(DataManager.get_tunable("barbarians.city_founding.max_civs_base", 3))
 
 # Barbarian camp data
 var barbarian_camps: Array = []  # Array of Vector2i positions
@@ -72,7 +71,7 @@ func _on_turn_ended(_turn_number: int, player) -> void:
 		return
 
 	# Process barbarian camp spawning (scale interval with game speed)
-	var camp_interval = max(1, int(CAMP_SPAWN_INTERVAL * GameManager.get_speed_multiplier()))
+	var camp_interval = max(1, int(_camp_spawn_interval() * GameManager.get_speed_multiplier()))
 	if TurnManager.current_turn % camp_interval == 0:
 		_try_spawn_camp()
 
@@ -94,7 +93,7 @@ func _on_turn_ended(_turn_number: int, player) -> void:
 ## Ensure barbarian player exists
 func _ensure_barbarian_player() -> void:
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian":
+		if player.is_barbarian():
 			barbarian_player = player
 			return
 
@@ -123,7 +122,7 @@ func _try_spawn_camp() -> void:
 
 	# Scale max camps with map size
 	var map_tiles = grid.width * grid.height
-	var max_camps = clampi(map_tiles / 200, 3, MAX_CAMPS)
+	var max_camps = clampi(map_tiles / 200, 3, _max_camps())
 	if barbarian_camps.size() >= max_camps:
 		return
 
@@ -180,7 +179,7 @@ func _is_valid_camp_position(pos: Vector2i) -> bool:
 
 	# Check distance from existing camps
 	for camp_pos in barbarian_camps:
-		if GridUtils.chebyshev_distance(pos, camp_pos) < MIN_CAMP_DISTANCE:
+		if GridUtils.chebyshev_distance(pos, camp_pos) < _min_camp_distance():
 			return false
 
 	# Check distance from cities
@@ -188,7 +187,7 @@ func _is_valid_camp_position(pos: Vector2i) -> bool:
 		if player == barbarian_player:
 			continue
 		for city in player.cities:
-			if GridUtils.chebyshev_distance(pos, city.grid_position) < CAMP_CITY_DISTANCE:
+			if GridUtils.chebyshev_distance(pos, city.grid_position) < _camp_city_distance():
 				return false
 
 	# BTS: camps ONLY spawn in fog of war (not visible to any player)
@@ -233,7 +232,7 @@ func _process_camp_spawning() -> void:
 			continue
 
 		# Spawn interval check (scale with game speed)
-		var unit_interval = max(1, int(UNIT_SPAWN_INTERVAL * GameManager.get_speed_multiplier()))
+		var unit_interval = max(1, int(_unit_spawn_interval() * GameManager.get_speed_multiplier()))
 		if TurnManager.current_turn % unit_interval != 0:
 			continue
 
@@ -302,7 +301,7 @@ func _try_spontaneous_spawn() -> void:
 		var barb_nearby = false
 		for near_pos in tiles_nearby:
 			for u in GameManager.get_units_at(near_pos):
-				if u.player_owner != null and u.player_owner.civilization_id == "barbarian":
+				if u.player_owner != null and u.player_owner.is_barbarian():
 					barb_nearby = true
 					break
 			if barb_nearby:
@@ -359,16 +358,17 @@ func _spawn_barbarian_unit(camp_pos: Vector2i) -> void:
 		barbarian_unit_spawned.emit(unit, camp_pos)
 
 ## Get appropriate barbarian unit type based on real civ tech progress.
-## BTS: first 2000 years are "animal era" — only animals spawn (represented as warriors).
+## BTS: first 2000 years are "animal era" — only animals spawn (represented as the fallback unit).
 ## After that, military units based on 50% civ tech threshold.
 func _get_barbarian_unit_type() -> String:
+	var fallback: String = String(DataManager.get_tunable("barbarians.fallback_unit", "warrior"))
 	# Animal era: first 2000 years (4000 BC → 2000 BC) — only animals
 	if _is_animal_era():
-		return "warrior"  # Animals represented as warriors
+		return fallback  # Animals represented by the fallback unit
 	# Build pool of units that barbarians can spawn based on civ tech progress
 	var pool = _get_available_barb_units(false)
 	if pool.is_empty():
-		return "warrior"  # Fallback
+		return fallback
 	return pool[randi() % pool.size()]
 
 ## Check if we're in the animal era (first 2000 years of the game)
@@ -383,58 +383,53 @@ func _get_barbarian_naval_type() -> String:
 	return pool[randi() % pool.size()]
 
 ## Build pool of units barbarians can spawn. Requires >= 50% of real civs to
-## have the required tech. naval_only filters to naval/land units.
+## have the required tech. naval_only filters to naval / land units.
+##
+## The eligible-unit list is now data-driven via units.json fields:
+##   barbarian_available: bool   - opt-in flag
+##   barbarian_tier: int         - relative era ordering, used to bias toward modern units
+##   unit_class: "naval"         - distinguishes naval pool
+## A unit's required_tech is read from its normal `required_tech` field; barbarians spawn it
+## once at least half of the real civs have researched that tech.
 func _get_available_barb_units(naval_only: bool) -> Array:
-	# Count real (non-barbarian) civs
 	var real_civs: Array = []
 	for p in GameManager.players:
-		if p.civilization_id != "barbarian":
+		if not p.is_barbarian():
 			real_civs.append(p)
 	var threshold = max(1, real_civs.size() / 2)  # 50% rounded down, min 1
 
-	# Barbarian unit progression: unit_id -> required_tech
-	# Land units (ordered by era)
-	var land_units = {
-		"warrior": "",               # Always available
-		"archer": "archery",
-		"axeman": "bronze_working",
-		"chariot": "the_wheel",
-		"spearman": "bronze_working",
-		"swordsman": "iron_working",
-		"horseman": "horseback_riding",
-		"crossbowman": "machinery",
-		"maceman": "machinery",
-		"longbowman": "machinery",
-		"knight": "guilds",
-		"musketman": "gunpowder",
-		"grenadier": "chemistry",
-		"rifleman": "rifling",
-	}
-	# Naval units
-	var naval_units = {
-		"galley": "sailing",
-		"caravel": "astronomy",
-		"frigate": "astronomy",
-	}
-
-	var source = naval_units if naval_only else land_units
-	var pool: Array = []
-
-	for unit_id in source:
-		var req_tech = source[unit_id]
-		if req_tech == "":
-			pool.append(unit_id)
+	# Collect (tier, unit_id) pairs for matching units, sorted by tier ascending.
+	var candidates: Array = []
+	for unit_id in DataManager.units.keys():
+		var entry = DataManager.units[unit_id]
+		if not (entry is Dictionary):
 			continue
-		# Count how many real civs have this tech
-		var have_count = 0
-		for civ in real_civs:
-			if civ.has_tech(req_tech):
-				have_count += 1
-		if have_count >= threshold:
-			pool.append(unit_id)
+		if not entry.get("barbarian_available", false):
+			continue
+		var is_naval = entry.get("unit_class", "") == "naval"
+		if naval_only and not is_naval:
+			continue
+		if not naval_only and is_naval:
+			continue
+
+		var req_tech = String(entry.get("required_tech", ""))
+		if req_tech != "":
+			var have_count = 0
+			for civ in real_civs:
+				if civ.has_tech(req_tech):
+					have_count += 1
+			if have_count < threshold:
+				continue
+
+		candidates.append([int(entry.get("barbarian_tier", 0)), unit_id])
+
+	candidates.sort_custom(func(a, b): return a[0] < b[0])
+	var pool: Array = []
+	for c in candidates:
+		pool.append(c[1])
 
 	# Bias toward more advanced units: keep only the top half of available units
-	# (so once swordsmen unlock, warriors become rare)
+	# (so once swordsmen unlock, warriors become rare).
 	if pool.size() > 2:
 		var keep = max(2, pool.size() / 2)
 		pool = pool.slice(pool.size() - keep)
@@ -450,7 +445,7 @@ func _barb_unit_within_range(pos: Vector2i, radius: int) -> bool:
 			return true
 	# Also check spawned barbarian civ units
 	for p in GameManager.players:
-		if p.civilization_id == "barbarian" and p.player_id != -1:
+		if p.is_barbarian() and p.player_id != -1:
 			for unit in p.units:
 				if is_instance_valid(unit) and GridUtils.chebyshev_distance(pos, unit.grid_position) <= radius:
 					return true
@@ -668,18 +663,18 @@ func get_camp_positions() -> Array:
 
 ## Get min turn scaled by game speed (Marathon=3x more turns, Quick=0.67x)
 func _get_scaled_min_turn() -> int:
-	return int(CITY_FOUNDING_BASE_MIN_TURN * GameManager.get_speed_multiplier())
+	return int(_city_founding_base_min_turn() * GameManager.get_speed_multiplier())
 
 ## Get check interval scaled by game speed
 func _get_scaled_interval() -> int:
-	return max(1, int(CITY_FOUNDING_BASE_INTERVAL * GameManager.get_speed_multiplier()))
+	return max(1, int(_city_founding_base_interval() * GameManager.get_speed_multiplier()))
 
 ## Get max barbarian civs scaled by map size
 func _get_max_barbarian_civs() -> int:
 	var map_tiles = GameManager.map_width * GameManager.map_height
 	# Standard map ~4000 tiles = 3 civs, larger maps get more, smaller get fewer
 	var scale = float(map_tiles) / 4000.0
-	return clampi(int(MAX_BARBARIAN_CIVS_BASE * scale), 1, 6)
+	return clampi(int(_max_barbarian_civs_base() * scale), 1, 6)
 
 ## Try to found a barbarian city from an eligible camp
 func _try_found_barbarian_city() -> void:
@@ -714,7 +709,7 @@ func _try_found_barbarian_city() -> void:
 		var too_close = false
 		for player in GameManager.players:
 			for city in player.cities:
-				if GridUtils.chebyshev_distance(camp_pos, city.grid_position) < CAMP_CITY_DISTANCE:
+				if GridUtils.chebyshev_distance(camp_pos, city.grid_position) < _camp_city_distance():
 					too_close = true
 					break
 			if too_close:
@@ -728,7 +723,7 @@ func _try_found_barbarian_city() -> void:
 			continue  # Not a good enough location
 
 		# Higher score = higher chance of spawning
-		var spawn_chance = CITY_FOUNDING_BASE_CHANCE + site_score * CITY_FOUNDING_SCORE_BONUS
+		var spawn_chance = _city_founding_base_chance() + site_score * _city_founding_score_bonus()
 		spawn_chance = clamp(spawn_chance, 0.0, 0.5)
 
 		eligible_camps.append({"position": camp_pos, "score": site_score, "chance": spawn_chance})

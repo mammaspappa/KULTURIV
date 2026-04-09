@@ -1,23 +1,20 @@
 extends Node
 ## Handles religion founding, spread, and effects.
+##
+## Tunable constants live in data/tunables/religion.json — see DataManager.get_tunable("religion.*").
 
-# Religion founding techs
-const FOUNDING_TECHS = {
-	"meditation": "buddhism",
-	"polytheism": "hinduism",
-	"monotheism": "judaism",
-	"theology": "christianity",
-	"code_of_laws": "confucianism",
-	"philosophy": "taoism",
-	"divine_right": "islam"
-}
+## Lookup tech_id -> religion_id from tunables (data/tunables/religion.json: founding_techs).
+func _founding_techs() -> Dictionary:
+	return DataManager.get_tunable("religion.founding_techs", {}) as Dictionary
 
-# Spread chance per turn (base)
-const BASE_SPREAD_CHANCE = 0.05
+func _base_spread_chance() -> float:
+	return float(DataManager.get_tunable("religion.base_spread_chance", 0.05))
 
-# Religion effects
-const RELIGION_HAPPINESS_HOLY_CITY = 1
-const RELIGION_HAPPINESS_WITH_BUILDING = 1
+func _holy_city_happiness() -> int:
+	return int(DataManager.get_tunable("religion.happiness.holy_city", 1))
+
+func _building_happiness() -> int:
+	return int(DataManager.get_tunable("religion.happiness.with_building", 1))
 
 func _ready() -> void:
 	# Connect to research events
@@ -157,7 +154,7 @@ func _get_nearby_cities(city, max_distance: int) -> Array:
 	return nearby
 
 func _calculate_spread_chance(target_city, source_city, religion_id: String) -> float:
-	var chance = BASE_SPREAD_CHANCE
+	var chance = _base_spread_chance()
 
 	# Distance modifier (closer = higher chance)
 	var distance = GridUtils.chebyshev_distance(target_city.grid_position, source_city.grid_position)
@@ -191,7 +188,7 @@ func get_religious_happiness(city) -> int:
 
 	# Holy city bonus
 	if city.holy_city_of != "":
-		happiness += RELIGION_HAPPINESS_HOLY_CITY
+		happiness += _holy_city_happiness()
 
 	# State religion with religious buildings
 	if city.player_owner and city.player_owner.state_religion != "":
@@ -201,7 +198,7 @@ func get_religious_happiness(city) -> int:
 			for building_id in city.buildings:
 				var building = DataManager.get_building(building_id)
 				if building.get("religious", false):
-					happiness += RELIGION_HAPPINESS_WITH_BUILDING
+					happiness += _building_happiness()
 
 	return happiness
 
@@ -252,9 +249,10 @@ func get_holy_city(religion_id: String):
 	return null
 
 func _on_research_completed(player, tech: String) -> void:
-	# Check if this tech founds a religion
-	if tech in FOUNDING_TECHS:
-		var religion_id = FOUNDING_TECHS[tech]
+	# Check if this tech founds a religion (lookup in tunables.religion.founding_techs)
+	var founding := _founding_techs()
+	if founding.has(tech):
+		var religion_id = founding[tech]
 
 		if can_found_religion(religion_id):
 			# Found religion in capital (city with palace)

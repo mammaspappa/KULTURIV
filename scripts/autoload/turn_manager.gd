@@ -15,17 +15,23 @@ var game_ended: bool = false
 # Multiplayer simultaneous turn mode
 var simultaneous_mode: bool = false
 
-# Year progression (BTS-style, Normal speed base — scaled by speed multiplier).
-# Designed so 4000 BC reaches ~2050 AD at turn 500 (Normal speed).
-# Quick/Epic/Marathon scale turn thresholds automatically.
-const YEAR_PROGRESSION = [
-	{"until_turn": 50, "years_per_turn": 60},    # Ancient: 4000 BC → 1000 BC
-	{"until_turn": 100, "years_per_turn": 25},   # Classical: 1000 BC → 250 AD
-	{"until_turn": 200, "years_per_turn": 10},   # Medieval: 250 AD → 1250 AD
-	{"until_turn": 300, "years_per_turn": 5},    # Renaissance: 1250 AD → 1750 AD
-	{"until_turn": 400, "years_per_turn": 2},    # Industrial: 1750 AD → 1950 AD
-	{"until_turn": 9999, "years_per_turn": 1},   # Modern/Future: 1950 AD → 2050+ AD
+# Year progression — loaded from data/tunables/year_progression.json (Normal speed base).
+# Quick/Epic/Marathon scale turn thresholds automatically via game speed multiplier.
+# Hardcoded fallback retained in case the tunables file is missing or malformed.
+const _FALLBACK_YEAR_PROGRESSION = [
+	{"until_turn": 50, "years_per_turn": 60},
+	{"until_turn": 100, "years_per_turn": 25},
+	{"until_turn": 200, "years_per_turn": 10},
+	{"until_turn": 300, "years_per_turn": 5},
+	{"until_turn": 400, "years_per_turn": 2},
+	{"until_turn": 9999, "years_per_turn": 1},
 ]
+
+func _year_progression() -> Array:
+	var data = DataManager.get_tunable("year_progression.progression", null)
+	if data is Array and not data.is_empty():
+		return data
+	return _FALLBACK_YEAR_PROGRESSION
 
 func _ready() -> void:
 	EventBus.player_eliminated.connect(_on_player_eliminated)
@@ -93,7 +99,7 @@ func _start_turn_for_player(player) -> void:
 
 	# Base barbarian player (id=-1): only refresh movement, skip all civ systems
 	# Spawned barbarian civs (id >= 0) get full turn processing like normal AI
-	if player.civilization_id == "barbarian" and player.player_id == -1:
+	if player.is_barbarian() and player.player_id == -1:
 		for unit in player.units:
 			unit.refresh_movement()
 			unit.has_acted = false
@@ -222,7 +228,7 @@ func _advance_year() -> void:
 	var years_to_add = 1
 	# Scale turn thresholds by game speed so Quick reaches Modern era faster
 	var speed = GameManager.get_speed_multiplier()
-	for progression in YEAR_PROGRESSION:
+	for progression in _year_progression():
 		var scaled_turn = int(progression.until_turn * speed)
 		if current_turn <= scaled_turn:
 			years_to_add = progression.years_per_turn
@@ -696,7 +702,7 @@ func _start_simultaneous_turn() -> void:
 		return
 
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian" and player.player_id == -1:
+		if player.is_barbarian() and player.player_id == -1:
 			continue  # Barbarians processed in between-turns
 
 		if player.is_human:
@@ -741,7 +747,7 @@ func process_between_turns_mp() -> void:
 
 	# Process barbarians
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian" and player.player_id == -1:
+		if player.is_barbarian() and player.player_id == -1:
 			for unit in player.units:
 				unit.refresh_movement()
 				unit.has_acted = false
@@ -749,7 +755,7 @@ func process_between_turns_mp() -> void:
 
 	# Process AI players
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian" and player.player_id == -1:
+		if player.is_barbarian() and player.player_id == -1:
 			continue
 		if not player.is_human:
 			_start_turn_for_player_mp(player)
@@ -757,7 +763,7 @@ func process_between_turns_mp() -> void:
 
 	# Process city turns for ALL players (human cities already had actions taken)
 	for player in GameManager.players:
-		if player.civilization_id == "barbarian" and player.player_id == -1:
+		if player.is_barbarian() and player.player_id == -1:
 			continue
 		for city in player.cities:
 			_process_city_turn_start(city)
