@@ -1651,9 +1651,12 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		if p.civilization_id != "barbarian":
 			num_real_players += 1
 	var land_per_player = map_tiles / max(num_real_players, 1)
-	# Tighter cap (was /120, max 10) — sims showed civs sprawling to 10 cities and
-	# collapsing economically. Match the formula in ai_strategy.gd.
 	var max_cities = clampi(land_per_player / 150 + expansion_flavor / 4, 3, 7)
+	# Dynamic cap: reduce max if economy is struggling — don't expand into bankruptcy
+	if player.gold_per_turn < -10:
+		max_cities = num_cities  # Hard freeze at current
+	elif player.gold_per_turn < -3 and player.science_rate < 0.5:
+		max_cities = mini(max_cities, num_cities + 1)  # Allow at most 1 more
 
 	# Count settlers already in production or in the field
 	var settlers_out = 0
@@ -1738,6 +1741,25 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		var unit_to_build = _get_best_military_unit(city, player, military_flavor, needs_siege, bankrupt)
 		if unit_to_build != "":
 			city.set_production(unit_to_build)
+			return
+
+	# ECONOMY FIX: when running a deficit, prioritize economic buildings in EVERY city
+	# before building more settlers/military. This prevents the common pattern of
+	# expanding to 4 cities → all building military → maintenance crashes economy.
+	# Only skip if we're below garrison minimum (defense comes first).
+	if player.gold_per_turn < -3 and military_units >= garrison_minimum:
+		var econ_bld = _get_economic_rescue_building(city, player)
+		if econ_bld != "":
+			city.set_production(econ_bld)
+			return
+
+	# Early game military floor: ensure at least 2 military units before T50
+	# regardless of garrison minimum. Civs with 1 warrior get eliminated by
+	# first contact with barbarians or aggressive neighbors.
+	if military_units < 2 and TurnManager.current_turn < 50 and workers >= 1:
+		var early_mil = _get_best_military_unit(city, player, military_flavor, false)
+		if early_mil != "":
+			city.set_production(early_mil)
 			return
 
 	# New cities MUST get a culture building first to expand borders (BTS priority)
@@ -2168,6 +2190,28 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 			# Courthouses scale with city count — urgent for wide empires
 			var cities_bonus = min(player.cities.size() * 5, 30)
 			score += (25 + cities_bonus) * (gold_flavor / 5.0)
+
+	# === ECONOMY-DRIVEN RESEARCH ===
+	# When running a deficit or low science rate, boost techs that unlock
+	# money-making buildings and trade. Prevents the spiral where civs expand
+	# but never research the techs needed to sustain the economy.
+	var in_deficit = player.gold_per_turn < 0 or player.science_rate < 0.5
+	if in_deficit:
+		match tech_id:
+			"currency": score += 40   # Markets (+25% gold), trade routes
+			"code_of_laws": score += 35  # Courthouses (-50% maintenance)
+			"guilds": score += 30     # Grocers, trade route bonus
+			"banking": score += 30    # Banks (+50% gold)
+			"economics": score += 25  # Free Great Merchant
+			"pottery": score += 20    # Cottages for commerce
+			"writing": score += 15    # Libraries for science
+	elif player.cities.size() >= 3 and not player.has_tech("currency"):
+		# Even without deficit, 3+ cities should push for Currency (markets + trade)
+		if tech_id == "currency":
+			score += 25
+	if player.cities.size() >= 3 and not player.has_tech("code_of_laws"):
+		if tech_id == "code_of_laws":
+			score += 20  # Courthouses critical for wide empires
 
 	# Military beeline (aggressive leaders)
 	if military_flavor >= HIGH_FLAVOR:
@@ -3032,13 +3076,16 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 			var mod = spec_mods.get("science", 1.0)
 			score += effects.science * science_flavor * mod
 
-		# Gold
+		# Gold — boosted when running deficit (markets, banks, grocers)
+		var deficit_gold_mult = 3.0 if player.gold_per_turn < 0 else 1.0
 		if effects.has("gold_percent"):
 			var mod = spec_mods.get("gold_percent", 1.0)
-			score += effects.gold_percent * gold_flavor / 5 * mod
+			score += effects.gold_percent * gold_flavor / 5 * mod * deficit_gold_mult
 		if effects.has("gold"):
 			var mod = spec_mods.get("gold", 1.0)
-			score += effects.gold * gold_flavor * mod
+			score += effects.gold * gold_flavor * mod * deficit_gold_mult
+		if effects.has("trade_routes") and player.gold_per_turn < 0:
+			score += effects.trade_routes * 10  # Trade routes = gold when in deficit
 
 		# Culture
 		if effects.has("culture"):
@@ -3064,9 +3111,13 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 			score += effects.happiness_from_resource * 3
 
 		# Maintenance reduction (courthouse) — scales with city count
+		# When running a deficit, courthouses become CRITICAL
 		if effects.has("maintenance_reduction"):
-			var num_cities = player.cities.size()
-			score += effects.maintenance_reduction * num_cities * 3
+			var num_cities_local = player.cities.size()
+			var base_maint_score = effects.maintenance_reduction * num_cities_local * 3
+			if player.gold_per_turn < 0:
+				base_maint_score *= 3  # Triple priority when in deficit
+			score += base_maint_score
 
 		# Domain experience (barracks: land_experience, stable: mounted_experience)
 		if effects.has("land_experience"):
