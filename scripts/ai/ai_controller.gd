@@ -152,17 +152,19 @@ func _ai_tun(player, path: String, default):
 ##   Protective (+drill I archery/gunpowder, cheap walls/castle): tall
 ##   Charismatic (+1 happy, -25% XP promote): wide
 const TRAIT_STRATEGY_BIAS = {
-	"aggressive":    {"warmonger": 15, "builder": -5, "science": -5},
+	"aggressive":    {"warmonger": 15, "builder": -5, "science": -5, "cultural": -8},
 	"imperialistic": {"wide": 15, "warmonger": 3},
 	"expansive":     {"wide": 12, "tall": 3},
-	"creative":      {"wide": 10, "builder": 3},
+	# Creative's +2 culture/city is the single biggest cultural-victory enabler
+	"creative":      {"cultural": 18, "wide": 8, "builder": 3},
 	"organized":     {"wide": 8, "tall": 5},
-	"industrious":   {"builder": 15, "science": 3},
-	"philosophical": {"science": 15, "builder": 3},
+	"industrious":   {"builder": 15, "science": 3, "cultural": 6},  # wonder bonus
+	"philosophical": {"science": 15, "builder": 3, "cultural": 10},  # great artists
 	"financial":     {"builder": 12, "science": 5, "tall": 3},
-	"spiritual":     {"builder": 3, "warmonger": 3},  # flexible
+	# Spiritual: no anarchy = easy civic swaps to Pacifism/Free Speech
+	"spiritual":     {"builder": 3, "warmonger": 3, "cultural": 8},
 	"protective":    {"tall": 12, "builder": 3},
-	"charismatic":   {"wide": 8, "warmonger": 3},
+	"charismatic":   {"wide": 8, "warmonger": 3, "cultural": 4},  # happiness helps
 }
 
 ## Pick the active strategy for this player based on leader flavor, game phase,
@@ -227,6 +229,7 @@ func _pick_strategy(player, flavor: Dictionary) -> void:
 		"warmonger": 0.0,
 		"builder": 0.0,
 		"science": 0.0,
+		"cultural": 0.0,
 	}
 
 	# ---- Leader trait bias: the strongest single factor in strategy selection ----
@@ -251,13 +254,20 @@ func _pick_strategy(player, flavor: Dictionary) -> void:
 		"representation":
 			scores["science"] += 6
 			scores["tall"] += 3
-		"free_speech", "mercantilism":
+		"free_speech":
+			# Free Speech is THE culture civic in BTS (+100% culture in all cities)
+			scores["cultural"] += 12
+			scores["builder"] += 4
+		"mercantilism":
 			scores["builder"] += 6
 		"emancipation", "universal_suffrage":
 			scores["wide"] += 6
 		"pacifism":
 			scores["science"] += 8
+			scores["cultural"] += 6  # extra GP points → more artists
 			scores["warmonger"] -= 10
+		"caste_system":
+			scores["cultural"] += 6  # artist specialist spam
 
 	# ---- Warmonger: high military flavor, active wars, or many threats ----
 	scores["warmonger"] += mil * 2.0
@@ -306,6 +316,19 @@ func _pick_strategy(player, flavor: Dictionary) -> void:
 		scores["science"] += 5.0
 	if mil > 7:
 		scores["science"] -= 10.0  # warmonger leaders don't science
+
+	# ---- Cultural: BTS cultural victory (3 legendary cities). High culture
+	# flavor (Ramesses, Louis XIV, Pericles), peaceful, 3+ cities required.
+	# Per https://forums.civfanatics.com/threads/the-beginners-crash-guide-to-cultural-victory.160306/
+	scores["cultural"] += culture * 2.5
+	if num_cities >= 3:
+		scores["cultural"] += 6.0
+	if real_wars == 0 and nearby_threats <= 1:
+		scores["cultural"] += 10.0
+	if phase == "mid" or phase == "late":
+		scores["cultural"] += 5.0  # only commit once you can build culture wonders
+	if mil > 6:
+		scores["cultural"] -= 15.0  # warmonger leaders don't pursue culture
 
 	# Emergency override: if a war is on and we're under-garrisoned, force warmonger
 	if real_wars > 0:
@@ -2652,6 +2675,24 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 			"machinery": score += 25  # Macemen, crossbowmen
 			"civil_service": score += 20  # Macemen, Bureaucracy civic
 
+	# Cultural beeline — for leaders pursuing cultural victory, push the key
+	# culture-enabling techs: Literature, Drama, Music (wonders/theatres),
+	# Liberalism (Free Speech civic), Mass Media (broadcast towers).
+	if player.active_strategy == "cultural":
+		match tech_id:
+			"literature": score += 60      # Great Library, Heroic Epic
+			"drama": score += 50           # Theatres, culture slider
+			"music": score += 50           # Sistine Chapel
+			"alphabet": score += 40        # prereq path
+			"code_of_laws": score += 35    # courthouses + path
+			"civil_service": score += 30   # Bureaucracy civic path
+			"philosophy": score += 45      # Pacifism civic
+			"paper": score += 30           # → Education → Liberalism
+			"education": score += 35       # Oxford, Universities
+			"liberalism": score += 60      # unlocks Free Speech!
+			"mass_media": score += 40      # Broadcast Towers (+50% culture)
+			"radio": score += 30           # prereq to mass_media
+
 	# Space race beeline — once a civ has enough techs to be modern-era-capable,
 	# strongly prioritize Rocketry + the 6 spaceship part techs. Without this
 	# bonus the AI drifts through the modern era researching flavor techs and
@@ -3551,10 +3592,14 @@ func _get_best_building_for_specialization(city, player, flavor: Dictionary, spe
 		if effects.has("trade_routes") and player.gold_per_turn < 0:
 			score += effects.trade_routes * 10  # Trade routes = gold when in deficit
 
-		# Culture
+		# Culture — triple weight when cultural strategy active
+		var cultural_mult = 3.0 if player.active_strategy == "cultural" else 1.0
 		if effects.has("culture"):
 			var mod = spec_mods.get("culture", 1.0)
-			score += effects.culture * culture_flavor * mod
+			score += effects.culture * culture_flavor * mod * cultural_mult
+		if effects.has("culture_percent"):
+			var mod = spec_mods.get("culture", 1.0)
+			score += effects.culture_percent * culture_flavor * mod * cultural_mult * 2
 
 		# Military (barracks use "free_experience", also check "experience")
 		if effects.has("free_experience"):

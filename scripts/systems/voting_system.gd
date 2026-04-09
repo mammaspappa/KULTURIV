@@ -617,20 +617,26 @@ func _ai_choose_resolution(player_id: int, available: Array, source_id: String) 
 
 	return ""
 
-func _ai_decide_vote(player_id: int, resolution_id: String, proposer_id: int, target) -> bool:
+func _ai_decide_vote(player_id: int, resolution_id: String, proposer_id: int, target, visited: Array = []) -> bool:
 	var player = GameManager.get_player(player_id) if GameManager else null
 	if player == null:
 		return randf() > 0.5
 
+	# Guard against infinite recursion via circular vassalage
+	# (saw stack overflow in sim when a vassal chain looped on itself)
+	if player_id in visited or visited.size() > 8:
+		return randf() > 0.5
+	var next_visited = visited + [player_id]
+
 	# Vassal voting: vassals always vote with their master
-	if player.is_vassal():
+	if player.is_vassal() and player.master_id != player_id:
 		var master = GameManager.get_player(player.master_id)
 		if master:
 			# Check if master has already voted
 			if pending_vote.votes.has(player.master_id):
 				return pending_vote.votes[player.master_id].vote_for
 			# Otherwise, determine what master would vote
-			return _ai_decide_vote(player.master_id, resolution_id, proposer_id, target)
+			return _ai_decide_vote(player.master_id, resolution_id, proposer_id, target, next_visited)
 
 	var resolution = resolutions.get(resolution_id, {})
 	var effects = resolution.get("effects", {})
