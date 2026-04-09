@@ -1961,15 +1961,20 @@ func _manage_science_rate(player) -> void:
 	# Science gets the rest minus culture and espionage
 	var max_science = 1.0 - player.culture_rate - player.espionage_rate
 
-	# BTS-style science management: maximize science, only drop when going bankrupt.
-	# Start at max science, then reduce if we can't afford it.
+	# BTS-style science management: maximize science, only drop when gold reserves
+	# fall below a threshold. AI is OK running a deficit while it has cash reserves
+	# (investing in research), but must balance the budget before going broke.
 	player.science_rate = max_science
 	for city in player.cities:
 		city.calculate_yields()
 	var est_gpt = _estimate_gold_per_turn(player)
 
-	# Only reduce science if we're actually going broke (gold negative or about to be)
-	if est_gpt < 0 and player.gold + est_gpt < 0:
+	# Allow deficit spending while gold reserves are healthy.
+	# Use hysteresis to prevent oscillation: drop science when gold < 80,
+	# but only go back to full science when gold > 150. This prevents the
+	# yo-yo between 100%/0% science every few turns.
+	var gold_floor = 80 if player.science_rate >= 0.5 else 150
+	if est_gpt < 0 and player.gold < gold_floor:
 		# Reduce science until we break even or hit minimum
 		while player.science_rate > 0.0:
 			player.science_rate = max(0.0, player.science_rate - 0.1)
