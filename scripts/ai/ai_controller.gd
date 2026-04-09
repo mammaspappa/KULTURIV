@@ -102,6 +102,12 @@ func execute_turn(player) -> void:
 	# after peace → structural bankruptcy" pattern seen in late-game sims.
 	_consider_peacetime_disband(player)
 
+	# Space race: if spaceship is ready but not yet launched, launch it.
+	if ProjectsSystem:
+		var ship = ProjectsSystem.spaceship_progress.get(player.player_id, {})
+		if ship.get("ready", false) and not ship.get("launched", false):
+			ProjectsSystem.launch_spaceship(player.player_id)
+
 	# Process cities
 	for city in player.cities:
 		var prev_production = city.current_production
@@ -2645,6 +2651,38 @@ func _evaluate_tech(tech_id: String, player, flavor: Dictionary) -> float:
 			"construction": score += 30  # Catapults — siege!
 			"machinery": score += 25  # Macemen, crossbowmen
 			"civil_service": score += 20  # Macemen, Bureaucracy civic
+
+	# Space race beeline — once a civ has enough techs to be modern-era-capable,
+	# strongly prioritize Rocketry + the 6 spaceship part techs. Without this
+	# bonus the AI drifts through the modern era researching flavor techs and
+	# never actually races to the spaceship.
+	var num_techs_total = player.researched_techs.size()
+	if num_techs_total >= 40 and science_flavor >= 5:
+		match tech_id:
+			"rocketry": score += 100  # unlocks Apollo Program
+			"fiber_optics": score += 80  # ss_cockpit
+			"composites": score += 80   # ss_casing
+			"fusion": score += 80       # ss_engine
+			"superconductors": score += 80  # ss_thrusters
+			"genetics": score += 80     # ss_stasis_chamber
+			"ecology": score += 80      # ss_life_support
+			# Prereqs on the path
+			"rifling": score += 40      # → rocketry
+			"plastics": score += 40     # → computers → fiber_optics
+			"computers": score += 50    # → fiber_optics
+			"biology": score += 30      # → ecology
+			"medicine": score += 30     # → genetics
+			"fission": score += 40      # → fusion
+			"satellites": score += 50   # → composites
+	# If Apollo Program is already built, the bonus becomes extreme
+	if ProjectsSystem and ProjectsSystem.player_projects.get(player.player_id, {}).get("apollo_program", 0) >= 1:
+		match tech_id:
+			"fiber_optics": score += 150
+			"composites": score += 150
+			"fusion": score += 150
+			"superconductors": score += 150
+			"genetics": score += 150
+			"ecology": score += 150
 
 	# Science beeline (research-focused leaders)
 	if science_flavor >= HIGH_FLAVOR:

@@ -267,6 +267,8 @@ func launch_spaceship(player_id: int) -> bool:
 	var progress = spaceship_progress[player_id]
 	if not progress.ready:
 		return false
+	if progress.get("launched", false):
+		return true  # Already launched, waiting for arrival
 
 	# Calculate success chance based on casings
 	var parts = progress.parts
@@ -277,8 +279,19 @@ func launch_spaceship(player_id: int) -> bool:
 
 	var roll = randi() % 100
 	if roll < success_chance:
-		# Success! Space race victory
+		# Successful launch — set arrival_turn. When that turn is reached,
+		# VictorySystem._check_space_race will fire the victory.
+		var travel = _calculate_spaceship_travel_time(player_id)
+		var cur_turn = TurnManager.current_turn if TurnManager else 0
+		progress["launched"] = true
+		progress["launch_turn"] = cur_turn
+		progress["arrival_turn"] = cur_turn + travel
 		EventBus.spaceship_launched.emit(player_id, true)
+		EventBus.notification_added.emit(
+			"Spaceship launched! Arrival in %d turns." % travel,
+			"victory"
+		)
+		# Immediate check (if travel == 0)
 		VictorySystem.check_space_race_victory(player_id)
 		return true
 	else:

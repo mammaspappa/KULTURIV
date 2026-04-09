@@ -103,23 +103,35 @@ func _check_cultural(player) -> bool:
 	return legendary_cities >= _cultural_cities_needed()
 
 func _check_space_race(player) -> bool:
-	# Check for spaceship parts (simplified - check for specific buildings/wonders)
-	var required_parts = ["ss_cockpit", "ss_casing", "ss_thrusters", "ss_stasis_chamber", "ss_life_support", "ss_engine"]
-	var parts_built = 0
+	# Space race victory requires:
+	#   1. Apollo Program built (tracked as a project, not building)
+	#   2. All spaceship parts built (tracked in ProjectsSystem.spaceship_progress)
+	#   3. Spaceship launched and travel time elapsed
+	if ProjectsSystem == null:
+		return false
+	# Apollo is a national project — check if this player has it
+	var player_apollo = ProjectsSystem.player_projects.get(player.player_id, {}).get("apollo_program", 0)
+	if player_apollo < 1:
+		return false
+	# Has the spaceship arrived at the destination (launched + travel time elapsed)?
+	var progress = ProjectsSystem.spaceship_progress.get(player.player_id, {})
+	if not progress.get("launched", false):
+		return false
+	var arrival_turn = progress.get("arrival_turn", -1)
+	if arrival_turn < 0:
+		return false
+	var current_turn = TurnManager.current_turn if TurnManager else 0
+	return current_turn >= arrival_turn
 
-	for city in player.cities:
-		for part in required_parts:
-			if part in city.buildings:
-				parts_built += 1
-
-	# Also check for Apollo Program as prerequisite
-	var has_apollo = false
-	for city in player.cities:
-		if "apollo_program" in city.buildings:
-			has_apollo = true
-			break
-
-	return has_apollo and parts_built >= required_parts.size()
+## Called by ProjectsSystem.launch_spaceship on successful launch.
+## Sets the victory flag immediately (for when travel time is 0 or 1 turn).
+func check_space_race_victory(player_id: int) -> void:
+	var player = GameManager.get_player(player_id) if GameManager else null
+	if player == null:
+		return
+	# Only trigger victory if the spaceship has actually arrived
+	if _check_space_race(player):
+		_apply_vote_victory(player_id, "space")
 
 ## Get total land tiles on the map (cached)
 func _get_total_land_tiles() -> int:
