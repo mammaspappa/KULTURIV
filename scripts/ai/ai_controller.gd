@@ -82,6 +82,11 @@ func execute_turn(player) -> void:
 			continue
 		_process_unit_ai(unit, player, flavor, escort_assignments)
 
+	# Peacetime disband: if no active wars and we're losing gold, disband excess
+	# military. Prevents the classic "build huge army during war → can't afford it
+	# after peace → structural bankruptcy" pattern seen in late-game sims.
+	_consider_peacetime_disband(player)
+
 	# Process cities
 	for city in player.cities:
 		var prev_production = city.current_production
@@ -1906,6 +1911,61 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			return
 
 ## Consider using Slavery whip to rush critical production
+## Peacetime disband: when not at war and running a deficit, disband excess
+## military units that aren't contributing to the empire. Only applies if we
+## have more than a comfortable garrison (2 per city).
+func _consider_peacetime_disband(player) -> void:
+	# Only in peace
+	var real_war = false
+	for enemy_id in player.at_war_with:
+		var enemy = GameManager.get_player(enemy_id)
+		if enemy and enemy.civilization_id != "barbarian":
+			real_war = true
+			break
+	if real_war:
+		return
+
+	# Only when bleeding gold
+	if player.gold_per_turn >= 0:
+		return
+
+	# Count military and identify excess
+	var mil_units: Array = []
+	for u in player.units:
+		if u.get_strength() > 0:
+			mil_units.append(u)
+
+	var num_cities = player.cities.size()
+	var comfort_garrison = num_cities * 2
+	var excess = mil_units.size() - comfort_garrison
+	if excess <= 0:
+		return
+
+	# Disband the weakest excess units, preferring obsolete/outdated units
+	# Don't disband units in cities (garrison) or the single strongest unit of its class
+	mil_units.sort_custom(func(a, b):
+		var sa = DataManager.get_unit_strength(a.unit_id)
+		var sb = DataManager.get_unit_strength(b.unit_id)
+		return sa < sb)  # weakest first
+
+	var disbanded = 0
+	# Disband up to half the excess per turn to smooth the transition
+	var to_disband = max(1, excess / 2)
+	for u in mil_units:
+		if disbanded >= to_disband:
+			break
+		# Skip garrisoned units (in own city)
+		if GameManager.get_city_at(u.grid_position) != null:
+			continue
+		# Skip injured — let them heal
+		if u.health < 100:
+			continue
+		u.die()
+		disbanded += 1
+		if sim_logger:
+			sim_logger.log_decision(player.player_name, "military", "peacetime_disband",
+				u.unit_id, "gpt=%d, mil=%d, garrison=%d" % [player.gold_per_turn, mil_units.size(), comfort_garrison])
+
 func _consider_whipping(city, player) -> void:
 	# Only whip with Slavery civic active
 	if player.civics.get("labor", "") != "slavery":
@@ -1914,12 +1974,23 @@ func _consider_whipping(city, player) -> void:
 	if not city.can_whip():
 		return
 
-	# Never whip below population 3 (preserves growth)
-	if city.population <= 2:
+	# Never whip below population 4 (preserves growth — was 3, raised because
+	# sims showed late-game pop collapse from repeated whipping)
+	if city.population <= 3:
 		return
 
 	# Don't whip if already suffering whip anger
 	if city.has_meta("whip_anger_turns") and city.get_meta("whip_anger_turns") > 0:
+		return
+
+	# Don't whip if food surplus is zero or negative — whipping removes a citizen
+	# from a food tile and the city will starve back down soon after.
+	if city.food_surplus <= 1:
+		return
+
+	# Don't whip if the city recently whipped (cooldown beyond the anger window)
+	var last_whip_turn = city.get_meta("last_whip_turn", -100)
+	if TurnManager.current_turn - last_whip_turn < 15:
 		return
 
 	var should_whip = false
@@ -1935,12 +2006,13 @@ func _consider_whipping(city, player) -> void:
 			if progress_ratio > 0.5:
 				should_whip = true
 
-	# Building settler + over 50% complete → whip
-	if prod == "settler" and progress_ratio > 0.5:
+	# Building settler + over 50% complete → whip (but settlers are costly, keep
+	# the same high bar: pop must be >= 5 to afford losing one to a settler)
+	if prod == "settler" and progress_ratio > 0.5 and city.population >= 5:
 		should_whip = true
 
-	# Building critical early building with pop >= 4 → whip
-	if city.population >= 4:
+	# Building critical early building with pop >= 5 → whip
+	if city.population >= 5:
 		if prod in ["granary", "library"]:
 			should_whip = true
 		elif prod == "barracks" and at_war:
@@ -1948,6 +2020,7 @@ func _consider_whipping(city, player) -> void:
 
 	if should_whip:
 		city.whip()
+		city.set_meta("last_whip_turn", TurnManager.current_turn)
 		if sim_logger:
 			sim_logger.log_decision(player.player_name, "production", "whip",
 				"%s in %s (pop %d->%d)" % [prod, city.city_name, city.population + 1, city.population], "")

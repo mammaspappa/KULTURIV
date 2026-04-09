@@ -1202,27 +1202,53 @@ func _score_start_location(pos: Vector2i) -> float:
 	if tile == null or not tile.is_passable() or tile.is_water():
 		return 0.0
 
+	# Reject tiles on low-food terrains — snow/tundra/desert centers can't grow.
+	# Sims showed civs on these terrains stuck at pop 1 for 500 turns.
+	var center_terrain = tile.terrain_id
+	if center_terrain in ["snow", "ice"]:
+		return 0.0
+	if center_terrain in ["tundra", "desert"]:
+		# Only allow if flood plains or oasis nearby
+		var nearby_check = get_tiles_in_range(pos, 1)
+		var has_food_feature = false
+		for n in nearby_check:
+			if n == null:
+				continue
+			if n.feature_id in ["flood_plains", "oasis"]:
+				has_food_feature = true
+				break
+		if not has_food_feature:
+			return 0.0
+
 	var score = 0.0
 	var nearby = get_tiles_in_range(pos, 2)
 	var food_tiles = 0
+	var high_food_tiles = 0  # tiles with food >= 3
 	var prod_tiles = 0
 	var commerce_tiles = 0
 	var has_fresh_water = false
 	var has_coast = false
 	var resource_count = 0
+	var total_food_potential = 0
 
 	for nearby_tile in nearby:
 		if nearby_tile == null or not nearby_tile.is_passable():
 			continue
 		if nearby_tile.is_water():
 			has_coast = true
+			# Coastal water also contributes food
+			var water_yields = nearby_tile.get_yields()
+			total_food_potential += water_yields.get("food", 0)
 			continue
 		var yields = nearby_tile.get_yields()
 		var food = yields.get("food", 0)
 		var prod = yields.get("production", 0)
 		var comm = yields.get("commerce", 0)
+		total_food_potential += food
 		if food >= 2:
 			food_tiles += 1
+		if food >= 3:
+			high_food_tiles += 1
 		if prod >= 1:
 			prod_tiles += 1
 		if comm >= 1:
@@ -1232,10 +1258,16 @@ func _score_start_location(pos: Vector2i) -> float:
 		if nearby_tile.has_fresh_water():
 			has_fresh_water = true
 
-	if food_tiles < 2:
+	# Require at least 3 food tiles (was 2) so civs have food to work as they grow
+	if food_tiles < 3:
+		return 0.0
+	# Require total food potential to allow growth to at least pop 4
+	# (pop 4 needs 8 food / turn, plus a bit of buffer)
+	if total_food_potential < 10:
 		return 0.0
 
 	score += food_tiles * 3.0
+	score += high_food_tiles * 2.0  # extra weight for 3+ food tiles
 	score += prod_tiles * 2.5
 	score += commerce_tiles * 1.5
 	score += resource_count * 3.0
