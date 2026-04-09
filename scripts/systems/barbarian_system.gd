@@ -396,7 +396,11 @@ func _get_available_barb_units(naval_only: bool) -> Array:
 	for p in GameManager.players:
 		if not p.is_barbarian():
 			real_civs.append(p)
-	var threshold = max(1, real_civs.size() / 2)  # 50% rounded down, min 1
+	# Require 75% of real civs to have a tech before barbs spawn its unit.
+	# At 50% (previous value), core barbs with zero research were fielding
+	# knights/macemen that wiped out civs in late game (seed 1000: Rome lost
+	# its capital at T243 to barbarian knights).
+	var threshold = max(2, int(ceil(real_civs.size() * 0.75)))
 
 	# Collect (tier, unit_id) pairs for matching units, sorted by tier ascending.
 	var candidates: Array = []

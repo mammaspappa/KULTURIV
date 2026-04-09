@@ -1701,6 +1701,13 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	var desired_military = num_cities * (1 + military_flavor / 5) * (build_unit_prob / 40.0)
 	if specialization == CitySpecialization.MILITARY:
 		desired_military *= 1.5
+	# Late-game threat scaling: after turn 150, barbs spawn advanced units and
+	# real civs grow aggressive. Require 2+ per city minimum so cities don't fall
+	# to single raids. Sims showed Rome losing cities at T243+ with only 6 mil/3c.
+	if TurnManager.current_turn >= 150:
+		desired_military = max(desired_military, num_cities * 2)
+	if TurnManager.current_turn >= 250:
+		desired_military = max(desired_military, num_cities * 3)
 
 	# Hard cap: scale with cities but don't over-build
 	var max_military = num_cities * 3 + 3
