@@ -735,16 +735,35 @@ func _score_tile_for_focus(yields: Dictionary) -> float:
 	var food = yields.get("food", 0)
 	var prod = yields.get("production", 0)
 	var commerce = yields.get("commerce", 0)
+
+	# If the city hasn't hit food equilibrium yet, heavily weight food.
+	# At pop N, the city needs 2*N food just to survive. If working this
+	# tile would leave surplus <= 0, we can't grow — a critical failure
+	# that caused Egypt to sit at pop 1 for 500 turns, working a 0f/9c
+	# commerce tile instead of a 2f food tile.
+	var food_need = 2 * population
+	var current_food = food_yield  # already-calculated food from prior tiles + base
+	var would_surplus = current_food + food - food_need
+	var food_urgent = would_surplus <= 0
+
 	match city_focus:
 		"food":
 			return food * 5 + prod * 1 + commerce * 1
 		"production":
+			if food_urgent:
+				return food * 10 + prod * 2 + commerce * 1
 			return food * 1 + prod * 5 + commerce * 1
 		"commerce", "science":
+			if food_urgent:
+				return food * 10 + prod * 1 + commerce * 2
 			return food * 1 + prod * 1 + commerce * 5
 		"culture":
+			if food_urgent:
+				return food * 10 + prod * 1 + commerce * 2
 			return food * 1 + prod * 1 + commerce * 4
 		_:
+			if food_urgent:
+				return food * 10 + prod * 2 + commerce * 1
 			return food * 3 + prod * 2 + commerce * 1
 
 ## Toggle whether a tile is manually worked or unworked
