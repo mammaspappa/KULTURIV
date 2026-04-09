@@ -1472,30 +1472,36 @@ func _combat_unit_ai(unit, player, flavor: Dictionary) -> void:
 		_random_explore(unit)
 		return
 
-	# After year -2000: if any of our cities is empty (no garrison), and we're
-	# not currently the only defender of our own city, head back to garrison
-	# the empty one. Cities without defenders fall to single barb units.
+	# After year -2000: garrison enforcement. Each city needs at least N defenders
+	# where N scales with phase (1 early, 2 mid, 3 late). A unit won't leave its
+	# city if doing so would drop the garrison below the threshold.
 	if TurnManager.current_year >= -2000 and not player.cities.is_empty():
-		# Are we currently the sole defender here?
+		var current_phase = GameManager.get_current_phase()
+		var required = 1
+		if current_phase == "mid":
+			required = 2
+		elif current_phase == "late":
+			required = 3
+		# Are we needed as a defender of the city we're standing on?
 		var here_city = GameManager.get_city_at(unit.grid_position)
-		var sole_defender = false
+		var needed_here = false
 		if here_city and here_city.player_owner == player:
-			var others_here = 0
+			var defenders_here = 0
 			for u in GameManager.get_units_at(unit.grid_position):
-				if u != unit and u.player_owner == player and u.get_strength() > 0:
-					others_here += 1
-			sole_defender = others_here == 0
-		# Find nearest empty city
-		if not sole_defender:
+				if u.player_owner == player and u.get_strength() > 0:
+					defenders_here += 1
+			# If removing me would drop below the required count, stay put
+			needed_here = (defenders_here - 1) < required
+		# Find nearest under-garrisoned city
+		if not needed_here:
 			var empty_city_pos = Vector2i(-1, -1)
 			var best_dist = 9999
 			for c in player.cities:
-				var has_def = false
+				var def_count = 0
 				for u in GameManager.get_units_at(c.grid_position):
 					if u.player_owner == player and u.get_strength() > 0:
-						has_def = true
-						break
-				if not has_def:
+						def_count += 1
+				if def_count < required:
 					var d = GridUtils.chebyshev_distance(unit.grid_position, c.grid_position)
 					if d < best_dist:
 						best_dist = d
@@ -2041,13 +2047,17 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 		desired_military *= 1.5
 	# Late-game threat scaling: after turn X (scaled), increase desired military per city.
 	var late_turn_1 = GameManager.scaled_turn(_ai_tun(player, "military.late_game_floor_turn_1", 150))
-	var late_mult_1 = _ai_tun(player, "military.late_game_floor_per_city_1", 2)
+	var late_mult_1 = _ai_tun(player, "military.late_game_floor_per_city_1", 3)
 	var late_turn_2 = GameManager.scaled_turn(_ai_tun(player, "military.late_game_floor_turn_2", 250))
-	var late_mult_2 = _ai_tun(player, "military.late_game_floor_per_city_2", 3)
+	var late_mult_2 = _ai_tun(player, "military.late_game_floor_per_city_2", 4)
+	var late_turn_3 = GameManager.scaled_turn(_ai_tun(player, "military.late_game_floor_turn_3", 350))
+	var late_mult_3 = _ai_tun(player, "military.late_game_floor_per_city_3", 5)
 	if TurnManager.current_turn >= late_turn_1:
 		desired_military = max(desired_military, num_cities * late_mult_1)
 	if TurnManager.current_turn >= late_turn_2:
 		desired_military = max(desired_military, num_cities * late_mult_2)
+	if TurnManager.current_turn >= late_turn_3:
+		desired_military = max(desired_military, num_cities * late_mult_3)
 
 	# Hard cap: scale with cities but don't over-build
 	var max_per_city = _ai_tun(player, "military.max_per_city_mult", 3)
@@ -2109,16 +2119,25 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 			city.set_production(unit_to_build)
 			return
 
-	# After year -2000 (when real barb threats begin), every city MUST have a
-	# defender. If THIS city currently has no military unit on it, build one
-	# right now regardless of total military count.
+	# After year -2000 (when real barb threats begin), every city MUST have
+	# defenders. The minimum scales with game phase:
+	#   year >= -2000          : 1 defender per city (animal era ending)
+	#   phase >= mid (T100+)   : 2 defenders per city
+	#   phase == late (T250+)  : 3 defenders per city
+	# If THIS city is below the threshold, build a garrison NOW regardless
+	# of total military count or whether desired_military is met.
 	if TurnManager.current_year >= -2000:
-		var has_garrison = false
+		var current_phase = GameManager.get_current_phase()
+		var required_here = 1
+		if current_phase == "mid":
+			required_here = 2
+		elif current_phase == "late":
+			required_here = 3
+		var here_count = 0
 		for u in GameManager.get_units_at(city.grid_position):
 			if u.player_owner == player and u.get_strength() > 0:
-				has_garrison = true
-				break
-		if not has_garrison:
+				here_count += 1
+		if here_count < required_here:
 			var garrison_unit = _get_best_military_unit(city, player, military_flavor, false, bankrupt)
 			if garrison_unit != "":
 				city.set_production(garrison_unit)
