@@ -1567,7 +1567,11 @@ func _process_city_ai(city, player, flavor: Dictionary) -> void:
 	# Sims showed all 3 civs collapsing to 0% science by T100 with -30 to -99 gpt because
 	# nothing in the production tree responded to running deficits — cities kept queuing
 	# settlers and military as fast as they finished, never reaching the building scorer.
-	if player.gold_per_turn < -3 and player.gold < 50 and city.current_production != "":
+	# Two triggers: (a) near-bankrupt (low gold and deficit), or (b) severe deficit
+	# regardless of current gold reserves (structural problem needs immediate action).
+	var severe_deficit = player.gold_per_turn < -10
+	var near_bankrupt = player.gold_per_turn < -3 and player.gold < 50
+	if (severe_deficit or near_bankrupt) and city.current_production != "":
 		var prod = city.current_production
 		var prod_unit_data = DataManager.get_unit(prod)
 		var is_unit_prod = not prod_unit_data.is_empty()
