@@ -1087,9 +1087,11 @@ func _worker_ai(unit, player, flavor: Dictionary) -> void:
 					ImprovementSystem.start_build(unit, chosen)
 					return
 
-		# Unimproved tile — build improvement
-		if tile.improvement_id == "" and tile.road_level == 0:
+		# Unimproved tile — build improvement (ok even if road already exists)
+		if tile.improvement_id == "":
 			var improvements = ImprovementSystem.get_available_improvements(unit, tile)
+			# Filter out fort — AI never builds forts proactively
+			improvements = improvements.filter(func(i): return i != "fort")
 			if not improvements.is_empty():
 				var chosen = _choose_improvement(tile, improvements, production_flavor, growth_flavor, gold_flavor)
 				if chosen != "":
@@ -1103,6 +1105,14 @@ func _worker_ai(unit, player, flavor: Dictionary) -> void:
 			if sim_logger:
 				sim_logger.trace_unit(unit, "build_road",
 					"on improved tile imp=%s" % tile.improvement_id)
+			ImprovementSystem.start_build_road(unit)
+			return
+
+		# Fallback: no improvement possible here, but we can lay a road on any owned tile
+		# This keeps the worker productive while waiting for tech/border expansion
+		if tile.road_level == 0 and tile.improvement_id == "" and ImprovementSystem.can_build_road(unit, tile):
+			if sim_logger:
+				sim_logger.trace_unit(unit, "build_road", "fallback road on unimproved tile")
 			ImprovementSystem.start_build_road(unit)
 			return
 
@@ -2355,18 +2365,29 @@ func _find_best_worker_target(unit, player) -> Vector2i:
 					elif res.get("type", "") == "luxury":
 						score += 20
 
-			# Unimproved non-resource tile
+			# Unimproved non-resource tile — only target if we can actually build something
 			elif tile.improvement_id == "":
-				score = 100.0 - dist * 5.0
-				if tile.feature_id == "forest":
-					if city_needs_prod:
-						score += 30
-					if tile.has_fresh_water() or tile.terrain_id == "hills":
-						score += 15
+				var avail = ImprovementSystem.get_available_improvements(unit, tile)
+				avail = avail.filter(func(i): return i != "fort")
+				if not avail.is_empty():
+					score = 100.0 - dist * 5.0
+					if tile.feature_id == "forest":
+						if city_needs_prod:
+							score += 30
+						if tile.has_fresh_water() or tile.terrain_id == "hills":
+							score += 15
+				# Fallback: no improvement available but can build road — low priority
+				elif tile.road_level == 0 and ImprovementSystem.can_build_road(unit, tile):
+					score = 30.0 - dist * 2.0
 
-			# Road needed on resource tile (to connect it to trade network)
-			elif tile.resource_id != "" and tile.road_level == 0:
-				score = 150.0 - dist * 3.0
+			# Road needed on improved/resource tile (to connect it to trade network)
+			elif tile.road_level == 0:
+				if ImprovementSystem.can_build_road(unit, tile):
+					if tile.resource_id != "":
+						score = 150.0 - dist * 3.0
+					else:
+						# Road on improved tile (connect improvements to network)
+						score = 50.0 - dist * 2.0
 
 			if score > best_score:
 				best_score = score
