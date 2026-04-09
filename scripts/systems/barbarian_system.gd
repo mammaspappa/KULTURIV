@@ -560,7 +560,7 @@ func _find_adjacent_enemy(unit):
 
 	return null
 
-## Find nearby target (enemy unit or improvement to pillage)
+## Find nearby target (enemy city > enemy unit > improvement to pillage)
 ## BTS: barbarians have normal sight range (2 tiles), not omniscient vision
 func _find_nearby_target(unit) -> Vector2i:
 	var grid = GameManager.hex_grid
@@ -574,6 +574,23 @@ func _find_nearby_target(unit) -> Vector2i:
 	var tiles_in_range = GridUtils.get_tiles_in_range(unit.grid_position, search_radius)
 
 	for pos in tiles_in_range:
+		var tile = grid.get_tile(pos)
+
+		# Check for enemy cities — TOP PRIORITY for barbarians
+		var city_at = GameManager.get_city_at(pos)
+		if city_at and city_at.player_owner != null and city_at.player_owner != barbarian_player:
+			# Undefended enemy city = free capture, top priority
+			var has_defender = false
+			for u in GameManager.get_units_at(pos):
+				if u.player_owner == city_at.player_owner and u.get_strength() > 0:
+					has_defender = true
+					break
+			var dist = GridUtils.chebyshev_distance(unit.grid_position, pos)
+			var city_priority = (300 if not has_defender else 150) - dist
+			if city_priority > best_priority:
+				best_priority = city_priority
+				best_target = pos
+
 		# Check for enemy units
 		var target_unit = GameManager.get_unit_at(pos)
 		if target_unit and target_unit.player_owner != barbarian_player:
@@ -584,7 +601,6 @@ func _find_nearby_target(unit) -> Vector2i:
 				best_target = pos
 
 		# Check for improvements to pillage
-		var tile = grid.get_tile(pos)
 		if tile and tile.improvement_id != "" and tile.improvement_id != "barbarian_camp":
 			if tile.tile_owner != null and tile.tile_owner != barbarian_player:
 				var dist = GridUtils.chebyshev_distance(unit.grid_position, pos)

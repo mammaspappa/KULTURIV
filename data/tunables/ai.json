@@ -117,16 +117,17 @@
 		},
 		"cultural": {
 			"_description": "BTS cultural victory: 6-9 cities with 3 legendary culture cities. Pacifism + Free Speech + temples/cathedrals/wonders/artists. Per https://forums.civfanatics.com/threads/the-beginners-crash-guide-to-cultural-victory.160306/",
-			"expansion.max_cities_hard_max": 9,
-			"expansion.max_cities_hard_min": 6,
-			"expansion.max_inflight_settlers": 2,
+			"expansion.max_cities_divisor": 151,
+			"expansion.max_cities_expansion_divisor": 5,
+			"expansion.max_cities_hard_min": 5,
+			"expansion.max_cities_hard_max": 8,
+			"expansion.freeze_max_cities_at_gpt": -9,
 			"expansion.soft_brake_gpt": -2,
-			"military.desired_per_city_base": 1,
-			"military.max_per_city_mult": 2,
+			"military.desired_per_city_flavor_divisor": 6,
 			"military.max_military_base": 2,
-			"military.build_unit_prob_default": 25,
-			"military.interleave_building_prob": 0.7,
-			"military.comfort_garrison_per_city": 2
+			"military.late_game_floor_per_city_1": 3,
+			"military.late_game_floor_per_city_2": 4,
+			"military.build_unit_prob_default": 35
 		}
 	},
 	"phases": {

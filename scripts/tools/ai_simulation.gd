@@ -208,6 +208,8 @@ func _write_results_json(path: String) -> void:
 		var mil = 0
 		var wrk = 0
 		var pop = 0
+		var total_culture = 0
+		var legendary_cities = 0
 		for u in p.units:
 			if u.get_strength() > 0:
 				mil += 1
@@ -215,6 +217,9 @@ func _write_results_json(path: String) -> void:
 				wrk += 1
 		for c in p.cities:
 			pop += c.population
+			total_culture += c.culture
+			if c.culture >= 50000:
+				legendary_cities += 1
 		result["players"].append({
 			"civ": p.civilization_id,
 			"leader": p.leader_id,
@@ -227,6 +232,9 @@ func _write_results_json(path: String) -> void:
 			"workers": wrk,
 			"gold": p.gold,
 			"gold_per_turn": p.gold_per_turn,
+			"total_culture": total_culture,
+			"legendary_cities": legendary_cities,
+			"strategy": p.active_strategy,
 			"eliminated": p.cities.is_empty(),
 		})
 	var file = FileAccess.open(path, FileAccess.WRITE)

@@ -106,7 +106,20 @@ STRATEGY_CONSTRAINTS = {
         "military.desired_per_city_base": (None, 1),    # minimal mil
         "military.build_unit_prob_default": (None, 35),
     },
+    "cultural": {
+        # BTS cultural victory needs 6-9 cities (3 legendary + supporting)
+        "expansion.max_cities_hard_min": (4, None),     # at least 4 cities
+        "expansion.max_cities_hard_max": (6, 10),       # wider to support culture cities
+        "military.build_unit_prob_default": (None, 35), # prefer buildings
+        "military.desired_per_city_base": (None, 1),    # low military
+        "military.max_per_city_mult": (None, 3),        # no military bloat
+    },
 }
+
+# Cultural strategy needs a longer evaluation window — culture accumulates slowly
+# and short sims can't tell if a variant will actually reach legendary cities.
+# Fitness also rewards total culture yield.
+FITNESS_CULTURE_BONUS_WEIGHT = 0.5  # per total culture point across all cities
 
 
 def apply_strategy_constraints(variant, strategy):
@@ -236,8 +249,11 @@ def run_sim(civ_overrides, civs, seed, max_turns=200, map_w=24, map_h=16,
         return json.load(f)
 
 
-def fitness(result, civ_id):
-    """Compute fitness for a single civ in a single sim."""
+def fitness(result, civ_id, strategy=None):
+    """Compute fitness for a single civ in a single sim.
+    When evolving the cultural strategy, adds a culture-yield bonus so
+    variants that actually accumulate culture (toward the 3 legendary
+    cities goal) rank higher than ones that just score on tech/cities."""
     if result is None:
         return -500  # penalty for failed sim
     for p in result.get("players", []):
@@ -251,6 +267,14 @@ def fitness(result, civ_id):
             score -= FITNESS_ELIMINATED_PENALTY
         if result.get("winner") == civ_id:
             score += FITNESS_WIN_BONUS
+        # Cultural strategy: heavy bonus for total culture + huge bonus per
+        # legendary city. Without this, "cultural" would just evolve toward
+        # the same score-maximizing params as "tall".
+        if strategy == "cultural":
+            total_culture = p.get("total_culture", 0)
+            legendary = p.get("legendary_cities", 0)
+            score += total_culture * 0.01  # 100 culture → 1 fitness
+            score += legendary * 200       # 200 per legendary city
         return score
     return -500  # civ not found in results
 
@@ -299,7 +323,7 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim,
         result = run_sim(overrides, civs, seed, max_turns=max_turns)
         dt = time.time() - t0
         for variant_idx, civ_id in zip(picks, civs):
-            f = fitness(result, civ_id)
+            f = fitness(result, civ_id, force_strategy)
             fitness_totals[variant_idx] += f
             fitness_counts[variant_idx] += 1
         winner = result.get("winner", "-") if result else "ERR"
@@ -314,7 +338,7 @@ def evaluate_pool(pool, sims_per_eval, base_seed, max_turns, civs_per_sim,
             result = run_sim(overrides, [civ_id] + random.sample(
                 [c for c in EVAL_CIVS if c != civ_id], min(civs_per_sim - 1, len(EVAL_CIVS) - 1)
             ), base_seed + 999999, max_turns=max_turns)
-            f = fitness(result, civ_id)
+            f = fitness(result, civ_id, force_strategy)
             scores.append((i, f))
         else:
             scores.append((i, fitness_totals[i] / fitness_counts[i]))
@@ -374,7 +398,7 @@ def evolve_single(args, baseline, force_strategy=None):
     return history, best
 
 
-STRATEGIES = ["wide", "tall", "warmonger", "builder", "science"]
+STRATEGIES = ["wide", "tall", "warmonger", "builder", "science", "cultural"]
 
 
 def print_best(label, best, baseline):

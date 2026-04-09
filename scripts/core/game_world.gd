@@ -525,8 +525,33 @@ func _on_turn_started(_turn: int, player: Player) -> void:
 		# Update UI, select first unit with movement, etc.
 		_update_reachable_tiles()
 
-func _on_unit_moved(_unit: Unit, _from: Vector2i, _to: Vector2i) -> void:
+func _on_unit_moved(unit: Unit, _from: Vector2i, to: Vector2i) -> void:
 	_update_reachable_tiles()
+	# Capture-on-walk-in: if a combat unit walks onto an enemy city tile
+	# (because the city was undefended), capture it. Without this, barbs
+	# could never take empty cities and players could pass through any
+	# undefended enemy capital without consequence.
+	if unit == null or unit.player_owner == null:
+		return
+	if unit.get_strength() <= 0:  # workers/settlers don't capture
+		return
+	var city = GameManager.get_city_at(to)
+	if city == null or city.player_owner == unit.player_owner:
+		return
+	# Must be at war (or a barb, which is always hostile)
+	var is_barb = unit.player_owner.is_barbarian()
+	var at_war = city.player_owner != null and unit.player_owner.is_at_war_with(city.player_owner.player_id)
+	if not (is_barb or at_war):
+		return
+	# Verify no enemy defenders still on the tile
+	for u in GameManager.get_units_at(to):
+		if u != unit and u.player_owner == city.player_owner and u.get_strength() > 0:
+			return  # still defended, nothing to capture
+	# Capture (or raze for barbs if small)
+	if is_barb and city.population <= 2 and city.can_be_razed():
+		raze_city(city)
+	else:
+		capture_city(city, unit.player_owner)
 
 ## Spawn a unit at position
 func spawn_unit(unit_type: String, pos: Vector2i, owner: Player) -> Unit:
